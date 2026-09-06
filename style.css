@@ -78,6 +78,24 @@ body {
   margin-bottom: 16px;
 }
 
+.title-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .controls h1 {
   font-size: 16px;
   margin: 0;

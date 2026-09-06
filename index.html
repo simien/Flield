@@ -14,7 +14,10 @@
     <div class="controls-header">
       <div class="title-row">
         <h1><a href="./">Flowgrain</a></h1>
-        <button id="randomizeBtn"><i class="ph ph-shuffle"></i> Randomize</button>
+        <div class="title-row-actions">
+          <button id="undoBtn" class="secondary icon-btn" title="Undo last randomize" disabled><i class="ph ph-arrow-counter-clockwise"></i></button>
+          <button id="randomizeBtn"><i class="ph ph-shuffle"></i> Randomize</button>
+        </div>
       </div>
 
       <div class="button-row">
@@ -625,7 +628,23 @@
       }
     }
 
+    // Keeps the full state from just before each randomize pass (manual
+    // clicks, autoplay ticks, and GIF-export frames all funnel through
+    // performRandomize, so all three feed the same undo stack), capped so
+    // it can't grow without bound over a long autoplay or GIF session.
+    const MAX_UNDO_HISTORY = 20;
+    const undoHistory = [];
+    const undoBtn = document.getElementById("undoBtn");
+
+    function updateUndoButton() {
+      undoBtn.disabled = undoHistory.length === 0;
+    }
+
     function performRandomize() {
+      undoHistory.push(readOptions());
+      if (undoHistory.length > MAX_UNDO_HISTORY) undoHistory.shift();
+      updateUndoButton();
+
       ["layerA", "layerB"].forEach((prefix) => {
         RANDOMIZABLE_FIELDS.forEach((field) => {
           if (!lockedFields.has(prefix + "-" + field)) randomizeElement(prefix, field);
@@ -645,6 +664,16 @@
     }
 
     document.getElementById("randomizeBtn").addEventListener("click", performRandomize);
+
+    undoBtn.addEventListener("click", () => {
+      const previous = undoHistory.pop();
+      if (!previous) return;
+      applyGeneral(previous);
+      applyDefaults("layerA", previous.layerA);
+      applyDefaults("layerB", previous.layerB);
+      render();
+      updateUndoButton();
+    });
 
     document.getElementById("lockAllBtn").addEventListener("click", () => {
       document.querySelectorAll(".lock-btn").forEach((btn) => setLock(btn, true));
