@@ -117,12 +117,16 @@ body {
 .split-btn {
   display: flex;
   flex-shrink: 0;
-  gap: 6px;
 }
 
 .split-btn button {
   width: auto;
   margin-top: 0;
+}
+
+.split-btn-main {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .split-btn-select {
@@ -131,7 +135,12 @@ body {
   margin-top: 0;
   padding: 8px 0;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0 6px 6px 0;
+  /* Invisible at rest (matches the shared fill), so the only visible
+     line at the seam is split-btn-main's own right border, at the same
+     1px weight as every other edge. Reappears in accent on this
+     control's own hover/focus, independent of its neighbor. */
+  border-left-color: transparent;
   background-color: transparent;
   color: var(--text);
   font-size: 13px;
@@ -154,6 +163,7 @@ body {
    than sitting on permanently and mismatching its other half. */
 .split-btn-select:focus {
   background-color: var(--bg);
+  border-color: var(--accent);
   outline: none;
 }
 
