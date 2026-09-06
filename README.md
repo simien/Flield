@@ -25,6 +25,8 @@ I built this to generate images and placeholder graphics without reaching for st
 
 The generator itself (`generator.js`) is independent of the UI, so the noise field, symmetry, and grid logic can be reused in other projects.
 
+See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques worth knowing, like locking fields to explore variations on one art direction with Auto-randomize.
+
 ## Features
 
 - Two independently configurable color layers, each with its own seed, density, and directional flow field
