@@ -10,6 +10,9 @@
   <script src="gif.js"></script>
 </head>
 <body>
+  <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show sidebar"><i class="ph ph-list"></i></button>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
   <div class="controls">
     <div class="controls-header">
       <div class="title-row">
@@ -945,6 +948,26 @@
     }
 
     document.getElementById("footerYear").textContent = new Date().getFullYear();
+
+    // Below the layout's mobile breakpoint, the sidebar becomes a
+    // full-height overlay drawer (see the .sidebar-toggle / .controls
+    // rules in style.css) instead of a permanent column.
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+
+    function setSidebarOpen(open) {
+      document.body.classList.toggle("sidebar-open", open);
+      sidebarToggle.querySelector("i").className = open ? "ph ph-x" : "ph ph-list";
+      sidebarToggle.title = open ? "Hide sidebar" : "Show sidebar";
+    }
+
+    sidebarToggle.addEventListener("click", () => {
+      setSidebarOpen(!document.body.classList.contains("sidebar-open"));
+    });
+    sidebarBackdrop.addEventListener("click", () => setSidebarOpen(false));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setSidebarOpen(false);
+    });
 
     // Shareable links: the full state (background, block size, both
     // layers) round-trips through readOptions()/applyGeneral()/
