@@ -619,7 +619,7 @@ button.secondary:hover:not(:disabled) {
 }
 
 .controls-footer .autoplay-row {
-  margin: 12px 0 0;
+  margin: 0 0 12px;
 }
 
 .preset-row {
