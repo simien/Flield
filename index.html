@@ -811,18 +811,22 @@
     }
     initSliderTooltips();
 
-    // Renders a fresh, randomized favicon on every page load using the
-    // same generate()/renderToCanvas() pipeline as the main artwork, just
-    // at a tiny size with random layer parameters. The static favicon.svg
-    // in <head> is what shows before this runs, so there's no flash of a
-    // missing icon.
+    // Renders a fresh favicon on every page load using the same
+    // generate()/renderToCanvas() pipeline as the main artwork, just at a
+    // tiny size with its own random layer parameters, but the same three
+    // colors as the main artwork, so the browser-tab icon reads as a
+    // miniature of what's on screen. The static favicon.svg in <head> is
+    // what shows before this runs, so there's no flash of a missing icon.
     function generateRandomFavicon() {
       const size = 64;
       const blockSize = 8;
       const symmetryOptions = ["quad", "kaleidoscope", "diagonal", "rotational", "horizontal", "vertical"];
-      const randomLayer = () => ({
+      const bgColor = document.getElementById("bgColor").value;
+      const colorA = document.getElementById("layerA-color").value;
+      const colorB = document.getElementById("layerB-color").value;
+      const randomLayer = (color) => ({
         seed: Math.random().toString(36).slice(2),
-        color: hslToHex(Math.random() * 360, 70, 55),
+        color,
         density: 0.3 + Math.random() * 0.3,
         fieldStrength: 0,
         fieldScale: 40,
@@ -837,9 +841,9 @@
         width: size,
         height: size,
         blockSize,
-        bgColor: "#0f172a",
-        layerA: randomLayer(),
-        layerB: randomLayer(),
+        bgColor,
+        layerA: randomLayer(colorA),
+        layerB: randomLayer(colorB),
       };
 
       const { gridA, gridB, cols, rows } = generate(options);
@@ -859,11 +863,11 @@
 
       document.querySelector('link[rel="icon"]').href = faviconCanvas.toDataURL("image/png");
     }
-    generateRandomFavicon();
 
     document.getElementById("footerYear").textContent = new Date().getFullYear();
 
     performRandomize();
+    generateRandomFavicon();
   </script>
 </body>
 </html>
