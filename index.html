@@ -266,6 +266,18 @@
 
   <script src="generator.js"></script>
   <script>
+    // If the Phosphor font can't load for any reason, fall back to plain
+    // Unicode glyphs (see the .icon-fallback rules in style.css) instead
+    // of leaving icon-only buttons blank.
+    if ("fonts" in document) {
+      document.fonts.load('16px "Phosphor"').catch(() => {});
+      document.fonts.ready.then(() => {
+        if (!document.fonts.check('16px "Phosphor"')) {
+          document.documentElement.classList.add("icon-fallback");
+        }
+      });
+    }
+
     // Wire up tab switching.
     document.querySelectorAll(".tab-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
