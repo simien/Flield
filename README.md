@@ -40,7 +40,7 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 - A shareable link that encodes the exact composition, colors, both layers, everything, into a URL
 - Three save-state slots stored in the browser for revisiting a composition later
 - Auto-randomize playback with an adjustable interval, from every 0.5 seconds up to every 10
-- Export to PNG, SVG, or an animated GIF, with frame count (1 to 13, following a Fibonacci sequence) and speed both configurable
+- Export to PNG, SVG, or an animated GIF, with frame count (1, 2, 3, 5, 8, or 13) and speed both configurable
 - Responsive sidebar that collapses into a toggleable drawer on narrow screens
 - Fully offline: every dependency is vendored in the repo, no CDN, no network connection needed
 
