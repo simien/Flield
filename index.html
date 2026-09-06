@@ -661,6 +661,19 @@
     const autoSpeedSelect = document.getElementById("autoSpeed");
     let autoplayTimer = null;
 
+    // These two selects show only a caret at rest (see .split-btn-select
+    // in style.css), so the current value is surfaced as a tooltip instead.
+    function syncSelectTitle(select, baseTitle) {
+      select.title = `${baseTitle} (currently ${select.options[select.selectedIndex].text})`;
+    }
+    const gifStepsSelect = document.getElementById("gifSteps");
+    syncSelectTitle(autoSpeedSelect, "Auto-randomize speed");
+    syncSelectTitle(gifStepsSelect, "GIF step count (uses the auto-randomize speed above as the per-frame delay)");
+    autoSpeedSelect.addEventListener("change", () => syncSelectTitle(autoSpeedSelect, "Auto-randomize speed"));
+    gifStepsSelect.addEventListener("change", () =>
+      syncSelectTitle(gifStepsSelect, "GIF step count (uses the auto-randomize speed above as the per-frame delay)")
+    );
+
     function stopAutoplay() {
       clearInterval(autoplayTimer);
       autoplayTimer = null;
