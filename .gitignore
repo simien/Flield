@@ -1,6 +1,9 @@
 # Editor/tool-local config, not relevant to other contributors
 .claude/
 
+# Scratch space for local assets, drafts, and other files not meant for the repo
+local/
+
 # OS cruft
 .DS_Store
 Thumbs.db
