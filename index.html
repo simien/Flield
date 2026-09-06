@@ -81,6 +81,18 @@
         </div>
       </div>
 
+      <div class="field">
+        <label>Shape mask</label>
+        <div class="field-row">
+          <select id="shapeMask">
+            <option value="none">None (full canvas)</option>
+            <option value="circle">Circle</option>
+            <option value="diamond">Diamond</option>
+          </select>
+          <button type="button" class="lock-btn" data-for="shapeMask" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
+      </div>
+
       <h2 class="section-title">Saved states</h2>
       <p class="hint">Snapshot the full composition, both layers and colors, into a slot to reload anytime.</p>
       <div class="preset-row" data-slot="1">
@@ -236,6 +248,7 @@
             <option value="rotational">180° rotational</option>
             <option value="diagonal">Diagonal mirror</option>
             <option value="kaleidoscope">8-way kaleidoscope</option>
+            <option value="tile">Tile (3&times;3)</option>
             <option value="none">None (noise)</option>
           </select>
           <button type="button" class="lock-btn" data-for="symmetry" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
@@ -498,6 +511,7 @@
         width: parseInt(document.getElementById("width").value, 10) || 100,
         height: parseInt(document.getElementById("height").value, 10) || 100,
         blockSize: parseInt(document.getElementById("blockSize").value, 10),
+        shapeMask: document.getElementById("shapeMask").value,
         layerA: readLayer("layerA"),
         layerB: readLayer("layerB"),
       };
@@ -664,6 +678,11 @@
       if (!lockedFields.has("blockSize")) {
         randomizeRangeInput(document.getElementById("blockSize"));
       }
+      if (!lockedFields.has("shapeMask")) {
+        const el = document.getElementById("shapeMask");
+        const opts = Array.from(el.options).map((o) => o.value);
+        el.value = opts[Math.floor(Math.random() * opts.length)];
+      }
       render();
     }
 
@@ -816,6 +835,7 @@
       document.getElementById("width").value = values.width;
       document.getElementById("height").value = values.height;
       document.getElementById("blockSize").value = values.blockSize;
+      document.getElementById("shapeMask").value = values.shapeMask || "none";
     }
 
     function refreshPresetUI(slot) {

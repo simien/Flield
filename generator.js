@@ -149,6 +149,23 @@ function mirrorDiagonal(grid, regionCols, regionRows) {
 
 const HALF_COLS_SYMMETRIES = new Set(["horizontal", "quad", "kaleidoscope"]);
 const HALF_ROWS_SYMMETRIES = new Set(["vertical", "quad", "rotational", "kaleidoscope"]);
+const TILE_REPEATS = 3;
+
+// Repeats the top-left fillCols x fillRows region across the whole grid
+// by modulo indexing. Unlike every other symmetry mode (all mirrors or
+// rotations of a unique region), this is a plain translation: the same
+// tile shows up unchanged, over and over, wallpaper-style. Safe to run
+// in simple row-major order because every source read stays inside the
+// untouched top-left tile, which is never itself overwritten.
+function tileGrid(grid, cols, rows, fillCols, fillRows) {
+  for (let y = 0; y < rows; y++) {
+    const sy = y % fillRows;
+    for (let x = 0; x < cols; x++) {
+      const sx = x % fillCols;
+      if (sy !== y || sx !== x) grid[y][x] = grid[sy][sx];
+    }
+  }
+}
 
 // Builds a boolean grid (rows x cols) using seeded randomness, optional
 // mirror/rotational/diagonal symmetry, an optional flow field that
@@ -163,8 +180,13 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field })
   const rand = seededRandom(seed);
   const grid = Array.from({ length: rows }, () => new Array(cols).fill(false));
 
-  const fillCols = HALF_COLS_SYMMETRIES.has(symmetry) ? Math.ceil(cols / 2) : cols;
-  const fillRows = HALF_ROWS_SYMMETRIES.has(symmetry) ? Math.ceil(rows / 2) : rows;
+  const isTile = symmetry === "tile";
+  const fillCols = isTile
+    ? Math.ceil(cols / TILE_REPEATS)
+    : HALF_COLS_SYMMETRIES.has(symmetry) ? Math.ceil(cols / 2) : cols;
+  const fillRows = isTile
+    ? Math.ceil(rows / TILE_REPEATS)
+    : HALF_ROWS_SYMMETRIES.has(symmetry) ? Math.ceil(rows / 2) : rows;
 
   const useField = field && field.strength > 0;
   const noise2D = useField ? makePerlin(seed + "|field") : null;
@@ -223,6 +245,10 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field })
 
   if (symmetry === "rotational") {
     mirrorRotational(grid, rows, cols, fillRows);
+  }
+
+  if (isTile) {
+    tileGrid(grid, cols, rows, fillCols, fillRows);
   }
 
   return grid;
@@ -321,6 +347,32 @@ function gridToSVG({ width, height, blockSize, bgColor, colorA, colorB, gridA, g
   );
 }
 
+// Tests whether grid cell (x, y) falls inside the given shape, inscribed
+// in the full cols x rows rect (an ellipse or diamond matching the
+// canvas's own aspect ratio, not a true circle that would leave large
+// dead margins on a wide canvas).
+function insideShape(shape, x, y, cols, rows) {
+  const cx = (cols - 1) / 2;
+  const cy = (rows - 1) / 2;
+  const nx = (x - cx) / (cols / 2);
+  const ny = (y - cy) / (rows / 2);
+  if (shape === "circle") return nx * nx + ny * ny <= 1;
+  if (shape === "diamond") return Math.abs(nx) + Math.abs(ny) <= 1;
+  return true; // "none"
+}
+
+// Clears every cell outside the mask shape. Applied to both layers before
+// the layer-A-over-B exclusion below, so a masked composition still keeps
+// both layers mutually exclusive inside the visible shape.
+function applyShapeMask(grid, cols, rows, shape) {
+  if (!shape || shape === "none") return;
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (!insideShape(shape, x, y, cols, rows)) grid[y][x] = false;
+    }
+  }
+}
+
 function layerOptionsToField(layer) {
   return {
     strength: layer.fieldStrength,
@@ -359,6 +411,9 @@ function generate(options) {
     smoothPasses: options.layerB.smoothPasses,
     field: layerOptionsToField(options.layerB),
   });
+
+  applyShapeMask(gridA, cols, rows, options.shapeMask);
+  applyShapeMask(gridB, cols, rows, options.shapeMask);
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
