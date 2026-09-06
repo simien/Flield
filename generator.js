@@ -347,28 +347,47 @@ function gridToSVG({ width, height, blockSize, bgColor, colorA, colorB, gridA, g
   );
 }
 
-// Tests whether grid cell (x, y) falls inside the given shape, inscribed
-// in the full cols x rows rect (an ellipse or diamond matching the
-// canvas's own aspect ratio, not a true circle that would leave large
-// dead margins on a wide canvas).
-function insideShape(shape, x, y, cols, rows) {
+// Distance from grid cell (x, y) to the shape's own boundary, in units
+// where 0 is dead center and 1 is the boundary itself, inscribed with a
+// small margin inside the full cols x rows rect (an ellipse or diamond
+// matching the canvas's own aspect ratio, not a true circle that would
+// leave large dead margins on a wide canvas). Values noticeably above 1
+// are well outside; noticeably below 1 are well inside.
+const SHAPE_MASK_MARGIN = 0.88;
+function shapeDistance(shape, x, y, cols, rows) {
   const cx = (cols - 1) / 2;
   const cy = (rows - 1) / 2;
-  const nx = (x - cx) / (cols / 2);
-  const ny = (y - cy) / (rows / 2);
-  if (shape === "circle") return nx * nx + ny * ny <= 1;
-  if (shape === "diamond") return Math.abs(nx) + Math.abs(ny) <= 1;
-  return true; // "none"
+  const nx = (x - cx) / ((cols / 2) * SHAPE_MASK_MARGIN);
+  const ny = (y - cy) / ((rows / 2) * SHAPE_MASK_MARGIN);
+  if (shape === "circle") return Math.sqrt(nx * nx + ny * ny);
+  if (shape === "diamond") return Math.abs(nx) + Math.abs(ny);
+  return 0; // "none"
 }
 
-// Clears every cell outside the mask shape. Applied to both layers before
+// Clears cells outside the mask shape, dithering the boundary instead of
+// cutting it off sharply: cells well inside always survive, cells well
+// outside are always cleared, and cells in between get a random chance
+// that fades from "almost certain" to "almost none" across the band. A
+// hard geometric edge read as pasted-on against the layer's own organic
+// texture, especially at fine block sizes. Uses the layer's own seed (a
+// separate stream from its fill/smoothing randomness) so the dither
+// pattern is deterministic and specific to that layer, not shared noise
+// reused wholesale from somewhere else. Applied to both layers before
 // the layer-A-over-B exclusion below, so a masked composition still keeps
 // both layers mutually exclusive inside the visible shape.
-function applyShapeMask(grid, cols, rows, shape) {
+const SHAPE_MASK_FEATHER = 0.18;
+function applyShapeMask(grid, cols, rows, shape, seed) {
   if (!shape || shape === "none") return;
+  const rand = seededRandom(seed + "|mask");
+  const inner = 1 - SHAPE_MASK_FEATHER;
+  const outer = 1 + SHAPE_MASK_FEATHER;
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
-      if (!insideShape(shape, x, y, cols, rows)) grid[y][x] = false;
+      const d = shapeDistance(shape, x, y, cols, rows);
+      if (d <= inner) continue;
+      if (d >= outer || rand() > 1 - (d - inner) / (outer - inner)) {
+        grid[y][x] = false;
+      }
     }
   }
 }
@@ -412,8 +431,8 @@ function generate(options) {
     field: layerOptionsToField(options.layerB),
   });
 
-  applyShapeMask(gridA, cols, rows, options.shapeMask);
-  applyShapeMask(gridB, cols, rows, options.shapeMask);
+  applyShapeMask(gridA, cols, rows, options.shapeMask, options.layerA.seed);
+  applyShapeMask(gridB, cols, rows, options.shapeMask, options.layerB.seed);
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
