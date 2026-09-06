@@ -25,10 +25,11 @@ The generator itself (`generator.js`) is independent of the UI, so the noise fie
 - Three save-state slots stored in the browser for revisiting a composition later
 - Auto-randomize playback with an adjustable interval
 - Export to PNG, SVG, or an animated GIF, with frame count and speed both configurable
+- Fully offline: every dependency is vendored in the repo, no CDN, no network connection needed
 
 ## Running locally
 
-Flowgrain is plain HTML, CSS, and JavaScript. No build step, no package manager, and every dependency (icons, GIF export) is vendored in the repo, so it runs with no network connection at all.
+Flowgrain is plain HTML, CSS, and JavaScript. No build step, no package manager.
 
 1. Clone the repository
 2. Serve the folder with any static file server, for example: `python3 -m http.server 8080`
