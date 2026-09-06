@@ -10,6 +10,15 @@ A browser-based generative pixel art tool for creating unique three-color compos
 
 ![Flowgrain screenshot](screenshot.png)
 
+## Examples
+
+A few exported compositions, showing different symmetry modes, palettes, and densities.
+
+| | | |
+|---|---|---|
+| ![Magenta streak](examples/magenta-streak.gif) | ![Purple bowtie](examples/purple-bowtie.gif) | ![Cyan scatter](examples/cyan-scatter.gif) |
+| ![Diagonal bands](examples/diagonal-bands.gif) | ![Vertical bands](examples/vertical-bands.gif) | ![Mint kaleidoscope](examples/mint-kaleidoscope.gif) |
+
 ## Why
 
 I built this to generate images and placeholder graphics without reaching for stock photos or a design tool every time. Swap in a brand color palette, seed a batch of variations, and export the one that fits. The GIF export works well as a subtle animated background or hover state.
