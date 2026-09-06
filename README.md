@@ -29,13 +29,15 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 
 ## Features
 
+- Every page load opens on a freshly randomized composition
 - Two independently configurable color layers, each with its own seed, density, and directional flow field
 - Seven symmetry modes: 4-way mirror, horizontal, vertical, 180-degree rotational, diagonal, 8-way kaleidoscope, and none
 - Palette range controls (hue, saturation, lightness) with five presets, plus fully custom ranges
-- Per-field locks, so a randomize pass can hold specific settings steady while re-rolling the rest
+- Density range controls, so a randomize pass can't drift all the way to a solid fill or an empty layer
+- Per-field locks, covering every layer setting plus background color and block size, so a randomize pass can hold specific settings steady while re-rolling the rest
 - Three save-state slots stored in the browser for revisiting a composition later
-- Auto-randomize playback with an adjustable interval
-- Export to PNG, SVG, or an animated GIF, with frame count and speed both configurable
+- Auto-randomize playback with an adjustable interval, from every 0.5 seconds up to every 10
+- Export to PNG, SVG, or an animated GIF, with frame count (1 to 13, following a Fibonacci sequence) and speed both configurable
 - Fully offline: every dependency is vendored in the repo, no CDN, no network connection needed
 
 ## Running locally
