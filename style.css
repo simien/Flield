@@ -117,17 +117,12 @@ body {
 .split-btn {
   display: flex;
   flex-shrink: 0;
+  gap: 6px;
 }
 
 .split-btn button {
   width: auto;
   margin-top: 0;
-}
-
-.split-btn-main {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  border-right: none;
 }
 
 .split-btn-select {
@@ -136,9 +131,8 @@ body {
   margin-top: 0;
   padding: 8px 0;
   border: 1px solid var(--border);
-  border-left: none;
-  border-radius: 0 6px 6px 0;
-  background-color: var(--bg);
+  border-radius: 6px;
+  background-color: transparent;
   color: var(--text);
   font-size: 13px;
   cursor: pointer;
@@ -152,7 +146,15 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   background-size: 12px;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+/* The darker "well" fill only appears once the dropdown is actually
+   open (a native select stays focused while its list is up), rather
+   than sitting on permanently and mismatching its other half. */
+.split-btn-select:focus {
+  background-color: var(--bg);
+  outline: none;
 }
 
 .split-btn-select:hover {
