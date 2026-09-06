@@ -1,6 +1,6 @@
 # Flowgrain
 
-A browser-based generative pixel art tool for creating unique two-color compositions from seeded flow fields and symmetry.
+A browser-based generative pixel art tool for creating unique three-color compositions (a background plus two artwork layers) from seeded flow fields and symmetry.
 
 ## Live demo
 
