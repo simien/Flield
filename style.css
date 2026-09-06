@@ -715,6 +715,10 @@ html.icon-fallback .ph-caret-down::before {
   content: "\2304";
 }
 
+html.icon-fallback .ph-caret-up::before {
+  content: "\2303";
+}
+
 html.icon-fallback .ph-floppy-disk::before {
   content: "\1F4BE\FE0E";
 }
