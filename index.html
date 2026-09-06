@@ -163,6 +163,24 @@
         </div>
       </div>
 
+      <div class="palette-section">
+        <button type="button" class="palette-toggle" aria-expanded="false">
+          <span>Density Range</span>
+          <i class="ph ph-caret-down"></i>
+        </button>
+        <div class="palette-content" hidden>
+          <p class="hint">Randomized density is drawn from within this window, so a randomize pass never drifts all the way to a solid fill (or, at the low end, an empty layer).</p>
+          <div class="field">
+            <label>Density min <span class="l-densityMinVal"></span></label>
+            <input type="range" class="l-densityMin" min="0" max="1" step="0.01" />
+          </div>
+          <div class="field">
+            <label>Density max <span class="l-densityMaxVal"></span></label>
+            <input type="range" class="l-densityMax" min="0" max="1" step="0.01" />
+          </div>
+        </div>
+      </div>
+
       <h2 class="section-title">Flow field</h2>
 
       <div class="field">
@@ -360,6 +378,8 @@
         lightMin: 45,
         lightMax: 65,
         density: 0.45,
+        densityMin: 0,
+        densityMax: 0.75,
         fieldStrength: 0.6,
         fieldScale: 40,
         flowAngle: 45,
@@ -378,6 +398,8 @@
         lightMin: 45,
         lightMax: 65,
         density: 0.25,
+        densityMin: 0,
+        densityMax: 0.75,
         fieldStrength: 0.6,
         fieldScale: 25,
         flowAngle: 200,
@@ -398,6 +420,8 @@
       document.getElementById(prefix + "-lightMin").value = values.lightMin;
       document.getElementById(prefix + "-lightMax").value = values.lightMax;
       document.getElementById(prefix + "-density").value = values.density;
+      document.getElementById(prefix + "-densityMin").value = values.densityMin;
+      document.getElementById(prefix + "-densityMax").value = values.densityMax;
       document.getElementById(prefix + "-fieldStrength").value = values.fieldStrength;
       document.getElementById(prefix + "-fieldScale").value = values.fieldScale;
       document.getElementById(prefix + "-flowAngle").value = values.flowAngle;
@@ -422,6 +446,8 @@
         lightMin: parseFloat(document.getElementById(prefix + "-lightMin").value),
         lightMax: parseFloat(document.getElementById(prefix + "-lightMax").value),
         density: parseFloat(document.getElementById(prefix + "-density").value),
+        densityMin: parseFloat(document.getElementById(prefix + "-densityMin").value),
+        densityMax: parseFloat(document.getElementById(prefix + "-densityMax").value),
         fieldStrength: parseFloat(document.getElementById(prefix + "-fieldStrength").value),
         fieldScale: parseInt(document.getElementById(prefix + "-fieldScale").value, 10),
         flowAngle: parseInt(document.getElementById(prefix + "-flowAngle").value, 10),
@@ -440,6 +466,8 @@
       document.getElementById(prefix + "-lightMinVal").textContent = layer.lightMin + "%";
       document.getElementById(prefix + "-lightMaxVal").textContent = layer.lightMax + "%";
       document.getElementById(prefix + "-densityVal").textContent = layer.density.toFixed(2);
+      document.getElementById(prefix + "-densityMinVal").textContent = layer.densityMin.toFixed(2);
+      document.getElementById(prefix + "-densityMaxVal").textContent = layer.densityMax.toFixed(2);
       document.getElementById(prefix + "-fieldStrengthVal").textContent = layer.fieldStrength.toFixed(2);
       document.getElementById(prefix + "-fieldScaleVal").textContent = layer.fieldScale;
       document.getElementById(prefix + "-flowAngleVal").textContent = layer.flowAngle + "°";
@@ -570,6 +598,8 @@
           randomInLayerRange(prefix, "sat"),
           randomInLayerRange(prefix, "light")
         );
+      } else if (field === "density") {
+        el.value = randomInLayerRange(prefix, "density");
       } else if (el.tagName === "SELECT") {
         const options = Array.from(el.options).map((o) => o.value);
         el.value = options[Math.floor(Math.random() * options.length)];
