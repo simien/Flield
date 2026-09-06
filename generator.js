@@ -248,14 +248,65 @@ function renderToCanvas(canvas, { width, height, blockSize, bgColor, colorA, col
   fillCells(ctx, gridB, cols, rows, blockSize);
 }
 
-function rectsForGrid(grid, cols, rows, blockSize) {
-  let rects = "";
+// Merges a boolean grid's filled cells into rectangles instead of one
+// <rect> per cell: first collapses each row into horizontal runs of
+// consecutive filled cells, then extends a run's rect downward through
+// following rows as long as a later row has a run with the identical x
+// and width. Keeps SVG file size practical at fine block sizes, where a
+// naive per-cell approach can produce hundreds of thousands of elements.
+// Every filled cell ends up covered by exactly one rect (open rects that
+// fail to extend are closed immediately), so this never changes the
+// rendered result, only how many <rect> elements represent it.
+function mergeGridToRects(grid, cols, rows) {
+  const closedRects = [];
+  let openRects = [];
+
   for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      if (grid[y][x]) {
-        rects += `<rect x="${x * blockSize}" y="${y * blockSize}" width="${blockSize}" height="${blockSize}"/>`;
+    const runs = [];
+    let x = 0;
+    while (x < cols) {
+      if (!grid[y][x]) {
+        x++;
+        continue;
+      }
+      const startX = x;
+      while (x < cols && grid[y][x]) x++;
+      runs.push({ x: startX, w: x - startX });
+    }
+
+    const usedRunIndexes = new Set();
+    const stillOpen = [];
+
+    for (const rect of openRects) {
+      const matchIndex = runs.findIndex(
+        (run, i) => !usedRunIndexes.has(i) && run.x === rect.x && run.w === rect.w
+      );
+      if (matchIndex === -1) {
+        closedRects.push(rect);
+      } else {
+        rect.h += 1;
+        stillOpen.push(rect);
+        usedRunIndexes.add(matchIndex);
       }
     }
+
+    runs.forEach((run, i) => {
+      if (!usedRunIndexes.has(i)) {
+        stillOpen.push({ x: run.x, y, w: run.w, h: 1 });
+      }
+    });
+
+    openRects = stillOpen;
+  }
+
+  closedRects.push(...openRects);
+  return closedRects;
+}
+
+function rectsForGrid(grid, cols, rows, blockSize) {
+  let rects = "";
+  for (const r of mergeGridToRects(grid, cols, rows)) {
+    rects += `<rect x="${r.x * blockSize}" y="${r.y * blockSize}" width="${r.w * blockSize}" height="${r.h * blockSize}"/>`;
   }
   return rects;
 }
