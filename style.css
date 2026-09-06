@@ -86,9 +86,7 @@ body {
 }
 
 .icon-btn {
-  width: 28px;
-  height: 28px;
-  padding: 0;
+  padding: 8px 12px;
 }
 
 .icon-btn:disabled {
@@ -710,10 +708,6 @@ html.icon-fallback .ph-caret-down::before {
   content: "\2304";
 }
 
-html.icon-fallback .ph-caret-up::before {
-  content: "\2303";
-}
-
 html.icon-fallback .ph-floppy-disk::before {
   content: "\1F4BE\FE0E";
 }
@@ -728,6 +722,18 @@ html.icon-fallback .ph-download-simple::before {
 
 html.icon-fallback .ph-spinner-gap::before {
   content: "\21BB";
+}
+
+html.icon-fallback .ph-arrow-counter-clockwise::before {
+  content: "\21BA";
+}
+
+html.icon-fallback .ph-link::before {
+  content: "\1F517\FE0E";
+}
+
+html.icon-fallback .ph-check::before {
+  content: "\2713\FE0E";
 }
 
 button:disabled {

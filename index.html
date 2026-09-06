@@ -16,7 +16,7 @@
         <h1><a href="./">Flowgrain</a></h1>
         <div class="title-row-actions">
           <button id="undoBtn" class="secondary icon-btn" title="Undo last randomize" disabled><i class="ph ph-arrow-counter-clockwise"></i></button>
-          <button id="randomizeBtn"><i class="ph ph-shuffle"></i> Randomize</button>
+          <button id="randomizeBtn"><i class="ph ph-shuffle"></i> Random</button>
         </div>
       </div>
 
@@ -269,6 +269,7 @@
           </select>
         </div>
       </div>
+      <button id="copyLinkBtn" class="secondary" title="Copy a link to this exact composition"><i class="ph ph-link"></i> Copy Link</button>
     </div>
   </div>
 
@@ -945,7 +946,50 @@
 
     document.getElementById("footerYear").textContent = new Date().getFullYear();
 
-    performRandomize();
+    // Shareable links: the full state (background, block size, both
+    // layers) round-trips through readOptions()/applyGeneral()/
+    // applyDefaults(), the same functions save-state slots already use,
+    // just encoded into a URL instead of localStorage.
+    function loadStateFromURL() {
+      const encoded = new URLSearchParams(location.search).get("state");
+      if (!encoded) return false;
+      try {
+        const data = JSON.parse(atob(encoded));
+        applyGeneral(data);
+        applyDefaults("layerA", data.layerA);
+        applyDefaults("layerB", data.layerB);
+        render();
+        return true;
+      } catch (err) {
+        return false;
+      }
+    }
+
+    document.getElementById("copyLinkBtn").addEventListener("click", async () => {
+      const encoded = btoa(JSON.stringify(readOptions()));
+      const url = `${location.origin}${location.pathname}?state=${encoded}`;
+      const btn = document.getElementById("copyLinkBtn");
+      const original = btn.innerHTML;
+      try {
+        await navigator.clipboard.writeText(url);
+        btn.innerHTML = '<i class="ph ph-check"></i> Copied!';
+      } catch (err) {
+        try {
+          window.prompt("Copy this link:", url);
+        } catch (err2) {
+          // Dialogs are unavailable in some environments; nothing more to do.
+        }
+        btn.innerHTML = original;
+        return;
+      }
+      setTimeout(() => {
+        btn.innerHTML = original;
+      }, 1500);
+    });
+
+    if (!loadStateFromURL()) {
+      performRandomize();
+    }
     generateRandomFavicon();
   </script>
 </body>
