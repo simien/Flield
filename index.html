@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flowgrain: pixel art generator</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="style.css" />
+  <!-- ?v= busts the browser cache for this project's own two evolving
+       files (not the vendored third-party ones, which are pinned and
+       don't change). Bump it whenever style.css or generator.js changes,
+       or a returning visitor's cached copy silently goes stale. -->
+  <link rel="stylesheet" href="style.css?v=2" />
   <link rel="stylesheet" href="phosphor/style.css" />
   <script src="gif.js"></script>
 </head>
@@ -303,7 +307,7 @@
     </footer>
   </div>
 
-  <script src="generator.js"></script>
+  <script src="generator.js?v=2"></script>
   <script>
     // If the Phosphor font can't load for any reason, fall back to plain
     // Unicode glyphs (see the .icon-fallback rules in style.css) instead
