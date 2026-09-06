@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flowgrain: pixel art generator</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+</head>
+<body>
+  <div class="controls">
+    <div class="controls-header">
+      <div class="title-row">
+        <h1>Flowgrain</h1>
+        <button id="randomizeBtn"><i class="ph ph-shuffle"></i> Randomize</button>
+      </div>
+
+      <div class="button-row">
+        <button id="lockAllBtn" class="secondary" title="Lock all fields"><i class="ph ph-lock-simple"></i> Lock</button>
+        <button id="unlockAllBtn" class="secondary" title="Unlock all fields"><i class="ph ph-lock-simple-open"></i> Unlock</button>
+        <div class="split-btn">
+          <button id="playBtn" class="secondary split-btn-main" title="Auto-randomize"><i class="ph ph-play"></i></button>
+          <button id="speedToggleBtn" class="secondary split-btn-caret" title="Auto-randomize speed" aria-expanded="false"><i class="ph ph-caret-down"></i></button>
+        </div>
+      </div>
+
+      <div class="autoplay-row" id="autoplayRow" hidden>
+        <label for="autoSpeed">Auto-randomize every</label>
+        <select id="autoSpeed">
+          <option value="1000">1s</option>
+          <option value="2000">2s</option>
+          <option value="3000" selected>3s</option>
+          <option value="5000">5s</option>
+          <option value="10000">10s</option>
+        </select>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="general">General</button>
+        <button class="tab-btn" data-tab="layerA">Layer A</button>
+        <button class="tab-btn" data-tab="layerB">Layer B</button>
+      </div>
+    </div>
+
+    <div class="controls-body">
+    <div class="tab-panel" id="tab-general">
+      <div class="field">
+        <label>Background color</label>
+        <input type="color" id="bgColor" value="#0f172a" />
+      </div>
+
+      <div class="color-row">
+        <div class="field">
+          <label>Width (px)</label>
+          <input type="number" id="width" value="1200" min="16" step="16" />
+        </div>
+        <div class="field">
+          <label>Height (px)</label>
+          <input type="number" id="height" value="630" min="16" step="16" />
+        </div>
+      </div>
+
+      <div class="preset-chip-row">
+        <button type="button" class="palette-preset-btn dimension-preset-btn" data-preset="web">Web</button>
+        <button type="button" class="palette-preset-btn dimension-preset-btn" data-preset="tablet">Tablet</button>
+        <button type="button" class="palette-preset-btn dimension-preset-btn" data-preset="mobile">Mobile</button>
+      </div>
+
+      <div class="field">
+        <label>Block size (grid resolution) <span id="blockSizeVal">24px</span></label>
+        <input type="range" id="blockSize" min="4" max="80" value="24" />
+      </div>
+
+      <h2 class="section-title">Saved states</h2>
+      <p class="hint">Snapshot the full composition (colors, both layers, everything) into a slot, and reload it any time.</p>
+      <div class="preset-row" data-slot="1">
+        <span class="preset-label">Slot 1</span>
+        <span class="preset-status" id="preset-status-1">empty</span>
+        <button type="button" class="preset-btn preset-save-btn" data-slot="1" title="Save current state to Slot 1"><i class="ph ph-floppy-disk"></i></button>
+        <button type="button" class="preset-btn preset-load-btn" data-slot="1" title="Load Slot 1" disabled><i class="ph ph-folder-open"></i></button>
+      </div>
+      <div class="preset-row" data-slot="2">
+        <span class="preset-label">Slot 2</span>
+        <span class="preset-status" id="preset-status-2">empty</span>
+        <button type="button" class="preset-btn preset-save-btn" data-slot="2" title="Save current state to Slot 2"><i class="ph ph-floppy-disk"></i></button>
+        <button type="button" class="preset-btn preset-load-btn" data-slot="2" title="Load Slot 2" disabled><i class="ph ph-folder-open"></i></button>
+      </div>
+      <div class="preset-row" data-slot="3">
+        <span class="preset-label">Slot 3</span>
+        <span class="preset-status" id="preset-status-3">empty</span>
+        <button type="button" class="preset-btn preset-save-btn" data-slot="3" title="Save current state to Slot 3"><i class="ph ph-floppy-disk"></i></button>
+        <button type="button" class="preset-btn preset-load-btn" data-slot="3" title="Load Slot 3" disabled><i class="ph ph-folder-open"></i></button>
+      </div>
+    </div>
+
+    <template id="layer-template">
+      <div class="field">
+        <label>Seed</label>
+        <div class="field-row">
+          <input type="text" class="l-seed" />
+          <button type="button" class="lock-btn" data-for="seed" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Color</label>
+        <div class="field-row">
+          <input type="color" class="l-color" />
+          <button type="button" class="lock-btn" data-for="color" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
+      </div>
+
+      <div class="palette-section">
+        <button type="button" class="palette-toggle" aria-expanded="false">
+          <span>Palette Range</span>
+          <i class="ph ph-caret-down"></i>
+        </button>
+        <div class="palette-content" hidden>
+          <p class="hint">Randomized colors are drawn from within these windows, not the whole wheel.</p>
+
+          <div class="preset-chip-row">
+            <button type="button" class="palette-preset-btn" data-preset="full">Full spectrum</button>
+            <button type="button" class="palette-preset-btn" data-preset="pastel">Pastel</button>
+            <button type="button" class="palette-preset-btn" data-preset="neon">Neon</button>
+            <button type="button" class="palette-preset-btn" data-preset="earth">Earth tones</button>
+            <button type="button" class="palette-preset-btn" data-preset="mono">Monochrome</button>
+          </div>
+
+          <div class="field">
+            <label>Hue min <span class="l-hueMinVal"></span></label>
+            <input type="range" class="l-hueMin" min="0" max="360" />
+          </div>
+          <div class="field">
+            <label>Hue max <span class="l-hueMaxVal"></span></label>
+            <input type="range" class="l-hueMax" min="0" max="360" />
+          </div>
+          <div class="field">
+            <label>Saturation min <span class="l-satMinVal"></span></label>
+            <input type="range" class="l-satMin" min="0" max="100" />
+          </div>
+          <div class="field">
+            <label>Saturation max <span class="l-satMaxVal"></span></label>
+            <input type="range" class="l-satMax" min="0" max="100" />
+          </div>
+          <div class="field">
+            <label>Lightness min <span class="l-lightMinVal"></span></label>
+            <input type="range" class="l-lightMin" min="0" max="100" />
+          </div>
+          <div class="field">
+            <label>Lightness max <span class="l-lightMaxVal"></span></label>
+            <input type="range" class="l-lightMax" min="0" max="100" />
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Base density <span class="l-densityVal"></span></label>
+        <div class="field-row">
+          <input type="range" class="l-density" min="0" max="1" step="0.01" />
+          <button type="button" class="lock-btn" data-for="density" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
+      </div>
+
+      <h2 class="section-title">Flow field</h2>
+
+      <div class="field">
+        <label>Field strength <span class="l-fieldStrengthVal"></span></label>
+        <div class="field-row">
+          <input type="range" class="l-fieldStrength" min="0" max="1" step="0.01" />
+          <button type="button" class="lock-btn" data-for="fieldStrength" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Flow scale <span class="l-fieldScaleVal"></span></label>
+        <div class="field-row">
+          <input type="range" class="l-fieldScale" min="5" max="150" />
+          <button type="button" class="lock-btn" data-for="fieldScale" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Flow direction <span class="l-flowAngleVal"></span></label>
+        <div class="field-row">
+          <input type="range" class="l-flowAngle" min="0" max="359" />
+          <button type="button" class="lock-btn" data-for="flowAngle" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Flow stretch <span class="l-flowStretchVal"></span></label>
+        <div class="field-row">
+          <input type="range" class="l-flowStretch" min="1" max="10" step="0.1" />
+          <button type="button" class="lock-btn" data-for="flowStretch" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Turbulence (octaves) <span class="l-fieldOctavesVal"></span></label>
+        <div class="field-row">
+          <input type="range" class="l-fieldOctaves" min="1" max="4" />
+          <button type="button" class="lock-btn" data-for="fieldOctaves" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Symmetry</label>
+        <div class="field-row">
+          <select class="l-symmetry">
+            <option value="quad">4-way mirror</option>
+            <option value="horizontal">Horizontal mirror</option>
+            <option value="vertical">Vertical mirror</option>
+            <option value="rotational">180° rotational</option>
+            <option value="diagonal">Diagonal mirror</option>
+            <option value="kaleidoscope">8-way kaleidoscope</option>
+            <option value="none">None (noise)</option>
+          </select>
+          <button type="button" class="lock-btn" data-for="symmetry" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Smoothing passes <span class="l-smoothVal"></span></label>
+        <div class="field-row">
+          <input type="range" class="l-smoothPasses" min="0" max="5" />
+          <button type="button" class="lock-btn" data-for="smoothPasses" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
+      </div>
+    </template>
+
+    <div class="tab-panel" id="tab-layerA" hidden></div>
+    <div class="tab-panel" id="tab-layerB" hidden>
+      <p class="hint">Layer B only shows in the gaps Layer A leaves empty. Lower either layer's density to let the background show through.</p>
+    </div>
+    </div>
+
+    <div class="controls-footer">
+      <div class="button-row">
+        <button id="downloadPng" class="secondary"><i class="ph ph-download-simple"></i> PNG</button>
+        <button id="downloadSvg" class="secondary"><i class="ph ph-download-simple"></i> SVG</button>
+        <div class="split-btn">
+          <button id="downloadGif" class="secondary split-btn-main" title="Download animated GIF (uses the auto-randomize speed above as the per-frame delay)"><i class="ph ph-download-simple"></i> GIF</button>
+          <button id="gifStepsToggleBtn" class="secondary split-btn-caret" title="GIF step count" aria-expanded="false"><i class="ph ph-caret-down"></i></button>
+        </div>
+      </div>
+      <div class="autoplay-row" id="gifStepsRow" hidden>
+        <label for="gifSteps" title="Uses the auto-randomize speed above as the per-frame delay">GIF steps</label>
+        <select id="gifSteps">
+          <option value="3">3</option>
+          <option value="5" selected>5</option>
+          <option value="8">8</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="canvas-area">
+    <canvas id="preview"></canvas>
+  </div>
+
+  <script src="generator.js"></script>
+  <script>
+    // Wire up tab switching.
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach((p) => (p.hidden = true));
+        btn.classList.add("active");
+        document.getElementById("tab-" + btn.dataset.tab).hidden = false;
+      });
+    });
+
+    // Fields a lock button can be attached to; randomize() skips any of
+    // these whose lock is engaged.
+    const RANDOMIZABLE_FIELDS = [
+      "seed", "color", "density", "fieldStrength", "fieldScale",
+      "flowAngle", "flowStretch", "fieldOctaves", "symmetry", "smoothPasses",
+    ];
+    const lockedFields = new Set();
+
+    // Sets one lock button's visual/logical state. `btn.dataset.targetId`
+    // is assigned once when the button is stamped into its panel (see
+    // buildLayerControls below), so this is reusable for both a single
+    // click and the Lock All / Unlock All bulk actions.
+    function setLock(btn, locked) {
+      const targetId = btn.dataset.targetId;
+      if (locked) {
+        lockedFields.add(targetId);
+        btn.classList.add("locked");
+        btn.querySelector("i").className = "ph ph-lock";
+      } else {
+        lockedFields.delete(targetId);
+        btn.classList.remove("locked");
+        btn.querySelector("i").className = "ph ph-lock-open";
+      }
+    }
+
+    // Stamp the shared layer-control template into each layer's tab panel,
+    // then wire each field's lock button (data-for="<field>") to toggle
+    // that field's id in `lockedFields`.
+    function buildLayerControls(panel, prefix) {
+      const tpl = document.getElementById("layer-template");
+      const frag = tpl.content.cloneNode(true);
+      frag.querySelectorAll("[class*='l-']").forEach((el) => {
+        el.classList.forEach((cls) => {
+          if (cls.startsWith("l-")) el.id = prefix + "-" + cls.slice(2);
+        });
+      });
+      frag.querySelectorAll(".lock-btn").forEach((btn) => {
+        btn.dataset.targetId = prefix + "-" + btn.dataset.for;
+        btn.addEventListener("click", () => setLock(btn, !lockedFields.has(btn.dataset.targetId)));
+      });
+      frag.querySelectorAll(".palette-preset-btn").forEach((btn) => {
+        btn.addEventListener("click", () => applyPalettePreset(prefix, btn.dataset.preset));
+      });
+      frag.querySelectorAll(".palette-toggle").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const content = btn.nextElementSibling;
+          const isOpen = btn.getAttribute("aria-expanded") === "true";
+          btn.setAttribute("aria-expanded", String(!isOpen));
+          content.hidden = isOpen;
+        });
+      });
+      panel.prepend(frag);
+    }
+    buildLayerControls(document.getElementById("tab-layerA"), "layerA");
+    buildLayerControls(document.getElementById("tab-layerB"), "layerB");
+
+    // Layer A: bold, dominant shape. Layer B: sparser accent living in the gaps.
+    const defaults = {
+      layerA: {
+        seed: "hello-world",
+        color: "#38bdf8",
+        hueMin: 0,
+        hueMax: 360,
+        satMin: 55,
+        satMax: 85,
+        lightMin: 45,
+        lightMax: 65,
+        density: 0.45,
+        fieldStrength: 0.6,
+        fieldScale: 40,
+        flowAngle: 45,
+        flowStretch: 3,
+        fieldOctaves: 2,
+        symmetry: "quad",
+        smoothPasses: 1,
+      },
+      layerB: {
+        seed: "hello-world-accent",
+        color: "#f472b6",
+        hueMin: 0,
+        hueMax: 360,
+        satMin: 55,
+        satMax: 85,
+        lightMin: 45,
+        lightMax: 65,
+        density: 0.25,
+        fieldStrength: 0.6,
+        fieldScale: 25,
+        flowAngle: 200,
+        flowStretch: 3,
+        fieldOctaves: 2,
+        symmetry: "none",
+        smoothPasses: 1,
+      },
+    };
+
+    function applyDefaults(prefix, values) {
+      document.getElementById(prefix + "-seed").value = values.seed;
+      document.getElementById(prefix + "-color").value = values.color;
+      document.getElementById(prefix + "-hueMin").value = values.hueMin;
+      document.getElementById(prefix + "-hueMax").value = values.hueMax;
+      document.getElementById(prefix + "-satMin").value = values.satMin;
+      document.getElementById(prefix + "-satMax").value = values.satMax;
+      document.getElementById(prefix + "-lightMin").value = values.lightMin;
+      document.getElementById(prefix + "-lightMax").value = values.lightMax;
+      document.getElementById(prefix + "-density").value = values.density;
+      document.getElementById(prefix + "-fieldStrength").value = values.fieldStrength;
+      document.getElementById(prefix + "-fieldScale").value = values.fieldScale;
+      document.getElementById(prefix + "-flowAngle").value = values.flowAngle;
+      document.getElementById(prefix + "-flowStretch").value = values.flowStretch;
+      document.getElementById(prefix + "-fieldOctaves").value = values.fieldOctaves;
+      document.getElementById(prefix + "-symmetry").value = values.symmetry;
+      document.getElementById(prefix + "-smoothPasses").value = values.smoothPasses;
+    }
+    applyDefaults("layerA", defaults.layerA);
+    applyDefaults("layerB", defaults.layerB);
+
+    const canvas = document.getElementById("preview");
+
+    function readLayer(prefix) {
+      return {
+        seed: document.getElementById(prefix + "-seed").value || prefix,
+        color: document.getElementById(prefix + "-color").value,
+        hueMin: parseFloat(document.getElementById(prefix + "-hueMin").value),
+        hueMax: parseFloat(document.getElementById(prefix + "-hueMax").value),
+        satMin: parseFloat(document.getElementById(prefix + "-satMin").value),
+        satMax: parseFloat(document.getElementById(prefix + "-satMax").value),
+        lightMin: parseFloat(document.getElementById(prefix + "-lightMin").value),
+        lightMax: parseFloat(document.getElementById(prefix + "-lightMax").value),
+        density: parseFloat(document.getElementById(prefix + "-density").value),
+        fieldStrength: parseFloat(document.getElementById(prefix + "-fieldStrength").value),
+        fieldScale: parseInt(document.getElementById(prefix + "-fieldScale").value, 10),
+        flowAngle: parseInt(document.getElementById(prefix + "-flowAngle").value, 10),
+        flowStretch: parseFloat(document.getElementById(prefix + "-flowStretch").value),
+        fieldOctaves: parseInt(document.getElementById(prefix + "-fieldOctaves").value, 10),
+        symmetry: document.getElementById(prefix + "-symmetry").value,
+        smoothPasses: parseInt(document.getElementById(prefix + "-smoothPasses").value, 10),
+      };
+    }
+
+    function updateLayerLabels(prefix, layer) {
+      document.getElementById(prefix + "-hueMinVal").textContent = layer.hueMin + "°";
+      document.getElementById(prefix + "-hueMaxVal").textContent = layer.hueMax + "°";
+      document.getElementById(prefix + "-satMinVal").textContent = layer.satMin + "%";
+      document.getElementById(prefix + "-satMaxVal").textContent = layer.satMax + "%";
+      document.getElementById(prefix + "-lightMinVal").textContent = layer.lightMin + "%";
+      document.getElementById(prefix + "-lightMaxVal").textContent = layer.lightMax + "%";
+      document.getElementById(prefix + "-densityVal").textContent = layer.density.toFixed(2);
+      document.getElementById(prefix + "-fieldStrengthVal").textContent = layer.fieldStrength.toFixed(2);
+      document.getElementById(prefix + "-fieldScaleVal").textContent = layer.fieldScale;
+      document.getElementById(prefix + "-flowAngleVal").textContent = layer.flowAngle + "°";
+      document.getElementById(prefix + "-flowStretchVal").textContent = layer.flowStretch.toFixed(1);
+      document.getElementById(prefix + "-fieldOctavesVal").textContent = layer.fieldOctaves;
+      document.getElementById(prefix + "-smoothVal").textContent = layer.smoothPasses;
+    }
+
+    function readOptions() {
+      return {
+        bgColor: document.getElementById("bgColor").value,
+        width: parseInt(document.getElementById("width").value, 10) || 100,
+        height: parseInt(document.getElementById("height").value, 10) || 100,
+        blockSize: parseInt(document.getElementById("blockSize").value, 10),
+        layerA: readLayer("layerA"),
+        layerB: readLayer("layerB"),
+      };
+    }
+
+    let lastResult = null;
+    let lastOptions = null;
+
+    // Chrome/Safari have no native "filled portion" pseudo-element for
+    // range inputs (Firefox does: ::-moz-range-progress), so the fill is
+    // faked with a track gradient driven by this --pct custom property.
+    // Called from render() so it stays correct after every value change,
+    // not just manual drags (randomize, presets, locks all just call
+    // render() too, without necessarily dispatching an "input" event).
+    function updateRangeFills() {
+      document.querySelectorAll('input[type="range"]').forEach((el) => {
+        const min = parseFloat(el.min) || 0;
+        const max = parseFloat(el.max) || 100;
+        const pct = ((parseFloat(el.value) - min) / (max - min || 1)) * 100;
+        el.style.setProperty("--pct", pct);
+      });
+    }
+
+    function render() {
+      const options = readOptions();
+      document.getElementById("blockSizeVal").textContent = options.blockSize + "px";
+      updateLayerLabels("layerA", options.layerA);
+      updateLayerLabels("layerB", options.layerB);
+      updateRangeFills();
+
+      const { gridA, gridB, cols, rows } = generate(options);
+      renderToCanvas(canvas, {
+        width: options.width,
+        height: options.height,
+        blockSize: options.blockSize,
+        bgColor: options.bgColor,
+        colorA: options.layerA.color,
+        colorB: options.layerB.color,
+        gridA,
+        gridB,
+        cols,
+        rows,
+      });
+      lastResult = { gridA, gridB, cols, rows };
+      lastOptions = options;
+    }
+
+    document.querySelector(".controls").addEventListener("input", render);
+
+    function hslToHex(h, s, l) {
+      s /= 100;
+      l /= 100;
+      const k = (n) => (n + h / 30) % 12;
+      const a = s * Math.min(l, 1 - l);
+      const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+      const toHex = (n) => Math.round(255 * f(n)).toString(16).padStart(2, "0");
+      return `#${toHex(0)}${toHex(8)}${toHex(4)}`;
+    }
+
+    // Curated hue/saturation/lightness windows a layer's randomized color
+    // is drawn from. "full" matches the original unconstrained defaults.
+    const PALETTE_PRESETS = {
+      full: { hueMin: 0, hueMax: 360, satMin: 55, satMax: 85, lightMin: 45, lightMax: 65 },
+      pastel: { hueMin: 0, hueMax: 360, satMin: 25, satMax: 45, lightMin: 75, lightMax: 90 },
+      neon: { hueMin: 0, hueMax: 360, satMin: 85, satMax: 100, lightMin: 50, lightMax: 60 },
+      earth: { hueMin: 20, hueMax: 45, satMin: 35, satMax: 60, lightMin: 25, lightMax: 50 },
+      mono: { hueMin: 0, hueMax: 360, satMin: 0, satMax: 8, lightMin: 15, lightMax: 85 },
+    };
+
+    function applyPalettePreset(prefix, presetKey) {
+      const preset = PALETTE_PRESETS[presetKey];
+      Object.keys(preset).forEach((key) => {
+        document.getElementById(prefix + "-" + key).value = preset[key];
+      });
+      render();
+    }
+
+    const DIMENSION_PRESETS = {
+      web: { width: 1920, height: 1080 },
+      tablet: { width: 768, height: 1024 },
+      mobile: { width: 375, height: 812 },
+    };
+
+    document.querySelectorAll(".dimension-preset-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const preset = DIMENSION_PRESETS[btn.dataset.preset];
+        document.getElementById("width").value = preset.width;
+        document.getElementById("height").value = preset.height;
+        render();
+      });
+    });
+
+    // Randomizes one field's DOM element in place, respecting its own
+    // type/range so every control (slider, select, color, text) gets a
+    // sensible random value without field-specific randomize code.
+    // Draws a random value between the layer's own <fieldName>Min/Max
+    // range controls (order-independent, so a min dragged past its max
+    // still yields a valid range instead of a negative span).
+    function randomInLayerRange(prefix, name) {
+      const a = parseFloat(document.getElementById(prefix + "-" + name + "Min").value);
+      const b = parseFloat(document.getElementById(prefix + "-" + name + "Max").value);
+      const lo = Math.min(a, b);
+      const hi = Math.max(a, b);
+      return lo + Math.random() * (hi - lo);
+    }
+
+    function randomizeElement(prefix, field) {
+      const el = document.getElementById(prefix + "-" + field);
+      if (field === "seed") {
+        el.value = Math.random().toString(36).slice(2, 10);
+      } else if (field === "color") {
+        el.value = hslToHex(
+          randomInLayerRange(prefix, "hue"),
+          randomInLayerRange(prefix, "sat"),
+          randomInLayerRange(prefix, "light")
+        );
+      } else if (el.tagName === "SELECT") {
+        const options = Array.from(el.options).map((o) => o.value);
+        el.value = options[Math.floor(Math.random() * options.length)];
+      } else {
+        const min = parseFloat(el.min);
+        const max = parseFloat(el.max);
+        const step = parseFloat(el.step) || 1;
+        const steps = Math.round((max - min) / step);
+        el.value = min + Math.floor(Math.random() * (steps + 1)) * step;
+      }
+    }
+
+    function performRandomize() {
+      ["layerA", "layerB"].forEach((prefix) => {
+        RANDOMIZABLE_FIELDS.forEach((field) => {
+          if (!lockedFields.has(prefix + "-" + field)) randomizeElement(prefix, field);
+        });
+      });
+      render();
+    }
+
+    document.getElementById("randomizeBtn").addEventListener("click", performRandomize);
+
+    document.getElementById("lockAllBtn").addEventListener("click", () => {
+      document.querySelectorAll(".lock-btn").forEach((btn) => setLock(btn, true));
+    });
+    document.getElementById("unlockAllBtn").addEventListener("click", () => {
+      document.querySelectorAll(".lock-btn").forEach((btn) => setLock(btn, false));
+    });
+
+    // Auto-randomize: repeatedly calls performRandomize on an interval
+    // whose length is read live from the speed <select>, so changing
+    // speed while playing takes effect on the next tick without a
+    // separate stop/restart step from the user.
+    const playBtn = document.getElementById("playBtn");
+    const autoSpeedSelect = document.getElementById("autoSpeed");
+    let autoplayTimer = null;
+
+    function stopAutoplay() {
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
+      playBtn.classList.remove("playing");
+      playBtn.querySelector("i").className = "ph ph-play";
+      playBtn.title = "Auto-randomize";
+    }
+
+    function startAutoplay() {
+      performRandomize();
+      autoplayTimer = setInterval(performRandomize, parseInt(autoSpeedSelect.value, 10));
+      playBtn.classList.add("playing");
+      playBtn.querySelector("i").className = "ph ph-pause";
+      playBtn.title = "Stop auto-randomize";
+    }
+
+    playBtn.addEventListener("click", () => {
+      if (autoplayTimer) stopAutoplay();
+      else startAutoplay();
+    });
+
+    autoSpeedSelect.addEventListener("change", () => {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = setInterval(performRandomize, parseInt(autoSpeedSelect.value, 10));
+      }
+    });
+
+    const speedToggleBtn = document.getElementById("speedToggleBtn");
+    const autoplayRow = document.getElementById("autoplayRow");
+    speedToggleBtn.addEventListener("click", () => {
+      const isOpen = speedToggleBtn.getAttribute("aria-expanded") === "true";
+      speedToggleBtn.setAttribute("aria-expanded", String(!isOpen));
+      autoplayRow.hidden = isOpen;
+    });
+
+    document.getElementById("downloadPng").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.download = `${lastOptions.layerA.seed}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+
+    document.getElementById("downloadSvg").addEventListener("click", () => {
+      const svg = gridToSVG({
+        width: lastOptions.width,
+        height: lastOptions.height,
+        blockSize: lastOptions.blockSize,
+        bgColor: lastOptions.bgColor,
+        colorA: lastOptions.layerA.color,
+        colorB: lastOptions.layerB.color,
+        gridA: lastResult.gridA,
+        gridB: lastResult.gridB,
+        cols: lastResult.cols,
+        rows: lastResult.rows,
+      });
+      const blob = new Blob([svg], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = `${lastOptions.layerA.seed}.svg`;
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    const gifStepsToggleBtn = document.getElementById("gifStepsToggleBtn");
+    const gifStepsRow = document.getElementById("gifStepsRow");
+    gifStepsToggleBtn.addEventListener("click", () => {
+      const isOpen = gifStepsToggleBtn.getAttribute("aria-expanded") === "true";
+      gifStepsToggleBtn.setAttribute("aria-expanded", String(!isOpen));
+      gifStepsRow.hidden = isOpen;
+    });
+
+    // Builds an animated GIF by calling performRandomize() once per step
+    // (so it respects the same field locks as manual randomizing) and
+    // capturing the canvas after each. Per-frame delay reuses the
+    // auto-randomize speed control above rather than a separate setting,
+    // so total GIF length = speed x steps.
+    const downloadGifBtn = document.getElementById("downloadGif");
+
+    downloadGifBtn.addEventListener("click", () => {
+      const steps = parseInt(document.getElementById("gifSteps").value, 10);
+      const delay = parseInt(autoSpeedSelect.value, 10);
+      const seedForFilename = lastOptions.layerA.seed;
+
+      const gif = new GIF({
+        workers: 2,
+        quality: 10,
+        width: canvas.width,
+        height: canvas.height,
+        workerScript: "gif.worker.js",
+      });
+
+      downloadGifBtn.disabled = true;
+      downloadGifBtn.innerHTML = '<i class="ph ph-spinner-gap"></i> Rendering...';
+
+      for (let i = 0; i < steps; i++) {
+        performRandomize();
+        gif.addFrame(canvas, { copy: true, delay });
+      }
+
+      gif.on("finished", (blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.download = `${seedForFilename}.gif`;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+        downloadGifBtn.disabled = false;
+        downloadGifBtn.innerHTML = '<i class="ph ph-download-simple"></i> GIF';
+      });
+
+      gif.render();
+    });
+
+    // Save-state slots: each stores the full readOptions() snapshot
+    // (canvas settings + both layers, not lock states) in localStorage
+    // so slots survive a page reload.
+    const PRESET_KEY_PREFIX = "featuregen-preset-";
+
+    function applyGeneral(values) {
+      document.getElementById("bgColor").value = values.bgColor;
+      document.getElementById("width").value = values.width;
+      document.getElementById("height").value = values.height;
+      document.getElementById("blockSize").value = values.blockSize;
+    }
+
+    function refreshPresetUI(slot) {
+      const raw = localStorage.getItem(PRESET_KEY_PREFIX + slot);
+      const row = document.querySelector(`.preset-row[data-slot="${slot}"]`);
+      row.querySelector(".preset-status").textContent = raw ? "saved" : "empty";
+      row.querySelector(".preset-load-btn").disabled = !raw;
+    }
+
+    document.querySelectorAll(".preset-save-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        localStorage.setItem(PRESET_KEY_PREFIX + btn.dataset.slot, JSON.stringify(readOptions()));
+        refreshPresetUI(btn.dataset.slot);
+      });
+    });
+
+    document.querySelectorAll(".preset-load-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const raw = localStorage.getItem(PRESET_KEY_PREFIX + btn.dataset.slot);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        applyGeneral(data);
+        applyDefaults("layerA", data.layerA);
+        applyDefaults("layerB", data.layerB);
+        render();
+      });
+    });
+
+    [1, 2, 3].forEach(refreshPresetUI);
+
+    // Floating value tooltip that tracks each range input's thumb while
+    // dragging. Reads its text from the slider's existing pill (<span> in
+    // its label), deferred via requestAnimationFrame so it reads AFTER
+    // the delegated render()/updateLayerLabels() call (attached earlier,
+    // on ".controls") has already refreshed that text for this event.
+    function initSliderTooltips() {
+      document.querySelectorAll('input[type="range"]').forEach((input) => {
+        const wrap = document.createElement("div");
+        wrap.className = "slider-wrap";
+        input.parentNode.insertBefore(wrap, input);
+        wrap.appendChild(input);
+
+        const tooltip = document.createElement("div");
+        tooltip.className = "slider-tooltip";
+        wrap.appendChild(tooltip);
+
+        const valueSpan = input.closest(".field")?.querySelector("label span");
+
+        function positionTooltip() {
+          const min = parseFloat(input.min) || 0;
+          const max = parseFloat(input.max) || 100;
+          const pct = (parseFloat(input.value) - min) / (max - min || 1);
+          const thumbWidth = 14;
+          const trackWidth = input.offsetWidth;
+          const left = pct * (trackWidth - thumbWidth) + thumbWidth / 2;
+          tooltip.style.left = left + "px";
+          tooltip.textContent = valueSpan ? valueSpan.textContent : input.value;
+        }
+
+        function showTooltip() {
+          positionTooltip();
+          tooltip.classList.add("visible");
+        }
+
+        input.addEventListener("pointerdown", showTooltip);
+        input.addEventListener("input", () => {
+          showTooltip();
+          requestAnimationFrame(positionTooltip);
+        });
+        input.addEventListener("keydown", showTooltip);
+        input.addEventListener("pointerup", () => {
+          setTimeout(() => tooltip.classList.remove("visible"), 500);
+        });
+        input.addEventListener("blur", () => tooltip.classList.remove("visible"));
+      });
+    }
+    initSliderTooltips();
+
+    render();
+  </script>
+</body>
+</html>

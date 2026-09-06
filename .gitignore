@@ -1,0 +1,6 @@
+# Editor/tool-local config, not relevant to other contributors
+.claude/
+
+# OS cruft
+.DS_Store
+Thumbs.db
