@@ -28,7 +28,7 @@ The generator itself (`generator.js`) is independent of the UI, so the noise fie
 
 ## Running locally
 
-Flowgrain is plain HTML, CSS, and JavaScript. No build step, no package manager.
+Flowgrain is plain HTML, CSS, and JavaScript. No build step, no package manager, and every dependency (icons, GIF export) is vendored in the repo, so it runs with no network connection at all.
 
 1. Clone the repository
 2. Serve the folder with any static file server, for example: `python3 -m http.server 8080`
