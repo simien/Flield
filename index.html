@@ -66,12 +66,18 @@
 
       <div class="field">
         <label>Background color</label>
-        <input type="color" id="bgColor" value="#0f172a" />
+        <div class="field-row">
+          <input type="color" id="bgColor" value="#0f172a" />
+          <button type="button" class="lock-btn" data-for="bgColor" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
       </div>
 
       <div class="field">
-        <label>Block size (grid resolution) <span id="blockSizeVal">24px</span></label>
-        <input type="range" id="blockSize" min="2" max="80" value="24" />
+        <label>Block size (grid resolution) <span id="blockSizeVal">4px</span></label>
+        <div class="field-row">
+          <input type="range" id="blockSize" min="2" max="80" value="4" />
+          <button type="button" class="lock-btn" data-for="blockSize" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
       </div>
 
       <h2 class="section-title">Saved states</h2>
@@ -366,6 +372,18 @@
     buildLayerControls(document.getElementById("tab-layerA"), "layerA");
     buildLayerControls(document.getElementById("tab-layerB"), "layerB");
 
+    // Background color and block size aren't per-layer fields, so their lock
+    // buttons (in the General tab's own markup, not the layer template)
+    // target their own id directly instead of a "<prefix>-<field>" one.
+    // Both start locked, so the initial composition keeps its intended
+    // starting values instead of an immediate randomize pass overwriting
+    // them; unlock either one to fold it into future randomize passes.
+    document.querySelectorAll("#tab-general .lock-btn").forEach((btn) => {
+      btn.dataset.targetId = btn.dataset.for;
+      btn.addEventListener("click", () => setLock(btn, !lockedFields.has(btn.dataset.targetId)));
+      setLock(btn, true);
+    });
+
     // Layer A: bold, dominant shape. Layer B: sparser accent living in the gaps.
     const defaults = {
       layerA: {
@@ -588,6 +606,14 @@
       return lo + Math.random() * (hi - lo);
     }
 
+    function randomizeRangeInput(el) {
+      const min = parseFloat(el.min);
+      const max = parseFloat(el.max);
+      const step = parseFloat(el.step) || 1;
+      const steps = Math.round((max - min) / step);
+      el.value = min + Math.floor(Math.random() * (steps + 1)) * step;
+    }
+
     function randomizeElement(prefix, field) {
       const el = document.getElementById(prefix + "-" + field);
       if (field === "seed") {
@@ -604,11 +630,7 @@
         const options = Array.from(el.options).map((o) => o.value);
         el.value = options[Math.floor(Math.random() * options.length)];
       } else {
-        const min = parseFloat(el.min);
-        const max = parseFloat(el.max);
-        const step = parseFloat(el.step) || 1;
-        const steps = Math.round((max - min) / step);
-        el.value = min + Math.floor(Math.random() * (steps + 1)) * step;
+        randomizeRangeInput(el);
       }
     }
 
@@ -618,6 +640,16 @@
           if (!lockedFields.has(prefix + "-" + field)) randomizeElement(prefix, field);
         });
       });
+      if (!lockedFields.has("bgColor")) {
+        document.getElementById("bgColor").value = hslToHex(
+          Math.random() * 360,
+          20 + Math.random() * 60,
+          8 + Math.random() * 35
+        );
+      }
+      if (!lockedFields.has("blockSize")) {
+        randomizeRangeInput(document.getElementById("blockSize"));
+      }
       render();
     }
 
