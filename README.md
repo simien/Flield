@@ -10,6 +10,12 @@ A browser-based generative pixel art tool for creating unique three-color compos
 
 ![Flowgrain screenshot](screenshot.png)
 
+## Why
+
+I built this to generate images and placeholder graphics without reaching for stock photos or a design tool every time. Swap in a brand color palette, seed a batch of variations, and export the one that fits. The GIF export works well as a subtle animated background or hover state.
+
+The generator itself (`generator.js`) is independent of the UI, so the noise field, symmetry, and grid logic can be reused in other projects.
+
 ## Features
 
 - Two independently configurable color layers, each with its own seed, density, and directional flow field
@@ -31,3 +37,7 @@ Flowgrain is plain HTML, CSS, and JavaScript. No build step, no package manager.
 ## How it works
 
 Each layer's shape comes from a seeded value noise field (a small Perlin-style implementation in `generator.js`), rotated and stretched to create a directional flow instead of isolated static. That field biases each cell's fill probability rather than gating cells on or off directly, which produces smooth density gradients across the canvas. Symmetry modes apply as a final mirror or rotation pass over the generated grid.
+
+## Future plans
+
+One idea I'm exploring: instead of generating both layers from noise, sample them from an uploaded image, so the two-layer grid reassembles it as a low-res, lofi featured image. Same two-layer engine, a different source for what fills each cell.
