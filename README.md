@@ -36,9 +36,12 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 - Palette range controls (hue, saturation, lightness) with five presets, plus fully custom ranges
 - Density range controls, so a randomize pass can't drift all the way to a solid fill or an empty layer
 - Per-field locks, covering every layer setting plus background color and block size, so a randomize pass can hold specific settings steady while re-rolling the rest
+- Undo steps back through recent randomize passes, including ones from autoplay or a GIF export
+- A shareable link that encodes the exact composition, colors, both layers, everything, into a URL
 - Three save-state slots stored in the browser for revisiting a composition later
 - Auto-randomize playback with an adjustable interval, from every 0.5 seconds up to every 10
 - Export to PNG, SVG, or an animated GIF, with frame count (1 to 13, following a Fibonacci sequence) and speed both configurable
+- Responsive sidebar that collapses into a toggleable drawer on narrow screens
 - Fully offline: every dependency is vendored in the repo, no CDN, no network connection needed
 
 ## Running locally
