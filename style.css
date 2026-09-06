@@ -153,6 +153,11 @@ body {
   background: var(--bg);
   color: var(--text);
   font-size: 12px;
+  transition: border-color 0.15s ease;
+}
+
+.autoplay-row select:hover {
+  border-color: var(--accent);
 }
 
 .tabs {
@@ -179,6 +184,10 @@ body {
 .tab-btn.active {
   opacity: 1;
   border-bottom-color: var(--accent);
+}
+
+.tab-btn:hover:not(.active) {
+  opacity: 0.85;
 }
 
 .field {
@@ -298,6 +307,13 @@ body {
   background: var(--bg);
   color: var(--text);
   font-size: 13px;
+  transition: border-color 0.15s ease;
+}
+
+.field input[type="text"]:hover,
+.field input[type="number"]:hover,
+.field select:hover {
+  border-color: var(--accent);
 }
 
 /* The native select arrow eats into the right padding without being part
@@ -347,6 +363,11 @@ body {
   background: var(--accent);
   border: 2px solid var(--panel);
   box-shadow: 0 0 0 1px var(--border);
+  transition: transform 0.15s ease;
+}
+
+.field input[type="range"]:hover::-webkit-slider-thumb {
+  transform: scale(1.2);
 }
 
 .field input[type="range"]::-moz-range-track {
@@ -369,6 +390,11 @@ body {
   background: var(--accent);
   border: 2px solid var(--panel);
   box-shadow: 0 0 0 1px var(--border);
+  transition: transform 0.15s ease;
+}
+
+.field input[type="range"]:hover::-moz-range-thumb {
+  transform: scale(1.2);
 }
 
 .slider-wrap {
@@ -440,6 +466,11 @@ body {
   opacity: 0.55;
 }
 
+.lock-btn:hover:not(.locked) {
+  opacity: 1;
+  border-color: var(--accent);
+}
+
 .lock-btn i {
   font-size: 14px;
 }
@@ -467,6 +498,11 @@ body {
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--bg);
+  transition: border-color 0.15s ease;
+}
+
+.field input[type="color"]:hover {
+  border-color: var(--accent);
 }
 
 button {
@@ -483,6 +519,17 @@ button {
   align-items: center;
   justify-content: center;
   gap: 6px;
+  transition: filter 0.15s ease, border-color 0.15s ease, background-color 0.15s ease,
+    opacity 0.15s ease, transform 0.08s ease;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+
+button:active:not(:disabled) {
+  filter: brightness(0.92);
+  transform: scale(0.98);
 }
 
 button i {
@@ -494,6 +541,11 @@ button.secondary {
   background: transparent;
   color: var(--text);
   border: 1px solid var(--border);
+}
+
+button.secondary:hover:not(:disabled) {
+  background: var(--bg);
+  border-color: var(--accent);
 }
 
 .canvas-area {
@@ -602,6 +654,11 @@ button.secondary {
 
 .preset-btn i {
   font-size: 14px;
+}
+
+.preset-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .preset-btn:disabled {
