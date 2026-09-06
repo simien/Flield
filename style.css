@@ -114,65 +114,35 @@ body {
   border-right: none;
 }
 
-.split-btn-caret {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  padding-left: 6px;
-  padding-right: 6px;
+.split-btn-select {
+  width: 58px;
+  flex-shrink: 0;
+  margin-top: 0;
+  padding: 8px 22px 8px 10px;
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23999999' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  background-size: 12px;
+  transition: border-color 0.15s ease;
 }
 
-.split-btn-caret i {
-  font-size: 12px;
-  transition: transform 0.15s ease;
-}
-
-.split-btn-caret[aria-expanded="true"] i {
-  transform: rotate(180deg);
-}
-
-#playBtn.playing,
-#playBtn.playing + .split-btn-caret {
-  background: var(--accent);
-  color: white;
+.split-btn-select:hover {
   border-color: var(--accent);
 }
 
-.autoplay-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 8px 0 16px;
-  padding: 10px 12px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 12px;
-}
-
-.autoplay-row[hidden] {
-  display: none;
-}
-
-.autoplay-row select {
-  width: auto;
-  padding: 4px 6px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 12px;
-  transition: border-color 0.15s ease;
-  appearance: none;
-  -webkit-appearance: none;
-  padding-right: 24px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23999999' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 6px center;
-  background-size: 12px;
-}
-
-.autoplay-row select:hover {
+#playBtn.playing,
+#playBtn.playing + .split-btn-select {
+  background-color: var(--accent);
+  color: white;
   border-color: var(--accent);
 }
 
@@ -630,10 +600,6 @@ button.secondary:hover:not(:disabled) {
 
 .controls-footer .button-row {
   margin-bottom: 0;
-}
-
-.controls-footer .autoplay-row {
-  margin: 0 0 12px;
 }
 
 .preset-row {

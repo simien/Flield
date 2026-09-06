@@ -22,20 +22,15 @@
         <button id="unlockAllBtn" class="secondary" title="Unlock all fields"><i class="ph ph-lock-simple-open"></i> Unlock</button>
         <div class="split-btn">
           <button id="playBtn" class="secondary split-btn-main" title="Auto-randomize"><i class="ph ph-play"></i></button>
-          <button id="speedToggleBtn" class="secondary split-btn-caret" title="Auto-randomize speed" aria-expanded="false"><i class="ph ph-caret-down"></i></button>
+          <select id="autoSpeed" class="split-btn-select" title="Auto-randomize speed">
+            <option value="500">0.5s</option>
+            <option value="1000">1s</option>
+            <option value="2000">2s</option>
+            <option value="3000" selected>3s</option>
+            <option value="5000">5s</option>
+            <option value="10000">10s</option>
+          </select>
         </div>
-      </div>
-
-      <div class="autoplay-row" id="autoplayRow" hidden>
-        <label for="autoSpeed">Auto-randomize every</label>
-        <select id="autoSpeed">
-          <option value="500">0.5s</option>
-          <option value="1000">1s</option>
-          <option value="2000">2s</option>
-          <option value="3000" selected>3s</option>
-          <option value="5000">5s</option>
-          <option value="10000">10s</option>
-        </select>
       </div>
 
       <div class="tabs">
@@ -256,23 +251,19 @@
     </div>
 
     <div class="controls-footer">
-      <div class="autoplay-row" id="gifStepsRow" hidden>
-        <label for="gifSteps" title="Uses the auto-randomize speed above as the per-frame delay">GIF steps</label>
-        <select id="gifSteps">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="5" selected>5</option>
-          <option value="8">8</option>
-          <option value="13">13</option>
-        </select>
-      </div>
       <div class="button-row">
         <button id="downloadPng" class="secondary"><i class="ph ph-download-simple"></i> PNG</button>
         <button id="downloadSvg" class="secondary"><i class="ph ph-download-simple"></i> SVG</button>
         <div class="split-btn">
           <button id="downloadGif" class="secondary split-btn-main" title="Download animated GIF (uses the auto-randomize speed above as the per-frame delay)"><i class="ph ph-download-simple"></i> GIF</button>
-          <button id="gifStepsToggleBtn" class="secondary split-btn-caret" title="GIF step count" aria-expanded="false"><i class="ph ph-caret-up"></i></button>
+          <select id="gifSteps" class="split-btn-select" title="GIF step count (uses the auto-randomize speed above as the per-frame delay)">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="8">8</option>
+            <option value="13">13</option>
+          </select>
         </div>
       </div>
     </div>
@@ -698,14 +689,6 @@
       }
     });
 
-    const speedToggleBtn = document.getElementById("speedToggleBtn");
-    const autoplayRow = document.getElementById("autoplayRow");
-    speedToggleBtn.addEventListener("click", () => {
-      const isOpen = speedToggleBtn.getAttribute("aria-expanded") === "true";
-      speedToggleBtn.setAttribute("aria-expanded", String(!isOpen));
-      autoplayRow.hidden = isOpen;
-    });
-
     document.getElementById("downloadPng").addEventListener("click", () => {
       const link = document.createElement("a");
       link.download = `${lastOptions.layerA.seed}.png`;
@@ -733,14 +716,6 @@
       link.href = url;
       link.click();
       URL.revokeObjectURL(url);
-    });
-
-    const gifStepsToggleBtn = document.getElementById("gifStepsToggleBtn");
-    const gifStepsRow = document.getElementById("gifStepsRow");
-    gifStepsToggleBtn.addEventListener("click", () => {
-      const isOpen = gifStepsToggleBtn.getAttribute("aria-expanded") === "true";
-      gifStepsToggleBtn.setAttribute("aria-expanded", String(!isOpen));
-      gifStepsRow.hidden = isOpen;
     });
 
     // Builds an animated GIF by calling performRandomize() once per step
