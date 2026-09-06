@@ -31,14 +31,14 @@ body {
   background: var(--bg);
   color: var(--text);
   display: flex;
-  flex-direction: column;
   height: 100vh;
   overflow: hidden;
 }
 
-.app-body {
+.main-area {
   flex: 1;
   display: flex;
+  flex-direction: column;
   min-height: 0;
 }
 
