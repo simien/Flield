@@ -232,6 +232,7 @@ body {
 }
 
 .split-btn-select:hover {
+  background-color: var(--bg);
   border-color: var(--accent);
 }
 
