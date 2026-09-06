@@ -792,6 +792,56 @@
     }
     initSliderTooltips();
 
+    // Renders a fresh, randomized favicon on every page load using the
+    // same generate()/renderToCanvas() pipeline as the main artwork, just
+    // at a tiny size with random layer parameters. The static favicon.svg
+    // in <head> is what shows before this runs, so there's no flash of a
+    // missing icon.
+    function generateRandomFavicon() {
+      const size = 64;
+      const blockSize = 8;
+      const symmetryOptions = ["quad", "kaleidoscope", "diagonal", "rotational", "horizontal", "vertical"];
+      const randomLayer = () => ({
+        seed: Math.random().toString(36).slice(2),
+        color: hslToHex(Math.random() * 360, 70, 55),
+        density: 0.3 + Math.random() * 0.3,
+        fieldStrength: 0,
+        fieldScale: 40,
+        flowAngle: 0,
+        flowStretch: 1,
+        fieldOctaves: 1,
+        symmetry: symmetryOptions[Math.floor(Math.random() * symmetryOptions.length)],
+        smoothPasses: 0,
+      });
+
+      const options = {
+        width: size,
+        height: size,
+        blockSize,
+        bgColor: "#0f172a",
+        layerA: randomLayer(),
+        layerB: randomLayer(),
+      };
+
+      const { gridA, gridB, cols, rows } = generate(options);
+      const faviconCanvas = document.createElement("canvas");
+      renderToCanvas(faviconCanvas, {
+        width: size,
+        height: size,
+        blockSize,
+        bgColor: options.bgColor,
+        colorA: options.layerA.color,
+        colorB: options.layerB.color,
+        gridA,
+        gridB,
+        cols,
+        rows,
+      });
+
+      document.querySelector('link[rel="icon"]').href = faviconCanvas.toDataURL("image/png");
+    }
+    generateRandomFavicon();
+
     render();
   </script>
 </body>
