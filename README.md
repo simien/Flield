@@ -20,7 +20,7 @@ A few exported compositions, showing different symmetry modes, palettes, and den
 | ![Diagonal bands](examples/diagonal-bands.gif) | ![Vertical bands](examples/vertical-bands.gif) | ![Mint kaleidoscope](examples/mint-kaleidoscope.gif) |
 | ![Diamond speckle](examples/diamond-speckle.gif) | ![Teal scatter](examples/teal-scatter.gif) | ![Magenta waves](examples/magenta-waves.gif) |
 
-## Why
+## Purpose
 
 I built this to generate images and placeholder graphics without reaching for stock photos or a design tool every time. Swap in a brand color palette, seed a batch of variations, and export the one that fits. The GIF export works well as a subtle animated background or hover state.
 
