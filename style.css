@@ -450,12 +450,19 @@ body {
   background-size: 15px;
 }
 
+/* The input's own box is the actual click/drag target, so it's sized
+   well past the 4px track drawn inside it (see the track/thumb rules
+   below) rather than matching it. Browsers center a shorter track
+   pseudo-element vertically within this taller box on their own, and
+   the thumb's own centering (its margin-top on WebKit, automatic on
+   Firefox) is relative to that track, not this height, so neither
+   needs to change to match. */
 .field input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 4px;
-  margin: 8px 0;
+  height: 24px;
+  margin: 0;
   background: transparent;
   cursor: pointer;
 }
