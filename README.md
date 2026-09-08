@@ -1,14 +1,16 @@
-# Flowgrain
+# Flield
+
+*A contraction of "flow field," the seeded noise mechanic the tool is built on.*
 
 A browser-based generative pixel art tool for creating unique three-color compositions (a background plus two artwork layers) from seeded flow fields and symmetry.
 
 ## Live demo
 
-[https://simien.github.io/flowgrain/](https://simien.github.io/flowgrain/)
+[https://simien.github.io/Flield/](https://simien.github.io/Flield/)
 
 ## Screenshot
 
-![Flowgrain screenshot](screenshot.png)
+![Flield screenshot](screenshot.png)
 
 ## Examples
 
@@ -46,7 +48,7 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 
 ## Running locally
 
-Flowgrain is plain HTML, CSS, and JavaScript. No build step, no package manager.
+Flield is plain HTML, CSS, and JavaScript. No build step, no package manager.
 
 1. Clone the repository
 2. Serve the folder with any static file server, for example: `python3 -m http.server 8080`
