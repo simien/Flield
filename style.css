@@ -31,8 +31,17 @@
   --border: #ddd;
 }
 
+/* Smooths the theme toggle: an element with its own transition (most
+   interactive controls; see button, .field input/select, .color-swatch)
+   overrides this outright rather than adding to it, since transition is
+   a single cascaded property, not a per-item merge, so those keep their
+   own faster hover/active feel. This is the fallback for everything
+   else, buttons, tabs and inputs would already snap on hover if only
+   this was here so the color-related ones are duplicated there. */
 * {
   box-sizing: border-box;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 html, body {
@@ -306,6 +315,15 @@ body {
   padding-top: 14px;
 }
 
+/* The border/margin above exist to separate a section from whatever
+   came before it; a title that opens its panel (Layer A/B's "Fill")
+   has nothing above it to separate from. */
+.section-title:first-child {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+}
+
 .palette-section {
   margin: 2px 0 14px;
 }
@@ -409,7 +427,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-size: 13px;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .field input[type="text"]:hover,
@@ -614,7 +632,7 @@ body {
   border-radius: 6px;
   background: var(--bg);
   color: var(--text);
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .color-swatch:hover {
@@ -837,7 +855,7 @@ button {
   justify-content: center;
   gap: 6px;
   transition: filter 0.15s ease, border-color 0.15s ease, background-color 0.15s ease,
-    opacity 0.15s ease, transform 0.08s ease;
+    color 0.15s ease, opacity 0.15s ease, transform 0.08s ease;
 }
 
 button:hover:not(:disabled) {
