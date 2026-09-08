@@ -54,11 +54,11 @@
     <div class="tab-panel" id="tab-general">
       <div class="color-row">
         <div class="field">
-          <label>Width (px)</label>
+          <label for="width">Width (px)</label>
           <input type="number" id="width" value="1200" min="16" step="16" />
         </div>
         <div class="field">
-          <label>Height (px)</label>
+          <label for="height">Height (px)</label>
           <input type="number" id="height" value="630" min="16" step="16" />
         </div>
       </div>
@@ -70,7 +70,7 @@
       </div>
 
       <div class="field">
-        <label>Background color</label>
+        <label for="bgColor">Background color</label>
         <div class="field-row">
           <input type="color" id="bgColor" value="#0f172a" />
           <button type="button" class="lock-btn" data-for="bgColor" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
@@ -78,7 +78,7 @@
       </div>
 
       <div class="field">
-        <label>Block size (grid resolution) <span id="blockSizeVal">4px</span></label>
+        <label for="blockSize">Block size (grid resolution) <span id="blockSizeVal">4px</span></label>
         <div class="field-row">
           <input type="range" id="blockSize" min="2" max="80" value="4" />
           <button type="button" class="lock-btn" data-for="blockSize" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
@@ -86,7 +86,7 @@
       </div>
 
       <div class="field">
-        <label>Shape mask</label>
+        <label for="shapeMask">Shape mask</label>
         <div class="field-row">
           <select id="shapeMask">
             <option value="none">None (full canvas)</option>
@@ -295,7 +295,7 @@
 
   <div class="main-area">
     <div class="canvas-area">
-      <canvas id="preview"></canvas>
+      <canvas id="preview" role="img">Your browser doesn't support canvas rendering, so the generated artwork can't display here.</canvas>
     </div>
 
     <footer class="site-footer">
@@ -366,6 +366,15 @@
         el.classList.forEach((cls) => {
           if (cls.startsWith("l-")) el.id = prefix + "-" + cls.slice(2);
         });
+      });
+      // Each .field wraps exactly one label and one labelable control;
+      // pair them now that the control has its final id, so the label
+      // text is announced to screen readers and clicking it focuses
+      // the control (neither worked with a bare, unassociated <label>).
+      frag.querySelectorAll(".field").forEach((field) => {
+        const label = field.querySelector("label");
+        const control = field.querySelector("input, select");
+        if (label && control && control.id) label.setAttribute("for", control.id);
       });
       frag.querySelectorAll(".lock-btn").forEach((btn) => {
         btn.dataset.targetId = prefix + "-" + btn.dataset.for;
@@ -545,6 +554,12 @@
       updateLayerLabels("layerA", options.layerA);
       updateLayerLabels("layerB", options.layerB);
       updateRangeFills();
+      canvas.setAttribute(
+        "aria-label",
+        `Generated pixel art composition, ${options.width} by ${options.height}. ` +
+          `Background ${options.bgColor}, layer A ${options.layerA.color} (seed ${options.layerA.seed}), ` +
+          `layer B ${options.layerB.color} (seed ${options.layerB.seed}).`
+      );
 
       const { gridA, gridB, cols, rows } = generate(options);
       renderToCanvas(canvas, {
