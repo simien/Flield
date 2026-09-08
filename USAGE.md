@@ -25,6 +25,10 @@
 
 The sidebar becomes a drawer instead of a permanent column. A toggle button in the top corner opens and closes it; tapping outside the drawer or pressing Escape closes it too.
 
+### Sliders
+
+The click and drag target reaches well past the thin line you see, so grabbing a slider doesn't take a precise hit.
+
 ### Locks
 
 Every randomizable field, background color, block size, and shape mask included, has a small lock icon next to it.
