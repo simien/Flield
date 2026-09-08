@@ -9,13 +9,29 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=2" />
+  <link rel="stylesheet" href="style.css?v=3" />
   <link rel="stylesheet" href="phosphor/style.css" />
   <script src="gif.js"></script>
+  <script src="floating-ui/core.min.js"></script>
+  <script src="floating-ui/dom.min.js"></script>
 </head>
 <body>
   <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show sidebar"><i class="ph ph-list"></i></button>
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="color-popover" id="colorPopover" role="dialog" aria-label="Color picker" hidden>
+    <div class="color-sl-square">
+      <canvas id="colorSLCanvas" width="196" height="140"></canvas>
+      <div class="color-sl-thumb"></div>
+    </div>
+    <div class="color-hue-strip" id="colorHueStrip">
+      <div class="color-hue-thumb"></div>
+    </div>
+    <div class="color-hex-row">
+      <span class="color-hex-prefix">#</span>
+      <input type="text" class="color-hex-input" id="colorHexInput" maxlength="6" spellcheck="false" autocomplete="off" aria-label="Hex color value" />
+    </div>
+  </div>
 
   <div class="controls">
     <div class="controls-header">
@@ -70,9 +86,15 @@
       </div>
 
       <div class="field">
-        <label for="bgColor">Background color</label>
+        <label for="bgColorSwatch">Background color</label>
         <div class="field-row">
-          <input type="color" id="bgColor" value="#0f172a" />
+          <div class="color-picker">
+            <button type="button" id="bgColorSwatch" class="color-swatch" aria-haspopup="true" aria-expanded="false">
+              <span class="color-swatch-fill"></span>
+              <span class="color-swatch-hex"></span>
+            </button>
+            <input type="color" id="bgColor" value="#0f172a" class="color-input-native" tabindex="-1" aria-hidden="true" />
+          </div>
           <button type="button" class="lock-btn" data-for="bgColor" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
         </div>
       </div>
@@ -130,7 +152,13 @@
       <div class="field">
         <label>Color</label>
         <div class="field-row">
-          <input type="color" class="l-color" />
+          <div class="color-picker">
+            <button type="button" class="color-swatch l-colorSwatch" aria-haspopup="true" aria-expanded="false">
+              <span class="color-swatch-fill"></span>
+              <span class="color-swatch-hex"></span>
+            </button>
+            <input type="color" class="l-color color-input-native" tabindex="-1" aria-hidden="true" />
+          </div>
           <button type="button" class="lock-btn" data-for="color" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
         </div>
       </div>
@@ -373,7 +401,7 @@
       // the control (neither worked with a bare, unassociated <label>).
       frag.querySelectorAll(".field").forEach((field) => {
         const label = field.querySelector("label");
-        const control = field.querySelector("input, select");
+        const control = field.querySelector(".color-swatch") || field.querySelector("input, select");
         if (label && control && control.id) label.setAttribute("for", control.id);
       });
       frag.querySelectorAll(".lock-btn").forEach((btn) => {
@@ -395,6 +423,180 @@
     }
     buildLayerControls(document.getElementById("tab-layerA"), "layerA");
     buildLayerControls(document.getElementById("tab-layerB"), "layerB");
+
+    // Custom color picker: a 2D saturation/lightness square plus a hue
+    // strip and hex input, in a Floating UI-positioned popover shared by
+    // every swatch. Each swatch's hidden .color-input-native stays the
+    // real value store (readOptions, randomize, saved states and shared
+    // links all read/write it directly, same as before this UI existed);
+    // the picker only ever sets its .value and dispatches "input" so the
+    // existing delegated listener on .controls picks it up.
+    const colorPopover = document.getElementById("colorPopover");
+    const colorSLCanvas = document.getElementById("colorSLCanvas");
+    const colorSLCtx = colorSLCanvas.getContext("2d");
+    const colorSLThumb = colorPopover.querySelector(".color-sl-thumb");
+    const colorHueStrip = document.getElementById("colorHueStrip");
+    const colorHueThumb = colorPopover.querySelector(".color-hue-thumb");
+    const colorHexInput = document.getElementById("colorHexInput");
+
+    let colorActiveInput = null;
+    let colorActiveSwatch = null;
+    let colorAutoUpdateCleanup = null;
+    let colorCurrent = { h: 0, s: 0, l: 0 };
+
+    function drawColorSquare() {
+      const { width, height } = colorSLCanvas;
+      const img = colorSLCtx.createImageData(width, height);
+      for (let y = 0; y < height; y++) {
+        const l = 100 - (y / (height - 1)) * 100;
+        for (let x = 0; x < width; x++) {
+          const s = (x / (width - 1)) * 100;
+          const [r, g, b] = hslToRgb(colorCurrent.h, s, l);
+          const i = (y * width + x) * 4;
+          img.data[i] = r;
+          img.data[i + 1] = g;
+          img.data[i + 2] = b;
+          img.data[i + 3] = 255;
+        }
+      }
+      colorSLCtx.putImageData(img, 0, 0);
+    }
+
+    function positionColorThumbs() {
+      colorSLThumb.style.left = colorCurrent.s + "%";
+      colorSLThumb.style.top = 100 - colorCurrent.l + "%";
+      colorHueThumb.style.left = (colorCurrent.h / 360) * 100 + "%";
+    }
+
+    function commitColor() {
+      if (!colorActiveInput) return;
+      const hex = hslToHex(colorCurrent.h, colorCurrent.s, colorCurrent.l);
+      colorHexInput.value = hex.slice(1).toUpperCase();
+      colorActiveInput.value = hex;
+      colorActiveInput.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
+    function openColorPicker(swatch) {
+      const input = swatch.closest(".color-picker").querySelector(".color-input-native");
+      colorActiveInput = input;
+      colorActiveSwatch = swatch;
+      colorCurrent = hexToHsl(input.value);
+      drawColorSquare();
+      positionColorThumbs();
+      colorHexInput.value = input.value.slice(1).toUpperCase();
+      colorPopover.hidden = false;
+      swatch.setAttribute("aria-expanded", "true");
+
+      function reposition() {
+        FloatingUIDOM.computePosition(swatch, colorPopover, {
+          placement: "bottom-start",
+          middleware: [FloatingUIDOM.offset(8), FloatingUIDOM.flip(), FloatingUIDOM.shift({ padding: 8 })],
+        }).then(({ x, y }) => {
+          colorPopover.style.left = x + "px";
+          colorPopover.style.top = y + "px";
+        });
+      }
+      colorAutoUpdateCleanup = FloatingUIDOM.autoUpdate(swatch, colorPopover, reposition);
+    }
+
+    function closeColorPicker() {
+      if (colorPopover.hidden) return;
+      colorPopover.hidden = true;
+      if (colorActiveSwatch) colorActiveSwatch.setAttribute("aria-expanded", "false");
+      if (colorAutoUpdateCleanup) {
+        colorAutoUpdateCleanup();
+        colorAutoUpdateCleanup = null;
+      }
+      colorActiveInput = null;
+      colorActiveSwatch = null;
+    }
+
+    document.querySelectorAll(".color-swatch").forEach((swatch) => {
+      swatch.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (colorActiveSwatch === swatch) {
+          closeColorPicker();
+        } else {
+          openColorPicker(swatch);
+        }
+      });
+    });
+
+    function clampedPoint(el, evt) {
+      const rect = el.getBoundingClientRect();
+      return {
+        x: Math.min(Math.max(evt.clientX - rect.left, 0), rect.width),
+        y: Math.min(Math.max(evt.clientY - rect.top, 0), rect.height),
+        rect,
+      };
+    }
+
+    let colorDragTarget = null;
+
+    colorSLCanvas.addEventListener("pointerdown", (e) => {
+      colorDragTarget = "square";
+      colorSLCanvas.setPointerCapture(e.pointerId);
+      dragColorSquare(e);
+    });
+    colorSLCanvas.addEventListener("pointermove", (e) => {
+      if (colorDragTarget === "square") dragColorSquare(e);
+    });
+    colorSLCanvas.addEventListener("pointerup", () => {
+      colorDragTarget = null;
+    });
+
+    colorHueStrip.addEventListener("pointerdown", (e) => {
+      colorDragTarget = "hue";
+      colorHueStrip.setPointerCapture(e.pointerId);
+      dragColorHue(e);
+    });
+    colorHueStrip.addEventListener("pointermove", (e) => {
+      if (colorDragTarget === "hue") dragColorHue(e);
+    });
+    colorHueStrip.addEventListener("pointerup", () => {
+      colorDragTarget = null;
+    });
+
+    function dragColorSquare(e) {
+      const { x, y, rect } = clampedPoint(colorSLCanvas, e);
+      colorCurrent.s = (x / rect.width) * 100;
+      colorCurrent.l = 100 - (y / rect.height) * 100;
+      positionColorThumbs();
+      commitColor();
+    }
+
+    function dragColorHue(e) {
+      const { x, rect } = clampedPoint(colorHueStrip, e);
+      colorCurrent.h = (x / rect.width) * 360;
+      drawColorSquare();
+      positionColorThumbs();
+      commitColor();
+    }
+
+    colorHexInput.addEventListener("input", () => {
+      const v = colorHexInput.value.trim();
+      if (/^[0-9a-fA-F]{6}$/.test(v)) {
+        colorCurrent = hexToHsl("#" + v);
+        drawColorSquare();
+        positionColorThumbs();
+        if (colorActiveInput) {
+          colorActiveInput.value = "#" + v;
+          colorActiveInput.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      }
+    });
+    colorHexInput.addEventListener("blur", () => {
+      if (colorActiveInput) colorHexInput.value = colorActiveInput.value.slice(1).toUpperCase();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!colorPopover.hidden && !colorPopover.contains(e.target) && !e.target.closest(".color-swatch")) {
+        closeColorPicker();
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeColorPicker();
+    });
 
     // Background color, block size, and shape mask aren't per-layer fields,
     // so their lock buttons (in the General tab's own markup, not the layer
@@ -549,12 +751,26 @@
       });
     }
 
+    // Keeps each color swatch button in sync with its hidden native
+    // <input type="color">, the actual value store. Called from render()
+    // so it stays correct after every value change, not just picker
+    // interactions (randomize, presets, saved states, and shared links
+    // all just set .value directly, the same as updateRangeFills above).
+    function updateColorSwatches() {
+      document.querySelectorAll(".color-input-native").forEach((input) => {
+        const swatch = input.closest(".color-picker").querySelector(".color-swatch");
+        swatch.querySelector(".color-swatch-fill").style.background = input.value;
+        swatch.querySelector(".color-swatch-hex").textContent = input.value.slice(1).toUpperCase();
+      });
+    }
+
     function render() {
       const options = readOptions();
       document.getElementById("blockSizeVal").textContent = options.blockSize + "px";
       updateLayerLabels("layerA", options.layerA);
       updateLayerLabels("layerB", options.layerB);
       updateRangeFills();
+      updateColorSwatches();
       canvas.setAttribute(
         "aria-label",
         `Generated pixel art composition, ${options.width} by ${options.height}. ` +
@@ -581,14 +797,39 @@
 
     document.querySelector(".controls").addEventListener("input", render);
 
-    function hslToHex(h, s, l) {
+    function hslToRgb(h, s, l) {
       s /= 100;
       l /= 100;
       const k = (n) => (n + h / 30) % 12;
       const a = s * Math.min(l, 1 - l);
       const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-      const toHex = (n) => Math.round(255 * f(n)).toString(16).padStart(2, "0");
-      return `#${toHex(0)}${toHex(8)}${toHex(4)}`;
+      return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4))];
+    }
+
+    function hslToHex(h, s, l) {
+      const [r, g, b] = hslToRgb(h, s, l);
+      const toHex = (n) => n.toString(16).padStart(2, "0");
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
+
+    function hexToHsl(hex) {
+      const r = parseInt(hex.slice(1, 3), 16) / 255;
+      const g = parseInt(hex.slice(3, 5), 16) / 255;
+      const b = parseInt(hex.slice(5, 7), 16) / 255;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const l = (max + min) / 2;
+      let h = 0;
+      let s = 0;
+      if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+        else if (max === g) h = (b - r) / d + 2;
+        else h = (r - g) / d + 4;
+        h *= 60;
+      }
+      return { h, s: s * 100, l: l * 100 };
     }
 
     // Curated hue/saturation/lightness windows a layer's randomized color
