@@ -633,6 +633,7 @@ body {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
+  overflow: hidden;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
@@ -727,14 +728,21 @@ body {
   color: #fff;
 }
 
+/* Bleeds past the popover's own 12px padding to sit flush against its
+   edges, like a sunken well let into the popover rather than a box
+   floating inside it. The matching 12px side padding put back on top
+   of that negative margin cancels it out for the row's own content,
+   so the value text still lines up under the square and hue strip
+   above instead of drifting outward with the bleed. The popover's own
+   overflow:hidden clips the well's square corners into its rounded
+   ones, so this doesn't need to match that radius itself. */
 .color-value-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 8px;
-  padding: 6px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  margin: 8px -12px -12px;
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--border);
   background: var(--bg);
 }
 
