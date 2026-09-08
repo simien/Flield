@@ -43,7 +43,7 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 - Auto-randomize playback with an adjustable interval, from every 0.5 seconds up to every 10
 - Export to PNG, SVG, or an animated GIF, with frame count (1, 2, 3, 5, 8, or 13) and speed both configurable
 - Responsive sidebar that collapses into a toggleable drawer on narrow screens
-- Dark theme by default, with a toggle for light, remembered on your next visit
+- Dark theme by default, with a toggle for light, remembered across visits
 - Fully offline: every dependency is vendored in the repo, no CDN, no network connection needed
 - A generated favicon: the browser tab icon regenerates on every load, in the same three colors as the composition on screen
 
