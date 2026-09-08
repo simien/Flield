@@ -1011,10 +1011,20 @@
       render();
     }
 
+    // Web and Tablet are real, recognizable resolutions (1080p; iPad
+    // portrait) that also happen to divide evenly by most of the block
+    // size range. Mobile's old 375x812 (iPhone X) was both a narrower,
+    // dated reference and the one preset that couldn't tile evenly at
+    // any block size: 375 is odd, so no even block size divides it, and
+    // 812 only shares factors with a handful of block sizes (2, 4, 7,
+    // 14, 28). 400x800 keeps the same tall portrait proportions while
+    // landing on a rounder, more current phone width and dividing
+    // cleanly by every common block size (2, 4, 5, 8, 10, 16, 20, 25,
+    // 40, 50, 80).
     const DIMENSION_PRESETS = {
       web: { width: 1920, height: 1080 },
       tablet: { width: 768, height: 1024 },
-      mobile: { width: 375, height: 812 },
+      mobile: { width: 400, height: 800 },
     };
 
     document.querySelectorAll(".dimension-preset-btn").forEach((btn) => {
