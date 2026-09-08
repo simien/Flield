@@ -10,7 +10,7 @@
 - Every composition is **three colors**: a background, plus two independently generated artwork layers.
 - Each layer runs on its own **seed**, so the same seed and settings always regenerate the same result.
 - The canvas sits on the right; every control that shapes it lives in the sidebar on the left.
-- Every page load opens on a **freshly randomized** composition instead of a fixed default, background color, block size, and shape mask aside (more on why in [Locks](#locks)).
+- Every page load opens on a **freshly randomized** composition instead of a fixed default, background color, block size, shape mask, and each layer's base density aside (more on why in [Locks](#locks)).
 
 ## Navigating the sidebar
 
@@ -31,7 +31,7 @@ Every randomizable field, background color, block size, and shape mask included,
 
 - A **locked** field holds its current value through a randomize pass instead of getting a new one.
 - **Lock** and **Unlock** at the top of the sidebar apply to every field at once.
-- Background color, block size, and shape mask **start locked**. That's why a fresh page load keeps its starting background, grid resolution, and shape steady while everything else randomizes around them. Unlock any of the three to fold it into future randomize and Auto-randomize passes.
+- Background color, block size, shape mask, and each layer's base density **start locked**. That's why a fresh page load keeps its starting background, grid resolution, shape, and fill steady while everything else randomizes around them. Unlock any of them to fold it into future randomize and Auto-randomize passes.
 
 ### Saving and sharing a composition
 
@@ -47,7 +47,7 @@ Both capture the exact same thing: colors, both layers, everything. Use Saved St
 ## Exploring an art direction with Auto-randomize
 
 1. Click **Random** to reroll every unlocked field at once. Good for a first look, but left alone this just cycles through unrelated compositions.
-2. **Lock down what you want to keep**, and let the rest stay unlocked. For example: lock a layer's seed and symmetry, leave density and flow field unlocked.
+2. **Lock down what you want to keep**, and let the rest stay unlocked. For example: lock a layer's seed and symmetry, leave color and flow field unlocked.
 3. Click the **Auto-randomize** button (▶, next to Random) to repeat that reroll on a timer, from every 0.5 seconds up to every 10.
 
 What comes through is a run of variations that share the same underlying structure, small differences in fill and texture on a shape that stays recognizable. It reads less like random noise and more like a designer trying variations on one idea.
