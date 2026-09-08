@@ -7,7 +7,7 @@
      the sidebar's own header/footer chrome). --well-deep: darker than
      --bg, for the color picker's value row, which wants a stronger,
      more visually distinct sunken well. */
-  --well: #fafafa;
+  --well: #f8f8f8;
   --well-deep: #ececec;
   --text: #1a1a1a;
   --border: #ddd;
@@ -19,7 +19,7 @@
   :root {
     --bg: #16161a;
     --panel: #1f1f24;
-    --well: #1b1b1f;
+    --well: #18181c;
     --well-deep: #101013;
     --text: #eaeaea;
     --border: #333;
