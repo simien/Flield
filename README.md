@@ -1,8 +1,6 @@
 # Flield
 
-*A contraction of "flow field," the seeded noise mechanic the tool is built on.*
-
-A browser-based generative pixel art tool for creating unique three-color compositions (a background plus two artwork layers) from seeded flow fields and symmetry.
+A browser-based generative pixel art tool for creating unique three-color compositions (a background plus two artwork layers) from seeded flow fields and symmetry. The name is a contraction of "flow field," the noise mechanic the tool is built on.
 
 ## Live demo
 
