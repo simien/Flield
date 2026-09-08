@@ -408,8 +408,13 @@ function layerOptionsToField(layer) {
 // covers 100% of the canvas, leaves the background visible in the gaps
 // both layers leave behind.
 function generate(options) {
-  const cols = Math.ceil(options.width / options.blockSize);
-  const rows = Math.ceil(options.height / options.blockSize);
+  // Floor rather than ceil, so cols/rows * blockSize never exceeds the
+  // canvas: a block that only partly fit would otherwise get clipped
+  // by the canvas edge instead of just leaving a sliver of background
+  // showing past the last whole block. Math.max(1, ...) keeps a small
+  // canvas with a large block size from flooring to zero blocks.
+  const cols = Math.max(1, Math.floor(options.width / options.blockSize));
+  const rows = Math.max(1, Math.floor(options.height / options.blockSize));
 
   const gridA = buildGrid({
     seed: options.layerA.seed,
