@@ -750,20 +750,10 @@
       setLock(btn, true);
     });
 
-    // Each layer's own density lock (built by buildLayerControls above,
-    // so its dataset.targetId is already set) starts locked too, for the
-    // same reason as the General tab fields: without it, the very first
-    // randomize pass below would immediately overwrite the density
-    // default with anything in its 0-0.75 range.
-    document.querySelectorAll('.lock-btn[data-for="density"]').forEach((btn) => setLock(btn, true));
-
-    // Both layers start at a middling density. This is the seed value
-    // applyDefaults() writes in before the first randomize pass runs;
-    // density itself gets locked by default too (see below, alongside
-    // bgColor/blockSize/shapeMask), or the pass would immediately
-    // overwrite it with a value anywhere in the 0-0.75 range and a
-    // first-time visitor could just as easily land on a near-solid
-    // fill or a near-empty layer instead.
+    // Base density stays unlocked like every other randomizable layer
+    // field; keeping the first randomize pass off a near-solid fill is
+    // Density Range's job (its default max is well under 1.0, see
+    // densityMax below), not a lock on density itself.
     const defaults = {
       layerA: {
         seed: "hello-world",
@@ -776,7 +766,7 @@
         lightMax: 65,
         density: 0.5,
         densityMin: 0,
-        densityMax: 0.75,
+        densityMax: 0.5,
         fieldStrength: 0.6,
         fieldScale: 40,
         flowAngle: 45,
@@ -796,7 +786,7 @@
         lightMax: 65,
         density: 0.5,
         densityMin: 0,
-        densityMax: 0.75,
+        densityMax: 0.5,
         fieldStrength: 0.6,
         fieldScale: 25,
         flowAngle: 200,
