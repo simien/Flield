@@ -10,7 +10,7 @@
 - Every composition is **three colors**: a background, plus two independently generated artwork layers.
 - Each layer runs on its own **seed**, so the same seed and settings always regenerate the same result.
 - The canvas sits on the right; every control that shapes it lives in the sidebar on the left.
-- Every page load opens on a **freshly randomized** composition instead of a fixed default, background color and block size aside (more on why in [Locks](#locks)).
+- Every page load opens on a **freshly randomized** composition instead of a fixed default, background color, block size, and shape mask aside (more on why in [Locks](#locks)).
 
 ## Navigating the sidebar
 
@@ -18,8 +18,8 @@
 
 | Tab | What it holds |
 |---|---|
-| **General** | Canvas width and height (with Web, Tablet, and Mobile presets), background color, and grid resolution (block size) |
-| **Layer A** / **Layer B** | That layer's seed, color, palette range, density range, flow field, and symmetry mode |
+| **General** | Canvas width and height (with Web, Tablet, and Mobile presets), background color, grid resolution (block size), and shape mask |
+| **Layer A** / **Layer B** | That layer's seed, color, palette range, density range, flow field, symmetry mode, and smoothing |
 
 ### On a narrow screen
 
@@ -27,11 +27,11 @@ The sidebar becomes a drawer instead of a permanent column. A toggle button in t
 
 ### Locks
 
-Every randomizable field, background color and block size included, has a small lock icon next to it.
+Every randomizable field, background color, block size, and shape mask included, has a small lock icon next to it.
 
 - A **locked** field holds its current value through a randomize pass instead of getting a new one.
 - **Lock** and **Unlock** at the top of the sidebar apply to every field at once.
-- Background color and block size **start locked**. That's why a fresh page load keeps its starting background and grid resolution steady while everything else randomizes around them. Unlock either one to fold it into future randomize and Auto-randomize passes.
+- Background color, block size, and shape mask **start locked**. That's why a fresh page load keeps its starting background, grid resolution, and shape steady while everything else randomizes around them. Unlock any of the three to fold it into future randomize and Auto-randomize passes.
 
 ### Saving and sharing a composition
 

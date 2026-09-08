@@ -396,12 +396,13 @@
     buildLayerControls(document.getElementById("tab-layerA"), "layerA");
     buildLayerControls(document.getElementById("tab-layerB"), "layerB");
 
-    // Background color and block size aren't per-layer fields, so their lock
-    // buttons (in the General tab's own markup, not the layer template)
-    // target their own id directly instead of a "<prefix>-<field>" one.
-    // Both start locked, so the initial composition keeps its intended
-    // starting values instead of an immediate randomize pass overwriting
-    // them; unlock either one to fold it into future randomize passes.
+    // Background color, block size, and shape mask aren't per-layer fields,
+    // so their lock buttons (in the General tab's own markup, not the layer
+    // template) target their own id directly instead of a "<prefix>-<field>"
+    // one. All three start locked, so the initial composition keeps its
+    // intended starting values instead of an immediate randomize pass
+    // overwriting them; unlock any of them to fold it into future randomize
+    // passes.
     document.querySelectorAll("#tab-general .lock-btn").forEach((btn) => {
       btn.dataset.targetId = btn.dataset.for;
       btn.addEventListener("click", () => setLock(btn, !lockedFields.has(btn.dataset.targetId)));
@@ -1008,8 +1009,8 @@
       if (e.key === "Escape") setSidebarOpen(false);
     });
 
-    // Shareable links: the full state (background, block size, both
-    // layers) round-trips through readOptions()/applyGeneral()/
+    // Shareable links: the full state (background, block size, shape mask,
+    // both layers) round-trips through readOptions()/applyGeneral()/
     // applyDefaults(), the same functions save-state slots already use,
     // just encoded into a URL instead of localStorage.
     function loadStateFromURL() {
