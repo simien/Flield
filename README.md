@@ -8,7 +8,10 @@ A browser-based generative pixel art tool for creating unique three-color compos
 
 ## Screenshot
 
-![Flield screenshot](screenshot.png)
+<!-- ?v= busts GitHub's and browsers' image cache for this file; bump it
+     whenever screenshot.png is replaced, or a cached copy can outlive
+     the actual file update for a while. -->
+![Flield screenshot](screenshot.png?v=2)
 
 ## Examples
 
