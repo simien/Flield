@@ -612,11 +612,15 @@ body {
 
 .color-swatch-hex {
   flex: 1;
+  min-width: 0;
   text-align: center;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   text-transform: uppercase;
   opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .color-popover {
