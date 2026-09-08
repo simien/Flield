@@ -2,7 +2,13 @@
   color-scheme: light dark;
   --bg: #f5f5f5;
   --panel: #ffffff;
-  --well: #ececec;
+  /* --well: sits between --bg and --panel, for the sidebar's tab
+     content area (lighter than the canvas surround, still darker than
+     the sidebar's own header/footer chrome). --well-deep: darker than
+     --bg, for the color picker's value row, which wants a stronger,
+     more visually distinct sunken well. */
+  --well: #fafafa;
+  --well-deep: #ececec;
   --text: #1a1a1a;
   --border: #ddd;
   --accent: #6b6b6b;
@@ -13,7 +19,8 @@
   :root {
     --bg: #16161a;
     --panel: #1f1f24;
-    --well: #101013;
+    --well: #1b1b1f;
+    --well-deep: #101013;
     --text: #eaeaea;
     --border: #333;
   }
@@ -750,7 +757,7 @@ body {
   margin: 8px -12px -12px;
   padding: 10px 12px 12px;
   border-top: 1px solid var(--border);
-  background: var(--well);
+  background: var(--well-deep);
 }
 
 .color-value-row[hidden] {
