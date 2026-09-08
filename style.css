@@ -693,15 +693,49 @@ body {
   pointer-events: none;
 }
 
-.color-hex-row {
+.color-format-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.color-format-btn {
+  flex: 1;
+  width: auto;
+  margin-top: 0;
+  padding: 4px;
+  font-size: 11px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  opacity: 0.7;
+}
+
+.color-format-btn:hover:not(.active) {
+  opacity: 1;
+  border-color: var(--accent);
+}
+
+.color-format-btn.active {
+  opacity: 1;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.color-value-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 10px;
+  margin-top: 8px;
   padding: 6px 8px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--bg);
+}
+
+.color-value-row[hidden] {
+  display: none;
 }
 
 .color-hex-prefix {
@@ -719,6 +753,42 @@ body {
   font-variant-numeric: tabular-nums;
   text-transform: uppercase;
   outline: none;
+}
+
+.color-channel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.color-channel input {
+  width: 32px;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  outline: none;
+}
+
+/* Chrome/Safari add spinner arrows to number inputs by default; they don't
+   fit this compact a field and duplicate the drag/hex ways of changing
+   the value, so they're switched off here (Firefox via -moz-appearance
+   on the input itself, below). */
+.color-channel input::-webkit-outer-spin-button,
+.color-channel input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.color-channel input[type="number"] {
+  -moz-appearance: textfield;
 }
 
 button {
