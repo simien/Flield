@@ -3,6 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Dark is the default theme regardless of the system's own setting;
+       this only ever adds data-theme="light" for a visitor who's
+       explicitly toggled it before, and runs before the stylesheet
+       paints so that choice doesn't flash to dark first. -->
+  <script>
+    try {
+      if (localStorage.getItem("flield-theme") === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    } catch (err) {
+      // localStorage can be unavailable (private browsing, blocked); dark stays the default.
+    }
+  </script>
   <title>Flield: pixel art generator</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <!-- ?v= busts the browser cache for this project's own two evolving
@@ -55,6 +68,7 @@
       <div class="title-row">
         <h1><a href="./">Flield</a></h1>
         <div class="title-row-actions">
+          <button id="themeToggleBtn" class="secondary icon-btn" title="Switch to light theme"><i class="ph ph-sun"></i></button>
           <button id="undoBtn" class="secondary icon-btn" title="Undo last randomize" disabled><i class="ph ph-arrow-counter-clockwise"></i></button>
           <button id="randomizeBtn"><i class="ph ph-shuffle"></i> Random</button>
         </div>
@@ -354,6 +368,33 @@
 
   <script src="generator.js?v=3"></script>
   <script>
+    // Dark is the default (set by the blocking script in <head>, which
+    // reads this same key); this button is the only way to reach light.
+    const THEME_KEY = "flield-theme";
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+
+    function applyTheme(isLight) {
+      if (isLight) {
+        document.documentElement.setAttribute("data-theme", "light");
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+      themeToggleBtn.innerHTML = isLight ? '<i class="ph ph-moon"></i>' : '<i class="ph ph-sun"></i>';
+      themeToggleBtn.title = isLight ? "Switch to dark theme" : "Switch to light theme";
+    }
+    applyTheme(document.documentElement.getAttribute("data-theme") === "light");
+
+    themeToggleBtn.addEventListener("click", () => {
+      const isLight = document.documentElement.getAttribute("data-theme") !== "light";
+      applyTheme(isLight);
+      try {
+        localStorage.setItem(THEME_KEY, isLight ? "light" : "dark");
+      } catch (err) {
+        // localStorage can be unavailable (private browsing, blocked); the
+        // toggle still works for this page load, just won't persist.
+      }
+    });
+
     // If the Phosphor font can't load for any reason, fall back to plain
     // Unicode glyphs (see the .icon-fallback rules in style.css) instead
     // of leaving icon-only buttons blank.
