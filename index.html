@@ -1423,6 +1423,10 @@
           document.getElementById("layerB-symmetry").value = preset.symmetry;
           setLock(document.querySelector('#tab-layerA .lock-btn[data-for="symmetry"]'), true);
           setLock(document.querySelector('#tab-layerB .lock-btn[data-for="symmetry"]'), true);
+          // The lock icons alone are easy to miss on a tab that isn't open
+          // (both layer tabs, in this case), same reasoning as the other
+          // toasts below.
+          showToast("Shape mask and symmetry locked");
         }
         render();
       });
