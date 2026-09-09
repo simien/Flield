@@ -1500,5 +1500,9 @@
     }
     generateRandomFavicon();
   </script>
+  <!-- Cloudflare Web Analytics: manual snippet, since flield.com is served
+       by a Worker's own static-assets pipeline, which the Automatic
+       Setup HTML-rewrite injection doesn't reach. -->
+  <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d0b20fbf211d45efb84596a5f93dd3d1"}'></script>
 </body>
 </html>
