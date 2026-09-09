@@ -17,13 +17,56 @@
     }
   </script>
   <title>Flield: pixel art generator</title>
+  <meta name="description" content="A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF." />
+  <link rel="canonical" href="https://flield.com/" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+  <!-- Open Graph and Twitter Card, for link previews on social platforms
+       and chat apps. og:image reuses the README screenshot; bump its own
+       ?v= below if screenshot.png is ever replaced. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://flield.com/" />
+  <meta property="og:site_name" content="Flield" />
+  <meta property="og:title" content="Flield: pixel art generator" />
+  <meta property="og:description" content="A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF." />
+  <meta property="og:image" content="https://flield.com/screenshot.png?v=2" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="900" />
+  <meta property="og:image:alt" content="A generated three-color composition in Flield" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Flield: pixel art generator" />
+  <meta name="twitter:description" content="A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF." />
+  <meta name="twitter:image" content="https://flield.com/screenshot.png?v=2" />
+  <meta name="twitter:image:alt" content="A generated three-color composition in Flield" />
+  <meta name="theme-color" content="#16161a" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Flield",
+    "url": "https://flield.com/",
+    "description": "A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF.",
+    "applicationCategory": "DesignApplication",
+    "operatingSystem": "Any (runs in a web browser)",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Simien",
+      "url": "https://simienap.com"
+    }
+  }
+  </script>
+
   <!-- ?v= busts the browser cache for this project's own two evolving
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=3" />
-  <link rel="stylesheet" href="phosphor/style.css" />
+  <link rel="stylesheet" href="style.css?v=4" />
   <script src="gif/gif.js"></script>
   <script src="floating-ui/core.min.js"></script>
   <script src="floating-ui/dom.min.js"></script>
@@ -373,6 +416,51 @@
 
   <script src="generator.js?v=4"></script>
   <script>
+    // Inline replacements for the icons that used to come from the
+    // Phosphor webfont (224KB for the ~19 glyphs this app actually uses).
+    // These are Phosphor's own "bold" weight source paths, MIT-licensed,
+    // reading better than "regular" at the 14-18px these render at; the
+    // field lock's "locked" state uses "fill" instead, so a solid glyph
+    // reinforces the locked state over the open outline of "lock-open".
+    const ICONS = {
+      "list": "M228,128a12,12,0,0,1-12,12H40a12,12,0,0,1,0-24H216A12,12,0,0,1,228,128ZM40,76H216a12,12,0,0,0,0-24H40a12,12,0,0,0,0,24ZM216,180H40a12,12,0,0,0,0,24H216a12,12,0,0,0,0-24Z",
+      "x": "M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z",
+      "sun": "M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z",
+      "moon": "M236.37,139.4a12,12,0,0,0-12-3A84.07,84.07,0,0,1,119.6,31.59a12,12,0,0,0-15-15A108.86,108.86,0,0,0,49.69,55.07,108,108,0,0,0,136,228a107.09,107.09,0,0,0,64.93-21.69,108.86,108.86,0,0,0,38.44-54.94A12,12,0,0,0,236.37,139.4Zm-49.88,47.74A84,84,0,0,1,68.86,69.51,84.93,84.93,0,0,1,92.27,48.29Q92,52.13,92,56A108.12,108.12,0,0,0,200,164q3.87,0,7.71-.27A84.79,84.79,0,0,1,186.49,187.14Z",
+      "arrow-counter-clockwise": "M228,128a100,100,0,0,1-98.66,100H128a99.39,99.39,0,0,1-68.62-27.29,12,12,0,0,1,16.48-17.45,76,76,0,1,0-1.57-109c-.13.13-.25.25-.39.37L54.89,92H72a12,12,0,0,1,0,24H24a12,12,0,0,1-12-12V56a12,12,0,0,1,24,0V76.72L57.48,57.06A100,100,0,0,1,228,128Z",
+      "shuffle": "M240.49,175.51a12,12,0,0,1,0,17l-24,24a12,12,0,0,1-17-17L203,196h-2.09a76.17,76.17,0,0,1-61.85-31.83L97.38,105.78A52.1,52.1,0,0,0,55.06,84H32a12,12,0,0,1,0-24H55.06a76.17,76.17,0,0,1,61.85,31.83l41.71,58.39A52.1,52.1,0,0,0,200.94,172H203l-3.52-3.51a12,12,0,0,1,17-17Zm-95.62-72.62a12,12,0,0,0,16.93-1.13A52,52,0,0,1,200.94,84H203l-3.52,3.51a12,12,0,0,0,17,17l24-24a12,12,0,0,0,0-17l-24-24a12,12,0,0,0-17,17L203,60h-2.09a76,76,0,0,0-57.2,26A12,12,0,0,0,144.87,102.89Zm-33.74,50.22a12,12,0,0,0-16.93,1.13A52,52,0,0,1,55.06,172H32a12,12,0,0,0,0,24H55.06a76,76,0,0,0,57.2-26A12,12,0,0,0,111.13,153.11Z",
+      "lock-simple": "M208,76H180V56A52,52,0,0,0,76,56V76H48A20,20,0,0,0,28,96V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V96A20,20,0,0,0,208,76ZM100,56a28,28,0,0,1,56,0V76H100ZM204,204H52V100H204Z",
+      "lock-simple-open": "M208,76H100V56a28,28,0,0,1,28-28c13.51,0,25.65,9.62,28.24,22.39a12,12,0,1,0,23.52-4.78C174.87,21.5,153.1,4,128,4A52.06,52.06,0,0,0,76,56V76H48A20,20,0,0,0,28,96V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V96A20,20,0,0,0,208,76Zm-4,128H52V100H204Z",
+      "play": "M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z",
+      "pause": "M200,28H160a20,20,0,0,0-20,20V208a20,20,0,0,0,20,20h40a20,20,0,0,0,20-20V48A20,20,0,0,0,200,28Zm-4,176H164V52h32ZM96,28H56A20,20,0,0,0,36,48V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V48A20,20,0,0,0,96,28ZM92,204H60V52H92Z",
+      "lock-open": "M208,76H100V56a28,28,0,0,1,28-28c13.51,0,25.65,9.62,28.24,22.39a12,12,0,1,0,23.52-4.78C174.87,21.5,153.1,4,128,4A52.06,52.06,0,0,0,76,56V76H48A20,20,0,0,0,28,96V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V96A20,20,0,0,0,208,76Zm-4,128H52V100H204Zm-92-52a16,16,0,1,1,16,16A16,16,0,0,1,112,152Z",
+      "lock": "M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80Zm-80,84a12,12,0,1,1,12-12A12,12,0,0,1,128,164Zm32-84H96V56a32,32,0,0,1,64,0Z",
+      "floppy-disk": "M222.14,69.17,186.83,33.86A19.86,19.86,0,0,0,172.69,28H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V83.31A19.86,19.86,0,0,0,222.14,69.17ZM164,204H92V160h72Zm40,0H188V156a20,20,0,0,0-20-20H88a20,20,0,0,0-20,20v48H52V52H171l33,33ZM164,84a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h56A12,12,0,0,1,164,84Z",
+      "folder-open": "M248.23,112.31A20,20,0,0,0,232,104H220V88a20,20,0,0,0-20-20H132L105.34,48a20.12,20.12,0,0,0-12-4H40A20,20,0,0,0,20,64V208a12,12,0,0,0,12,12H211.1a12,12,0,0,0,11.33-8l28.49-81.47.06-.17A20,20,0,0,0,248.23,112.31ZM92,68l28.8,21.6A12,12,0,0,0,128,92h68v12H69.77a20,20,0,0,0-18.94,13.58L44,137.15V68ZM202.59,196H48.89l23.72-68H226.37Z",
+      "download-simple": "M228,144v64a12,12,0,0,1-12,12H40a12,12,0,0,1-12-12V144a12,12,0,0,1,24,0v52H204V144a12,12,0,0,1,24,0Zm-108.49,8.49a12,12,0,0,0,17,0l40-40a12,12,0,0,0-17-17L140,115V32a12,12,0,0,0-24,0v83L96.49,95.51a12,12,0,0,0-17,17Z",
+      "caret-down": "M216.49,104.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L128,159l71.51-71.52a12,12,0,0,1,17,17Z",
+      "spinner-gap": "M140,32V64a12,12,0,0,1-24,0V32a12,12,0,0,1,24,0Zm84,84H192a12,12,0,0,0,0,24h32a12,12,0,0,0,0-24Zm-42.26,48.77a12,12,0,1,0-17,17l22.63,22.63a12,12,0,0,0,17-17ZM128,180a12,12,0,0,0-12,12v32a12,12,0,0,0,24,0V192A12,12,0,0,0,128,180ZM74.26,164.77,51.63,187.4a12,12,0,0,0,17,17l22.63-22.63a12,12,0,1,0-17-17ZM76,128a12,12,0,0,0-12-12H32a12,12,0,0,0,0,24H64A12,12,0,0,0,76,128ZM68.6,51.63a12,12,0,1,0-17,17L74.26,91.23a12,12,0,0,0,17-17Z",
+      "link": "M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z",
+      "check": "M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z",
+    };
+
+    function setIcon(el, name) {
+      el.className = "ph ph-" + name;
+      el.innerHTML = `<svg viewBox="0 0 256 256" fill="currentColor"><path d="${ICONS[name]}"/></svg>`;
+    }
+
+    function iconTag(name) {
+      return `<i class="ph ph-${name}"><svg viewBox="0 0 256 256" fill="currentColor"><path d="${ICONS[name]}"/></svg></i>`;
+    }
+
+    // Every icon in the static markup below is stamped with its name via
+    // the same "ph-<name>" class this used with the old Phosphor webfont;
+    // this just fills each one in with its SVG instead of a font glyph.
+    document.querySelectorAll(".ph").forEach((el) => {
+      const cls = [...el.classList].find((c) => c !== "ph" && c.startsWith("ph-"));
+      if (cls) el.innerHTML = `<svg viewBox="0 0 256 256" fill="currentColor"><path d="${ICONS[cls.slice(3)]}"/></svg>`;
+    });
+
     // Dark is the default (set by the blocking script in <head>, which
     // reads this same key); this button is the only way to reach light.
     const THEME_KEY = "flield-theme";
@@ -384,7 +472,7 @@
       } else {
         document.documentElement.removeAttribute("data-theme");
       }
-      themeToggleBtn.innerHTML = isLight ? '<i class="ph ph-moon"></i>' : '<i class="ph ph-sun"></i>';
+      themeToggleBtn.innerHTML = iconTag(isLight ? "moon" : "sun");
       themeToggleBtn.title = isLight ? "Switch to dark theme" : "Switch to light theme";
     }
     applyTheme(document.documentElement.getAttribute("data-theme") === "light");
@@ -399,18 +487,6 @@
         // toggle still works for this page load, just won't persist.
       }
     });
-
-    // If the Phosphor font can't load for any reason, fall back to plain
-    // Unicode glyphs (see the .icon-fallback rules in style.css) instead
-    // of leaving icon-only buttons blank.
-    if ("fonts" in document) {
-      document.fonts.load('16px "Phosphor"').catch(() => {});
-      document.fonts.ready.then(() => {
-        if (!document.fonts.check('16px "Phosphor"')) {
-          document.documentElement.classList.add("icon-fallback");
-        }
-      });
-    }
 
     // Wire up tab switching.
     document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -439,11 +515,11 @@
       if (locked) {
         lockedFields.add(targetId);
         btn.classList.add("locked");
-        btn.querySelector("i").className = "ph ph-lock";
+        setIcon(btn.querySelector("i"), "lock");
       } else {
         lockedFields.delete(targetId);
         btn.classList.remove("locked");
-        btn.querySelector("i").className = "ph ph-lock-open";
+        setIcon(btn.querySelector("i"), "lock-open");
       }
     }
 
@@ -1189,7 +1265,7 @@
       clearInterval(autoplayTimer);
       autoplayTimer = null;
       playBtn.classList.remove("playing");
-      playBtn.querySelector("i").className = "ph ph-play";
+      setIcon(playBtn.querySelector("i"), "play");
       playBtn.title = "Auto-randomize";
     }
 
@@ -1197,7 +1273,7 @@
       performRandomize();
       autoplayTimer = setInterval(performRandomize, parseInt(autoSpeedSelect.value, 10));
       playBtn.classList.add("playing");
-      playBtn.querySelector("i").className = "ph ph-pause";
+      setIcon(playBtn.querySelector("i"), "pause");
       playBtn.title = "Stop auto-randomize";
     }
 
@@ -1263,7 +1339,7 @@
       });
 
       downloadGifBtn.disabled = true;
-      downloadGifBtn.innerHTML = '<i class="ph ph-spinner-gap"></i> Rendering...';
+      downloadGifBtn.innerHTML = iconTag("spinner-gap") + " Rendering...";
 
       for (let i = 0; i < steps; i++) {
         performRandomize();
@@ -1278,7 +1354,7 @@
         link.click();
         URL.revokeObjectURL(url);
         downloadGifBtn.disabled = false;
-        downloadGifBtn.innerHTML = '<i class="ph ph-download-simple"></i> GIF';
+        downloadGifBtn.innerHTML = iconTag("download-simple") + " GIF";
       });
 
       gif.render();
@@ -1436,7 +1512,7 @@
 
     function setSidebarOpen(open) {
       document.body.classList.toggle("sidebar-open", open);
-      sidebarToggle.querySelector("i").className = open ? "ph ph-x" : "ph ph-list";
+      setIcon(sidebarToggle.querySelector("i"), open ? "x" : "list");
       sidebarToggle.title = open ? "Hide sidebar" : "Show sidebar";
     }
 
@@ -1474,7 +1550,7 @@
       const original = btn.innerHTML;
       try {
         await navigator.clipboard.writeText(url);
-        btn.innerHTML = '<i class="ph ph-check"></i> Copied!';
+        btn.innerHTML = iconTag("check") + " Copied!";
       } catch (err) {
         try {
           window.prompt("Copy this link:", url);

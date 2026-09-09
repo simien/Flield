@@ -1001,6 +1001,12 @@ button.secondary:hover:not(:disabled) {
   cursor: not-allowed;
 }
 
+.ph svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+
 .ph-spinner-gap {
   animation: spin 0.8s linear infinite;
 }
@@ -1009,83 +1015,6 @@ button.secondary:hover:not(:disabled) {
   to {
     transform: rotate(360deg);
   }
-}
-
-/* If the Phosphor icon font fails to load, index.html adds this class
-   to <html> and every icon falls back to a plain Unicode character
-   instead of an empty, unlabeled box. */
-html.icon-fallback .ph::before {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Emoji", "Segoe UI", sans-serif;
-}
-
-html.icon-fallback .ph-shuffle::before {
-  content: "\1F500\FE0E";
-}
-
-html.icon-fallback .ph-lock-simple::before,
-html.icon-fallback .ph-lock::before {
-  content: "\1F512\FE0E";
-}
-
-html.icon-fallback .ph-lock-simple-open::before,
-html.icon-fallback .ph-lock-open::before {
-  content: "\1F513\FE0E";
-}
-
-html.icon-fallback .ph-play::before {
-  content: "\25B6\FE0E";
-}
-
-html.icon-fallback .ph-pause::before {
-  content: "\23F8\FE0E";
-}
-
-html.icon-fallback .ph-caret-down::before {
-  content: "\2304";
-}
-
-html.icon-fallback .ph-floppy-disk::before {
-  content: "\1F4BE\FE0E";
-}
-
-html.icon-fallback .ph-folder-open::before {
-  content: "\1F4C2\FE0E";
-}
-
-html.icon-fallback .ph-download-simple::before {
-  content: "\2B07\FE0E";
-}
-
-html.icon-fallback .ph-spinner-gap::before {
-  content: "\21BB";
-}
-
-html.icon-fallback .ph-arrow-counter-clockwise::before {
-  content: "\21BA";
-}
-
-html.icon-fallback .ph-link::before {
-  content: "\1F517\FE0E";
-}
-
-html.icon-fallback .ph-check::before {
-  content: "\2713\FE0E";
-}
-
-html.icon-fallback .ph-sun::before {
-  content: "\2600\FE0E";
-}
-
-html.icon-fallback .ph-moon::before {
-  content: "\1F319\FE0E";
-}
-
-html.icon-fallback .ph-list::before {
-  content: "\2630";
-}
-
-html.icon-fallback .ph-x::before {
-  content: "\2715";
 }
 
 button:disabled {
