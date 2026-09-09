@@ -1,6 +1,7 @@
 # Using Flield
 
 - [The basics](#the-basics)
+- [In-app tutorial](#in-app-tutorial)
 - [Navigating the sidebar](#navigating-the-sidebar)
 - [Exploring an art direction with Auto-randomize](#exploring-an-art-direction-with-auto-randomize)
 - [Widening or narrowing with Palette Range and Density Range](#widening-or-narrowing-an-art-direction-with-palette-range-and-density-range)
@@ -11,6 +12,12 @@
 - Each layer runs on its own **seed**, so the same seed and settings always regenerate the same result.
 - The canvas sits on the right; every control that shapes it lives in the sidebar on the left.
 - Every page load opens on a **freshly randomized** composition instead of a fixed default, background color, block size, and shape mask aside (more on why in [Locks](#locks)).
+
+## In-app tutorial
+
+Everything below is also built into the app itself. The **?** button (bottom of the sidebar, next to Copy Link) opens a nine-step tutorial, each step paired with a small live example of the control it's describing: sidebar navigation, layer settings, locks, Random and Auto-randomize, Undo, and saving, sharing, and exporting.
+
+It opens on its own the first time you visit. Check **Don't show this automatically on future visits** before closing it to skip that going forward; the **?** button still opens it anytime. Step through with the arrows or the dots at the bottom, or the left/right arrow keys.
 
 ## Navigating the sidebar
 
@@ -28,6 +35,14 @@ The sidebar becomes a drawer instead of a permanent column. A toggle button in t
 ### Sliders
 
 The click and drag target reaches well past the thin line you see, so grabbing a slider doesn't take a precise hit.
+
+### Scrolling
+
+A tab's content can run longer than the sidebar is tall. A soft fade shows up at whichever edge, top, bottom, or both, still has more to see, and clears once you've scrolled all the way to that edge.
+
+### Confirmations
+
+A few actions change something that might not be on screen right now, like **Lock All** changing icons on a layer tab that isn't open. Those show a brief confirmation above the canvas: **Lock All** / **Unlock All**, **Undo**, loading a saved state, and **Copy Link**.
 
 ### Locks
 

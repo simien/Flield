@@ -66,14 +66,139 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=4" />
-  <script src="gif/gif.js"></script>
-  <script src="floating-ui/core.min.js"></script>
-  <script src="floating-ui/dom.min.js"></script>
+  <link rel="stylesheet" href="style.css?v=41" />
+  <script src="vendor/gif/gif.js"></script>
+  <script src="vendor/floating-ui/core.min.js"></script>
+  <script src="vendor/floating-ui/dom.min.js"></script>
 </head>
 <body>
   <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show sidebar"><i class="ph ph-list"></i></button>
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="tutorial-backdrop" id="tutorialBackdrop" hidden></div>
+  <div class="tutorial-modal" id="tutorialModal" role="dialog" aria-modal="true" aria-label="How to use Flield" hidden>
+    <div class="tutorial-modal-header">
+      <h2>How to use Flield</h2>
+      <button type="button" class="secondary icon-btn" id="tutorialCloseBtn" title="Close"><i class="ph ph-x"></i></button>
+    </div>
+
+    <div class="tutorial-modal-body" id="tutorialSteps">
+      <div class="tutorial-step active" data-step="0">
+        <div class="tutorial-demo tutorial-demo-tabs">
+          <div class="mini-tabs">
+            <span class="mini-tab">General</span>
+            <span class="mini-tab mini-tab-target">Layer A</span>
+            <span class="mini-tab">Layer B</span>
+          </div>
+        </div>
+        <p class="tutorial-eyebrow">Step 1 of 9</p>
+        <h3>Three tabs, one canvas</h3>
+        <p><span class="ui-ref">General</span> holds canvas settings; <span class="ui-ref">Layer A</span> and <span class="ui-ref">Layer B</span> hold each layer's own look.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="1">
+        <div class="tutorial-demo tutorial-demo-theme">
+          <div class="mini-theme-btn">
+            <i class="ph ph-sun mini-lock-a"></i>
+            <i class="ph ph-moon mini-lock-b"></i>
+          </div>
+        </div>
+        <p class="tutorial-eyebrow">Step 2 of 9</p>
+        <h3>Switch between dark and light</h3>
+        <p>The toggle switches dark and light, and your pick is remembered next time.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="2">
+        <div class="tutorial-demo tutorial-demo-drag">
+          <div class="mini-slider-row">
+            <span class="mini-slider-label">Flow scale</span>
+            <div class="mini-slider-track"><div class="mini-slider-thumb mini-slider-thumb-drag"></div></div>
+          </div>
+        </div>
+        <p class="tutorial-eyebrow">Step 3 of 9</p>
+        <h3>Each layer has its own settings</h3>
+        <p><span class="ui-ref">Layer A</span> and <span class="ui-ref">Layer B</span> each get their own seed, color, density, flow field, and symmetry, so they rarely match.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="3">
+        <div class="tutorial-demo tutorial-demo-lock">
+          <span class="mini-lock-label">Lock from randomization</span>
+          <div class="mini-lock-btn">
+            <i class="ph ph-lock-open mini-lock-a"></i>
+            <i class="ph ph-lock mini-lock-b"></i>
+          </div>
+        </div>
+        <p class="tutorial-eyebrow">Step 4 of 9</p>
+        <h3>Lock a field to keep it</h3>
+        <p>A locked field holds its value through a randomize pass instead of getting a new one. <span class="ui-ref">Lock All</span> / <span class="ui-ref">Unlock All</span> apply to everything at once.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="4">
+        <div class="tutorial-demo tutorial-demo-random">
+          <div class="mini-random-btn"><i class="ph ph-shuffle"></i> Random</div>
+          <div class="mini-canvas-swatch"></div>
+        </div>
+        <p class="tutorial-eyebrow">Step 5 of 9</p>
+        <h3>Random rerolls what's unlocked</h3>
+        <p>One click, and every unlocked field gets a fresh new value.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="5">
+        <div class="tutorial-demo tutorial-demo-explore">
+          <div class="mini-explore-controls">
+            <div class="mini-play-btn"><i class="ph ph-play"></i></div>
+            <div class="mini-lock-btn tutorial-demo-lock-badge">
+              <i class="ph ph-lock-open mini-lock-a"></i>
+              <i class="ph ph-lock mini-lock-b"></i>
+            </div>
+          </div>
+          <canvas id="tutorialDemoCanvas" width="180" height="90"></canvas>
+        </div>
+        <p class="tutorial-eyebrow">Step 6 of 9</p>
+        <h3>Explore with Auto-randomize</h3>
+        <p>Lock what you like, then slowly unlock the rest while it plays, watching results narrow toward a collection worth keeping. Prefer more control? Skip the button and click <span class="ui-ref">Random</span> by hand instead.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="6">
+        <div class="tutorial-demo tutorial-demo-undo">
+          <div class="mini-undo-btn"><i class="ph ph-arrow-counter-clockwise"></i></div>
+          <div class="mini-canvas-swatch mini-canvas-swatch-b"></div>
+        </div>
+        <p class="tutorial-eyebrow">Step 7 of 9</p>
+        <h3>Undo steps back</h3>
+        <p>Went too far? <span class="ui-ref">Undo</span> walks back through recent passes, whether they came from a click, autoplay, or a GIF export.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="7">
+        <div class="tutorial-demo tutorial-demo-save">
+          <span class="mini-saved-badge">Saved</span>
+          <div class="mini-icon-btn mini-icon-btn-save"><i class="ph ph-floppy-disk"></i></div>
+        </div>
+        <p class="tutorial-eyebrow">Step 8 of 9</p>
+        <h3>Save it, or share a link</h3>
+        <p>Three save slots live in your browser; <span class="ui-ref">Copy Link</span> encodes the same snapshot into a URL anyone can open.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="8">
+        <div class="tutorial-demo tutorial-demo-export">
+          <div class="mini-icon-btn mini-icon-btn-export"><i class="ph ph-download-simple"></i></div>
+        </div>
+        <p class="tutorial-eyebrow">Step 9 of 9</p>
+        <h3>Export PNG, SVG, or GIF</h3>
+        <p>The exported GIF replays the exact sequence <span class="ui-ref">Auto-randomize</span> shows live.</p>
+      </div>
+    </div>
+
+    <label class="tutorial-dont-show">
+      <input type="checkbox" id="tutorialDontShowCheckbox" />
+      Don't show this automatically on future visits
+    </label>
+    <div class="tutorial-modal-footer">
+      <button type="button" class="secondary icon-btn tutorial-nav-arrow prev" id="tutorialPrevBtn" title="Previous" disabled><i class="ph ph-caret-down"></i></button>
+      <div class="tutorial-dots" id="tutorialDots"></div>
+      <button type="button" class="secondary icon-btn tutorial-nav-arrow next" id="tutorialNextBtn" title="Next"><i class="ph ph-caret-down"></i></button>
+    </div>
+  </div>
 
   <div class="color-popover" id="colorPopover" role="dialog" aria-label="Color picker" hidden>
     <div class="color-sl-square">
@@ -141,7 +266,9 @@
     </div>
 
     <div class="controls-body">
+    <div class="scroll-fade scroll-fade-top" aria-hidden="true"></div>
     <div class="tab-panel" id="tab-general">
+      <h2 class="section-title">Settings</h2>
       <div class="color-row">
         <div class="field">
           <label for="width">Width (px)</label>
@@ -378,6 +505,7 @@
     <div class="tab-panel" id="tab-layerB" hidden>
       <p class="hint">Layer B only shows in the gaps Layer A leaves empty. Lower either layer's density to let the background show through.</p>
     </div>
+    <div class="scroll-fade scroll-fade-bottom" aria-hidden="true"></div>
     </div>
 
     <div class="controls-footer">
@@ -396,11 +524,15 @@
           </select>
         </div>
       </div>
-      <button id="copyLinkBtn" class="secondary" title="Copy a link to this exact composition"><i class="ph ph-link"></i> Copy Link</button>
+      <div class="footer-link-row">
+        <button id="tutorialBtn" class="secondary icon-btn" title="How to use Flield"><i class="ph ph-question"></i></button>
+        <button id="copyLinkBtn" class="secondary" title="Copy a link to this exact composition"><i class="ph ph-link"></i> Copy Link</button>
+      </div>
     </div>
   </div>
 
   <div class="main-area">
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="canvas-area">
       <canvas id="preview" role="img">Your browser doesn't support canvas rendering, so the generated artwork can't display here.</canvas>
     </div>
@@ -442,24 +574,35 @@
       "spinner-gap": "M140,32V64a12,12,0,0,1-24,0V32a12,12,0,0,1,24,0Zm84,84H192a12,12,0,0,0,0,24h32a12,12,0,0,0,0-24Zm-42.26,48.77a12,12,0,1,0-17,17l22.63,22.63a12,12,0,0,0,17-17ZM128,180a12,12,0,0,0-12,12v32a12,12,0,0,0,24,0V192A12,12,0,0,0,128,180ZM74.26,164.77,51.63,187.4a12,12,0,0,0,17,17l22.63-22.63a12,12,0,1,0-17-17ZM76,128a12,12,0,0,0-12-12H32a12,12,0,0,0,0,24H64A12,12,0,0,0,76,128ZM68.6,51.63a12,12,0,1,0-17,17L74.26,91.23a12,12,0,0,0,17-17Z",
       "link": "M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z",
       "check": "M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z",
+      "question": "M144,180a16,16,0,1,1-16-16A16,16,0,0,1,144,180Zm92-52A108,108,0,1,1,128,20,108.12,108.12,0,0,1,236,128Zm-24,0a84,84,0,1,0-84,84A84.09,84.09,0,0,0,212,128ZM128,64c-24.26,0-44,17.94-44,40v4a12,12,0,0,0,24,0v-4c0-8.82,9-16,20-16s20,7.18,20,16-9,16-20,16a12,12,0,0,0-12,12v8a12,12,0,0,0,23.73,2.56C158.31,137.88,172,122.37,172,104,172,81.94,152.26,64,128,64Z",
     };
+
+    function iconSvg(name) {
+      return `<svg viewBox="0 0 256 256" fill="currentColor"><path d="${ICONS[name]}"/></svg>`;
+    }
 
     function setIcon(el, name) {
       el.className = "ph ph-" + name;
-      el.innerHTML = `<svg viewBox="0 0 256 256" fill="currentColor"><path d="${ICONS[name]}"/></svg>`;
+      el.innerHTML = iconSvg(name);
     }
 
     function iconTag(name) {
-      return `<i class="ph ph-${name}"><svg viewBox="0 0 256 256" fill="currentColor"><path d="${ICONS[name]}"/></svg></i>`;
+      return `<i class="ph ph-${name}">${iconSvg(name)}</i>`;
     }
 
     // Every icon in the static markup below is stamped with its name via
     // the same "ph-<name>" class this used with the old Phosphor webfont;
     // this just fills each one in with its SVG instead of a font glyph.
-    document.querySelectorAll(".ph").forEach((el) => {
-      const cls = [...el.classList].find((c) => c !== "ph" && c.startsWith("ph-"));
-      if (cls) el.innerHTML = `<svg viewBox="0 0 256 256" fill="currentColor"><path d="${ICONS[cls.slice(3)]}"/></svg>`;
-    });
+    // Exposed as a function (not a one-off pass) since buildLayerControls
+    // below clones fresh icon markup from <template> after this first
+    // pass has already run, and needs to hydrate that copy too.
+    function hydrateIcons(root) {
+      root.querySelectorAll(".ph").forEach((el) => {
+        const cls = [...el.classList].find((c) => c !== "ph" && c.startsWith("ph-"));
+        if (cls) el.innerHTML = iconSvg(cls.slice(3));
+      });
+    }
+    hydrateIcons(document);
 
     // Dark is the default (set by the blocking script in <head>, which
     // reads this same key); this button is the only way to reach light.
@@ -488,6 +631,21 @@
       }
     });
 
+    // Fades in at whichever edge (or both) still has hidden content, so a
+    // tab that overflows shows its bottom fade immediately on switching to
+    // it, before any scrolling; each then clears once scrolled to that end.
+    const controlsBody = document.querySelector(".controls-body");
+    const scrollFadeTop = controlsBody.querySelector(".scroll-fade-top");
+    const scrollFadeBottom = controlsBody.querySelector(".scroll-fade-bottom");
+
+    function updateScrollFade() {
+      const { scrollTop, scrollHeight, clientHeight } = controlsBody;
+      scrollFadeTop.classList.toggle("visible", scrollTop > 1);
+      scrollFadeBottom.classList.toggle("visible", scrollTop + clientHeight < scrollHeight - 1);
+    }
+    controlsBody.addEventListener("scroll", updateScrollFade);
+    window.addEventListener("resize", updateScrollFade);
+
     // Wire up tab switching.
     document.querySelectorAll(".tab-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -495,6 +653,7 @@
         document.querySelectorAll(".tab-panel").forEach((p) => (p.hidden = true));
         btn.classList.add("active");
         document.getElementById("tab-" + btn.dataset.tab).hidden = false;
+        updateScrollFade();
       });
     });
 
@@ -529,6 +688,7 @@
     function buildLayerControls(panel, prefix) {
       const tpl = document.getElementById("layer-template");
       const frag = tpl.content.cloneNode(true);
+      hydrateIcons(frag);
       frag.querySelectorAll("[class*='l-']").forEach((el) => {
         el.classList.forEach((cls) => {
           if (cls.startsWith("l-")) el.id = prefix + "-" + cls.slice(2);
@@ -556,6 +716,7 @@
           const isOpen = btn.getAttribute("aria-expanded") === "true";
           btn.setAttribute("aria-expanded", String(!isOpen));
           content.hidden = isOpen;
+          updateScrollFade();
         });
       });
       panel.prepend(frag);
@@ -1231,13 +1392,29 @@
       applyDefaults("layerB", previous.layerB);
       render();
       updateUndoButton();
+      showToast("Stepped back");
     });
+
+    // A brief confirmation for actions whose effect might not be visible
+    // from whichever tab is currently open (Lock All, for instance,
+    // changes lock icons that could be sitting on a layer tab that
+    // isn't the one on screen right now).
+    const toast = document.getElementById("toast");
+    let toastTimer = null;
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("visible");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
 
     document.getElementById("lockAllBtn").addEventListener("click", () => {
       document.querySelectorAll(".lock-btn").forEach((btn) => setLock(btn, true));
+      showToast("All fields locked");
     });
     document.getElementById("unlockAllBtn").addEventListener("click", () => {
       document.querySelectorAll(".lock-btn").forEach((btn) => setLock(btn, false));
+      showToast("All fields unlocked");
     });
 
     // Auto-randomize: repeatedly calls performRandomize on an interval
@@ -1335,16 +1512,11 @@
         quality: 10,
         width: canvas.width,
         height: canvas.height,
-        workerScript: "gif/gif.worker.js",
+        workerScript: "vendor/gif/gif.worker.js",
       });
 
       downloadGifBtn.disabled = true;
       downloadGifBtn.innerHTML = iconTag("spinner-gap") + " Rendering...";
-
-      for (let i = 0; i < steps; i++) {
-        performRandomize();
-        gif.addFrame(canvas, { copy: true, delay });
-      }
 
       gif.on("finished", (blob) => {
         const url = URL.createObjectURL(blob);
@@ -1357,7 +1529,18 @@
         downloadGifBtn.innerHTML = iconTag("download-simple") + " GIF";
       });
 
-      gif.render();
+      // Frame generation runs synchronously and can take a moment at a
+      // fine block size or large canvas; deferring it one frame lets the
+      // browser actually paint the "Rendering..." state above first,
+      // instead of setting it and immediately blocking the main thread
+      // before that paint ever happens.
+      requestAnimationFrame(() => {
+        for (let i = 0; i < steps; i++) {
+          performRandomize();
+          gif.addFrame(canvas, { copy: true, delay });
+        }
+        gif.render();
+      });
     });
 
     // Save-state slots: each stores the full readOptions() snapshot
@@ -1396,6 +1579,7 @@
         applyDefaults("layerA", data.layerA);
         applyDefaults("layerB", data.layerB);
         render();
+        showToast(`Loaded Slot ${btn.dataset.slot}`);
       });
     });
 
@@ -1524,6 +1708,144 @@
       if (e.key === "Escape") setSidebarOpen(false);
     });
 
+    // Tutorial modal: a "?" button opens a short guide, one step at a
+    // time, each with a small animated demo of the actual control being
+    // described. The Auto-randomize step's demo reuses generate()/
+    // renderToCanvas() from the main pipeline on a fixed, unrelated
+    // composition, so it's an actual cycling result rather than a canned
+    // illustration; it only runs while that step is on screen.
+    const tutorialBtn = document.getElementById("tutorialBtn");
+    const tutorialBackdrop = document.getElementById("tutorialBackdrop");
+    const tutorialModal = document.getElementById("tutorialModal");
+    const tutorialDemoCanvas = document.getElementById("tutorialDemoCanvas");
+    const tutorialSteps = document.querySelectorAll(".tutorial-step");
+    const tutorialDotsWrap = document.getElementById("tutorialDots");
+    const tutorialPrevBtn = document.getElementById("tutorialPrevBtn");
+    const tutorialNextBtn = document.getElementById("tutorialNextBtn");
+    const TUTORIAL_LIVE_DEMO_STEP = 5;
+    let tutorialStep = 0;
+    let tutorialDemoTimer = null;
+
+    tutorialSteps.forEach((_, i) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "tutorial-dot";
+      dot.dataset.step = i;
+      dot.setAttribute("aria-label", `Step ${i + 1}`);
+      dot.addEventListener("click", () => goToTutorialStep(i));
+      tutorialDotsWrap.appendChild(dot);
+    });
+    const tutorialDots = tutorialDotsWrap.querySelectorAll(".tutorial-dot");
+
+    function stopTutorialDemo() {
+      clearInterval(tutorialDemoTimer);
+      tutorialDemoTimer = null;
+    }
+
+    function renderTutorialDemoFrame() {
+      const options = {
+        width: tutorialDemoCanvas.width,
+        height: tutorialDemoCanvas.height,
+        blockSize: 4,
+        bgColor: "#16161a",
+        layerA: {
+          seed: Math.random().toString(36).slice(2),
+          color: "#38bdf8",
+          density: 0.3 + Math.random() * 0.3,
+          fieldStrength: 0.5,
+          fieldScale: 30,
+          flowAngle: Math.random() * 360,
+          flowStretch: 3,
+          fieldOctaves: 2,
+          symmetry: "quad",
+          smoothPasses: 1,
+        },
+        layerB: {
+          seed: Math.random().toString(36).slice(2),
+          color: "#f472b6",
+          density: 0.2 + Math.random() * 0.2,
+          fieldStrength: 0.5,
+          fieldScale: 20,
+          flowAngle: Math.random() * 360,
+          flowStretch: 2,
+          fieldOctaves: 2,
+          symmetry: "none",
+          smoothPasses: 1,
+        },
+      };
+      const { gridA, gridB, cols, rows } = generate(options);
+      renderToCanvas(tutorialDemoCanvas, {
+        ...options,
+        colorA: options.layerA.color,
+        colorB: options.layerB.color,
+        gridA,
+        gridB,
+        cols,
+        rows,
+      });
+    }
+
+    function startTutorialDemo() {
+      stopTutorialDemo();
+      renderTutorialDemoFrame();
+      // Respect reduced-motion: show one frame instead of cycling.
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      tutorialDemoTimer = setInterval(renderTutorialDemoFrame, 1600);
+    }
+
+    function goToTutorialStep(i) {
+      tutorialStep = Math.max(0, Math.min(tutorialSteps.length - 1, i));
+      tutorialSteps.forEach((step, idx) => step.classList.toggle("active", idx === tutorialStep));
+      tutorialDots.forEach((dot, idx) => dot.classList.toggle("active", idx === tutorialStep));
+      tutorialPrevBtn.disabled = tutorialStep === 0;
+      tutorialNextBtn.disabled = tutorialStep === tutorialSteps.length - 1;
+      if (tutorialStep === TUTORIAL_LIVE_DEMO_STEP) startTutorialDemo();
+      else stopTutorialDemo();
+    }
+
+    tutorialPrevBtn.addEventListener("click", () => goToTutorialStep(tutorialStep - 1));
+    tutorialNextBtn.addEventListener("click", () => goToTutorialStep(tutorialStep + 1));
+
+    // "Don't show again" only affects the automatic first-visit open
+    // below; the "?" button always opens it regardless of this flag.
+    const TUTORIAL_DISMISSED_KEY = "flield-tutorial-dismissed";
+    const tutorialDontShowCheckbox = document.getElementById("tutorialDontShowCheckbox");
+    let tutorialDismissed = false;
+    try {
+      tutorialDismissed = localStorage.getItem(TUTORIAL_DISMISSED_KEY) === "1";
+    } catch (err) {
+      // localStorage can be unavailable (private browsing, blocked); the
+      // tutorial just won't remember being dismissed for next time.
+    }
+    tutorialDontShowCheckbox.checked = tutorialDismissed;
+
+    function openTutorial() {
+      tutorialBackdrop.hidden = false;
+      tutorialModal.hidden = false;
+      goToTutorialStep(0);
+    }
+
+    function closeTutorial() {
+      tutorialBackdrop.hidden = true;
+      tutorialModal.hidden = true;
+      stopTutorialDemo();
+      try {
+        localStorage.setItem(TUTORIAL_DISMISSED_KEY, tutorialDontShowCheckbox.checked ? "1" : "0");
+      } catch (err) {
+        // Same as above; the checkbox still works for this page load.
+      }
+    }
+
+    tutorialBtn.addEventListener("click", openTutorial);
+    document.getElementById("tutorialCloseBtn").addEventListener("click", closeTutorial);
+    tutorialBackdrop.addEventListener("click", closeTutorial);
+    document.addEventListener("keydown", (e) => {
+      if (tutorialModal.hidden) return;
+      if (e.key === "Escape") closeTutorial();
+      else if (e.key === "ArrowRight" && !tutorialNextBtn.disabled) goToTutorialStep(tutorialStep + 1);
+      else if (e.key === "ArrowLeft" && !tutorialPrevBtn.disabled) goToTutorialStep(tutorialStep - 1);
+    });
+
     // Shareable links: the full state (background, block size, shape mask,
     // both layers) round-trips through readOptions()/applyGeneral()/
     // applyDefaults(), the same functions save-state slots already use,
@@ -1546,23 +1868,16 @@
     document.getElementById("copyLinkBtn").addEventListener("click", async () => {
       const encoded = btoa(JSON.stringify(readOptions()));
       const url = `${location.origin}${location.pathname}?state=${encoded}`;
-      const btn = document.getElementById("copyLinkBtn");
-      const original = btn.innerHTML;
       try {
         await navigator.clipboard.writeText(url);
-        btn.innerHTML = iconTag("check") + " Copied!";
+        showToast("Link copied");
       } catch (err) {
         try {
           window.prompt("Copy this link:", url);
         } catch (err2) {
           // Dialogs are unavailable in some environments; nothing more to do.
         }
-        btn.innerHTML = original;
-        return;
       }
-      setTimeout(() => {
-        btn.innerHTML = original;
-      }, 1500);
     });
 
     if (!loadStateFromURL()) {
@@ -1575,6 +1890,8 @@
       performRandomize();
     }
     generateRandomFavicon();
+    updateScrollFade();
+    if (!tutorialDismissed) openTutorial();
   </script>
   <!-- Cloudflare Web Analytics: manual snippet, since flield.com is served
        by a Worker's own static-assets pipeline, which the Automatic

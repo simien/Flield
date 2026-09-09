@@ -29,7 +29,7 @@ Built to generate images and placeholder graphics without reaching for stock pho
 
 The generator itself (`generator.js`) is independent of the UI, so the noise field, symmetry, and grid logic can be reused in other projects.
 
-See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques worth knowing, like locking fields to explore variations on one art direction with Auto-randomize.
+See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques worth knowing, like locking fields to explore variations on one art direction with Auto-randomize. The same walkthrough is also built into the app itself: the **?** button (bottom of the sidebar, next to Copy Link) opens a short tutorial with a live example for each step.
 
 ## Features
 
@@ -46,6 +46,7 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 - Three save-state slots stored in the browser for revisiting a composition later
 - Auto-randomize playback with an adjustable interval, from every 0.5 seconds up to every 10
 - Export to PNG, SVG, or an animated GIF, with frame count (1, 2, 3, 5, 8, or 13) and speed both configurable
+- A built-in tutorial, nine short steps with a live example each, covering the sidebar, locks, Random and Auto-randomize, and saving and exporting; it opens on its own on a first visit and can be turned off for good from inside it
 - Responsive sidebar that collapses into a toggleable drawer on narrow screens
 - Dark theme by default, with a toggle for light, remembered across visits
 - Fully offline: every dependency is vendored in the repo, no CDN, no network connection needed

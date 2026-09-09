@@ -14,6 +14,7 @@
      --bg, for the color picker's value row, which wants a stronger,
      more visually distinct sunken well. */
   --well: #18181c;
+  --well-rgb: 24, 24, 28;
   --well-deep: #101013;
   --text: #eaeaea;
   --border: #333;
@@ -26,6 +27,7 @@
   --bg: #f5f5f5;
   --panel: #ffffff;
   --well: #f8f8f8;
+  --well-rgb: 248, 248, 248;
   --well-deep: #ececec;
   --text: #1a1a1a;
   --border: #ddd;
@@ -59,6 +61,7 @@ body {
 }
 
 .main-area {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -97,6 +100,41 @@ body {
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 24;
+}
+
+/* Confirms an action whose effect isn't visible from wherever the user
+   is looking, e.g. Lock All changes lock icons that may be sitting on
+   a layer tab that isn't even the one currently open. Shown via
+   showToast() in index.html; opacity/transform (not display) so it can
+   transition, and pointer-events stays off so it never blocks a click. */
+.toast {
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  transform: translate(-50%, -8px);
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 20;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: opacity 0.2s ease;
+    transform: translate(-50%, 0);
+  }
 }
 
 /* Below this width there's no room for a permanent side-by-side layout,
@@ -143,6 +181,12 @@ body {
 .controls-header {
   flex-shrink: 0;
   padding: 20px 20px 0;
+  /* Full sidebar width, same as .controls-footer's own border-top,
+     rather than living on each (padding-inset, gap-separated) tab
+     button the way it used to; the active tab's own 1px overlap below
+     erases its own segment so it still reads as flowing into the well
+     below instead of being boxed in by this line too. */
+  border-bottom: 1px solid var(--border);
 }
 
 .controls-body {
@@ -150,6 +194,56 @@ body {
   overflow-y: auto;
   padding: 16px 20px 20px;
   background: var(--well);
+}
+
+/* Hints that a tab's content continues past the visible edge. Sticky
+   (not fixed/absolute) so each tracks its own edge of the scrolled
+   area without JS needing to measure anything; negative margin keeps
+   it from adding scroll height of its own. JS (see updateScrollFade)
+   only toggles the "visible" class, based on scroll position and
+   whether the panel overflows at all. */
+.scroll-fade {
+  position: sticky;
+  left: 0;
+  right: 0;
+  height: 40px;
+  margin-bottom: -40px;
+  pointer-events: none;
+  opacity: 0;
+  /* Sits as the first and last child of .controls-body respectively;
+     without this, default stacking paints every tab-panel's own content
+     (a later sibling) over the top one, since it comes before them in
+     the DOM. The bottom one comes after them, so it never showed the
+     same problem. */
+  z-index: 2;
+  transition: opacity 0.15s ease;
+}
+
+/* Sticky offsets resolve against .controls-body's padding edge, not its
+   true outer edge, so top:0/bottom:0 would leave each fade stopping
+   short by exactly that padding (16px/20px), with a hard, unfaded cutoff
+   in the gap where content is still being clipped. Offsetting by the
+   negative of that padding pushes each fade flush with the real edge.
+   Each gradient holds solid for roughly its first sixth, rather than
+   starting to fade immediately, so the part nearest the true edge reads
+   clearly rather than being mid-fade already; the fade-out end uses an explicit
+   0-alpha var(--well) rather than the transparent keyword, since
+   interpolating a solid color straight to "transparent" (rgba(0,0,0,0))
+   drifts visibly toward black partway through instead of just thinning. */
+.scroll-fade-top {
+  top: -16px;
+  background: linear-gradient(to bottom, var(--well) 0%, var(--well) 17.5%, rgba(var(--well-rgb), 0) 100%);
+}
+
+.scroll-fade-bottom {
+  bottom: -20px;
+  margin-bottom: 0;
+  margin-top: -40px;
+  background: linear-gradient(to top, var(--well) 0%, var(--well) 17.5%, rgba(var(--well-rgb), 0) 100%);
+}
+
+.scroll-fade.visible {
+  opacity: 1;
 }
 
 .controls-footer {
@@ -272,56 +366,111 @@ body {
   gap: 4px;
 }
 
-/* No border-radius on the well below (see .controls-body) and no gap
-   between a tab and it: the active tab fills with the well's own
-   background and drops its bottom border, so its shape reads as
-   growing directly out of the content instead of a separate rounded
-   panel sitting under a divider line. */
+/* Four states, each spelled out rather than left to inheritance, since
+   every property below is a deliberate match to one specific reference
+   color rather than a default:
+   - Rest: background matches the header's own background (the tab is
+     literally unstyled against it); the bottom border matches the
+     sidebar/sectional border, continuing the header's own border-bottom
+     line; the other three sides are that same border color faded 50%
+     toward the header background, a quieter outline than the active/
+     hover tabs get.
+   - Active: background and bottom border both match the scrollable
+     content area below, so the tab reads as growing directly out of it;
+     the other three sides are the full-strength sidebar/sectional
+     border, continuing the header's own border-bottom around the tab's
+     top corners.
+   - Hover: background is the active tab's own fill faded 50% toward the
+     header background, a step between rest and active without fully
+     committing to active's fill; the other three sides match the full-
+     strength sidebar/sectional border, same as active; the bottom
+     border matches hover's own background, same erase-the-header-line
+     trick active uses.
+   margin-bottom/position/z-index stay constant across every state
+   (rest included) so hovering never changes the button's box height. */
 .tab-btn {
   flex: 1;
   width: auto;
   margin-top: 0;
+  margin-bottom: -1px;
   padding: 8px 4px;
-  background: transparent;
+  background: var(--panel);
   color: var(--text);
   opacity: 0.6;
-  border: none;
-  border-bottom: 1px solid var(--border);
+  border: 1px solid var(--border);
+  border-color: color-mix(in srgb, var(--border) 50%, var(--panel) 50%);
+  border-bottom-color: var(--border);
   border-radius: 6px 6px 0 0;
   font-size: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .tab-btn.active {
   opacity: 1;
   background: var(--well);
-  border-bottom-color: transparent;
+  border-color: var(--border);
+  border-bottom-color: var(--well);
 }
 
 .tab-btn:hover:not(.active) {
   opacity: 0.85;
+  background: color-mix(in srgb, var(--well) 50%, var(--panel) 50%);
+  border-color: var(--border);
+  border-bottom-color: color-mix(in srgb, var(--well) 50%, var(--panel) 50%);
 }
 
 .field {
   margin-bottom: 14px;
 }
 
+/* A trailing fill of "░" (see ::after) stands in for the divider line
+   this used to draw above the title: enough to mark a new section
+   without a hard rule cutting across the sidebar, and it reads as a
+   heading's own underline-in-spirit rather than a separator between
+   unrelated blocks. The margin above is the same spacing the border
+   used to sit inside; keep that even though the line itself is gone,
+   or sections stop reading as distinct groups. */
 .section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  white-space: nowrap;
   font-size: 12px;
+  /* Lighter than a preset label's 600 (see .preset-label above) even
+     though this sits above it in the hierarchy: uppercase plus wide
+     letter-spacing already reads as the heavier, more prominent line,
+     so a matching 600 here would out-weigh everything below it. */
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  opacity: 0.7;
-  margin: 20px 0 10px;
-  border-top: 1px solid var(--border);
-  padding-top: 14px;
+  letter-spacing: 0.08em;
+  /* Brighter than a field label's own 0.8 (see .field label below), so
+     it reads as the more prominent heading over them rather than
+     blending in as just another dim label at the same weight. */
+  opacity: 0.95;
+  margin: 28px 0 16px;
 }
 
-/* The border/margin above exist to separate a section from whatever
-   came before it; a title that opens its panel (Layer A/B's "Fill")
-   has nothing above it to separate from. */
+/* A title that opens its panel (Layer A/B's "Fill") has nothing above
+   it to separate from. */
 .section-title:first-child {
   margin-top: 0;
-  border-top: none;
-  padding-top: 0;
+}
+
+.section-title::after {
+  content: "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░";
+  flex: 1;
+  overflow: hidden;
+  color: var(--border);
+  /* The UI's own system-sans font smooths this glyph into a soft,
+     nearly continuous smudge; a monospace face renders its dot texture
+     with crisp edges instead, so it stays visibly pixelated even
+     packed edge to edge with no letter-spacing pulling it apart into
+     separate dots. */
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1;
 }
 
 .palette-section {
@@ -348,7 +497,6 @@ body {
 }
 
 .palette-toggle i {
-  font-size: 13px;
   opacity: 0.7;
   transition: transform 0.15s ease;
 }
@@ -596,10 +744,6 @@ body {
 .lock-btn:hover:not(.locked) {
   opacity: 1;
   border-color: var(--accent);
-}
-
-.lock-btn i {
-  font-size: 14px;
 }
 
 .lock-btn.locked {
@@ -865,11 +1009,16 @@ button {
     color 0.15s ease, opacity 0.15s ease, transform 0.08s ease;
 }
 
-button:hover:not(:disabled) {
+/* .tab-btn is excluded: it already computes its own hover background
+   and border color explicitly (see .tab-btn:hover above), and a 1.15x
+   brightness multiply on top of that pushes the light theme's
+   already-near-white values past 255, clamping them flat and washing
+   out the color-mix contrast that state depends on. */
+button:hover:not(:disabled):not(.tab-btn) {
   filter: brightness(1.15);
 }
 
-button:active:not(:disabled) {
+button:active:not(:disabled):not(.tab-btn) {
   filter: brightness(0.92);
   transform: scale(0.98);
 }
@@ -946,7 +1095,7 @@ button.secondary:hover:not(:disabled) {
 .button-row {
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .button-row > button {
@@ -954,8 +1103,20 @@ button.secondary:hover:not(:disabled) {
   margin-top: 0;
 }
 
-.controls-footer .button-row {
-  margin-bottom: 0;
+.footer-link-row {
+  display: flex;
+  gap: 8px;
+}
+
+.footer-link-row #copyLinkBtn {
+  flex: 1;
+  margin-top: 0;
+}
+
+.footer-link-row #tutorialBtn {
+  width: auto;
+  flex-shrink: 0;
+  margin-top: 0;
 }
 
 .preset-row {
@@ -988,10 +1149,6 @@ button.secondary:hover:not(:disabled) {
   border-radius: 6px;
 }
 
-.preset-btn i {
-  font-size: 14px;
-}
-
 .preset-btn:hover:not(:disabled) {
   border-color: var(--accent);
 }
@@ -1020,4 +1177,534 @@ button.secondary:hover:not(:disabled) {
 button:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+
+/* Tutorial modal: opened from the "?" button next to the theme toggle,
+   and automatically on a visitor's first visit (see the "don't show
+   again" checkbox below). One step at a time rather than a nav-plus-
+   content split, so there's no sidebar text to misalign and the whole
+   thing collapses to a single narrow column on a small screen with
+   nothing to reflow. */
+.tutorial-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 40;
+}
+
+.tutorial-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, 92vw);
+  max-height: 88vh;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  z-index: 41;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tutorial-modal:not([hidden]) {
+  display: flex;
+}
+
+.tutorial-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 14px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.tutorial-modal-header h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.tutorial-modal-header button {
+  width: auto;
+  margin-top: 0;
+}
+
+.tutorial-modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 24px 28px;
+}
+
+.tutorial-step {
+  display: none;
+}
+
+.tutorial-step.active {
+  display: block;
+}
+
+.tutorial-step .tutorial-eyebrow {
+  margin: 4px 0 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.tutorial-step h3 {
+  margin: 0 0 14px;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.tutorial-step p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+/* Echoes the real control it names, in miniature, so the reader can
+   match the word in the sentence to the button they'll actually look
+   for in the sidebar. */
+.ui-ref {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--well);
+  font-size: 0.92em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tutorial-dont-show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.7;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.tutorial-dont-show input {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.tutorial-modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 16px;
+  flex-shrink: 0;
+}
+
+.tutorial-nav-arrow {
+  width: auto;
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+.tutorial-nav-arrow.prev i svg {
+  transform: rotate(90deg);
+}
+
+.tutorial-nav-arrow.next i svg {
+  transform: rotate(-90deg);
+}
+
+.tutorial-dots {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tutorial-dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  margin: 0;
+  border-radius: 3px;
+  background: var(--border);
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.tutorial-dot.active {
+  width: 18px;
+  background: var(--accent);
+}
+
+/* --- Demo preview: same sunken frame as the app's own .controls-body,
+   so every demo reads as a miniature of the real UI. --- */
+.tutorial-demo {
+  position: relative;
+  height: 108px;
+  border-radius: 8px;
+  background: var(--well);
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  overflow: hidden;
+  padding: 0 20px;
+}
+
+/* --- Step 1: Tabs. "Layer A" lights up on a loop. --- */
+.tutorial-demo-tabs {
+  align-items: center;
+}
+
+.mini-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.mini-tab {
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  opacity: 0.65;
+}
+
+.mini-tab-target {
+  animation: tutorialTabClick 3.4s ease-in-out infinite;
+}
+
+@keyframes tutorialTabClick {
+  0%, 34% { background: transparent; color: var(--text); opacity: 0.65; border-color: var(--border); }
+  40%, 88% { background: var(--accent); color: white; opacity: 1; border-color: var(--accent); }
+  96%, 100% { background: transparent; color: var(--text); opacity: 0.65; border-color: var(--border); }
+}
+
+/* --- Step 2: Theme. Sun crossfades to moon on a loop. --- */
+.mini-theme-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  animation: tutorialThemeBorder 3.4s ease-in-out infinite;
+}
+
+.mini-theme-btn i {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--text);
+}
+
+@keyframes tutorialThemeBorder {
+  0%, 34% { border-color: var(--border); }
+  40%, 88% { border-color: var(--accent); }
+  96%, 100% { border-color: var(--border); }
+}
+
+/* Shared open/closed (or sun/moon) crossfade, used by the Theme demo
+   above and the Lock demo below; timing matches the state-change
+   moment (34-40%) and reset (88-96%) every other demo animates around. */
+@keyframes tutorialFadeShow {
+  0%, 34% { opacity: 1; }
+  40%, 88% { opacity: 0; }
+  96%, 100% { opacity: 1; }
+}
+
+@keyframes tutorialFadeHide {
+  0%, 34% { opacity: 0; }
+  40%, 88% { opacity: 1; }
+  96%, 100% { opacity: 0; }
+}
+
+.mini-lock-a {
+  opacity: 1;
+  animation: tutorialFadeShow 3.4s ease-in-out infinite;
+}
+
+.mini-lock-b {
+  opacity: 0;
+  animation: tutorialFadeHide 3.4s ease-in-out infinite;
+}
+
+/* --- Step 3: Layer settings. The thumb drifts across the track. --- */
+.mini-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.mini-slider-label {
+  font-size: 11px;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.mini-slider-track {
+  position: relative;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.mini-slider-thumb-drag {
+  position: absolute;
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translate(-50%, -50%);
+  animation: tutorialSliderDrag 3.4s ease-in-out infinite;
+}
+
+@keyframes tutorialSliderDrag {
+  0%, 6% { left: 12%; }
+  40%, 88% { left: 86%; }
+  100% { left: 12%; }
+}
+
+/* --- Step 4: Locking. The lock fills solid on a loop. --- */
+.tutorial-demo-lock {
+  gap: 12px;
+}
+
+.mini-lock-btn {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  animation: tutorialLockBg 3.4s ease-in-out infinite;
+}
+
+.mini-lock-btn i {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.mini-lock-label {
+  font-size: 11px;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+@keyframes tutorialLockBg {
+  0%, 34% { background: var(--bg); border-color: var(--border); }
+  40%, 88% { background: var(--accent); border-color: var(--accent); }
+  96%, 100% { background: var(--bg); border-color: var(--border); }
+}
+
+.tutorial-demo-lock .mini-lock-b {
+  color: white;
+}
+
+/* --- Step 5: Random. The swatch snaps to a new look, an instant cut
+   (steps(1)) rather than a smooth blend, since a reroll doesn't ease
+   into place. --- */
+.mini-canvas-swatch {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, #38bdf8, #f472b6);
+  flex-shrink: 0;
+  animation: tutorialSwatchChange 3.4s steps(1) infinite;
+}
+
+@keyframes tutorialSwatchChange {
+  0%, 39% { background: linear-gradient(135deg, #38bdf8, #f472b6); }
+  40%, 100% { background: linear-gradient(135deg, #facc15, #22d3ee); }
+}
+
+.mini-random-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: white;
+  font-size: 12px;
+  animation: tutorialBtnPress 3.4s ease-in-out infinite;
+}
+
+@keyframes tutorialBtnPress {
+  0%, 34% { filter: brightness(1); }
+  40% { filter: brightness(1.3); }
+  46%, 100% { filter: brightness(1); }
+}
+
+/* --- Step 6: Auto-randomize. The live canvas (see startTutorialDemo
+   in index.html) cycles for real. --- */
+.tutorial-demo-explore canvas {
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+/* Stacked to the left of the canvas, in the sidebar's own real order:
+   the play/auto-randomize button lives up in the title row, well above
+   any per-field lock icon, so it sits above the lock here too. */
+.mini-explore-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.tutorial-demo-lock-badge {
+  position: relative;
+  width: 26px;
+  height: 26px;
+}
+
+.tutorial-demo-lock-badge i {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.mini-play-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  animation: tutorialBtnPress 3.4s ease-in-out infinite;
+}
+
+/* --- Step 7: Undo. The swatch reverts on a loop. --- */
+.mini-canvas-swatch-b {
+  animation: tutorialSwatchRevert 3.4s steps(1) infinite;
+}
+
+@keyframes tutorialSwatchRevert {
+  0%, 39% { background: linear-gradient(135deg, #a78bfa, #34d399); }
+  40%, 100% { background: linear-gradient(135deg, #fb7185, #fbbf24); }
+}
+
+.mini-undo-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  animation: tutorialLockBg 3.4s ease-in-out infinite;
+}
+
+/* --- Step 8: Saved states & links. A "Saved" badge flashes on a loop. --- */
+.mini-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.mini-icon-btn-save {
+  animation: tutorialBtnPress 3.4s ease-in-out infinite;
+}
+
+.mini-saved-badge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: white;
+  animation: tutorialBadgeFlash 3.4s ease-in-out infinite;
+}
+
+@keyframes tutorialBadgeFlash {
+  0%, 38% { opacity: 0; transform: translateY(2px); }
+  44%, 82% { opacity: 1; transform: translateY(0); }
+  92%, 100% { opacity: 0; transform: translateY(2px); }
+}
+
+/* --- Step 9: Exporting. The icon nudges down on a loop. --- */
+.mini-icon-btn-export {
+  animation: tutorialDownloadNudge 3.4s ease-in-out infinite;
+}
+
+@keyframes tutorialDownloadNudge {
+  0%, 34% { transform: translateY(0); background: var(--bg); border-color: var(--border); color: var(--text); }
+  40% { transform: translateY(3px); background: var(--accent); border-color: var(--accent); color: white; }
+  46%, 88% { transform: translateY(0); background: var(--accent); border-color: var(--accent); color: white; }
+  96%, 100% { transform: translateY(0); background: var(--bg); border-color: var(--border); color: var(--text); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mini-tab-target,
+  .mini-theme-btn,
+  .mini-lock-a,
+  .mini-lock-b,
+  .mini-slider-thumb-drag,
+  .mini-lock-btn,
+  .mini-random-btn,
+  .mini-canvas-swatch,
+  .mini-canvas-swatch-b,
+  .mini-undo-btn,
+  .mini-icon-btn-save,
+  .mini-saved-badge,
+  .mini-icon-btn-export,
+  .mini-play-btn {
+    animation: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .tutorial-modal {
+    width: 94vw;
+    max-height: 92vh;
+  }
+
+  .tutorial-modal-body {
+    padding: 16px 16px 4px;
+  }
+
+  .tutorial-demo {
+    height: 92px;
+    padding: 0 14px;
+  }
 }
