@@ -37,6 +37,7 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 - Two independently configurable color layers, each with its own seed, density, and directional flow field
 - Eight symmetry modes: 4-way mirror, horizontal, vertical, 180-degree rotational, diagonal, 8-way kaleidoscope, tile, and none
 - An optional circle or diamond shape mask, with a seeded dithered edge so the boundary blends into the noise instead of cutting it off sharply
+- A Tile dimension preset for a square canvas that repeats with no visible seam (not to be confused with the Tile symmetry mode above): shape mask off, both layers on 4-way mirror, so left edge matches right edge and top matches bottom exactly
 - Palette range controls (hue, saturation, lightness) with five presets, plus fully custom ranges
 - Density range controls, so a randomize pass can't drift all the way to a solid fill or an empty layer
 - Per-field locks, covering every layer setting plus background color, block size, and shape mask, so a randomize pass can hold specific settings steady while re-rolling the rest

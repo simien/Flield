@@ -18,7 +18,7 @@
 
 | Tab | What it holds |
 |---|---|
-| **General** | Canvas width and height (with Web, Tablet, and Mobile presets), background color, grid resolution (block size), and shape mask |
+| **General** | Canvas width and height (with Web, Tablet, Mobile, and Tile presets), background color, grid resolution (block size), and shape mask |
 | **Layer A** / **Layer B** | That layer's seed, color, palette range, density range, flow field, symmetry mode, and smoothing |
 
 ### On a narrow screen
@@ -36,6 +36,10 @@ Every randomizable field, background color, block size, and shape mask included,
 - A **locked** field holds its current value through a randomize pass instead of getting a new one.
 - **Lock** and **Unlock** at the top of the sidebar apply to every field at once.
 - Background color, block size, and shape mask **start locked**. That's why a fresh page load keeps its starting background, grid resolution, and shape steady while everything else randomizes around them. Unlock any of the three to fold it into future randomize and Auto-randomize passes.
+
+### Tiling without a seam
+
+The **Tile** preset (General tab, next to Web/Tablet/Mobile) sets up a square canvas that repeats without a visible seam: it turns off the shape mask and switches both layers to 4-way mirror symmetry, which makes each layer's left edge match its right edge and its top edge match its bottom edge exactly. Both settings get locked automatically, so Random and Auto-randomize keep exploring colors, density, and flow field without breaking the seam.
 
 ### Saving and sharing a composition
 

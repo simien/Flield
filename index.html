@@ -114,6 +114,7 @@
         <button type="button" class="palette-preset-btn dimension-preset-btn" data-preset="web">Web</button>
         <button type="button" class="palette-preset-btn dimension-preset-btn" data-preset="tablet">Tablet</button>
         <button type="button" class="palette-preset-btn dimension-preset-btn" data-preset="mobile">Mobile</button>
+        <button type="button" class="palette-preset-btn dimension-preset-btn" data-preset="tile" title="A square canvas set up to tile with no visible seam: no shape mask, both layers on 4-way mirror">Tile</button>
       </div>
 
       <div class="field">
@@ -1028,10 +1029,19 @@
     // landing on a rounder, more current phone width and dividing
     // cleanly by every common block size (2, 4, 5, 8, 10, 16, 20, 25,
     // 40, 50, 80).
+    // Tile's shapeMask/symmetry aren't dimension choices, they're what
+    // actually make the output tile without a visible seam: "quad"
+    // mirrors each layer's unique region across both axes, so a layer's
+    // left edge always equals its right edge and its top edge always
+    // equals its bottom edge, the exact property an image needs to
+    // repeat cleanly. A shape mask breaks that (a centered circle doesn't repeat),
+    // so Tile forces it off. 512 is a nice round, highly divisible size
+    // for a texture swatch, not a specific device or screen to match.
     const DIMENSION_PRESETS = {
       web: { width: 1920, height: 1080 },
       tablet: { width: 768, height: 1024 },
       mobile: { width: 400, height: 800 },
+      tile: { width: 512, height: 512, shapeMask: "none", symmetry: "quad" },
     };
 
     document.querySelectorAll(".dimension-preset-btn").forEach((btn) => {
@@ -1039,6 +1049,20 @@
         const preset = DIMENSION_PRESETS[btn.dataset.preset];
         document.getElementById("width").value = preset.width;
         document.getElementById("height").value = preset.height;
+        if (preset.shapeMask) {
+          document.getElementById("shapeMask").value = preset.shapeMask;
+          setLock(document.querySelector('.lock-btn[data-for="shapeMask"]'), true);
+        }
+        if (preset.symmetry) {
+          // Symmetry is one of RANDOMIZABLE_FIELDS, so without locking it
+          // here too, the very next Random click would reroll each layer
+          // onto some other symmetry and silently break the seam this
+          // preset just set up.
+          document.getElementById("layerA-symmetry").value = preset.symmetry;
+          document.getElementById("layerB-symmetry").value = preset.symmetry;
+          setLock(document.querySelector('#tab-layerA .lock-btn[data-for="symmetry"]'), true);
+          setLock(document.querySelector('#tab-layerB .lock-btn[data-for="symmetry"]'), true);
+        }
         render();
       });
     });
