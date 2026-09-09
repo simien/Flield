@@ -66,7 +66,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=41" />
+  <link rel="stylesheet" href="style.css?v=42" />
   <script src="vendor/gif/gif.js"></script>
   <script src="vendor/floating-ui/core.min.js"></script>
   <script src="vendor/floating-ui/dom.min.js"></script>
@@ -84,6 +84,19 @@
 
     <div class="tutorial-modal-body" id="tutorialSteps">
       <div class="tutorial-step active" data-step="0">
+        <div class="tutorial-demo tutorial-demo-intro">
+          <div class="mini-color-trio">
+            <span class="mini-color-chip" style="background:#38bdf8"></span>
+            <span class="mini-color-chip" style="background:#f472b6"></span>
+            <span class="mini-color-chip" style="background:#facc15"></span>
+          </div>
+        </div>
+        <p class="tutorial-eyebrow">Step 1 of 13</p>
+        <h3>Generate, explore, export</h3>
+        <p>Every composition is three colors, a background and two independent layers, built from a seed so it can always be reproduced. Explore variations with Random and Auto-randomize, then export a still image or a looping GIF.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="1">
         <div class="tutorial-demo tutorial-demo-tabs">
           <div class="mini-tabs">
             <span class="mini-tab">General</span>
@@ -91,36 +104,77 @@
             <span class="mini-tab">Layer B</span>
           </div>
         </div>
-        <p class="tutorial-eyebrow">Step 1 of 9</p>
+        <p class="tutorial-eyebrow">Step 2 of 13</p>
         <h3>Three tabs, one canvas</h3>
         <p><span class="ui-ref">General</span> holds canvas settings; <span class="ui-ref">Layer A</span> and <span class="ui-ref">Layer B</span> hold each layer's own look.</p>
       </div>
 
-      <div class="tutorial-step" data-step="1">
+      <div class="tutorial-step" data-step="2">
         <div class="tutorial-demo tutorial-demo-theme">
           <div class="mini-theme-btn">
             <i class="ph ph-sun mini-lock-a"></i>
             <i class="ph ph-moon mini-lock-b"></i>
           </div>
         </div>
-        <p class="tutorial-eyebrow">Step 2 of 9</p>
+        <p class="tutorial-eyebrow">Step 3 of 13</p>
         <h3>Switch between dark and light</h3>
         <p>The toggle switches dark and light, and your pick is remembered next time.</p>
       </div>
 
-      <div class="tutorial-step" data-step="2">
+      <div class="tutorial-step" data-step="3">
+        <div class="tutorial-demo tutorial-demo-presets">
+          <div class="mini-tabs">
+            <span class="mini-tab">Web</span>
+            <span class="mini-tab">Tablet</span>
+            <span class="mini-tab mini-tab-target">Tile</span>
+          </div>
+        </div>
+        <p class="tutorial-eyebrow">Step 4 of 13</p>
+        <h3>Pick a size, or tile it</h3>
+        <p>Web, Tablet, and Mobile presets set common dimensions. <span class="ui-ref">Tile</span> squares the canvas and mirrors both layers so it repeats with no visible seam.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="4">
+        <div class="tutorial-demo tutorial-demo-mask">
+          <div class="mini-mask-preview">
+            <span class="mini-mask-shape mini-mask-square"></span>
+            <span class="mini-mask-shape mini-mask-circle"></span>
+          </div>
+        </div>
+        <p class="tutorial-eyebrow">Step 5 of 13</p>
+        <h3>Mask it into a circle or diamond</h3>
+        <p>An optional shape mask clips the composition to a circle or diamond, with a seeded dithered edge so the boundary blends into the noise instead of cutting it off sharply.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="5">
         <div class="tutorial-demo tutorial-demo-drag">
           <div class="mini-slider-row">
             <span class="mini-slider-label">Flow scale</span>
             <div class="mini-slider-track"><div class="mini-slider-thumb mini-slider-thumb-drag"></div></div>
           </div>
         </div>
-        <p class="tutorial-eyebrow">Step 3 of 9</p>
+        <p class="tutorial-eyebrow">Step 6 of 13</p>
         <h3>Each layer has its own settings</h3>
         <p><span class="ui-ref">Layer A</span> and <span class="ui-ref">Layer B</span> each get their own seed, color, density, flow field, and symmetry, so they rarely match.</p>
       </div>
 
-      <div class="tutorial-step" data-step="3">
+      <div class="tutorial-step" data-step="6">
+        <div class="tutorial-demo tutorial-demo-range">
+          <div class="mini-range-row">
+            <span class="mini-slider-label">Density Range</span>
+            <div class="mini-range-track">
+              <div class="mini-range-fill"></div>
+              <div class="mini-range-thumb mini-range-thumb-min"></div>
+              <div class="mini-range-thumb mini-range-thumb-max"></div>
+            </div>
+          </div>
+        </div>
+        <p class="tutorial-eyebrow">Step 7 of 13</p>
+        <h3>Narrow the range, keep the theme</h3>
+        <p>Palette Range and Density Range constrain how far a randomized color or fill can wander, keeping Auto-randomize inside one tight, cohesive family.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="7">
         <div class="tutorial-demo tutorial-demo-lock">
           <span class="mini-lock-label">Lock from randomization</span>
           <div class="mini-lock-btn">
@@ -128,22 +182,22 @@
             <i class="ph ph-lock mini-lock-b"></i>
           </div>
         </div>
-        <p class="tutorial-eyebrow">Step 4 of 9</p>
+        <p class="tutorial-eyebrow">Step 8 of 13</p>
         <h3>Lock a field to keep it</h3>
         <p>A locked field holds its value through a randomize pass instead of getting a new one. <span class="ui-ref">Lock All</span> / <span class="ui-ref">Unlock All</span> apply to everything at once.</p>
       </div>
 
-      <div class="tutorial-step" data-step="4">
+      <div class="tutorial-step" data-step="8">
         <div class="tutorial-demo tutorial-demo-random">
           <div class="mini-random-btn"><i class="ph ph-shuffle"></i> Random</div>
           <div class="mini-canvas-swatch"></div>
         </div>
-        <p class="tutorial-eyebrow">Step 5 of 9</p>
+        <p class="tutorial-eyebrow">Step 9 of 13</p>
         <h3>Random rerolls what's unlocked</h3>
         <p>One click, and every unlocked field gets a fresh new value.</p>
       </div>
 
-      <div class="tutorial-step" data-step="5">
+      <div class="tutorial-step" data-step="9">
         <div class="tutorial-demo tutorial-demo-explore">
           <div class="mini-explore-controls">
             <div class="mini-play-btn"><i class="ph ph-play"></i></div>
@@ -154,38 +208,38 @@
           </div>
           <canvas id="tutorialDemoCanvas" width="180" height="90"></canvas>
         </div>
-        <p class="tutorial-eyebrow">Step 6 of 9</p>
+        <p class="tutorial-eyebrow">Step 10 of 13</p>
         <h3>Explore with Auto-randomize</h3>
         <p>Lock what you like, then slowly unlock the rest while it plays, watching results narrow toward a collection worth keeping. Prefer more control? Skip the button and click <span class="ui-ref">Random</span> by hand instead.</p>
       </div>
 
-      <div class="tutorial-step" data-step="6">
+      <div class="tutorial-step" data-step="10">
         <div class="tutorial-demo tutorial-demo-undo">
           <div class="mini-undo-btn"><i class="ph ph-arrow-counter-clockwise"></i></div>
           <div class="mini-canvas-swatch mini-canvas-swatch-b"></div>
         </div>
-        <p class="tutorial-eyebrow">Step 7 of 9</p>
+        <p class="tutorial-eyebrow">Step 11 of 13</p>
         <h3>Undo steps back</h3>
         <p>Went too far? <span class="ui-ref">Undo</span> walks back through recent passes, whether they came from a click, autoplay, or a GIF export.</p>
       </div>
 
-      <div class="tutorial-step" data-step="7">
+      <div class="tutorial-step" data-step="11">
         <div class="tutorial-demo tutorial-demo-save">
           <span class="mini-saved-badge">Saved</span>
           <div class="mini-icon-btn mini-icon-btn-save"><i class="ph ph-floppy-disk"></i></div>
         </div>
-        <p class="tutorial-eyebrow">Step 8 of 9</p>
+        <p class="tutorial-eyebrow">Step 12 of 13</p>
         <h3>Save it, or share a link</h3>
         <p>Three save slots live in your browser; <span class="ui-ref">Copy Link</span> encodes the same snapshot into a URL anyone can open.</p>
       </div>
 
-      <div class="tutorial-step" data-step="8">
+      <div class="tutorial-step" data-step="12">
         <div class="tutorial-demo tutorial-demo-export">
           <div class="mini-icon-btn mini-icon-btn-export"><i class="ph ph-download-simple"></i></div>
         </div>
-        <p class="tutorial-eyebrow">Step 9 of 9</p>
+        <p class="tutorial-eyebrow">Step 13 of 13</p>
         <h3>Export PNG, SVG, or GIF</h3>
-        <p>The exported GIF replays the exact sequence <span class="ui-ref">Auto-randomize</span> shows live.</p>
+        <p>The exported GIF replays the exact sequence <span class="ui-ref">Auto-randomize</span> would generate.</p>
       </div>
     </div>
 
@@ -1722,7 +1776,7 @@
     const tutorialDotsWrap = document.getElementById("tutorialDots");
     const tutorialPrevBtn = document.getElementById("tutorialPrevBtn");
     const tutorialNextBtn = document.getElementById("tutorialNextBtn");
-    const TUTORIAL_LIVE_DEMO_STEP = 5;
+    const TUTORIAL_LIVE_DEMO_STEP = 9;
     let tutorialStep = 0;
     let tutorialDemoTimer = null;
 
@@ -1798,13 +1852,23 @@
       tutorialSteps.forEach((step, idx) => step.classList.toggle("active", idx === tutorialStep));
       tutorialDots.forEach((dot, idx) => dot.classList.toggle("active", idx === tutorialStep));
       tutorialPrevBtn.disabled = tutorialStep === 0;
-      tutorialNextBtn.disabled = tutorialStep === tutorialSteps.length - 1;
+      // The last step has nowhere to go "next", so the button becomes a
+      // Replay instead of disabling: it stays useful rather than going dead.
+      const onLastStep = tutorialStep === tutorialSteps.length - 1;
+      tutorialNextBtn.classList.toggle("replay", onLastStep);
+      tutorialNextBtn.title = onLastStep ? "Replay" : "Next";
+      setIcon(tutorialNextBtn.querySelector("i"), onLastStep ? "arrow-counter-clockwise" : "caret-down");
       if (tutorialStep === TUTORIAL_LIVE_DEMO_STEP) startTutorialDemo();
       else stopTutorialDemo();
     }
 
+    function advanceTutorial() {
+      if (tutorialStep === tutorialSteps.length - 1) goToTutorialStep(0);
+      else goToTutorialStep(tutorialStep + 1);
+    }
+
     tutorialPrevBtn.addEventListener("click", () => goToTutorialStep(tutorialStep - 1));
-    tutorialNextBtn.addEventListener("click", () => goToTutorialStep(tutorialStep + 1));
+    tutorialNextBtn.addEventListener("click", advanceTutorial);
 
     // "Don't show again" only affects the automatic first-visit open
     // below; the "?" button always opens it regardless of this flag.
@@ -1842,7 +1906,7 @@
     document.addEventListener("keydown", (e) => {
       if (tutorialModal.hidden) return;
       if (e.key === "Escape") closeTutorial();
-      else if (e.key === "ArrowRight" && !tutorialNextBtn.disabled) goToTutorialStep(tutorialStep + 1);
+      else if (e.key === "ArrowRight") advanceTutorial();
       else if (e.key === "ArrowLeft" && !tutorialPrevBtn.disabled) goToTutorialStep(tutorialStep - 1);
     });
 

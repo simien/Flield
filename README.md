@@ -46,7 +46,7 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 - Three save-state slots stored in the browser for revisiting a composition later
 - Auto-randomize playback with an adjustable interval, from every 0.5 seconds up to every 10
 - Export to PNG, SVG, or an animated GIF, with frame count (1, 2, 3, 5, 8, or 13) and speed both configurable
-- A built-in tutorial, nine short steps with a live example each, covering the sidebar, locks, Random and Auto-randomize, and saving and exporting; it opens on its own on a first visit and can be turned off for good from inside it
+- A built-in tutorial, thirteen short steps with a live example each, covering the sidebar, dimension presets, the shape mask, palette and density ranges, locks, Random and Auto-randomize, and saving and exporting; it opens on its own on a first visit and can be turned off for good from inside it
 - Toast confirmations for actions that change something off-screen: Lock All / Unlock All, Undo, loading a saved state, and Copy Link
 - Responsive sidebar that collapses into a toggleable drawer on narrow screens
 - Dark theme by default, with a toggle for light, remembered across visits

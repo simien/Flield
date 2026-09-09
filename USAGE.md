@@ -15,7 +15,7 @@
 
 ## In-app tutorial
 
-Everything below is also built into the app itself. The **?** button (bottom of the sidebar, next to Copy Link) opens a nine-step tutorial, each step paired with a small live example of the control it's describing: sidebar navigation, layer settings, locks, Random and Auto-randomize, Undo, and saving, sharing, and exporting.
+Everything below is also built into the app itself. The **?** button (bottom of the sidebar, next to Copy Link) opens a thirteen-step tutorial, each step paired with a small live example of the control it's describing: what the tool does, sidebar navigation, dimension presets and Tile, the shape mask, layer settings, Palette Range and Density Range, locks, Random and Auto-randomize, Undo, and saving, sharing, and exporting.
 
 It opens on its own the first time you visit. Check **Don't show this automatically on future visits** before closing it to skip that going forward; the **?** button still opens it anytime. Step through with the arrows or the dots at the bottom, or the left/right arrow keys.
 
@@ -77,7 +77,7 @@ What comes through is a run of variations that share the same underlying structu
 
 > **Took a wrong turn?** **Undo** (next to Random) steps back through recent randomize passes, most recent first, and grays out once there's nothing left to undo.
 
-**GIF export is the same loop, captured.** The step count option (1, 2, 3, 5, 8, 13) runs that same randomize sequence, frame by frame, at the Auto-randomize interval as the per-frame delay. Whatever you see previewed live is what ends up in the exported GIF.
+**GIF export is the same loop, captured.** The step count option (1, 2, 3, 5, 8, 13) runs that same randomize sequence, frame by frame, at the Auto-randomize interval as the per-frame delay, the exact sequence Auto-randomize would generate rather than whatever the artboard happens to be showing at the moment.
 
 ## Widening or narrowing an art direction with Palette Range and Density Range
 

@@ -1324,6 +1324,13 @@ button:disabled {
   transform: rotate(-90deg);
 }
 
+/* Replay (the last step) swaps in a restart icon, which already points
+   the right way on its own, so the generic 90deg rotation above needs
+   canceling out here specifically. */
+.tutorial-nav-arrow.next.replay i svg {
+  transform: rotate(0deg);
+}
+
 .tutorial-dots {
   flex: 1;
   display: flex;
@@ -1364,7 +1371,20 @@ button:disabled {
   padding: 0 20px;
 }
 
-/* --- Step 1: Tabs. "Layer A" lights up on a loop. --- */
+/* --- Step 1: Intro. Static: three colors, no interaction to demo yet. --- */
+.mini-color-trio {
+  display: flex;
+  gap: 8px;
+}
+
+.mini-color-chip {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+/* --- Step 2: Tabs. "Layer A" lights up on a loop. --- */
 .tutorial-demo-tabs {
   align-items: center;
 }
@@ -1393,7 +1413,7 @@ button:disabled {
   96%, 100% { background: transparent; color: var(--text); opacity: 0.65; border-color: var(--border); }
 }
 
-/* --- Step 2: Theme. Sun crossfades to moon on a loop. --- */
+/* --- Step 3: Theme. Sun crossfades to moon on a loop. --- */
 .mini-theme-btn {
   position: relative;
   width: 36px;
@@ -1445,7 +1465,38 @@ button:disabled {
   animation: tutorialFadeHide 3.4s ease-in-out infinite;
 }
 
-/* --- Step 3: Layer settings. The thumb drifts across the track. --- */
+/* --- Step 4: Dimension presets & Tile. Reuses .mini-tab/.mini-tab-target
+   from the Tabs demo above; "Tile" is the target that lights up. --- */
+
+/* --- Step 5: Shape mask. A square crossfades to a circle on a loop,
+   the same fade pair the Theme/Lock demos use. --- */
+.mini-mask-preview {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.mini-mask-shape {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, #38bdf8, #f472b6);
+}
+
+.mini-mask-square {
+  border-radius: 6px;
+  opacity: 1;
+  animation: tutorialFadeShow 3.4s ease-in-out infinite;
+}
+
+.mini-mask-circle {
+  border-radius: 50%;
+  opacity: 0;
+  animation: tutorialFadeHide 3.4s ease-in-out infinite;
+}
+
+/* --- Step 6: Layer settings. The thumb drifts across the track. --- */
 .mini-slider-row {
   display: flex;
   flex-direction: column;
@@ -1483,7 +1534,52 @@ button:disabled {
   100% { left: 12%; }
 }
 
-/* --- Step 4: Locking. The lock fills solid on a loop. --- */
+/* --- Step 7: Palette Range & Density Range. A static track: two thumbs
+   bounding a highlighted middle segment reads as a range without needing
+   any motion. --- */
+.mini-range-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.mini-range-track {
+  position: relative;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.mini-range-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 25%;
+  right: 25%;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.mini-range-thumb {
+  position: absolute;
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translate(-50%, -50%);
+}
+
+.mini-range-thumb-min {
+  left: 25%;
+}
+
+.mini-range-thumb-max {
+  left: 75%;
+}
+
+/* --- Step 8: Locking. The lock fills solid on a loop. --- */
 .tutorial-demo-lock {
   gap: 12px;
 }
@@ -1524,7 +1620,7 @@ button:disabled {
   color: white;
 }
 
-/* --- Step 5: Random. The swatch snaps to a new look, an instant cut
+/* --- Step 9: Random. The swatch snaps to a new look, an instant cut
    (steps(1)) rather than a smooth blend, since a reroll doesn't ease
    into place. --- */
 .mini-canvas-swatch {
@@ -1560,7 +1656,7 @@ button:disabled {
   46%, 100% { filter: brightness(1); }
 }
 
-/* --- Step 6: Auto-randomize. The live canvas (see startTutorialDemo
+/* --- Step 10: Auto-randomize. The live canvas (see startTutorialDemo
    in index.html) cycles for real. --- */
 .tutorial-demo-explore canvas {
   border-radius: 6px;
@@ -1605,7 +1701,7 @@ button:disabled {
   animation: tutorialBtnPress 3.4s ease-in-out infinite;
 }
 
-/* --- Step 7: Undo. The swatch reverts on a loop. --- */
+/* --- Step 11: Undo. The swatch reverts on a loop. --- */
 .mini-canvas-swatch-b {
   animation: tutorialSwatchRevert 3.4s steps(1) infinite;
 }
@@ -1629,7 +1725,7 @@ button:disabled {
   animation: tutorialLockBg 3.4s ease-in-out infinite;
 }
 
-/* --- Step 8: Saved states & links. A "Saved" badge flashes on a loop. --- */
+/* --- Step 12: Saved states & links. A "Saved" badge flashes on a loop. --- */
 .mini-icon-btn {
   width: 40px;
   height: 40px;
@@ -1662,7 +1758,7 @@ button:disabled {
   92%, 100% { opacity: 0; transform: translateY(2px); }
 }
 
-/* --- Step 9: Exporting. The icon nudges down on a loop. --- */
+/* --- Step 13: Exporting. The icon nudges down on a loop. --- */
 .mini-icon-btn-export {
   animation: tutorialDownloadNudge 3.4s ease-in-out infinite;
 }
@@ -1688,7 +1784,9 @@ button:disabled {
   .mini-icon-btn-save,
   .mini-saved-badge,
   .mini-icon-btn-export,
-  .mini-play-btn {
+  .mini-play-btn,
+  .mini-mask-square,
+  .mini-mask-circle {
     animation: none;
   }
 }
