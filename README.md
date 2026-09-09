@@ -21,7 +21,7 @@ A few exported compositions, showing different symmetry modes, palettes, and den
 |---|---|---|
 | ![Magenta streak](examples/magenta-streak.gif) | ![Purple bowtie](examples/purple-bowtie.gif) | ![Cyan scatter](examples/cyan-scatter.gif) |
 | ![Diagonal bands](examples/diagonal-bands.gif) | ![Vertical bands](examples/vertical-bands.gif) | ![Mint kaleidoscope](examples/mint-kaleidoscope.gif) |
-| ![Diamond speckle](examples/diamond-speckle.gif) | ![Teal scatter](examples/teal-scatter.gif) | ![Magenta waves](examples/magenta-waves.gif) |
+| ![Diamond speckle](examples/diamond-speckle.gif?v=2) | ![Teal scatter](examples/teal-scatter.gif) | ![Magenta waves](examples/magenta-waves.gif) |
 
 ## Purpose
 
