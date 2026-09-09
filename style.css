@@ -1546,8 +1546,9 @@ button:disabled {
 /* --- Step 4: Dimension presets & Tile. Reuses .mini-tab/.mini-tab-target
    from the Tabs demo above; "Tile" is the target that lights up. --- */
 
-/* --- Step 5: Shape mask. A square crossfades to a circle on a loop,
-   the same fade pair the Theme/Lock demos use. --- */
+/* --- Step 5: Shape mask. A diamond crossfades to a circle on a loop,
+   the same fade pair the Theme/Lock demos use, matching the two actual
+   mask choices instead of an unmasked square. --- */
 .mini-mask-preview {
   position: relative;
   width: 56px;
@@ -1562,9 +1563,13 @@ button:disabled {
   background: linear-gradient(135deg, #38bdf8, #f472b6);
 }
 
-.mini-mask-square {
+.mini-mask-diamond {
   border-radius: 6px;
   opacity: 1;
+  /* Rotated a plain square: scaled down first so the rotated corners
+     (a square's diagonal is ~1.4x its side) still land inside the
+     56px box instead of overflowing it. */
+  transform: rotate(45deg) scale(0.7);
   animation: tutorialFadeShow 3.4s ease-in-out infinite;
 }
 
@@ -1863,7 +1868,7 @@ button:disabled {
   .mini-saved-badge,
   .mini-icon-btn-export,
   .mini-play-btn,
-  .mini-mask-square,
+  .mini-mask-diamond,
   .mini-mask-circle {
     animation: none;
   }
