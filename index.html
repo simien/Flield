@@ -66,7 +66,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=49" />
+  <link rel="stylesheet" href="style.css?v=50" />
   <script src="vendor/gif/gif.js"></script>
   <script src="vendor/floating-ui/core.min.js"></script>
   <script src="vendor/floating-ui/dom.min.js"></script>
@@ -144,11 +144,12 @@
           <div class="mini-mask-preview">
             <span class="mini-mask-shape mini-mask-diamond"></span>
             <span class="mini-mask-shape mini-mask-circle"></span>
+            <span class="mini-mask-shape mini-mask-stripes"></span>
           </div>
         </div>
         <p class="tutorial-eyebrow">Step 5 of 13</p>
-        <h3>Mask it into a circle or diamond</h3>
-        <p>An optional shape mask clips the composition to a circle or diamond, with a seeded dithered edge so the boundary blends into the noise instead of cutting it off sharply.</p>
+        <h3>Mask it into a shape, or a fade</h3>
+        <p>An optional shape mask clips or fades the composition, circle, diamond, vignette, corner or side vignette, or stripes, all dithered rather than sharply cut off at the edge.</p>
       </div>
 
       <div class="tutorial-step" data-step="5">
@@ -384,9 +385,19 @@
             <option value="none">None (full canvas)</option>
             <option value="circle">Circle</option>
             <option value="diamond">Diamond</option>
+            <option value="vignette">Vignette</option>
+            <option value="vignetteInverse">Vignette (inverse)</option>
+            <option value="cornerVignette">Corner vignette</option>
+            <option value="sideVignette">Side vignette</option>
+            <option value="stripes">Stripes</option>
           </select>
           <button type="button" class="lock-btn" data-for="shapeMask" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
         </div>
+      </div>
+
+      <div class="field" id="shapeMaskDirectionField" hidden>
+        <label for="shapeMaskDirection">Direction</label>
+        <select id="shapeMaskDirection"></select>
       </div>
 
       <h2 class="section-title">Saved states</h2>
@@ -614,7 +625,7 @@
     </footer>
   </div>
 
-  <script src="generator.js?v=4"></script>
+  <script src="generator.js?v=6"></script>
   <script>
     // Inline replacements for the icons that used to come from the
     // Phosphor webfont (224KB for the ~19 glyphs this app actually uses).
@@ -1169,6 +1180,49 @@
       document.getElementById(prefix + "-smoothVal").textContent = layer.smoothPasses;
     }
 
+    // Corner/side vignette and stripes need a direction the plain circle,
+    // diamond, and center vignette don't; the field's options are swapped
+    // to match whichever of these is selected, see updateShapeMaskDirectionUI.
+    const SHAPE_MASK_DIRECTIONS = {
+      cornerVignette: [
+        { value: "topLeft", label: "Top-left" },
+        { value: "topRight", label: "Top-right" },
+        { value: "bottomLeft", label: "Bottom-left" },
+        { value: "bottomRight", label: "Bottom-right" },
+      ],
+      sideVignette: [
+        { value: "top", label: "Top" },
+        { value: "right", label: "Right" },
+        { value: "bottom", label: "Bottom" },
+        { value: "left", label: "Left" },
+      ],
+      stripes: [
+        { value: "horizontal", label: "Horizontal" },
+        { value: "vertical", label: "Vertical" },
+        { value: "diagonal", label: "Diagonal" },
+      ],
+    };
+
+    // Only rebuilds the option list when the shape type actually changed
+    // (tracked via the select's own dataset), so calling this on every
+    // render() (needed to keep the field's visibility in sync) doesn't
+    // stomp a direction the user, or a randomize pass, already picked.
+    function updateShapeMaskDirectionUI() {
+      const shapeMask = document.getElementById("shapeMask").value;
+      const field = document.getElementById("shapeMaskDirectionField");
+      const select = document.getElementById("shapeMaskDirection");
+      const directions = SHAPE_MASK_DIRECTIONS[shapeMask];
+      if (!directions) {
+        field.hidden = true;
+        return;
+      }
+      field.hidden = false;
+      if (select.dataset.forShape !== shapeMask) {
+        select.innerHTML = directions.map((d) => `<option value="${d.value}">${d.label}</option>`).join("");
+        select.dataset.forShape = shapeMask;
+      }
+    }
+
     function readOptions() {
       return {
         bgColor: document.getElementById("bgColor").value,
@@ -1176,6 +1230,7 @@
         height: parseInt(document.getElementById("height").value, 10) || 100,
         blockSize: parseInt(document.getElementById("blockSize").value, 10),
         shapeMask: document.getElementById("shapeMask").value,
+        shapeMaskDirection: document.getElementById("shapeMaskDirection").value,
         layerA: readLayer("layerA"),
         layerB: readLayer("layerB"),
       };
@@ -1213,6 +1268,7 @@
     }
 
     function render() {
+      updateShapeMaskDirectionUI();
       const options = readOptions();
       document.getElementById("blockSizeVal").textContent = options.blockSize + "px";
       updateLayerLabels("layerA", options.layerA);
@@ -1446,6 +1502,14 @@
         const el = document.getElementById("shapeMask");
         const opts = Array.from(el.options).map((o) => o.value);
         el.value = opts[Math.floor(Math.random() * opts.length)];
+        // Direction rides along with the shape mask under one lock rather
+        // than getting its own, so a landed-on corner/side/stripe reads
+        // as a full reroll instead of always defaulting to the same
+        // first option in its list.
+        updateShapeMaskDirectionUI();
+        const dirSelect = document.getElementById("shapeMaskDirection");
+        const dirOpts = Array.from(dirSelect.options).map((o) => o.value);
+        if (dirOpts.length) dirSelect.value = dirOpts[Math.floor(Math.random() * dirOpts.length)];
       }
       render();
     }
@@ -1622,6 +1686,15 @@
       document.getElementById("height").value = values.height;
       document.getElementById("blockSize").value = values.blockSize;
       document.getElementById("shapeMask").value = values.shapeMask || "none";
+      // Rebuild the direction options for the restored shape now, rather
+      // than leaving it to render()'s own call further down the line:
+      // that way the specific direction below is set on options that
+      // already match, instead of getting reset back to the first one
+      // the moment render() notices the shape type changed.
+      updateShapeMaskDirectionUI();
+      const dirSelect = document.getElementById("shapeMaskDirection");
+      const hasDirection = [...dirSelect.options].some((o) => o.value === values.shapeMaskDirection);
+      if (hasDirection) dirSelect.value = values.shapeMaskDirection;
     }
 
     function refreshPresetUI(slot) {

@@ -36,7 +36,7 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 - Every page load opens on a freshly randomized composition
 - Two independently configurable color layers, each with its own seed, density, and directional flow field
 - Eight symmetry modes: 4-way mirror, horizontal, vertical, 180-degree rotational, diagonal, 8-way kaleidoscope, tile, and none
-- An optional circle or diamond shape mask, with a seeded dithered edge so the boundary blends into the noise instead of cutting it off sharply
+- Optional shape masks, circle, diamond, vignette (and its inverse), a directional corner or side vignette, and stripes, each with a seeded dithered edge or fade instead of a hard cutoff
 - A Tile dimension preset for a square canvas that repeats with no visible seam (not to be confused with the Tile symmetry mode above): shape mask off, both layers on 4-way mirror, so left edge matches right edge and top matches bottom exactly
 - Palette range controls (hue, saturation, lightness) with five presets, plus fully custom ranges
 - Density range controls, so a randomize pass can't drift all the way to a solid fill or an empty layer
@@ -63,4 +63,4 @@ Flield is plain HTML, CSS, and JavaScript. No build step, no package manager.
 
 ## How it works
 
-Each layer's shape comes from a seeded value noise field (a small Perlin-style implementation in `generator.js`), rotated and stretched to create a directional flow instead of isolated static. That field biases each cell's fill probability rather than gating cells on or off directly, which produces smooth density gradients across the canvas. Symmetry modes apply as a final mirror, rotation, or (for Tile) translation pass over the generated grid. A shape mask, when set, constrains the composition to a circle or diamond with a seeded dither along the boundary instead of a hard cutoff, so the edge reads as part of the texture rather than a clipped shape.
+Each layer's shape comes from a seeded value noise field (a small Perlin-style implementation in `generator.js`), rotated and stretched to create a directional flow instead of isolated static. That field biases each cell's fill probability rather than gating cells on or off directly, which produces smooth density gradients across the canvas. Symmetry modes apply as a final mirror, rotation, or (for Tile) translation pass over the generated grid. A shape mask, when set, constrains or fades the composition, a circle, diamond, vignette, corner or side vignette, or stripes, with a seeded dither along the transition instead of a hard cutoff, so the edge reads as part of the texture rather than a clipped shape.

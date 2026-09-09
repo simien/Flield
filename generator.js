@@ -348,18 +348,25 @@ function gridToSVG({ width, height, blockSize, bgColor, colorA, colorB, gridA, g
 }
 
 // Distance from grid cell (x, y) to the shape's own boundary, in units
-// where 0 is dead center and 1 is the boundary itself, inscribed with a
-// small margin inside the full cols x rows rect (an ellipse or diamond
-// matching the canvas's own aspect ratio, not a true circle that would
-// leave large dead margins on a wide canvas). Values noticeably above 1
-// are well outside; noticeably below 1 are well inside.
+// where 0 is dead center and 1 is the boundary itself. Values noticeably
+// above 1 are well outside; noticeably below 1 are well inside. Diamond
+// stays inscribed to the canvas's own aspect ratio (a stretched rhombus
+// reads fine); circle uses the shorter dimension for both axes so it's an
+// actual circle rather than an ellipse stretched wide on the typical
+// wider-than-tall canvas, even though that leaves dead margin on the
+// longer axis.
 const SHAPE_MASK_MARGIN = 0.88;
 function shapeDistance(shape, x, y, cols, rows) {
   const cx = (cols - 1) / 2;
   const cy = (rows - 1) / 2;
+  if (shape === "circle") {
+    const r = (Math.min(cols, rows) / 2) * SHAPE_MASK_MARGIN;
+    const nx = (x - cx) / r;
+    const ny = (y - cy) / r;
+    return Math.sqrt(nx * nx + ny * ny);
+  }
   const nx = (x - cx) / ((cols / 2) * SHAPE_MASK_MARGIN);
   const ny = (y - cy) / ((rows / 2) * SHAPE_MASK_MARGIN);
-  if (shape === "circle") return Math.sqrt(nx * nx + ny * ny);
   if (shape === "diamond") return Math.abs(nx) + Math.abs(ny);
   return 0; // "none"
 }
@@ -376,9 +383,106 @@ function shapeDistance(shape, x, y, cols, rows) {
 // the layer-A-over-B exclusion below, so a masked composition still keeps
 // both layers mutually exclusive inside the visible shape.
 const SHAPE_MASK_FEATHER = 0.18;
-function applyShapeMask(grid, cols, rows, shape, seed) {
+
+// Gradient-family masks (vignette, corner/side vignette, stripes) skip the
+// circle/diamond path entirely: rather than a hard shape boundary with a
+// narrow feathered band around it, every cell gets a keep-probability that
+// varies continuously across the whole canvas, from the mask's own
+// reference point (center, a chosen corner or side, a stripe's own center
+// line) out to wherever it fades to nothing. Same rand()-per-cell dither
+// as the boundary band above, just applied over the full frame instead of
+// a narrow ring, since these are continuously fading rather than a shape
+// with an inside and an outside.
+const GRADIENT_SHAPE_MASKS = new Set(["vignette", "vignetteInverse", "cornerVignette", "sideVignette", "stripes"]);
+
+const CORNER_POINTS = {
+  topLeft: [0, 0],
+  topRight: [1, 0],
+  bottomLeft: [0, 1],
+  bottomRight: [1, 1],
+};
+
+const STRIPE_COUNT = 5;
+
+// Circular (not aspect-stretched) distance from (originX, originY) to
+// (x, y), scaled by the canvas's shorter dimension and normalized so 0 is
+// right at the origin and 1 lands on whichever canvas corner is farthest
+// from it. Shared by vignette (origin at center) and cornerVignette
+// (origin at the chosen corner) so both read as a real circular falloff,
+// the same fix shapeDistance's "circle" uses, rather than an ellipse
+// stretched to the canvas's own aspect ratio.
+function radialFade(x, y, cols, rows, originX, originY) {
+  const r = Math.min(cols, rows) / 2 || 1;
+  const dx = (x - originX) / r;
+  const dy = (y - originY) / r;
+  const corners = [
+    [0, 0],
+    [cols - 1, 0],
+    [0, rows - 1],
+    [cols - 1, rows - 1],
+  ];
+  let maxD = 0;
+  for (const [cornerX, cornerY] of corners) {
+    const fx = (cornerX - originX) / r;
+    const fy = (cornerY - originY) / r;
+    maxD = Math.max(maxD, Math.sqrt(fx * fx + fy * fy));
+  }
+  return Math.min(1, Math.sqrt(dx * dx + dy * dy) / (maxD || 1));
+}
+
+function maskKeepProbability(shape, direction, x, y, cols, rows) {
+  const nx = x / Math.max(1, cols - 1);
+  const ny = y / Math.max(1, rows - 1);
+
+  if (shape === "vignette" || shape === "vignetteInverse") {
+    const d = radialFade(x, y, cols, rows, (cols - 1) / 2, (rows - 1) / 2);
+    return shape === "vignette" ? 1 - d : d;
+  }
+
+  if (shape === "cornerVignette") {
+    const [fx, fy] = CORNER_POINTS[direction] || CORNER_POINTS.topLeft;
+    const d = radialFade(x, y, cols, rows, fx * (cols - 1), fy * (rows - 1));
+    return 1 - d;
+  }
+
+  if (shape === "sideVignette") {
+    let d;
+    if (direction === "top") d = ny;
+    else if (direction === "bottom") d = 1 - ny;
+    else if (direction === "right") d = 1 - nx;
+    else d = nx; // "left" (also the fallback)
+    return 1 - d;
+  }
+
+  if (shape === "stripes") {
+    let t;
+    if (direction === "horizontal") t = ny;
+    else if (direction === "diagonal") t = (nx + ny) / 2;
+    else t = nx; // "vertical" (also the fallback)
+    const phase = (t * STRIPE_COUNT) % 1;
+    // Triangle wave: 0 at each stripe's own boundary, 1 at its center, so
+    // the band fades out on both sides instead of cutting off sharply.
+    return phase < 0.5 ? phase * 2 : (1 - phase) * 2;
+  }
+
+  return 1;
+}
+
+function applyShapeMask(grid, cols, rows, shape, seed, direction) {
   if (!shape || shape === "none") return;
   const rand = seededRandom(seed + "|mask");
+
+  if (GRADIENT_SHAPE_MASKS.has(shape)) {
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        if (rand() > maskKeepProbability(shape, direction, x, y, cols, rows)) {
+          grid[y][x] = false;
+        }
+      }
+    }
+    return;
+  }
+
   const inner = 1 - SHAPE_MASK_FEATHER;
   const outer = 1 + SHAPE_MASK_FEATHER;
   for (let y = 0; y < rows; y++) {
@@ -436,8 +540,8 @@ function generate(options) {
     field: layerOptionsToField(options.layerB),
   });
 
-  applyShapeMask(gridA, cols, rows, options.shapeMask, options.layerA.seed);
-  applyShapeMask(gridB, cols, rows, options.shapeMask, options.layerB.seed);
+  applyShapeMask(gridA, cols, rows, options.shapeMask, options.layerA.seed, options.shapeMaskDirection);
+  applyShapeMask(gridB, cols, rows, options.shapeMask, options.layerB.seed, options.shapeMaskDirection);
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {

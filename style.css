@@ -1546,9 +1546,12 @@ button:disabled {
 /* --- Step 4: Dimension presets & Tile. Reuses .mini-tab/.mini-tab-target
    from the Tabs demo above; "Tile" is the target that lights up. --- */
 
-/* --- Step 5: Shape mask. A diamond crossfades to a circle on a loop,
-   the same fade pair the Theme/Lock demos use, matching the two actual
-   mask choices instead of an unmasked square. --- */
+/* --- Step 5: Shape mask. Three shapes cycle through on a loop (diamond,
+   circle, stripes), standing in for the full set (those two plus
+   vignette and its inverse, a corner or side vignette, and stripes)
+   without trying to cram all six into one small preview. Three
+   evenly-spaced phases of the same shared timeline rather than the
+   two-state tutorialFadeShow/Hide pair the Theme/Lock demos use. --- */
 .mini-mask-preview {
   position: relative;
   width: 56px;
@@ -1563,6 +1566,24 @@ button:disabled {
   background: linear-gradient(135deg, #38bdf8, #f472b6);
 }
 
+@keyframes tutorialMaskPhase1 {
+  0%, 27% { opacity: 1; }
+  33%, 94% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes tutorialMaskPhase2 {
+  0%, 27% { opacity: 0; }
+  33%, 60% { opacity: 1; }
+  66%, 100% { opacity: 0; }
+}
+
+@keyframes tutorialMaskPhase3 {
+  0%, 60% { opacity: 0; }
+  66%, 94% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 .mini-mask-diamond {
   border-radius: 6px;
   opacity: 1;
@@ -1570,13 +1591,20 @@ button:disabled {
      (a square's diagonal is ~1.4x its side) still land inside the
      56px box instead of overflowing it. */
   transform: rotate(45deg) scale(0.7);
-  animation: tutorialFadeShow 3.4s ease-in-out infinite;
+  animation: tutorialMaskPhase1 5.1s ease-in-out infinite;
 }
 
 .mini-mask-circle {
   border-radius: 50%;
   opacity: 0;
-  animation: tutorialFadeHide 3.4s ease-in-out infinite;
+  animation: tutorialMaskPhase2 5.1s ease-in-out infinite;
+}
+
+.mini-mask-stripes {
+  border-radius: 6px;
+  background: repeating-linear-gradient(90deg, #38bdf8 0px, #38bdf8 8px, #f472b6 8px, #f472b6 16px);
+  opacity: 0;
+  animation: tutorialMaskPhase3 5.1s ease-in-out infinite;
 }
 
 /* --- Step 6: Layer settings. The thumb drifts across the track. --- */
@@ -1869,7 +1897,8 @@ button:disabled {
   .mini-icon-btn-export,
   .mini-play-btn,
   .mini-mask-diamond,
-  .mini-mask-circle {
+  .mini-mask-circle,
+  .mini-mask-stripes {
     animation: none;
   }
 }
