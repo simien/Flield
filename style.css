@@ -1232,9 +1232,14 @@ button:disabled {
   margin-top: 0;
 }
 
+/* Reserves room for the tallest step (see the 900px+ override below,
+   which drops this once the nav arrows move outside the modal) so the
+   footer's Prev/Next never shift under a cursor that's already sitting
+   on them mid-click-through. Measured against the tallest step's actual
+   content at a narrow (375px) width, plus the body's own padding. */
 .tutorial-modal-body {
   flex: 1;
-  min-height: 0;
+  min-height: 332px;
   overflow-y: auto;
   padding: 20px 24px 28px;
 }
@@ -1331,6 +1336,75 @@ button:disabled {
   transform: rotate(0deg);
 }
 
+/* .tutorial-nav-arrow-wide duplicates tutorialPrevBtn/tutorialNextBtn
+   for the 900px+ layout (see index.html, kept in sync in
+   goToTutorialStep) rather than being those same buttons repositioned:
+   .tutorial-modal centers itself with a transform (see above), which
+   makes it the containing block for any position:fixed descendant and
+   clips it via the modal's own overflow:hidden, so a footer button
+   can't actually escape to float beside the modal from inside it. Living
+   outside the modal's DOM subtree entirely sidesteps that. */
+.tutorial-nav-arrow-wide {
+  display: none;
+}
+
+/* At 900px+ there's enough side gutter to show these floating beside
+   the modal instead of the in-footer pair, fixed to the viewport's own
+   vertical center rather than the modal's. The modal is also centered
+   via top:50% + translate(-50%,-50%), so its center never moves even as
+   its height changes step to step; anchoring these to that same fixed
+   point means they stay under the cursor across the whole walkthrough
+   without needing the min-height reservation below 900px uses instead.
+   The modal's own width is a flat 420px anywhere this query applies
+   (min(420px, 92vw) only ever clamps to 92vw under ~456px), so the
+   offset from center can be a plain number instead of replicating that
+   min(). */
+@media (min-width: 900px) {
+  .tutorial-modal-body {
+    min-height: 0;
+  }
+
+  .tutorial-modal-footer .tutorial-nav-arrow {
+    display: none;
+  }
+
+  /* Centered via top + a negative margin rather than the more usual
+     translateY(-50%): the global button:active rule (see button, way
+     above) sets its own transform for the press-down feel, and a single
+     transform can only hold one value, so translateY here would just
+     get replaced by that scale(), silently dropping the centering
+     offset and snapping the button down by half its own height on every
+     press, moving it out from under the cursor before the click even
+     fires. Leaving transform free for that rule keeps this element in
+     place while still letting the press effect apply normally. */
+  /* Bigger than the icon inside needs (that stays at the usual 15px via
+     button i, way above) purely to widen the click target: this button
+     floats alone against the backdrop, with the backdrop's own
+     click-to-close listener right behind it, so a near-miss here closes
+     the tutorial instead of just failing to advance a step. */
+  .tutorial-nav-arrow-wide:not([hidden]) {
+    display: flex;
+    position: fixed;
+    top: 50%;
+    margin-top: -28px;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--panel);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    z-index: 41;
+  }
+
+  .tutorial-nav-arrow-wide.prev {
+    left: calc(50% - 210px - 28px - 56px);
+  }
+
+  .tutorial-nav-arrow-wide.next {
+    left: calc(50% + 210px + 28px);
+  }
+}
+
 .tutorial-dots {
   flex: 1;
   display: flex;
@@ -1371,17 +1445,21 @@ button:disabled {
   padding: 0 20px;
 }
 
-/* --- Step 1: Intro. Static: three colors, no interaction to demo yet. --- */
-.mini-color-trio {
-  display: flex;
-  gap: 8px;
+/* --- Step 1: Intro. A grid of short strokes, each rotated to its own
+   angle, the way a flow field is conventionally visualized (many small
+   vectors, not one continuous line). Static: nothing to click yet. --- */
+.mini-flow-field {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px 20px;
 }
 
-.mini-color-chip {
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
+.mini-flow-line {
+  display: block;
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--accent);
 }
 
 /* --- Step 2: Tabs. "Layer A" lights up on a loop. --- */

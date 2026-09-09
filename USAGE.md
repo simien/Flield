@@ -15,7 +15,7 @@
 
 ## In-app tutorial
 
-Everything below is also built into the app itself. The **?** button (bottom of the sidebar, next to Copy Link) opens a thirteen-step tutorial, each step paired with a small live example of the control it's describing: what the tool does, sidebar navigation, dimension presets and Tile, the shape mask, layer settings, Palette Range and Density Range, locks, Random and Auto-randomize, Undo, and saving, sharing, and exporting.
+Everything below is also built into the app itself. The **?** button (bottom of the sidebar, next to Copy Link) opens a thirteen-step tutorial, each step paired with a small live example of the control it's describing: what a flow field is, sidebar navigation, dimension presets and Tile, the shape mask, layer settings, Palette Range and Density Range, locks, Random and Auto-randomize, Undo, and saving, sharing, and exporting.
 
 It opens on its own the first time you visit. Check **Don't show this automatically on future visits** before closing it to skip that going forward; the **?** button still opens it anytime. Step through with the arrows or the dots at the bottom, or the left/right arrow keys.
 
