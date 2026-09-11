@@ -140,6 +140,9 @@ input[type="range"]:focus-visible {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  /* Shared by the canvas area and the site footer, so the legend and
+     links sit on the same inset as the artwork's edges. */
+  --artboard-pad: 40px;
 }
 
 /* The name sits centered over the artboard, out of the sidebar's way
@@ -341,8 +344,8 @@ input[type="range"]:focus-visible {
     display: block;
   }
 
-  .canvas-area {
-    padding: 16px;
+  .main-area {
+    --artboard-pad: 16px;
   }
 }
 
@@ -1254,14 +1257,16 @@ button.secondary:hover:not(:disabled) {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: var(--artboard-pad);
   overflow: auto;
 }
 
 /* One quiet strip under the canvas: the shortcut legend on the left,
    the links on the right, both at the subtle text color and both
-   waking to full strength together on hover. Same 32px line box and
-   20px edge inset as .brand at the top. */
+   waking to full strength together on hover. Inset by the artboard's
+   own padding on the sides and the bottom, so it frames the artwork
+   rather than floating off its edges; the brand above keeps its own
+   20px, since it belongs to the header row. */
 .site-footer {
   flex-shrink: 0;
   display: flex;
@@ -1269,8 +1274,8 @@ button.secondary:hover:not(:disabled) {
   align-items: center;
   gap: 16px;
   height: 32px;
-  margin-bottom: 20px;
-  padding: 0 24px;
+  margin-bottom: var(--artboard-pad);
+  padding: 0 var(--artboard-pad);
   font-size: 11px;
   color: var(--text-subtle);
   transition: color 0.15s ease;
