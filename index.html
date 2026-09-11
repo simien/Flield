@@ -29,16 +29,16 @@
   <meta property="og:site_name" content="Flield" />
   <meta property="og:title" content="Flield: Pixel Art Generator" />
   <meta property="og:description" content="A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF." />
-  <meta property="og:image" content="https://flield.com/screenshot.png?v=3" />
+  <meta property="og:image" content="https://flield.com/screenshot.png?v=4" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="900" />
   <meta property="og:image:alt" content="A generated three-color composition in Flield" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Flield: Pixel Art Generator" />
   <meta name="twitter:description" content="A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF." />
-  <meta name="twitter:image" content="https://flield.com/screenshot.png?v=3" />
+  <meta name="twitter:image" content="https://flield.com/screenshot.png?v=4" />
   <meta name="twitter:image:alt" content="A generated three-color composition in Flield" />
-  <meta name="theme-color" content="#16161a" />
+  <meta name="theme-color" content="#09090b" />
 
   <script type="application/ld+json">
   {
@@ -66,7 +66,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=50" />
+  <link rel="stylesheet" href="style.css?v=51" />
   <script src="vendor/gif/gif.js"></script>
   <script src="vendor/floating-ui/core.min.js"></script>
   <script src="vendor/floating-ui/dom.min.js"></script>
@@ -96,12 +96,22 @@
             <span class="mini-flow-line" style="transform:rotate(60deg)"></span>
           </div>
         </div>
-        <p class="tutorial-eyebrow">Step 1 of 13</p>
+        <p class="tutorial-eyebrow">Step 1 of 12</p>
         <h3>What's a flow field?</h3>
         <p>In generative art, a flow field is a grid of directional forces that steers noise into organic drifts instead of static. Every layer here follows its own field to shape density into bands and clusters, which is where the name comes from.</p>
       </div>
 
       <div class="tutorial-step" data-step="1">
+        <div class="tutorial-demo tutorial-demo-random">
+          <div class="mini-random-btn"><i class="ph ph-shuffle"></i> Random</div>
+          <div class="mini-canvas-swatch"></div>
+        </div>
+        <p class="tutorial-eyebrow">Step 2 of 12</p>
+        <h3>Random rerolls the canvas</h3>
+        <p>One click, or the <span class="ui-ref">R</span> key, and every setting in the sidebar gets a fresh value. It's the fastest way to see what the tool does; the rest of this tour is about steering it.</p>
+      </div>
+
+      <div class="tutorial-step" data-step="2">
         <div class="tutorial-demo tutorial-demo-tabs">
           <div class="mini-tabs">
             <span class="mini-tab">General</span>
@@ -109,24 +119,24 @@
             <span class="mini-tab">Layer B</span>
           </div>
         </div>
-        <p class="tutorial-eyebrow">Step 2 of 13</p>
+        <p class="tutorial-eyebrow">Step 3 of 12</p>
         <h3>Three tabs, one canvas</h3>
         <p><span class="ui-ref">General</span> holds canvas settings; <span class="ui-ref">Layer A</span> and <span class="ui-ref">Layer B</span> hold each layer's own look.</p>
       </div>
 
-      <div class="tutorial-step" data-step="2">
-        <div class="tutorial-demo tutorial-demo-theme">
-          <div class="mini-theme-btn">
-            <i class="ph ph-sun mini-lock-a"></i>
-            <i class="ph ph-moon mini-lock-b"></i>
+      <div class="tutorial-step" data-step="3">
+        <div class="tutorial-demo tutorial-demo-drag">
+          <div class="mini-slider-row">
+            <span class="mini-slider-label">Flow scale</span>
+            <div class="mini-slider-track"><div class="mini-slider-thumb mini-slider-thumb-drag"></div></div>
           </div>
         </div>
-        <p class="tutorial-eyebrow">Step 3 of 13</p>
-        <h3>Switch between dark and light</h3>
-        <p>The toggle switches dark and light, and your pick is remembered next time.</p>
+        <p class="tutorial-eyebrow">Step 4 of 12</p>
+        <h3>Each layer has its own settings</h3>
+        <p><span class="ui-ref">Layer A</span> and <span class="ui-ref">Layer B</span> each get their own seed, color, density, flow field, and symmetry, so they rarely match.</p>
       </div>
 
-      <div class="tutorial-step" data-step="3">
+      <div class="tutorial-step" data-step="4">
         <div class="tutorial-demo tutorial-demo-presets">
           <div class="mini-tabs">
             <span class="mini-tab">Web</span>
@@ -134,12 +144,12 @@
             <span class="mini-tab mini-tab-target">Tile</span>
           </div>
         </div>
-        <p class="tutorial-eyebrow">Step 4 of 13</p>
+        <p class="tutorial-eyebrow">Step 5 of 12</p>
         <h3>Pick a size, or tile it</h3>
         <p>Web, Tablet, and Mobile presets set common dimensions. <span class="ui-ref">Tile</span> squares the canvas and mirrors both layers so it repeats with no visible seam.</p>
       </div>
 
-      <div class="tutorial-step" data-step="4">
+      <div class="tutorial-step" data-step="5">
         <div class="tutorial-demo tutorial-demo-mask">
           <div class="mini-mask-preview">
             <span class="mini-mask-shape mini-mask-diamond"></span>
@@ -147,24 +157,25 @@
             <span class="mini-mask-shape mini-mask-stripes"></span>
           </div>
         </div>
-        <p class="tutorial-eyebrow">Step 5 of 13</p>
+        <p class="tutorial-eyebrow">Step 6 of 12</p>
         <h3>Mask it into a shape, or a fade</h3>
         <p>An optional shape mask clips or fades the composition, circle, diamond, vignette, corner or side vignette, or stripes, all dithered rather than sharply cut off at the edge.</p>
       </div>
 
-      <div class="tutorial-step" data-step="5">
-        <div class="tutorial-demo tutorial-demo-drag">
-          <div class="mini-slider-row">
-            <span class="mini-slider-label">Flow scale</span>
-            <div class="mini-slider-track"><div class="mini-slider-thumb mini-slider-thumb-drag"></div></div>
+      <div class="tutorial-step" data-step="6">
+        <div class="tutorial-demo tutorial-demo-lock">
+          <span class="mini-lock-label">Lock from randomization</span>
+          <div class="mini-lock-btn">
+            <i class="ph ph-lock-open mini-lock-a"></i>
+            <i class="ph ph-lock mini-lock-b"></i>
           </div>
         </div>
-        <p class="tutorial-eyebrow">Step 6 of 13</p>
-        <h3>Each layer has its own settings</h3>
-        <p><span class="ui-ref">Layer A</span> and <span class="ui-ref">Layer B</span> each get their own seed, color, density, flow field, and symmetry, so they rarely match.</p>
+        <p class="tutorial-eyebrow">Step 7 of 12</p>
+        <h3>Lock a field to keep it</h3>
+        <p>A locked field holds its value through a randomize pass instead of getting a new one. <span class="ui-ref">Lock All</span> / <span class="ui-ref">Unlock All</span> apply to everything at once, and a tab shows a padlock once any of its fields are locked.</p>
       </div>
 
-      <div class="tutorial-step" data-step="6">
+      <div class="tutorial-step" data-step="7">
         <div class="tutorial-demo tutorial-demo-range">
           <div class="mini-range-row">
             <span class="mini-slider-label">Density Range</span>
@@ -175,35 +186,12 @@
             </div>
           </div>
         </div>
-        <p class="tutorial-eyebrow">Step 7 of 13</p>
+        <p class="tutorial-eyebrow">Step 8 of 12</p>
         <h3>Narrow the range, keep the theme</h3>
         <p>Palette Range and Density Range constrain how far a randomized color or fill can wander, keeping Auto-randomize inside one tight, cohesive family.</p>
       </div>
 
-      <div class="tutorial-step" data-step="7">
-        <div class="tutorial-demo tutorial-demo-lock">
-          <span class="mini-lock-label">Lock from randomization</span>
-          <div class="mini-lock-btn">
-            <i class="ph ph-lock-open mini-lock-a"></i>
-            <i class="ph ph-lock mini-lock-b"></i>
-          </div>
-        </div>
-        <p class="tutorial-eyebrow">Step 8 of 13</p>
-        <h3>Lock a field to keep it</h3>
-        <p>A locked field holds its value through a randomize pass instead of getting a new one. <span class="ui-ref">Lock All</span> / <span class="ui-ref">Unlock All</span> apply to everything at once.</p>
-      </div>
-
       <div class="tutorial-step" data-step="8">
-        <div class="tutorial-demo tutorial-demo-random">
-          <div class="mini-random-btn"><i class="ph ph-shuffle"></i> Random</div>
-          <div class="mini-canvas-swatch"></div>
-        </div>
-        <p class="tutorial-eyebrow">Step 9 of 13</p>
-        <h3>Random rerolls what's unlocked</h3>
-        <p>One click, and every unlocked field gets a fresh new value.</p>
-      </div>
-
-      <div class="tutorial-step" data-step="9">
         <div class="tutorial-demo tutorial-demo-explore">
           <div class="mini-explore-controls">
             <div class="mini-play-btn"><i class="ph ph-play"></i></div>
@@ -214,45 +202,41 @@
           </div>
           <canvas id="tutorialDemoCanvas" width="180" height="90"></canvas>
         </div>
-        <p class="tutorial-eyebrow">Step 10 of 13</p>
+        <p class="tutorial-eyebrow">Step 9 of 12</p>
         <h3>Explore with Auto-randomize</h3>
-        <p>Lock what you like, then slowly unlock the rest while it plays, watching results narrow toward a collection worth keeping. Prefer more control? Skip the button and click <span class="ui-ref">Random</span> by hand instead.</p>
+        <p>Lock what you like, then slowly unlock the rest while it plays (<span class="ui-ref">Space</span> starts and stops it), watching results narrow toward a collection worth keeping. Prefer more control? Skip the button and click <span class="ui-ref">Random</span> by hand instead.</p>
       </div>
 
-      <div class="tutorial-step" data-step="10">
+      <div class="tutorial-step" data-step="9">
         <div class="tutorial-demo tutorial-demo-undo">
           <div class="mini-undo-btn"><i class="ph ph-arrow-counter-clockwise"></i></div>
           <div class="mini-canvas-swatch mini-canvas-swatch-b"></div>
         </div>
-        <p class="tutorial-eyebrow">Step 11 of 13</p>
+        <p class="tutorial-eyebrow">Step 10 of 12</p>
         <h3>Undo steps back</h3>
-        <p>Went too far? <span class="ui-ref">Undo</span> walks back through recent passes, whether they came from a click, autoplay, or a GIF export.</p>
+        <p>Went too far? <span class="ui-ref">Undo</span> (or <span class="ui-ref">Cmd/Ctrl+Z</span>) walks back through recent passes, whether they came from a click, autoplay, or a GIF export.</p>
       </div>
 
-      <div class="tutorial-step" data-step="11">
+      <div class="tutorial-step" data-step="10">
         <div class="tutorial-demo tutorial-demo-save">
           <span class="mini-saved-badge">Saved</span>
           <div class="mini-icon-btn mini-icon-btn-save"><i class="ph ph-floppy-disk"></i></div>
         </div>
-        <p class="tutorial-eyebrow">Step 12 of 13</p>
+        <p class="tutorial-eyebrow">Step 11 of 12</p>
         <h3>Save it, or share a link</h3>
         <p>Three save slots live in your browser; <span class="ui-ref">Copy Link</span> encodes the same snapshot into a URL anyone can open.</p>
       </div>
 
-      <div class="tutorial-step" data-step="12">
+      <div class="tutorial-step" data-step="11">
         <div class="tutorial-demo tutorial-demo-export">
           <div class="mini-icon-btn mini-icon-btn-export"><i class="ph ph-download-simple"></i></div>
         </div>
-        <p class="tutorial-eyebrow">Step 13 of 13</p>
+        <p class="tutorial-eyebrow">Step 12 of 12</p>
         <h3>Export PNG, SVG, or GIF</h3>
         <p>The exported GIF replays the exact sequence <span class="ui-ref">Auto-randomize</span> would generate.</p>
       </div>
     </div>
 
-    <label class="tutorial-dont-show">
-      <input type="checkbox" id="tutorialDontShowCheckbox" />
-      Don't show this automatically on future visits
-    </label>
     <div class="tutorial-modal-footer">
       <button type="button" class="secondary icon-btn tutorial-nav-arrow prev" id="tutorialPrevBtn" title="Previous" disabled><i class="ph ph-caret-down"></i></button>
       <div class="tutorial-dots" id="tutorialDots"></div>
@@ -302,35 +286,36 @@
 
   <div class="controls">
     <div class="controls-header">
-      <div class="title-row">
-        <h1><a href="./">Flield</a></h1>
-        <div class="title-row-actions">
-          <button id="themeToggleBtn" class="secondary icon-btn" title="Switch to light theme"><i class="ph ph-sun"></i></button>
+      <!-- The exploration loop, the three controls pressed over and
+           over: Undo, Auto-randomize (with its speed), Random. Lock and
+           Unlock, which constrain that loop rather than drive it, get
+           their own row below. The brand lives over the artboard (see
+           .brand in .main-area) so this row has the full width. -->
+      <div class="explore-row">
           <button id="undoBtn" class="secondary icon-btn" title="Undo last randomize" disabled><i class="ph ph-arrow-counter-clockwise"></i></button>
-          <button id="randomizeBtn"><i class="ph ph-shuffle"></i> Random</button>
-        </div>
+          <div class="split-btn">
+            <button id="playBtn" class="secondary split-btn-main" title="Auto-randomize (Space)"><i class="ph ph-play"></i></button>
+            <select id="autoSpeed" class="split-btn-select" title="Auto-randomize speed">
+              <option value="500">0.5s</option>
+              <option value="1000">1s</option>
+              <option value="2000" selected>2s</option>
+              <option value="3000">3s</option>
+              <option value="5000">5s</option>
+              <option value="10000">10s</option>
+            </select>
+          </div>
+          <button id="randomizeBtn" title="Randomize every unlocked field (R)"><i class="ph ph-shuffle"></i> Random</button>
       </div>
 
       <div class="button-row">
         <button id="lockAllBtn" class="secondary" title="Lock all fields"><i class="ph ph-lock-simple"></i> Lock</button>
         <button id="unlockAllBtn" class="secondary" title="Unlock all fields"><i class="ph ph-lock-simple-open"></i> Unlock</button>
-        <div class="split-btn">
-          <button id="playBtn" class="secondary split-btn-main" title="Auto-randomize"><i class="ph ph-play"></i></button>
-          <select id="autoSpeed" class="split-btn-select" title="Auto-randomize speed">
-            <option value="500">0.5s</option>
-            <option value="1000">1s</option>
-            <option value="2000" selected>2s</option>
-            <option value="3000">3s</option>
-            <option value="5000">5s</option>
-            <option value="10000">10s</option>
-          </select>
-        </div>
       </div>
 
       <div class="tabs">
-        <button class="tab-btn active" data-tab="general">General</button>
-        <button class="tab-btn" data-tab="layerA">Layer A</button>
-        <button class="tab-btn" data-tab="layerB">Layer B</button>
+        <button class="tab-btn active" data-tab="general">General <span class="tab-count" aria-hidden="true"></span></button>
+        <button class="tab-btn" data-tab="layerA">Layer A <span class="tab-count" aria-hidden="true"></span></button>
+        <button class="tab-btn" data-tab="layerB">Layer B <span class="tab-count" aria-hidden="true"></span></button>
       </div>
     </div>
 
@@ -404,18 +389,21 @@
       <p class="hint">Snapshot the full composition, both layers and colors, into a slot to reload anytime.</p>
       <div class="preset-row" data-slot="1">
         <span class="preset-label">Slot 1</span>
+        <span class="preset-swatches" aria-hidden="true"></span>
         <span class="preset-status" id="preset-status-1">empty</span>
         <button type="button" class="preset-btn preset-save-btn" data-slot="1" title="Save current state to Slot 1"><i class="ph ph-floppy-disk"></i></button>
         <button type="button" class="preset-btn preset-load-btn" data-slot="1" title="Load Slot 1" disabled><i class="ph ph-folder-open"></i></button>
       </div>
       <div class="preset-row" data-slot="2">
         <span class="preset-label">Slot 2</span>
+        <span class="preset-swatches" aria-hidden="true"></span>
         <span class="preset-status" id="preset-status-2">empty</span>
         <button type="button" class="preset-btn preset-save-btn" data-slot="2" title="Save current state to Slot 2"><i class="ph ph-floppy-disk"></i></button>
         <button type="button" class="preset-btn preset-load-btn" data-slot="2" title="Load Slot 2" disabled><i class="ph ph-folder-open"></i></button>
       </div>
       <div class="preset-row" data-slot="3">
         <span class="preset-label">Slot 3</span>
+        <span class="preset-swatches" aria-hidden="true"></span>
         <span class="preset-status" id="preset-status-3">empty</span>
         <button type="button" class="preset-btn preset-save-btn" data-slot="3" title="Save current state to Slot 3"><i class="ph ph-floppy-disk"></i></button>
         <button type="button" class="preset-btn preset-load-btn" data-slot="3" title="Load Slot 3" disabled><i class="ph ph-folder-open"></i></button>
@@ -604,24 +592,47 @@
         </div>
       </div>
       <div class="footer-link-row">
-        <button id="tutorialBtn" class="secondary icon-btn" title="How to use Flield"><i class="ph ph-question"></i></button>
+        <button id="tutorialBtn" class="secondary icon-btn" title="How to use Flield"><i class="ph ph-question-mark"></i></button>
+        <button id="themeToggleBtn" class="secondary icon-btn" title="Switch to light theme"><i class="ph ph-sun"></i></button>
         <button id="copyLinkBtn" class="secondary" title="Copy a link to this exact composition"><i class="ph ph-link"></i> Copy Link</button>
       </div>
     </div>
   </div>
 
   <div class="main-area">
+    <h1 class="brand"><a href="./">Flield</a></h1>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <!-- First-visit nudge toward the tutorial. A modal used to open on
+         its own here, on top of the freshly randomized canvas that is
+         the app's best first impression; this offers the same tour
+         without gating anything. Goes away for good once the tour is
+         taken or the nudge dismissed (see TUTORIAL_DISMISSED_KEY). -->
+    <div class="tour-chip" id="tourChip" hidden>
+      <span>New here?</span>
+      <button type="button" id="tourChipOpenBtn">Take the tour</button>
+      <button type="button" id="tourChipDismissBtn" class="tour-chip-dismiss" title="Dismiss"><i class="ph ph-x"></i></button>
+    </div>
     <div class="canvas-area">
       <canvas id="preview" role="img">Your browser doesn't support canvas rendering, so the generated artwork can't display here.</canvas>
     </div>
 
     <footer class="site-footer">
-      <a href="https://github.com/simien" target="_blank" rel="noopener">github.com</a>
-      <span>&middot;</span>
-      <a href="https://simienap.com" target="_blank" rel="noopener">simienap.com</a>
-      <span>&middot;</span>
-      <span>&copy; <span id="footerYear"></span></span>
+      <!-- Shortcut legend for the exploration loop (see the keydown
+           handler near the end of the script). Hidden on narrow and
+           touch-only layouts, where there's no keyboard to bind. The
+           undo key label is filled in per platform by UNDO_SHORTCUT. -->
+      <div class="site-footer-keys" aria-label="Keyboard shortcuts">
+        <span><kbd>R</kbd> Random</span>
+        <span><kbd>Space</kbd> Play</span>
+        <span><kbd id="undoKeyLabel">Ctrl+Z</kbd> Undo</span>
+      </div>
+      <div class="site-footer-links">
+        <a href="https://github.com/simien" target="_blank" rel="noopener">github.com</a>
+        <span>&middot;</span>
+        <a href="https://simienap.com" target="_blank" rel="noopener">simienap.com</a>
+        <span>&middot;</span>
+        <span>&copy; <span id="footerYear"></span></span>
+      </div>
     </footer>
   </div>
 
@@ -653,7 +664,7 @@
       "spinner-gap": "M140,32V64a12,12,0,0,1-24,0V32a12,12,0,0,1,24,0Zm84,84H192a12,12,0,0,0,0,24h32a12,12,0,0,0,0-24Zm-42.26,48.77a12,12,0,1,0-17,17l22.63,22.63a12,12,0,0,0,17-17ZM128,180a12,12,0,0,0-12,12v32a12,12,0,0,0,24,0V192A12,12,0,0,0,128,180ZM74.26,164.77,51.63,187.4a12,12,0,0,0,17,17l22.63-22.63a12,12,0,1,0-17-17ZM76,128a12,12,0,0,0-12-12H32a12,12,0,0,0,0,24H64A12,12,0,0,0,76,128ZM68.6,51.63a12,12,0,1,0-17,17L74.26,91.23a12,12,0,0,0,17-17Z",
       "link": "M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z",
       "check": "M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z",
-      "question": "M144,180a16,16,0,1,1-16-16A16,16,0,0,1,144,180Zm92-52A108,108,0,1,1,128,20,108.12,108.12,0,0,1,236,128Zm-24,0a84,84,0,1,0-84,84A84.09,84.09,0,0,0,212,128ZM128,64c-24.26,0-44,17.94-44,40v4a12,12,0,0,0,24,0v-4c0-8.82,9-16,20-16s20,7.18,20,16-9,16-20,16a12,12,0,0,0-12,12v8a12,12,0,0,0,23.73,2.56C158.31,137.88,172,122.37,172,104,172,81.94,152.26,64,128,64Z",
+      "question-mark": "M196,96c0,29.47-24.21,54.05-56,59.06V156a12,12,0,0,1-24,0V144a12,12,0,0,1,12-12c24.26,0,44-16.15,44-36s-19.74-36-44-36S84,76.15,84,96a12,12,0,0,1-24,0c0-33.08,30.5-60,68-60S196,62.92,196,96Zm-68,92a20,20,0,1,0,20,20A20,20,0,0,0,128,188Z",
     };
 
     function iconSvg(name) {
@@ -754,11 +765,48 @@
         lockedFields.add(targetId);
         btn.classList.add("locked");
         setIcon(btn.querySelector("i"), "lock");
+        btn.title = "Locked: kept through randomize. Click to unlock";
       } else {
         lockedFields.delete(targetId);
         btn.classList.remove("locked");
         setIcon(btn.querySelector("i"), "lock-open");
+        btn.title = "Lock from randomization";
       }
+      updateLockCounts();
+    }
+
+    // Each tab shows how many of its own fields are locked, so the state
+    // of a tab that isn't open is still readable at a glance (before
+    // this, Lock All on the General tab left no visible trace that
+    // Layer A and B had changed too). General's lock ids are bare
+    // ("bgColor"); a layer's are prefixed ("layerA-seed").
+    function updateLockCounts() {
+      const counts = { general: 0, layerA: 0, layerB: 0 };
+      lockedFields.forEach((id) => {
+        const tab = id.startsWith("layerA-") ? "layerA" : id.startsWith("layerB-") ? "layerB" : "general";
+        counts[tab] += 1;
+      });
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        const tab = btn.dataset.tab;
+        const n = counts[tab] || 0;
+        const total = document.querySelectorAll(`#tab-${tab} .lock-btn`).length;
+        // A single glyph rather than a number, which didn't fit beside
+        // "Layer A" in an 80px segment: outline padlock when some of
+        // the tab's fields are locked, solid when all of them are. The
+        // exact count lives in the tooltip and the accessible name.
+        const indicator = btn.querySelector(".tab-count");
+        indicator.innerHTML = n ? iconSvg(n === total ? "lock" : "lock-simple") : "";
+        indicator.classList.toggle("all", n > 0 && n === total);
+        const label = tab === "general" ? "General" : "Layer " + tab.slice(-1);
+        const detail = n ? `${n} of ${total} fields locked` : "";
+        btn.title = detail;
+        btn.setAttribute("aria-label", detail ? `${label}, ${detail}` : label);
+      });
+      // Lock All mirrors the tabs: its padlock fills in once every field
+      // is locked, and drops back to the outline the moment any one of
+      // them is unlocked again.
+      const allLocked = lockedFields.size > 0 && lockedFields.size === document.querySelectorAll(".lock-btn").length;
+      setIcon(document.querySelector("#lockAllBtn i"), allLocked ? "lock" : "lock-simple");
     }
 
     // Stamp the shared layer-control template into each layer's tab panel,
@@ -1482,6 +1530,10 @@
     const undoHistory = [];
     const undoBtn = document.getElementById("undoBtn");
 
+    const UNDO_SHORTCUT = /Mac|iPhone|iPad/.test(navigator.platform) ? "\u2318Z" : "Ctrl+Z";
+    undoBtn.title = `Undo last randomize (${UNDO_SHORTCUT})`;
+    document.getElementById("undoKeyLabel").textContent = UNDO_SHORTCUT;
+
     function updateUndoButton() {
       undoBtn.disabled = undoHistory.length === 0;
     }
@@ -1579,7 +1631,7 @@
       autoplayTimer = null;
       playBtn.classList.remove("playing");
       setIcon(playBtn.querySelector("i"), "play");
-      playBtn.title = "Auto-randomize";
+      playBtn.title = "Auto-randomize (Space)";
     }
 
     function startAutoplay() {
@@ -1587,7 +1639,7 @@
       autoplayTimer = setInterval(performRandomize, parseInt(autoSpeedSelect.value, 10));
       playBtn.classList.add("playing");
       setIcon(playBtn.querySelector("i"), "pause");
-      playBtn.title = "Stop auto-randomize";
+      playBtn.title = "Stop auto-randomize (Space)";
     }
 
     playBtn.addEventListener("click", () => {
@@ -1701,17 +1753,47 @@
       if (hasDirection) dirSelect.value = values.shapeMaskDirection;
     }
 
+    // "2:14 PM" for a same-day save, otherwise "Sep 3"; a slot written
+    // before savedAt existed just says "saved".
+    function formatSavedAt(ts) {
+      if (!ts) return "saved";
+      const d = new Date(ts);
+      const sameDay = d.toDateString() === new Date().toDateString();
+      return sameDay
+        ? d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
+        : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    }
+
     function refreshPresetUI(slot) {
       const raw = localStorage.getItem(PRESET_KEY_PREFIX + slot);
       const row = document.querySelector(`.preset-row[data-slot="${slot}"]`);
-      row.querySelector(".preset-status").textContent = raw ? "saved" : "empty";
-      row.querySelector(".preset-load-btn").disabled = !raw;
+      const swatches = row.querySelector(".preset-swatches");
+      let data = null;
+      if (raw) {
+        try { data = JSON.parse(raw); } catch (err) { data = null; }
+      }
+      // The three colors are what make one slot recognizable next to
+      // another; nothing else in the snapshot is glanceable.
+      swatches.replaceChildren();
+      if (data) {
+        [data.bgColor, data.layerA?.color, data.layerB?.color]
+          .filter(Boolean)
+          .forEach((color) => {
+            const band = document.createElement("i");
+            band.style.background = color;
+            swatches.appendChild(band);
+          });
+      }
+      row.querySelector(".preset-status").textContent = data ? formatSavedAt(data.savedAt) : "empty";
+      row.querySelector(".preset-load-btn").disabled = !data;
     }
 
     document.querySelectorAll(".preset-save-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        localStorage.setItem(PRESET_KEY_PREFIX + btn.dataset.slot, JSON.stringify(readOptions()));
+        const snapshot = Object.assign(readOptions(), { savedAt: Date.now() });
+        localStorage.setItem(PRESET_KEY_PREFIX + btn.dataset.slot, JSON.stringify(snapshot));
         refreshPresetUI(btn.dataset.slot);
+        showToast(`Saved to Slot ${btn.dataset.slot}`);
       });
     });
 
@@ -1873,9 +1955,19 @@
     // footer pair in goToTutorialStep/advanceTutorial below.
     const tutorialPrevBtnWide = document.getElementById("tutorialPrevBtnWide");
     const tutorialNextBtnWide = document.getElementById("tutorialNextBtnWide");
-    const TUTORIAL_LIVE_DEMO_STEP = 9;
+    // The Auto-randomize step, whose demo is a live canvas rather than a
+    // CSS animation; found by its canvas so reordering steps can't
+    // silently point this at the wrong one.
+    const TUTORIAL_LIVE_DEMO_STEP = [...tutorialSteps].findIndex((step) => step.contains(tutorialDemoCanvas));
     let tutorialStep = 0;
     let tutorialDemoTimer = null;
+
+    // "Step N of M" eyebrows are stamped here rather than trusted from
+    // the markup, so a reordered or removed step can't leave stale
+    // numbers behind.
+    tutorialSteps.forEach((step, i) => {
+      step.querySelector(".tutorial-eyebrow").textContent = `Step ${i + 1} of ${tutorialSteps.length}`;
+    });
 
     tutorialSteps.forEach((_, i) => {
       const dot = document.createElement("button");
@@ -1975,20 +2067,33 @@
     tutorialPrevBtnWide.addEventListener("click", () => goToTutorialStep(tutorialStep - 1));
     tutorialNextBtnWide.addEventListener("click", advanceTutorial);
 
-    // "Don't show again" only affects the automatic first-visit open
-    // below; the "?" button always opens it regardless of this flag.
+    // Only gates the first-visit chip; the "?" button always opens the
+    // tour regardless of this flag. Same key the old "don't show this
+    // automatically" checkbox wrote, so anyone who ticked it never sees
+    // the chip either. Set once the tour has been opened by any route,
+    // or the chip dismissed.
     const TUTORIAL_DISMISSED_KEY = "flield-tutorial-dismissed";
-    const tutorialDontShowCheckbox = document.getElementById("tutorialDontShowCheckbox");
+    const tourChip = document.getElementById("tourChip");
     let tutorialDismissed = false;
     try {
       tutorialDismissed = localStorage.getItem(TUTORIAL_DISMISSED_KEY) === "1";
     } catch (err) {
       // localStorage can be unavailable (private browsing, blocked); the
-      // tutorial just won't remember being dismissed for next time.
+      // chip just comes back next visit.
     }
-    tutorialDontShowCheckbox.checked = tutorialDismissed;
+
+    function dismissTourChip() {
+      tourChip.hidden = true;
+      tutorialDismissed = true;
+      try {
+        localStorage.setItem(TUTORIAL_DISMISSED_KEY, "1");
+      } catch (err) {
+        // Same as above.
+      }
+    }
 
     function openTutorial() {
+      dismissTourChip();
       tutorialBackdrop.hidden = false;
       tutorialModal.hidden = false;
       tutorialPrevBtnWide.hidden = false;
@@ -2002,14 +2107,11 @@
       tutorialPrevBtnWide.hidden = true;
       tutorialNextBtnWide.hidden = true;
       stopTutorialDemo();
-      try {
-        localStorage.setItem(TUTORIAL_DISMISSED_KEY, tutorialDontShowCheckbox.checked ? "1" : "0");
-      } catch (err) {
-        // Same as above; the checkbox still works for this page load.
-      }
     }
 
     tutorialBtn.addEventListener("click", openTutorial);
+    document.getElementById("tourChipOpenBtn").addEventListener("click", openTutorial);
+    document.getElementById("tourChipDismissBtn").addEventListener("click", dismissTourChip);
     document.getElementById("tutorialCloseBtn").addEventListener("click", closeTutorial);
     tutorialBackdrop.addEventListener("click", closeTutorial);
     document.addEventListener("keydown", (e) => {
@@ -2017,6 +2119,42 @@
       if (e.key === "Escape") closeTutorial();
       else if (e.key === "ArrowRight") advanceTutorial();
       else if (e.key === "ArrowLeft" && !tutorialPrevBtn.disabled) goToTutorialStep(tutorialStep - 1);
+    });
+
+    // Shortcuts for the exploration loop, the three things pressed over
+    // and over while hunting for a composition: R rerolls, Space toggles
+    // Auto-randomize, Cmd/Ctrl+Z steps back. All three stay out of the
+    // way of typing: a focused text/number field or select keeps its
+    // own keys (R types a letter there, Cmd+Z is the field's own undo,
+    // Space opens the select), and a focused button keeps Space as its
+    // native click. Range sliders don't use any of these, so they still
+    // work with a slider focused after a drag. Held-down repeat is
+    // ignored so a long press on R can't fire a burst of rerolls.
+    document.addEventListener("keydown", (e) => {
+      if (!tutorialModal.hidden || !colorPopover.hidden || e.altKey || e.repeat) return;
+      const target = e.target instanceof Element ? e.target : document.body;
+      const inField = target.matches('input:not([type="range"]), textarea, select');
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && !e.shiftKey && e.key.toLowerCase() === "z") {
+        if (inField) return;
+        e.preventDefault();
+        if (!undoBtn.disabled) undoBtn.click();
+        return;
+      }
+      if (mod) return;
+      if (e.key.toLowerCase() === "r") {
+        if (inField) return;
+        e.preventDefault();
+        performRandomize();
+      } else if (e.key === " ") {
+        // A button focused by keyboard keeps Space as its native click.
+        // One that merely kept focus from a mouse click (most commonly
+        // Random itself) must not, or Space would re-fire that button
+        // instead of toggling playback.
+        if (inField || (target.matches("button") && target.matches(":focus-visible"))) return;
+        e.preventDefault();
+        playBtn.click();
+      }
     });
 
     // Shareable links: the full state (background, block size, shape mask,
@@ -2064,7 +2202,11 @@
     }
     generateRandomFavicon();
     updateScrollFade();
-    if (!tutorialDismissed) openTutorial();
+    // A beat after first paint, so the composition lands before the
+    // nudge does.
+    // Re-checked inside the timer: opening the tour from "?" within that
+    // beat would otherwise surface the chip after the fact.
+    if (!tutorialDismissed) setTimeout(() => { if (!tutorialDismissed) tourChip.hidden = false; }, 700);
   </script>
   <!-- Cloudflare Web Analytics: manual snippet, since flield.com is served
        by a Worker's own static-assets pipeline, which the Automatic

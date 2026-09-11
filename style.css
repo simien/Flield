@@ -6,31 +6,85 @@
    the wrong theme). */
 :root {
   color-scheme: dark;
-  --bg: #16161a;
-  --panel: #1f1f24;
-  /* --well: sits between --bg and --panel, for the sidebar's tab
-     content area (lighter than the canvas surround, still darker than
-     the sidebar's own header/footer chrome). --well-deep: darker than
-     --bg, for the color picker's value row, which wants a stronger,
-     more visually distinct sunken well. */
-  --well: #18181c;
-  --well-rgb: 24, 24, 28;
-  --well-deep: #101013;
-  --text: #eaeaea;
-  --border: #333;
-  --accent: #6b6b6b;
-  accent-color: var(--accent);
+  /* Surfaces, darkest to lightest: --bg is the canvas surround and
+     every sunken control (inputs, chips, lock buttons, the tab track);
+     --well is the sidebar's scrollable tab body; --panel is the sidebar
+     chrome, popovers, the modal, and the raised active tab. --well-deep
+     sits below --bg, for the color picker's value row, which wants a
+     stronger, more visually distinct sunken well. --muted is the lift a
+     flat control gets on hover. */
+  --bg: #09090b;
+  --well: #0f0f11;
+  --well-rgb: 15, 15, 17;
+  --panel: #18181b;
+  --well-deep: #050506;
+  --muted: #27272a;
+  /* Borders are white at low alpha rather than a fixed zinc, the way
+     shadcn's dark theme does it, so the same hairline reads at the same
+     contrast on the well, the panel, and a card alike. Controls that
+     take input (text fields, outline buttons, the lock tiles) share a
+     translucent "input" fill and a slightly stronger border, and lift
+     to --input-hover on hover instead of changing border color. */
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --input: rgba(255, 255, 255, 0.05);
+  --input-hover: rgba(255, 255, 255, 0.09);
+  --input-border: rgba(255, 255, 255, 0.15);
+  --tab-active-border: var(--input-border);
+  /* Three text levels instead of one color at assorted opacities, so
+     muted text stays a real, predictable color on every surface. */
+  --text: #fafafa;
+  --text-muted: #a1a1aa;
+  --text-subtle: #71717a;
+  /* Primary is the foreground inverted onto the surface (white on dark,
+     near-black on light), the way a neutral shadcn theme does it, so
+     the one primary action, a locked field, an active segment, all read
+     as the strongest thing on screen without needing a hue. --accent
+     stays as an alias since every control below was written against
+     it. */
+  /* Zinc-200 rather than the full text white: on a #18181b panel the
+     pure white fill glows, and this keeps the inverted look at a
+     contrast that reads as a button rather than a light source. */
+  --primary: #e4e4e7;
+  --primary-fg: #18181b;
+  --accent: var(--primary);
+  /* Sliders fill in the muted text color rather than primary: a layer
+     tab shows nine tracks at once, and nine bright lines competed with
+     Random and the locks for attention. */
+  --slider-fill: var(--text-muted);
+  --ring: #71717a;
+  /* shadcn's scale: 10px base, controls two steps down, cards and the
+     modal one step up. */
+  --radius-sm: 8px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+  accent-color: var(--primary);
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f5f5f5;
+  --bg: #f4f4f5;
+  --well: #fafafa;
+  --well-rgb: 250, 250, 250;
   --panel: #ffffff;
-  --well: #f8f8f8;
-  --well-rgb: 248, 248, 248;
-  --well-deep: #ececec;
-  --text: #1a1a1a;
-  --border: #ddd;
+  --well-deep: #e4e4e7;
+  --muted: #f4f4f5;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --input: #ffffff;
+  --input-hover: #f4f4f5;
+  --input-border: #e4e4e7;
+  --tab-active-border: transparent;
+  --text: #09090b;
+  --text-muted: #71717a;
+  --text-subtle: #a1a1aa;
+  --primary: #18181b;
+  --primary-fg: #fafafa;
+  --ring: #a1a1aa;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.16);
 }
 
 /* Smooths the theme toggle: an element with its own transition (most
@@ -52,12 +106,32 @@ html, body {
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background: var(--bg);
   color: var(--text);
   display: flex;
   height: 100vh;
   overflow: hidden;
+}
+
+/* One keyboard focus treatment for everything, shadcn's: the border
+   takes the ring color and a 3px half-opacity ring sits outside it.
+   :focus-visible only, so a mouse click never leaves a ring behind.
+   Range inputs put the ring on their thumb instead (see below). */
+button:focus-visible,
+.field input[type="text"]:focus-visible,
+.field input[type="number"]:focus-visible,
+.field select:focus-visible,
+.split-btn-select:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+
+input[type="range"]:focus-visible {
+  outline: none;
 }
 
 .main-area {
@@ -66,6 +140,38 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+/* The name sits centered over the artboard, out of the sidebar's way
+   (its top row is the exploration controls, which want the full
+   width). Still the page's h1, just placed where the eye lands after
+   the canvas rather than in the control panel. The 20px top inset and
+   32px line box match the sidebar header's own padding and its Random
+   button, so the name's text sits on the same line as the button's;
+   .site-footer mirrors the same 20px and 32px from the bottom edge. */
+.brand {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 32px;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-muted);
+  z-index: 10;
+}
+
+.brand a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand a:hover {
+  color: var(--text);
 }
 
 .controls {
@@ -110,15 +216,18 @@ body {
 .toast {
   position: absolute;
   left: 50%;
+  /* Shares the brand's spot on purpose: the toast is transient and sits
+     a layer above it, so it simply covers the name while it shows. */
   top: 20px;
   transform: translate(-50%, -8px);
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--panel);
   border: 1px solid var(--border);
   color: var(--text);
   font-size: 13px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
   opacity: 0;
   pointer-events: none;
   z-index: 20;
@@ -128,6 +237,65 @@ body {
 .toast.visible {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+/* First-visit "take the tour" nudge (see #tourChip in index.html).
+   Same spot and surface as the toast, one layer beneath it, so a toast
+   fired in the meantime still shows on top. */
+.tour-chip {
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  transform: translateX(-50%);
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+  z-index: 19;
+  animation: tourChipIn 0.3s ease both;
+}
+
+.tour-chip:not([hidden]) {
+  display: inline-flex;
+}
+
+@keyframes tourChipIn {
+  from { opacity: 0; transform: translate(-50%, -6px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.tour-chip button {
+  width: auto;
+  height: 26px;
+  margin-top: 0;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.tour-chip-dismiss {
+  min-width: 26px;
+  padding: 0;
+  background: transparent;
+  color: var(--text-subtle);
+  border-color: transparent;
+}
+
+.tour-chip-dismiss:hover {
+  background: var(--muted);
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-chip {
+    animation: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -181,11 +349,7 @@ body {
 .controls-header {
   flex-shrink: 0;
   padding: 20px 20px 0;
-  /* Full sidebar width, same as .controls-footer's own border-top,
-     rather than living on each (padding-inset, gap-separated) tab
-     button the way it used to; the active tab's own 1px overlap below
-     erases its own segment so it still reads as flowing into the well
-     below instead of being boxed in by this line too. */
+  /* Full sidebar width, same as .controls-footer's own border-top. */
   border-bottom: 1px solid var(--border);
 }
 
@@ -252,48 +416,47 @@ body {
   border-top: 1px solid var(--border);
 }
 
-.title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.title-row-actions {
+/* Undo, Auto-randomize, Random: the two icon controls at their fixed
+   width and Random taking whatever is left, so the primary action is
+   also the widest thing in the sidebar. */
+.explore-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
+  /* Same spacing as .button-row below it keeps to the tabs, so the
+     three header rows read as evenly stacked rather than paired. */
+  margin-bottom: 16px;
 }
 
-.icon-btn {
-  padding: 8px 12px;
-}
-
-.icon-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.controls h1 {
-  font-size: 16px;
-  margin: 0;
-}
-
-.controls h1 a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.controls h1 a:hover {
-  opacity: 0.8;
-}
-
-.title-row button {
+.explore-row > button,
+.explore-row .split-btn button {
   width: auto;
   flex-shrink: 0;
   margin-top: 0;
+}
+
+.explore-row #randomizeBtn {
+  flex: 1;
+}
+
+/* Icon-only in this row, matching Undo beside it. */
+.explore-row .split-btn-main {
+  min-width: 32px;
+  padding: 0;
+}
+
+/* min-width rather than width: .explore-row buttons and the footer's
+   icon buttons both set width:auto to opt out of the full-width button
+   default, and with the padding gone that would shrink these to the
+   bare icon. */
+.icon-btn {
+  min-width: 32px;
+  padding: 0;
+}
+
+.icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .split-btn {
@@ -313,17 +476,18 @@ body {
 
 .split-btn-select {
   width: 30px;
+  height: 32px;
   flex-shrink: 0;
   margin-top: 0;
-  padding: 8px 0;
-  border: 1px solid var(--border);
-  border-radius: 0 6px 6px 0;
+  padding: 0;
+  border: 1px solid var(--input-border);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   /* Invisible at rest (matches the shared fill), so the only visible
      line at the seam is split-btn-main's own right border, at the same
-     1px weight as every other edge. Reappears in accent on this
-     control's own hover/focus, independent of its neighbor. */
+     1px weight as every other edge. */
   border-left-color: transparent;
-  background-color: transparent;
+  background-color: var(--input);
+  box-shadow: var(--shadow-xs);
   color: var(--text);
   font-size: 13px;
   cursor: pointer;
@@ -333,7 +497,7 @@ body {
      list itself is unaffected) so only the chevron shows at rest; the
      real value only needs to be visible once the list is open. */
   text-indent: -9999px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23999999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 15px;
@@ -344,80 +508,94 @@ body {
    open (a native select stays focused while its list is up), rather
    than sitting on permanently and mismatching its other half. */
 .split-btn-select:focus {
-  background-color: var(--bg);
-  border-color: var(--accent);
+  background-color: var(--input-hover);
   outline: none;
 }
 
 .split-btn-select:hover {
-  background-color: var(--bg);
-  border-color: var(--accent);
+  background-color: var(--input-hover);
 }
 
 #playBtn.playing,
 #playBtn.playing + .split-btn-select {
-  background-color: var(--accent);
-  color: white;
-  border-color: var(--accent);
+  background-color: var(--primary);
+  color: var(--primary-fg);
+  border-color: var(--primary);
 }
 
+/* A segmented control: the track is a sunken well, the active segment
+   a raised pill with a soft shadow, and the rest plain muted text.
+   shadcn's Tabs: a muted track, and the active trigger takes the input
+   fill and border in dark (a plain white card in light). */
 .tabs {
   display: flex;
-  gap: 4px;
+  gap: 2px;
+  padding: 3px;
+  margin-bottom: 16px;
+  background: var(--muted);
+  border-radius: var(--radius);
 }
 
-/* Four states, each spelled out rather than left to inheritance, since
-   every property below is a deliberate match to one specific reference
-   color rather than a default:
-   - Rest: background matches the header's own background (the tab is
-     literally unstyled against it); the bottom border matches the
-     sidebar/sectional border, continuing the header's own border-bottom
-     line; the other three sides are that same border color faded 50%
-     toward the header background, a quieter outline than the active/
-     hover tabs get.
-   - Active: background and bottom border both match the scrollable
-     content area below, so the tab reads as growing directly out of it;
-     the other three sides are the full-strength sidebar/sectional
-     border, continuing the header's own border-bottom around the tab's
-     top corners.
-   - Hover: background is the active tab's own fill faded 50% toward the
-     header background, a step between rest and active without fully
-     committing to active's fill; the other three sides match the full-
-     strength sidebar/sectional border, same as active; the bottom
-     border matches hover's own background, same erase-the-header-line
-     trick active uses.
-   margin-bottom/position/z-index stay constant across every state
-   (rest included) so hovering never changes the button's box height. */
 .tab-btn {
   flex: 1;
   width: auto;
+  height: 26px;
   margin-top: 0;
-  margin-bottom: -1px;
-  padding: 8px 4px;
-  background: var(--panel);
-  color: var(--text);
-  opacity: 0.6;
-  border: 1px solid var(--border);
-  border-color: color-mix(in srgb, var(--border) 50%, var(--panel) 50%);
-  border-bottom-color: var(--border);
-  border-radius: 6px 6px 0 0;
+  padding: 0 2px;
+  gap: 4px;
+  /* The label plus its lock count (see .tab-count below) has to stay on
+     one line even at "Layer A" + a two-digit count, or the whole track
+     grows a second row. */
+  white-space: nowrap;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
   font-size: 12px;
-  position: relative;
-  z-index: 1;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .tab-btn.active {
-  opacity: 1;
-  background: var(--well);
-  border-color: var(--border);
-  border-bottom-color: var(--well);
+  background: var(--input);
+  color: var(--text);
+  border-color: var(--tab-active-border);
+  box-shadow: var(--shadow-xs);
 }
 
 .tab-btn:hover:not(.active) {
-  opacity: 0.85;
-  background: color-mix(in srgb, var(--well) 50%, var(--panel) 50%);
-  border-color: var(--border);
-  border-bottom-color: color-mix(in srgb, var(--well) 50%, var(--panel) 50%);
+  color: var(--text);
+}
+
+/* Per-tab lock indicator (see updateLockCounts in index.html): one
+   small padlock trailing the tab's name, outline when some of that
+   tab's fields are locked and solid when all are, in the subtle text
+   color so it reads as an annotation rather than part of the label.
+   The count itself is in the tab's tooltip. Collapses to nothing when
+   the tab has no locks. */
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-subtle);
+}
+
+.tab-count:empty {
+  display: none;
+}
+
+.tab-count svg {
+  width: 11px;
+  height: 11px;
+}
+
+.tab-count.all,
+.tab-btn.active .tab-count {
+  color: var(--text-muted);
+}
+
+.tab-btn.active .tab-count.all {
+  color: var(--text);
 }
 
 .field {
@@ -437,19 +615,15 @@ body {
   gap: 10px;
   overflow: hidden;
   white-space: nowrap;
-  font-size: 12px;
-  /* Lighter than a preset label's 600 (see .preset-label above) even
-     though this sits above it in the hierarchy: uppercase plus wide
-     letter-spacing already reads as the heavier, more prominent line,
-     so a matching 600 here would out-weigh everything below it. */
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  /* Brighter than a field label's own 0.8 (see .field label below), so
-     it reads as the more prominent heading over them rather than
-     blending in as just another dim label at the same weight. */
-  opacity: 0.95;
-  margin: 28px 0 16px;
+  letter-spacing: 0.1em;
+  /* Muted on purpose: uppercase plus wide tracking already makes this
+     the most prominent line in its group, so the full text color on
+     top of that would out-weigh every control below it. */
+  color: var(--text-muted);
+  margin: 28px 0 14px;
 }
 
 /* A title that opens its panel (Layer A/B's "Fill") has nothing above
@@ -462,7 +636,7 @@ body {
   content: "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░";
   flex: 1;
   overflow: hidden;
-  color: var(--border);
+  color: var(--border-strong);
   /* The UI's own system-sans font smooths this glyph into a soft,
      nearly continuous smudge; a monospace face renders its dot texture
      with crisp edges instead, so it stays visibly pixelated even
@@ -473,19 +647,28 @@ body {
   line-height: 1;
 }
 
+/* One card per collapsible: the toggle is the card's header row and
+   the content unfolds inside the same border below a divider, rather
+   than the header and body being two separate boxes with a gap. */
 .palette-section {
   margin: 2px 0 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
 .palette-toggle {
   width: 100%;
+  height: 32px;
   margin-top: 0;
-  padding: 6px 8px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  padding: 0 8px 0 10px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   color: var(--text);
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -493,11 +676,11 @@ body {
 }
 
 .palette-toggle:hover {
-  border-color: var(--accent);
+  background: var(--muted);
 }
 
 .palette-toggle i {
-  opacity: 0.7;
+  color: var(--text-muted);
   transition: transform 0.15s ease;
 }
 
@@ -506,11 +689,8 @@ body {
 }
 
 .palette-content {
-  margin-top: 8px;
-  padding: 12px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  padding: 12px 10px;
+  border-top: 1px solid var(--border);
 }
 
 .palette-content .hint {
@@ -527,12 +707,14 @@ body {
 .preset-chip-row button {
   width: auto;
   flex: 0 0 auto;
+  height: 26px;
   margin-top: 0;
-  padding: 5px 10px;
+  padding: 0 10px;
   font-size: 11px;
-  background: var(--bg);
+  background: var(--input);
   color: var(--text);
-  border: 1px solid var(--border);
+  border: 1px solid var(--input-border);
+  box-shadow: var(--shadow-xs);
 }
 
 .preset-chip-row .dimension-preset-btn {
@@ -541,7 +723,7 @@ body {
 }
 
 .preset-chip-row button:hover {
-  border-color: var(--accent);
+  background: var(--input-hover);
 }
 
 .field label {
@@ -549,39 +731,52 @@ body {
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
-  margin-bottom: 4px;
-  opacity: 0.8;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--text-muted);
 }
 
+/* The live value: plain tabular monospace in the full text color, so it
+   reads as data next to its muted label without a box around it. */
 .field label span {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-variant-numeric: tabular-nums;
   font-size: 11px;
-  min-width: 34px;
-  padding: 2px 6px;
-  text-align: center;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  opacity: 1;
+  font-weight: 400;
+  color: var(--text);
 }
 
 .field input[type="text"],
 .field input[type="number"],
 .field select {
   width: 100%;
-  padding: 6px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  background: var(--input);
   color: var(--text);
+  font-family: inherit;
   font-size: 13px;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
-.field input[type="text"]:hover,
-.field input[type="number"]:hover,
 .field select:hover {
-  border-color: var(--accent);
+  background-color: var(--input-hover);
+}
+
+/* Width/Height: the native spinner arrows are too small to hit at this
+   size and clash with the flat look; the arrow keys still step them. */
+.field input[type="number"]::-webkit-outer-spin-button,
+.field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.field input[type="number"] {
+  -moz-appearance: textfield;
 }
 
 /* The native select arrow eats into the right padding without being part
@@ -592,7 +787,7 @@ body {
   appearance: none;
   -webkit-appearance: none;
   padding-right: 28px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23999999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 15px;
@@ -615,61 +810,69 @@ body {
   cursor: pointer;
 }
 
+/* shadcn's Slider: a 6px muted track with the filled range in primary,
+   and a hollow 16px thumb (surface fill, primary border) that grows a
+   half-opacity ring on hover and keyboard focus. */
 .field input[type="range"]::-webkit-slider-runnable-track {
-  height: 4px;
-  border-radius: 2px;
+  height: 6px;
+  border-radius: 3px;
   background: linear-gradient(
     to right,
-    var(--accent) 0%,
-    var(--accent) calc(var(--pct, 0) * 1%),
-    var(--bg) calc(var(--pct, 0) * 1%),
-    var(--bg) 100%
+    var(--slider-fill) 0%,
+    var(--slider-fill) calc(var(--pct, 0) * 1%),
+    var(--muted) calc(var(--pct, 0) * 1%),
+    var(--muted) 100%
   );
-  border: 1px solid var(--border);
 }
 
 .field input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   margin-top: -5px;
   border-radius: 50%;
-  background: var(--accent);
-  border: 2px solid var(--panel);
-  box-shadow: 0 0 0 1px var(--border);
-  transition: transform 0.15s ease;
+  background: var(--well);
+  border: 1px solid var(--slider-fill);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow 0.15s ease;
 }
 
-.field input[type="range"]:hover::-webkit-slider-thumb {
-  transform: scale(1.2);
+.field input[type="range"]:hover::-webkit-slider-thumb,
+.field input[type="range"]:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ring) 50%, transparent);
 }
 
 .field input[type="range"]::-moz-range-track {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--bg);
-  border: 1px solid var(--border);
+  height: 6px;
+  border-radius: 3px;
+  background: var(--muted);
 }
 
 .field input[type="range"]::-moz-range-progress {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--accent);
+  height: 6px;
+  border-radius: 3px;
+  background: var(--slider-fill);
 }
 
 .field input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: var(--accent);
-  border: 2px solid var(--panel);
-  box-shadow: 0 0 0 1px var(--border);
-  transition: transform 0.15s ease;
+  background: var(--well);
+  border: 1px solid var(--slider-fill);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow 0.15s ease;
 }
 
-.field input[type="range"]:hover::-moz-range-thumb {
-  transform: scale(1.2);
+.field input[type="range"]:hover::-moz-range-thumb,
+.field input[type="range"]:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+
+:root[data-theme="light"] .field select,
+:root[data-theme="light"] .split-btn-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
 }
 
 .slider-wrap {
@@ -687,14 +890,14 @@ body {
   bottom: 100%;
   margin-bottom: 5px;
   transform: translateX(-50%);
-  background: #262626;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--primary);
+  color: var(--primary-fg);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   padding: 3px 7px;
-  border-radius: 5px;
+  border-radius: 6px;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
@@ -713,7 +916,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   border: 4px solid transparent;
-  border-top-color: #262626;
+  border-top-color: var(--primary);
 }
 
 .field-row {
@@ -730,27 +933,30 @@ body {
 
 .lock-btn {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   margin-top: 0;
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  opacity: 0.55;
+  background: var(--input);
+  color: var(--text-subtle);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .lock-btn:hover:not(.locked) {
-  opacity: 1;
-  border-color: var(--accent);
+  background: var(--input-hover);
+  color: var(--text);
 }
 
+/* Locked is a state, not an action, and a layer tab shows ten of these
+   at once, so it gets a lifted, muted tile with the solid padlock glyph
+   at full text strength rather than the primary fill, which would
+   scatter bright squares down the sidebar competing with Random. */
 .lock-btn.locked {
-  opacity: 1;
-  background: var(--accent);
-  border-color: var(--accent);
-  color: white;
+  background: var(--muted);
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 
 .color-row {
@@ -779,15 +985,16 @@ body {
   padding: 2px;
   display: flex;
   align-items: center;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  background: var(--input);
   color: var(--text);
+  box-shadow: var(--shadow-xs);
   transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .color-swatch:hover {
-  border-color: var(--accent);
+  background: var(--input-hover);
 }
 
 .color-swatch-fill {
@@ -802,10 +1009,10 @@ body {
   flex: 1;
   min-width: 0;
   text-align: center;
-  font-size: 12px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11.5px;
   font-variant-numeric: tabular-nums;
   text-transform: uppercase;
-  opacity: 0.85;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -820,9 +1027,9 @@ body {
   padding: 12px;
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-lg);
 }
 
 .color-sl-square {
@@ -895,25 +1102,24 @@ body {
 .color-format-btn {
   flex: 1;
   width: auto;
+  height: 24px;
   margin-top: 0;
-  padding: 4px;
+  padding: 0;
   font-size: 11px;
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  opacity: 0.7;
+  background: var(--input);
+  color: var(--text-muted);
+  border: 1px solid var(--input-border);
 }
 
 .color-format-btn:hover:not(.active) {
-  opacity: 1;
-  border-color: var(--accent);
+  background: var(--input-hover);
+  color: var(--text);
 }
 
 .color-format-btn.active {
-  opacity: 1;
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-fg);
 }
 
 /* Bleeds past the popover's own 12px padding to sit flush against its
@@ -940,7 +1146,7 @@ body {
 
 .color-hex-prefix {
   font-size: 13px;
-  opacity: 0.6;
+  color: var(--text-subtle);
 }
 
 .color-hex-input {
@@ -949,6 +1155,7 @@ body {
   border: none;
   background: transparent;
   color: var(--text);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
   text-transform: uppercase;
@@ -962,7 +1169,7 @@ body {
   justify-content: center;
   gap: 4px;
   font-size: 11px;
-  opacity: 0.75;
+  color: var(--text-muted);
 }
 
 .color-channel input {
@@ -971,6 +1178,7 @@ body {
   border: none;
   background: transparent;
   color: var(--text);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
   text-align: center;
@@ -993,33 +1201,35 @@ body {
 
 button {
   width: 100%;
-  padding: 8px 10px;
+  height: 32px;
+  padding: 0 12px;
   margin-top: 6px;
   border: 1px solid transparent;
-  border-radius: 6px;
-  background: var(--accent);
-  color: white;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: var(--primary-fg);
+  font-family: inherit;
   font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  box-shadow: var(--shadow-xs);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: filter 0.15s ease, border-color 0.15s ease, background-color 0.15s ease,
+  transition: border-color 0.15s ease, background-color 0.15s ease,
     color 0.15s ease, opacity 0.15s ease, transform 0.08s ease;
 }
 
-/* .tab-btn is excluded: it already computes its own hover background
-   and border color explicitly (see .tab-btn:hover above), and a 1.15x
-   brightness multiply on top of that pushes the light theme's
-   already-near-white values past 255, clamping them flat and washing
-   out the color-mix contrast that state depends on. */
-button:hover:not(:disabled):not(.tab-btn) {
-  filter: brightness(1.15);
+/* The bare default above is the primary style, and Random is the only
+   button that uses it; every other button opts into .secondary or its
+   own flat treatment and carries its own hover. */
+#randomizeBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 85%, var(--panel));
 }
 
 button:active:not(:disabled):not(.tab-btn) {
-  filter: brightness(0.92);
   transform: scale(0.98);
 }
 
@@ -1028,15 +1238,15 @@ button i {
   line-height: 1;
 }
 
+/* shadcn's "outline" variant: input fill and border, lifting on hover. */
 button.secondary {
-  background: transparent;
+  background: var(--input);
   color: var(--text);
-  border: 1px solid var(--border);
+  border: 1px solid var(--input-border);
 }
 
 button.secondary:hover:not(:disabled) {
-  background: var(--bg);
-  border-color: var(--accent);
+  background: var(--input-hover);
 }
 
 .canvas-area {
@@ -1048,21 +1258,58 @@ button.secondary:hover:not(:disabled) {
   overflow: auto;
 }
 
+/* One quiet strip under the canvas: the shortcut legend on the left,
+   the links on the right, both at the subtle text color and both
+   waking to full strength together on hover. Same 32px line box and
+   20px edge inset as .brand at the top. */
 .site-footer {
   flex-shrink: 0;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 6px;
-  padding: 6px 0 14px;
+  gap: 16px;
+  height: 32px;
+  margin-bottom: 20px;
+  padding: 0 24px;
   font-size: 11px;
-  color: var(--text);
-  opacity: 0.45;
-  transition: opacity 0.15s ease;
+  color: var(--text-subtle);
+  transition: color 0.15s ease;
 }
 
 .site-footer:hover {
-  opacity: 1;
+  color: var(--text);
+}
+
+.site-footer-links,
+.site-footer-keys {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.site-footer-keys {
+  gap: 14px;
+}
+
+.site-footer-keys span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.site-footer kbd {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 10px;
+  line-height: 1;
+  padding: 3px 5px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--input);
+  color: inherit;
+}
+
+.site-footer:hover kbd {
+  border-color: var(--border-strong);
 }
 
 .site-footer a {
@@ -1074,8 +1321,20 @@ button.secondary:hover:not(:disabled) {
   text-decoration: underline;
 }
 
-.site-footer span {
+.site-footer-links span {
   opacity: 0.7;
+}
+
+/* No keyboard to bind on a phone or a touch-only screen; the links go
+   back to centered on their own. */
+@media (max-width: 768px), (hover: none) {
+  .site-footer-keys {
+    display: none;
+  }
+
+  .site-footer {
+    justify-content: center;
+  }
 }
 
 #preview {
@@ -1083,11 +1342,13 @@ button.secondary:hover:not(:disabled) {
   max-height: 80vh;
   border: 1px solid var(--border);
   border-radius: 4px;
+  box-shadow: var(--shadow-lg);
 }
 
 .hint {
-  font-size: 11px;
-  opacity: 0.6;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
   margin-top: 8px;
   margin-bottom: 12px;
 }
@@ -1113,9 +1374,9 @@ button.secondary:hover:not(:disabled) {
   margin-top: 0;
 }
 
-.footer-link-row #tutorialBtn {
+.footer-link-row .icon-btn {
   width: auto;
-  flex-shrink: 0;
+  flex: 0 0 auto;
   margin-top: 0;
 }
 
@@ -1134,27 +1395,63 @@ button.secondary:hover:not(:disabled) {
 .preset-status {
   flex: 1;
   font-size: 11px;
-  opacity: 0.55;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-subtle);
+}
+
+/* The three colors a slot holds (background, Layer A, Layer B), so one
+   slot is recognizable next to another without loading it. One small
+   strip rather than three separate chips, and dimmed until the row is
+   hovered: enough to tell the slots apart at a glance without three
+   saturated squares pulling the eye away from the controls. */
+.preset-swatches {
+  display: flex;
+  /* A square the height of the slot label's text (12px at line-height
+     normal), split into three vertical bands. */
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  opacity: 0.4;
+  transition: opacity 0.15s ease;
+}
+
+/* The stronger border on hover keeps a dark band from dissolving into
+   the well behind it once the square is at full strength. */
+.preset-row:hover .preset-swatches {
+  opacity: 1;
+  border-color: var(--border-strong);
+}
+
+.preset-swatches:empty {
+  display: none;
+}
+
+.preset-swatches i {
+  display: block;
+  flex: 1;
 }
 
 .preset-btn {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   padding: 0;
   margin-top: 0;
-  background: var(--bg);
+  background: var(--input);
   color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .preset-btn:hover:not(:disabled) {
-  border-color: var(--accent);
+  background: var(--input-hover);
 }
 
 .preset-btn:disabled {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -1175,7 +1472,7 @@ button.secondary:hover:not(:disabled) {
 }
 
 button:disabled {
-  opacity: 0.65;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -1202,8 +1499,8 @@ button:disabled {
   max-height: 88vh;
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   z-index: 41;
   flex-direction: column;
   overflow: hidden;
@@ -1258,7 +1555,7 @@ button:disabled {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--text-muted);
 }
 
 .tutorial-step h3 {
@@ -1272,6 +1569,7 @@ button:disabled {
   margin: 0;
   font-size: 13.5px;
   line-height: 1.6;
+  color: var(--text-muted);
 }
 
 /* Echoes the real control it names, in miniature, so the reader can
@@ -1288,30 +1586,12 @@ button:disabled {
   white-space: nowrap;
 }
 
-.tutorial-dont-show {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 24px;
-  font-size: 12px;
-  color: var(--text);
-  opacity: 0.7;
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.tutorial-dont-show input {
-  margin: 0;
-  accent-color: var(--accent);
-}
-
 .tutorial-modal-footer {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 16px 16px;
+  border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
 
@@ -1392,7 +1672,7 @@ button:disabled {
     padding: 0;
     border-radius: 50%;
     background: var(--panel);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--shadow-lg);
     z-index: 41;
   }
 
@@ -1402,6 +1682,34 @@ button:disabled {
 
   .tutorial-nav-arrow-wide.next {
     left: calc(50% + 210px + 28px);
+  }
+}
+
+/* The tutorial's own controls (close, the footer arrows, the floating
+   arrows) stay opaque: the outline button's translucent input fill
+   they'd otherwise inherit all but disappears on hover over the dimmed
+   backdrop. Solid panel at rest, a solid one-step-lighter mix on
+   hover, and a small lift with a shadow as the motion. transform is
+   free to use here: button:active's own scale() replaces it for the
+   press, which is the intended feel. */
+.tutorial-modal button.secondary,
+button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
+  background: var(--panel);
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.tutorial-modal button.secondary:hover:not(:disabled),
+button.secondary.tutorial-nav-arrow-wide:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--panel) 90%, var(--text));
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tutorial-modal button.secondary:hover:not(:disabled),
+  button.secondary.tutorial-nav-arrow-wide:hover:not(:disabled) {
+    transform: none;
   }
 }
 
@@ -1418,8 +1726,9 @@ button:disabled {
   height: 6px;
   padding: 0;
   margin: 0;
+  border: none;
   border-radius: 3px;
-  background: var(--border);
+  background: var(--border-strong);
   transition: width 0.2s ease, background-color 0.2s ease;
 }
 
@@ -1433,7 +1742,7 @@ button:disabled {
 .tutorial-demo {
   position: relative;
   height: 108px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--well);
   border: 1px solid var(--border);
   margin-bottom: 16px;
@@ -1462,23 +1771,31 @@ button:disabled {
   background: var(--accent);
 }
 
-/* --- Step 2: Tabs. "Layer A" lights up on a loop. --- */
+/* --- Step 3: Tabs. "Layer A" lights up on a loop. --- */
 .tutorial-demo-tabs {
   align-items: center;
 }
 
+/* Mirrors the real .tabs segmented control: muted track, and the
+   target segment takes the active pill's input fill and border. */
 .mini-tabs {
   display: flex;
-  gap: 6px;
+  gap: 2px;
+  padding: 3px;
+  background: var(--muted);
+  border-radius: var(--radius);
 }
 
 .mini-tab {
   font-size: 11px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  color: var(--text);
-  opacity: 0.65;
+  font-weight: 500;
+  padding: 0 12px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  color: var(--text-muted);
 }
 
 .mini-tab-target {
@@ -1486,41 +1803,14 @@ button:disabled {
 }
 
 @keyframes tutorialTabClick {
-  0%, 34% { background: transparent; color: var(--text); opacity: 0.65; border-color: var(--border); }
-  40%, 88% { background: var(--accent); color: white; opacity: 1; border-color: var(--accent); }
-  96%, 100% { background: transparent; color: var(--text); opacity: 0.65; border-color: var(--border); }
+  0%, 34% { background: transparent; color: var(--text-muted); border-color: transparent; box-shadow: none; }
+  40%, 88% { background: var(--input); color: var(--text); border-color: var(--tab-active-border); box-shadow: var(--shadow-xs); }
+  96%, 100% { background: transparent; color: var(--text-muted); border-color: transparent; box-shadow: none; }
 }
 
-/* --- Step 3: Theme. Sun crossfades to moon on a loop. --- */
-.mini-theme-btn {
-  position: relative;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  animation: tutorialThemeBorder 3.4s ease-in-out infinite;
-}
-
-.mini-theme-btn i {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  color: var(--text);
-}
-
-@keyframes tutorialThemeBorder {
-  0%, 34% { border-color: var(--border); }
-  40%, 88% { border-color: var(--accent); }
-  96%, 100% { border-color: var(--border); }
-}
-
-/* Shared open/closed (or sun/moon) crossfade, used by the Theme demo
-   above and the Lock demo below; timing matches the state-change
-   moment (34-40%) and reset (88-96%) every other demo animates around. */
+/* Open/closed crossfade for the Lock demo below; timing matches the
+   state-change moment (34-40%) and reset (88-96%) every other demo
+   animates around. */
 @keyframes tutorialFadeShow {
   0%, 34% { opacity: 1; }
   40%, 88% { opacity: 0; }
@@ -1543,10 +1833,10 @@ button:disabled {
   animation: tutorialFadeHide 3.4s ease-in-out infinite;
 }
 
-/* --- Step 4: Dimension presets & Tile. Reuses .mini-tab/.mini-tab-target
+/* --- Step 5: Dimension presets & Tile. Reuses .mini-tab/.mini-tab-target
    from the Tabs demo above; "Tile" is the target that lights up. --- */
 
-/* --- Step 5: Shape mask. Three shapes cycle through on a loop (diamond,
+/* --- Step 6: Shape mask. Three shapes cycle through on a loop (diamond,
    circle, stripes), standing in for the full set (those two plus
    vignette and its inverse, a corner or side vignette, and stripes)
    without trying to cram all six into one small preview. Three
@@ -1607,7 +1897,7 @@ button:disabled {
   animation: tutorialMaskPhase3 5.1s ease-in-out infinite;
 }
 
-/* --- Step 6: Layer settings. The thumb drifts across the track. --- */
+/* --- Step 4: Layer settings. The thumb drifts across the track. --- */
 .mini-slider-row {
   display: flex;
   flex-direction: column;
@@ -1623,9 +1913,9 @@ button:disabled {
 
 .mini-slider-track {
   position: relative;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border);
+  height: 6px;
+  border-radius: 3px;
+  background: var(--muted);
 }
 
 .mini-slider-thumb-drag {
@@ -1634,7 +1924,7 @@ button:disabled {
   width: 13px;
   height: 13px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--slider-fill);
   transform: translate(-50%, -50%);
   animation: tutorialSliderDrag 3.4s ease-in-out infinite;
 }
@@ -1645,7 +1935,7 @@ button:disabled {
   100% { left: 12%; }
 }
 
-/* --- Step 7: Palette Range & Density Range. A static track: two thumbs
+/* --- Step 8: Palette Range & Density Range. A static track: two thumbs
    bounding a highlighted middle segment reads as a range without needing
    any motion. --- */
 .mini-range-row {
@@ -1657,9 +1947,9 @@ button:disabled {
 
 .mini-range-track {
   position: relative;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border);
+  height: 6px;
+  border-radius: 3px;
+  background: var(--muted);
 }
 
 .mini-range-fill {
@@ -1668,7 +1958,7 @@ button:disabled {
   bottom: 0;
   left: 25%;
   right: 25%;
-  background: var(--accent);
+  background: var(--slider-fill);
   border-radius: 2px;
 }
 
@@ -1678,7 +1968,7 @@ button:disabled {
   width: 13px;
   height: 13px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--slider-fill);
   transform: translate(-50%, -50%);
 }
 
@@ -1690,7 +1980,7 @@ button:disabled {
   left: 75%;
 }
 
-/* --- Step 8: Locking. The lock fills solid on a loop. --- */
+/* --- Step 7: Locking. The lock fills solid on a loop. --- */
 .tutorial-demo-lock {
   gap: 12px;
 }
@@ -1702,7 +1992,7 @@ button:disabled {
   flex-shrink: 0;
   border-radius: 6px;
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--input);
   animation: tutorialLockBg 3.4s ease-in-out infinite;
 }
 
@@ -1722,16 +2012,16 @@ button:disabled {
 }
 
 @keyframes tutorialLockBg {
-  0%, 34% { background: var(--bg); border-color: var(--border); }
-  40%, 88% { background: var(--accent); border-color: var(--accent); }
-  96%, 100% { background: var(--bg); border-color: var(--border); }
+  0%, 34% { background: var(--input); border-color: var(--input-border); }
+  40%, 88% { background: var(--muted); border-color: var(--border-strong); }
+  96%, 100% { background: var(--input); border-color: var(--input-border); }
 }
 
 .tutorial-demo-lock .mini-lock-b {
-  color: white;
+  color: var(--text);
 }
 
-/* --- Step 9: Random. The swatch snaps to a new look, an instant cut
+/* --- Step 2: Random. The swatch snaps to a new look, an instant cut
    (steps(1)) rather than a smooth blend, since a reroll doesn't ease
    into place. --- */
 .mini-canvas-swatch {
@@ -1756,18 +2046,18 @@ button:disabled {
   padding: 8px 14px;
   border-radius: 6px;
   background: var(--accent);
-  color: white;
+  color: var(--primary-fg);
   font-size: 12px;
   animation: tutorialBtnPress 3.4s ease-in-out infinite;
 }
 
 @keyframes tutorialBtnPress {
-  0%, 34% { filter: brightness(1); }
-  40% { filter: brightness(1.3); }
-  46%, 100% { filter: brightness(1); }
+  0%, 34% { opacity: 1; }
+  40% { opacity: 0.75; }
+  46%, 100% { opacity: 1; }
 }
 
-/* --- Step 10: Auto-randomize. The live canvas (see startTutorialDemo
+/* --- Step 9: Auto-randomize. The live canvas (see startTutorialDemo
    in index.html) cycles for real. --- */
 .tutorial-demo-explore canvas {
   border-radius: 6px;
@@ -1804,7 +2094,7 @@ button:disabled {
   height: 26px;
   border-radius: 6px;
   background: var(--accent);
-  color: white;
+  color: var(--primary-fg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1812,7 +2102,7 @@ button:disabled {
   animation: tutorialBtnPress 3.4s ease-in-out infinite;
 }
 
-/* --- Step 11: Undo. The swatch reverts on a loop. --- */
+/* --- Step 10: Undo. The swatch reverts on a loop. --- */
 .mini-canvas-swatch-b {
   animation: tutorialSwatchRevert 3.4s steps(1) infinite;
 }
@@ -1827,7 +2117,7 @@ button:disabled {
   height: 32px;
   border-radius: 6px;
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--input);
   color: var(--text);
   display: flex;
   align-items: center;
@@ -1836,13 +2126,13 @@ button:disabled {
   animation: tutorialLockBg 3.4s ease-in-out infinite;
 }
 
-/* --- Step 12: Saved states & links. A "Saved" badge flashes on a loop. --- */
+/* --- Step 11: Saved states & links. A "Saved" badge flashes on a loop. --- */
 .mini-icon-btn {
   width: 40px;
   height: 40px;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--input);
   color: var(--text);
   display: flex;
   align-items: center;
@@ -1859,7 +2149,7 @@ button:disabled {
   padding: 4px 10px;
   border-radius: 12px;
   background: var(--accent);
-  color: white;
+  color: var(--primary-fg);
   animation: tutorialBadgeFlash 3.4s ease-in-out infinite;
 }
 
@@ -1869,21 +2159,20 @@ button:disabled {
   92%, 100% { opacity: 0; transform: translateY(2px); }
 }
 
-/* --- Step 13: Exporting. The icon nudges down on a loop. --- */
+/* --- Step 12: Exporting. The icon nudges down on a loop. --- */
 .mini-icon-btn-export {
   animation: tutorialDownloadNudge 3.4s ease-in-out infinite;
 }
 
 @keyframes tutorialDownloadNudge {
-  0%, 34% { transform: translateY(0); background: var(--bg); border-color: var(--border); color: var(--text); }
-  40% { transform: translateY(3px); background: var(--accent); border-color: var(--accent); color: white; }
-  46%, 88% { transform: translateY(0); background: var(--accent); border-color: var(--accent); color: white; }
-  96%, 100% { transform: translateY(0); background: var(--bg); border-color: var(--border); color: var(--text); }
+  0%, 34% { transform: translateY(0); background: var(--input); border-color: var(--input-border); color: var(--text); }
+  40% { transform: translateY(3px); background: var(--accent); border-color: var(--accent); color: var(--primary-fg); }
+  46%, 88% { transform: translateY(0); background: var(--accent); border-color: var(--accent); color: var(--primary-fg); }
+  96%, 100% { transform: translateY(0); background: var(--input); border-color: var(--input-border); color: var(--text); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mini-tab-target,
-  .mini-theme-btn,
   .mini-lock-a,
   .mini-lock-b,
   .mini-slider-thumb-drag,

@@ -10,14 +10,14 @@
 
 - Every composition is **three colors**: a background, plus two independently generated artwork layers.
 - Each layer runs on its own **seed**, so the same seed and settings always regenerate the same result.
-- The canvas sits on the right; every control that shapes it lives in the sidebar on the left.
+- The canvas sits on the right, with the Flield name in its top corner; every control that shapes it lives in the sidebar on the left.
 - Every page load opens on a **freshly randomized** composition instead of a fixed default, background color, block size, and shape mask aside (more on why in [Locks](#locks)).
 
 ## In-app tutorial
 
-Everything below is also built into the app itself. The **?** button (bottom of the sidebar, next to Copy Link) opens a thirteen-step tutorial, each step paired with a small live example of the control it's describing: what a flow field is, sidebar navigation, dimension presets and Tile, the shape mask, layer settings, Palette Range and Density Range, locks, Random and Auto-randomize, Undo, and saving, sharing, and exporting.
+Everything below is also built into the app itself. The **?** button (bottom of the sidebar, next to Copy Link) opens a twelve-step tutorial, each step paired with a small live example of the control it's describing: what a flow field is, Random, sidebar navigation, layer settings, dimension presets and Tile, the shape mask, locks, Palette Range and Density Range, Auto-randomize, Undo, and saving, sharing, and exporting.
 
-It opens on its own the first time you visit. Check **Don't show this automatically on future visits** before closing it to skip that going forward; the **?** button still opens it anytime. Step through with the arrows or the dots at the bottom, or the left/right arrow keys.
+On a first visit, a small **Take the tour** prompt appears above the canvas. Take it or dismiss it and it won't come back; the **?** button opens the tutorial anytime. Step through with the arrows or the dots at the bottom, or the left/right arrow keys.
 
 ## Navigating the sidebar
 
@@ -42,14 +42,15 @@ A tab's content can run longer than the sidebar is tall. A soft fade shows up at
 
 ### Confirmations
 
-A few actions change something that might not be on screen right now, like **Lock All** changing icons on a layer tab that isn't open. Those show a brief confirmation above the canvas: **Lock All** / **Unlock All**, **Undo**, loading a saved state, and **Copy Link**.
+A few actions change something that might not be on screen right now, like **Lock All** changing icons on a layer tab that isn't open. Those show a brief confirmation above the canvas: **Lock All** / **Unlock All**, **Undo**, saving or loading a slot, and **Copy Link**.
 
 ### Locks
 
 Every randomizable field, background color, block size, and shape mask included, has a small lock icon next to it.
 
 - A **locked** field holds its current value through a randomize pass instead of getting a new one.
-- **Lock** and **Unlock** at the top of the sidebar apply to every field at once.
+- **Lock** and **Unlock** (the row under Random) apply to every field at once.
+- Each tab's button shows a small padlock when any of its fields are locked, solid once all of them are, and hovering it gives the exact count, so **Lock All** or a lock on another tab never goes unnoticed.
 - Background color, block size, and shape mask **start locked**. That's why a fresh page load keeps its starting background, grid resolution, and shape steady while everything else randomizes around them. Unlock any of the three to fold it into future randomize and Auto-randomize passes.
 
 ### Tiling without a seam
@@ -65,7 +66,17 @@ The **Tile** preset (General tab, next to Web/Tablet/Mobile) sets up a square ca
 | Works across devices/people | No | Yes |
 | Survives a reload | Yes | Yes, and forever |
 
-Both capture the exact same thing: colors, both layers, everything. Use Saved States to bookmark a composition for yourself; use **Copy Link** (bottom of the sidebar) to hand an exact reproduction to someone else, or to yourself on a different device.
+Each saved slot shows its three colors and the time it was saved, so you can tell them apart before loading one. Both capture the exact same thing: colors, both layers, everything. Use Saved States to bookmark a composition for yourself; use **Copy Link** (bottom of the sidebar) to hand an exact reproduction to someone else, or to yourself on a different device.
+
+### Keyboard shortcuts
+
+| Key | Action |
+|---|---|
+| **R** | Random (reroll every unlocked field) |
+| **Space** | Start or stop Auto-randomize |
+| **Cmd+Z** / **Ctrl+Z** | Undo the last randomize pass |
+
+All three stay out of the way while you're typing in a field, and the legend sits in the footer under the canvas.
 
 ## Exploring an art direction with Auto-randomize
 
@@ -75,7 +86,7 @@ Both capture the exact same thing: colors, both layers, everything. Use Saved St
 
 What comes through is a run of variations that share the same underlying structure, small differences in fill and texture on a shape that stays recognizable. It reads less like random noise and more like a designer trying variations on one idea.
 
-> **Took a wrong turn?** **Undo** (next to Random) steps back through recent randomize passes, most recent first, and grays out once there's nothing left to undo.
+> **Took a wrong turn?** **Undo** (the arrow at the left of the Random row) steps back through recent randomize passes, most recent first, and grays out once there's nothing left to undo.
 
 **GIF export is the same loop, captured.** The step count option (1, 2, 3, 5, 8, 13) runs that same randomize sequence, frame by frame, at the Auto-randomize interval as the per-frame delay, the exact sequence Auto-randomize would generate rather than whatever the artboard happens to be showing at the moment.
 

@@ -11,7 +11,7 @@ A browser-based generative pixel art tool for creating unique three-color compos
 <!-- ?v= busts GitHub's and browsers' image cache for this file; bump it
      whenever screenshot.png is replaced, or a cached copy can outlive
      the actual file update for a while. -->
-![Flield screenshot](screenshot.png?v=3)
+![Flield screenshot](screenshot.png?v=4)
 
 ## Examples
 
@@ -41,13 +41,15 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 - Palette range controls (hue, saturation, lightness) with five presets, plus fully custom ranges
 - Density range controls, so a randomize pass can't drift all the way to a solid fill or an empty layer
 - Per-field locks, covering every layer setting plus background color, block size, and shape mask, so a randomize pass can hold specific settings steady while re-rolling the rest
+- Each sidebar tab shows a padlock when any of its fields are locked (solid once all of them are), so the state of a tab that isn't open stays visible
+- Keyboard shortcuts for the exploration loop, listed under the canvas: R to randomize, Space to start or stop Auto-randomize, Cmd/Ctrl+Z to undo
 - Undo steps back through recent randomize passes, including ones from autoplay or a GIF export
 - A shareable link that encodes the exact composition, colors, both layers, everything, into a URL
-- Three save-state slots stored in the browser for revisiting a composition later
+- Three save-state slots stored in the browser for revisiting a composition later, each showing its three colors and when it was saved
 - Auto-randomize playback with an adjustable interval, from every 0.5 seconds up to every 10
 - Export to PNG, SVG, or an animated GIF, with frame count (1, 2, 3, 5, 8, or 13) and speed both configurable
-- A built-in tutorial, thirteen short steps with a live example each, covering the sidebar, dimension presets, the shape mask, palette and density ranges, locks, Random and Auto-randomize, and saving and exporting; it opens on its own on a first visit and can be turned off for good from inside it
-- Toast confirmations for actions that change something off-screen: Lock All / Unlock All, Undo, loading a saved state, and Copy Link
+- A built-in tutorial, twelve short steps with a live example each, covering Random, the sidebar, dimension presets, the shape mask, locks, palette and density ranges, Auto-randomize, Undo, and saving and exporting; a first visit gets a small "Take the tour" prompt above the canvas rather than a modal
+- Toast confirmations for actions that change something off-screen: Lock All / Unlock All, Undo, saving or loading a slot, and Copy Link
 - Responsive sidebar that collapses into a toggleable drawer on narrow screens
 - Dark theme by default, with a toggle for light, remembered across visits
 - Fully offline: every dependency is vendored in the repo, no CDN, no network connection needed
