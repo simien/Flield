@@ -152,6 +152,24 @@ const DRIFT_PERIOD = 1;
 // and 1 are the still), by this fraction of each layer's own density.
 const PULSE_DEPTH = 0.4;
 
+// Wind loops travel like Drift but bend as they go, the way smoke or
+// long grass moves rather than a printed sheet sliding past. Two things
+// do it. A second, coarser noise field (WIND_WARP_SCALE times the
+// field's own frequency) warps where the field is sampled, by up to
+// WIND_WARP noise units at the peak; its strength follows a raised
+// cosine of the phase, zero at both ends, so the cycle opens and closes
+// on Drift's own first frame and the bending rises and settles once
+// per cycle like a gust.
+// The warp's own sampling origin circles WIND_WARP_RADIUS once per
+// cycle too, so the bends travel rather than swell in place. And every
+// octave past the first travels WIND_PARALLAX periods per cycle instead
+// of one, so fine detail runs ahead of the mass. Each octave still
+// covers a whole number of its wrap periods, so the loop closes.
+const WIND_WARP = 0.5;
+const WIND_WARP_SCALE = 0.5;
+const WIND_WARP_RADIUS = 0.35;
+const WIND_PARALLAX = 2;
+
 // Layer B moves with layer A, not against it, the way two depths of one
 // flow field would: in Loop it circles the same way but starts a
 // quarter turn further round, so the two currents never point exactly
@@ -168,6 +186,7 @@ const GRAD_Y = new Float64Array([0, 0, 1, -1, 1, 1, -1, -1]);
 
 function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octaves, phase, mode, phaseOffset) {
   const drift = mode === "drift";
+  const wind = mode === "wind";
   const key = `${seed}|${fillCols}|${fillRows}|${scale}|${angleRad}|${stretch}|${octaves}|${phase || 0}|${mode || ""}|${phaseOffset || 0}`;
   const cached = fieldCache.get(key);
   if (cached) return cached;
@@ -196,10 +215,44 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
   // Circle: a loop around a circle through the origin, entered at
   // phaseOffset radians round from the default start; subtracting the
   // start point keeps phase 0 (and 1) exactly on the still.
-  const looping = drift || (mode === "circle" && phase > 0 && phase < 1);
+  // Wind adds its travel per octave inside the loop (see WIND_PARALLAX)
+  // rather than up front here.
+  const looping = drift || wind || (mode === "circle" && phase > 0 && phase < 1);
   const start = phaseOffset || 0;
-  const offX = !looping ? 0 : drift ? (phase || 0) * DRIFT_PERIOD : LOOP_RADIUS * (Math.cos(2 * Math.PI * phase + start) - Math.cos(start));
-  const offY = !looping || drift ? 0 : LOOP_RADIUS * (Math.sin(2 * Math.PI * phase + start) - Math.sin(start));
+  const offX = !looping || wind ? 0 : drift ? (phase || 0) * DRIFT_PERIOD : LOOP_RADIUS * (Math.cos(2 * Math.PI * phase + start) - Math.cos(start));
+  const offY = !looping || drift || wind ? 0 : LOOP_RADIUS * (Math.sin(2 * Math.PI * phase + start) - Math.sin(start));
+  // Wind's gust (see WIND_WARP): the warp's strength this frame, and
+  // where on its circle the warp field is sampled from. Layer B enters
+  // the circle at its own start, like Loop.
+  const turn = 2 * Math.PI * (phase || 0);
+  const gust = wind ? WIND_WARP * (1 - Math.cos(turn)) / 2 : 0;
+  const gustX = wind ? WIND_WARP_RADIUS * (Math.cos(turn + start) - Math.cos(start)) : 0;
+  const gustY = wind ? WIND_WARP_RADIUS * (Math.sin(turn + start) - Math.sin(start)) : 0;
+  // Both Drift and Wind wrap the lattice along the flow axis.
+  const wraps = drift || wind;
+  // One gradient-noise sample off the same table, for the warp only;
+  // the octave loop below keeps its own inlined copy of this arithmetic.
+  const sample = (sx, sy) => {
+    const flx = Math.floor(sx);
+    const fly = Math.floor(sy);
+    const xi = flx & 255;
+    const yi = fly & 255;
+    const xf = sx - flx;
+    const yf = sy - fly;
+    const u = xf * xf * xf * (xf * (xf * 6 - 15) + 10);
+    const v = yf * yf * yf * (yf * (yf * 6 - 15) + 10);
+    const aa = perm[perm[xi] + yi] & 7;
+    const ba = perm[perm[xi + 1] + yi] & 7;
+    const ab = perm[perm[xi] + yi + 1] & 7;
+    const bb = perm[perm[xi + 1] + yi + 1] & 7;
+    const gaa = GRAD_X[aa] * xf + GRAD_Y[aa] * yf;
+    const gba = GRAD_X[ba] * (xf - 1) + GRAD_Y[ba] * yf;
+    const gab = GRAD_X[ab] * xf + GRAD_Y[ab] * (yf - 1);
+    const gbb = GRAD_X[bb] * (xf - 1) + GRAD_Y[bb] * (yf - 1);
+    const x1 = gaa + u * (gba - gaa);
+    const x2 = gab + u * (gbb - gab);
+    return x1 + v * (x2 - x1);
+  };
   let maxAmp = 0;
   for (let o = 0, amp = 1; o < octaves; o++, amp *= 0.5) maxAmp += amp;
 
@@ -209,22 +262,32 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
     for (let x = 0; x < fillCols; x++) {
       const rx = x * cos + y * sin;
       const ry = -x * sin + y * cos;
-      const bx = looping ? rx / stretch / scale + offX : rx / stretch / scale;
-      const by = looping ? ry / scale + offY : ry / scale;
+      let bx = looping ? rx / stretch / scale + offX : rx / stretch / scale;
+      let by = looping ? ry / scale + offY : ry / scale;
+      if (gust > 0) {
+        // Two samples of the warp field, well apart in it so the x and
+        // y displacements aren't the same pattern.
+        const wx = sample(bx * WIND_WARP_SCALE + 13.7 + gustX, by * WIND_WARP_SCALE + 5.3 + gustY);
+        const wy = sample(bx * WIND_WARP_SCALE + 47.1 + gustX, by * WIND_WARP_SCALE + 29.9 + gustY);
+        bx += gust * wx;
+        by += gust * wy;
+      }
       let total = 0;
       let amp = 1;
       let freq = 1;
       for (let o = 0; o < octaves; o++) {
-        const sx = bx * freq;
+        // Wind: the first octave travels one period per cycle, the rest
+        // WIND_PARALLAX of theirs.
+        const sx = wind ? (bx + (phase || 0) * DRIFT_PERIOD * (o === 0 ? 1 : WIND_PARALLAX)) * freq : bx * freq;
         const sy = by * freq;
         const flx = Math.floor(sx);
         const fly = Math.floor(sy);
-        // Drift mode wraps the lattice along the flow axis so the field
-        // is periodic there (see DRIFT_PERIOD); circle mode and stills
-        // use the plain 256-entry wrap.
+        // Drift and wind wrap the lattice along the flow axis so the
+        // field is periodic there (see DRIFT_PERIOD); circle mode and
+        // stills use the plain 256-entry wrap.
         const period = DRIFT_PERIOD * freq;
-        const xi = drift ? (((flx % period) + period) % period) & 255 : flx & 255;
-        const xi1 = drift ? (((flx + 1) % period + period) % period) & 255 : xi + 1;
+        const xi = wraps ? (((flx % period) + period) % period) & 255 : flx & 255;
+        const xi1 = wraps ? (((flx + 1) % period + period) % period) & 255 : xi + 1;
         const yi = fly & 255;
         const xf = sx - flx;
         const yf = sy - fly;
@@ -736,9 +799,9 @@ function layerOptionsToField(layer) {
 // covers 100% of the canvas, leaves the background visible in the gaps
 // both layers leave behind. `options.loopPhase` (0 to 1, optional) is
 // the loop phase, and `options.loopMode` picks the kind:
-// "circle" (see LOOP_RADIUS), "drift" (DRIFT_PERIOD), or "pulse"
-// (PULSE_DEPTH). Circle and drift move the field, so a layer with no
-// field strength stays still through them.
+// "circle" (see LOOP_RADIUS), "drift" (DRIFT_PERIOD), "wind"
+// (WIND_WARP), or "pulse" (PULSE_DEPTH). Circle, drift, and wind move
+// the field, so a layer with no field strength stays still through them.
 function generate(options) {
   // Floor rather than ceil, so cols/rows * blockSize never exceeds the
   // canvas: a block that only partly fit would otherwise get clipped

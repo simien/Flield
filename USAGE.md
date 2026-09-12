@@ -15,7 +15,7 @@
 
 ## In-app tutorial
 
-Everything below is also built into the app itself. The **?** button (bottom of the sidebar, next to Copy Link) opens a twelve-step tutorial, each step paired with a small live example of the control it's describing: what a flow field is, Random, sidebar navigation, layer settings, dimension presets and Tile, the shape mask, locks, Palette Range and Density Range, Auto-randomize, Undo, and saving, sharing, and exporting.
+Everything below is also built into the app itself. The **?** button (bottom of the sidebar, next to Copy Link) opens a thirteen-step tutorial, each step paired with a small live example of the control it's describing: what a flow field is, Random, sidebar navigation, layer settings, dimension presets and Tile, the shape mask, locks, Palette Range and Density Range, Auto-randomize, Undo, saving and sharing, exporting, and the animated exports, with a small canvas that runs one cycle of each kind.
 
 On a first visit, a small **Take the tour** prompt appears above the canvas. Take it or dismiss it and it won't come back; the **?** button opens the tutorial anytime. Step through with the arrows or the dots at the bottom, or the left/right arrow keys.
 
@@ -98,13 +98,14 @@ What comes through is a run of variations that share the same underlying structu
 
 - **Loop** breathes the flow field around a small closed path, one full turn across the frames. Each cell's dither is fixed by the seed, so shapes grow, shrink, and slide rather than flicker.
 - **Drift** flows the field one way along its flow direction and travels exactly one period, so the pattern's density envelope repeats along that axis at flow scale times stretch pixels.
+- **Wind** is Drift with weather. The field flows the same way and the same distance, but a second, much broader noise field bends where it's sampled, rising and settling once per cycle like a gust, and fine detail travels twice as far as the broad shapes, so wisps run ahead of the streaks they belong to. The gust starts and ends at nothing, so the cycle opens on Drift's first frame and the bending rises and settles once through it.
 - **Pulse** swings density with one sine wave, 40% of each layer's density either way, so the composition inflates and thins. Cells appear and vanish in a stable order, so it breathes rather than sparkles. The one kind that moves without any field strength.
 
 Each kind is one cycle of about three seconds. Its **×3** and **×5** entries are the two ideas combined: that many Auto-randomize passes, each held for the Auto-randomize interval and animated through one full cycle of that kind, then a cut to the next pass. It is the export of watching a preview with Auto-randomize running.
 
-Layer B moves with Layer A rather than in lockstep, like two depths of one flow field: in Drift its heading is its own flow direction and its speed follows its own flow scale and stretch, in Loop it circles the same way from a point an eighth of a turn further round, and in Pulse it swings the same way at 70% of the depth.
+Layer B moves with Layer A rather than in lockstep, like two depths of one flow field: in Drift and Wind its heading is its own flow direction and its speed follows its own flow scale and stretch (and Wind's gust bends it from a point an eighth of a turn round, as in Loop), in Loop it circles the same way from a point an eighth of a turn further round, and in Pulse it swings the same way at 70% of the depth.
 
-Picking any of them plays that kind on the canvas right away, at the export's own frame rate, so what you see is what the file will be; pick a step count to put the still back. Loop and Drift need some field strength to have anything to move, and all make bigger files than a stepped GIF, since there are 38 frames per cycle instead of a handful; larger blocks bring it down.
+Picking any of them plays that kind on the canvas right away, at the export's own frame rate, so what you see is what the file will be; pick a step count to put the still back. Loop, Drift, and Wind need some field strength to have anything to move, and all make bigger files than a stepped GIF, since there are 38 frames per cycle instead of a handful; larger blocks bring it down.
 
 ## Widening or narrowing an art direction with Palette Range and Density Range
 

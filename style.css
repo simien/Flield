@@ -2184,9 +2184,27 @@ button.secondary.tutorial-nav-arrow-wide:hover:not(:disabled) {
 
 /* --- Step 9: Auto-randomize. The live canvas (see startTutorialDemo
    in index.html) cycles for real. --- */
-.tutorial-demo-explore canvas {
+.tutorial-demo-explore canvas,
+.tutorial-demo-animate canvas {
   border-radius: 6px;
   border: 1px solid var(--border);
+}
+
+/* --- Step 13: Animated exports. The other live canvas, running one
+   cycle of each kind in turn; the kind's name sits to its left (menu
+   side, like the sidebar), in a chip wide enough for any of the four
+   so nothing shifts when it changes. --- */
+.tutorial-demo-kind {
+  flex-shrink: 0;
+  min-width: 44px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
 }
 
 /* Stacked to the left of the canvas, in the sidebar's own real order:
