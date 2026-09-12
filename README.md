@@ -15,13 +15,12 @@ A browser-based generative pixel art tool for creating unique three-color compos
 
 ## Examples
 
-A few exported compositions, showing different symmetry modes, palettes, and densities.
+Three exported GIFs, each thirteen Auto-randomize passes at a two-second interval, showing three ways to use the locks.
 
-| | | |
+| Full random | Brand campaign | Kaleidoscope variations |
 |---|---|---|
-| ![Magenta streak](examples/magenta-streak.gif) | ![Purple bowtie](examples/purple-bowtie.gif) | ![Cyan scatter](examples/cyan-scatter.gif) |
-| ![Diagonal bands](examples/diagonal-bands.gif) | ![Vertical bands](examples/vertical-bands.gif) | ![Mint kaleidoscope](examples/mint-kaleidoscope.gif) |
-| ![Diamond speckle](examples/diamond-speckle.gif?v=2) | ![Teal scatter](examples/teal-scatter.gif) | ![Magenta waves](examples/magenta-waves.gif) |
+| ![Full random](examples/full-random.gif) | ![Brand campaign](examples/brand-campaign.gif) | ![Kaleidoscope variations](examples/kaleidoscope-variations.gif) |
+| Only block size and shape mask locked; every other field rerolls each pass. | Fine diagonal streaks fading toward the bottom, colors and flow locked to a brand palette; only density and stretch drift, for a set of on-brand variations. | A chunky 8-way kaleidoscope with symmetry, block size, density, and flow locked; seeds and colors reroll each pass, so every frame is a new pattern in the same language. |
 
 ## Purpose
 
