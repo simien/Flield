@@ -35,6 +35,7 @@
        and chat apps. og:image reuses the README screenshot; bump its own
        ?v= below if screenshot.png is ever replaced. -->
   <meta property="og:type" content="website" />
+  <meta property="og:locale" content="en_US" />
   <meta property="og:url" content="https://flield.com/" />
   <meta property="og:site_name" content="Flield" />
   <meta property="og:title" content="Flield: Pixel Art Generator" />
@@ -54,21 +55,130 @@
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
+    "@id": "https://flield.com/#app",
     "name": "Flield",
     "url": "https://flield.com/",
     "description": "A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF.",
     "applicationCategory": "DesignApplication",
     "operatingSystem": "Any (runs in a web browser)",
+    "screenshot": "https://flield.com/screenshot.png?v=5",
+    "license": "https://polyformproject.org/licenses/noncommercial/1.0.0/",
+    "isAccessibleForFree": true,
     "offers": {
       "@type": "Offer",
       "price": "0",
       "priceCurrency": "USD"
     },
+    "featureList": [
+      "Two independently seeded layers over a background color, three colors in all",
+      "Seeded flow fields with adjustable scale, strength, and stretch",
+      "Symmetry modes, including the 4-way mirror that tiles without a seam",
+      "Per-field locks that hold a value through a randomize pass",
+      "Palette Range and Density Range to constrain how far randomization wanders",
+      "Auto-randomize on a timer, from every 0.5 to every 10 seconds",
+      "PNG, SVG, and animated GIF export",
+      "Loop, Drift, Wind, and Pulse animations that return to their first frame with no cut",
+      "Shareable URLs and three browser-local save slots, both carrying the lock set",
+      "Runs entirely in the browser with no account, upload, or third-party dependency"
+    ],
+    "sameAs": [
+      "https://github.com/simien/Flield"
+    ],
     "author": {
       "@type": "Person",
+      "@id": "https://simienap.com/#person",
       "name": "Simien",
-      "url": "https://simienap.com"
+      "url": "https://simienap.com",
+      "sameAs": [
+        "https://github.com/simien"
+      ]
     }
+  }
+  </script>
+
+  <!-- The twelve actionable steps of the in-page tour (#tutorialSteps
+       below), in the same order, so the tour's content is machine-readable
+       without a crawler having to open a modal that starts hidden. Google
+       retired HowTo rich results in 2023; this is here for the crawlers
+       that still read schema.org directly. It duplicates the tour's prose
+       by hand, so edit both together or they drift. Step 1 of the tour
+       explains what a flow field is rather than asking for an action, so
+       it sits in the description here instead of in the step list. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "@id": "https://flield.com/#how-to",
+    "name": "How to use Flield",
+    "description": "Flield builds three-color compositions from flow fields: grids of directional forces that steer noise into organic drifts instead of static. Each layer follows its own field, shaping density into bands and clusters. This is how to steer that, then save the result.",
+    "about": { "@id": "https://flield.com/#app" },
+    "inLanguage": "en",
+    "image": "https://flield.com/screenshot.png?v=5",
+    "tool": [
+      { "@type": "HowToTool", "name": "A web browser" }
+    ],
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Reroll the canvas with Random",
+        "text": "Click Random, or press the R key, and every setting in the sidebar gets a fresh value. It's the fastest way to see what the tool does."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Move between the three tabs",
+        "text": "General holds canvas settings. Layer A and Layer B hold each layer's own look."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Give each layer its own settings",
+        "text": "Layer A and Layer B each get their own seed, color, density, flow field, and symmetry, so they rarely match."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Pick a size, or tile it",
+        "text": "The Web, Tablet, and Mobile presets set common dimensions. Tile squares the canvas and mirrors both layers so it repeats with no visible seam."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Mask it into a shape, or a fade",
+        "text": "An optional shape mask clips or fades the composition: circle, diamond, vignette, corner or side vignette, or stripes, all dithered rather than sharply cut off at the edge."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Lock a field to keep it",
+        "text": "A locked field holds its value through a randomize pass instead of getting a new one. Lock All and Unlock All apply to everything at once, and a tab shows a padlock once any of its fields are locked."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Narrow the range to keep a theme",
+        "text": "Palette Range and Density Range constrain how far a randomized color or fill can wander, keeping Auto-randomize inside one tight, cohesive family."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Explore with Auto-randomize",
+        "text": "Lock what you like, then slowly unlock the rest while it plays. Space starts and stops it, and the results narrow toward a collection worth keeping."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Step back with Undo",
+        "text": "Undo, or Cmd/Ctrl+Z, walks back through recent passes, whether they came from a click, autoplay, or a GIF export."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Save it, or share a link",
+        "text": "Three save slots live in your browser. Copy Link encodes the same snapshot, locks included, into a URL anyone can open, and the small menu beside it can make that link offer Auto-randomize to whoever opens it."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Export a PNG, SVG, or GIF",
+        "text": "PNG and SVG save the still. A stepped GIF of 3 to 13 steps replays the exact sequence Auto-randomize would generate, one pass per frame, each held for the speed set beside the play button."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Animate it",
+        "text": "The GIF menu's Loop, Drift, Wind, and Pulse hold every setting and move the composition through one cycle that lands back on its first frame, with no cut. Their times-three and times-five entries record that many Auto-randomize passes, each animated that way."
+      }
+    ]
   }
   </script>
 
@@ -705,9 +815,14 @@
         <span><kbd id="undoKeyLabel">Ctrl+Z</kbd> Undo</span>
       </div>
       <div class="site-footer-links">
-        <a href="https://github.com/simien" target="_blank" rel="noopener">github.com</a>
+        <!-- Internal, and first: /guide/ is the only other page on the
+             site, so this is both the way a reader reaches the long-form
+             docs and the only crawlable link into them. -->
+        <a href="./guide/">Guide</a>
         <span>&middot;</span>
-        <a href="https://simienap.com" target="_blank" rel="noopener">simienap.com</a>
+        <a href="https://github.com/simien" target="_blank" rel="noopener">GitHub.com</a>
+        <span>&middot;</span>
+        <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP.com</a>
         <span>&middot;</span>
         <span>&copy; <span id="footerYear"></span></span>
       </div>

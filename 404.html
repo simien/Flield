@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Same contract as the other two pages: dark by default, light only
+       for a visitor who has toggled it before. -->
+  <script>
+    try {
+      if (localStorage.getItem("flield-theme") === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    } catch (err) {
+      // localStorage can be unavailable (private browsing, blocked); dark stays the default.
+    }
+  </script>
+  <title>Page not found</title>
+  <!-- An error page should never enter an index, whatever URL it was
+       served for. There is deliberately no canonical here either: this
+       page stands in for many URLs rather than being one of its own. -->
+  <meta name="robots" content="noindex, follow" />
+  <meta name="theme-color" content="#09090b" />
+  <!-- Root-relative throughout, not "../": this one file answers for any
+       path that misses, at any depth. -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
+  <link rel="stylesheet" href="/guide.css?v=1" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="wordmark" href="/">Flield</a>
+      <div class="header-actions">
+        <a class="btn" href="/guide/">Guide</a>
+        <a class="btn btn-primary" href="/">Open App</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="notfound">
+      <p class="notfound-code">404</p>
+      <h1>Page not found</h1>
+      <p>There's no page at this address. Flield is a single-canvas app with one guide beside it, so the two links below are the whole site.</p>
+      <p class="notfound-actions">
+        <a class="btn btn-primary" href="/">Open the app</a>
+        <a class="btn" href="/guide/">Read the guide</a>
+      </p>
+      <p class="meta">If you followed a shared composition link that didn't open, the settings ride in the URL's query string. Check that it copied in full, including everything after the <code>?</code>.</p>
+    </div>
+  </main>
+</body>
+</html>

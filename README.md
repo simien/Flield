@@ -38,23 +38,35 @@ Three exported GIFs, each thirteen Auto-randomize passes at a two-second interva
   </tr>
 </table>
 
-Three more, one of each animated export kind, each a single 3-second cycle (at half the frame rate of the app's own export, to keep the files small). Every setting and both seeds hold; only the animation's phase moves, and the last frame runs back into the first with no cut.
+Four more, one of each animated export kind, each a single 3-second cycle (at half the frame rate of the app's own export, to keep the files small). Every setting and both seeds hold; only the animation's phase moves, and the last frame runs back into the first with no cut.
 
+<!-- Two columns rather than the three above: four kinds split evenly, and
+     each clip renders about half again as large, which these need since the
+     motion is the whole point of them. -->
 <table>
   <tr>
-    <th width="33%">Loop</th>
-    <th width="33%">Drift</th>
-    <th width="33%">Pulse</th>
+    <th width="50%">Loop</th>
+    <th width="50%">Drift</th>
   </tr>
   <tr>
-    <td width="33%"><img src="examples/loop.gif" width="100%" alt="Loop"></td>
-    <td width="33%"><img src="examples/drift.gif" width="100%" alt="Drift"></td>
-    <td width="33%"><img src="examples/pulse.gif" width="100%" alt="Pulse"></td>
+    <td width="50%"><img src="examples/loop.gif" width="100%" alt="Loop"></td>
+    <td width="50%"><img src="examples/drift.gif" width="100%" alt="Drift"></td>
   </tr>
   <tr>
-    <td width="33%">The flow field breathes around a small closed path and comes back where it started, so the stripes of this 8-way kaleidoscope sway in place.</td>
-    <td width="33%">The green bands slide one way along their flow direction and wrap into themselves, so they never jump; the sparse purple layer, with almost no field strength, holds still behind them.</td>
-    <td width="33%">Density swings on one sine wave, Layer B at 70% of the depth, so the streaks swell and thin without moving.</td>
+    <td width="50%">The flow field breathes around a small closed path and comes back where it started, so the stripes of this 8-way kaleidoscope sway in place.</td>
+    <td width="50%">The green bands slide one way along their flow direction and wrap into themselves, so they never jump; the sparse purple layer, with almost no field strength, holds still behind them.</td>
+  </tr>
+  <tr>
+    <th width="50%">Wind</th>
+    <th width="50%">Pulse</th>
+  </tr>
+  <tr>
+    <td width="50%"><img src="examples/wind.gif" width="100%" alt="Wind"></td>
+    <td width="50%"><img src="examples/pulse.gif" width="100%" alt="Pulse"></td>
+  </tr>
+  <tr>
+    <td width="50%">The yellow and magenta streaks travel the way Drift's do, but a much broader gust bends the field as they go, rising and settling once across the cycle, so the fine wisps run ahead of the bands they belong to.</td>
+    <td width="50%">Density swings on one sine wave, Layer B at 70% of the depth, so the streaks swell and thin without moving.</td>
   </tr>
 </table>
 
@@ -64,7 +76,7 @@ Built to generate images and placeholder graphics without reaching for stock pho
 
 The generator itself (`generator.js`) is independent of the UI, so the noise field, symmetry, and grid logic can be reused in other projects.
 
-See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques worth knowing, like locking fields to explore variations on one art direction with Auto-randomize. The same walkthrough is also built into the app itself: the **?** button (bottom of the sidebar, next to Copy Link) opens a short tutorial with a live example for each step.
+See the [guide](https://flield.com/guide/) for the sidebar walkthrough and a couple of techniques worth knowing, like locking fields to explore variations on one art direction with Auto-randomize. It shows each control with the icon it carries in the app, and plays an example of each animated export. The same walkthrough is also built into the app itself: the **?** button (bottom of the sidebar, next to Copy Link) opens a short tutorial with a live example for each step.
 
 ## Features
 
@@ -89,7 +101,7 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 - Responsive sidebar that collapses into a toggleable drawer on narrow screens
 - Dark theme by default, with a toggle for light, remembered across visits
 - Fully offline: every dependency is vendored in the repo, no CDN, no network connection needed
-- A generated favicon: the browser tab icon regenerates on every load, in the same three colors as the composition on screen
+- A generated favicon: the browser tab icon regenerates on every load, in the same three colors as the composition on screen, over a static `favicon.svg` and a 192px PNG that iOS home-screen saves and search crawlers use
 
 ## Running locally
 
@@ -98,6 +110,8 @@ Flield is plain HTML, CSS, and JavaScript. No build step, no package manager.
 1. Clone the repository
 2. Serve the folder with any static file server, for example: `python3 -m http.server 8080`
 3. Open `http://localhost:8080` in a browser
+
+The guide is served alongside it at `http://localhost:8080/guide/`.
 
 ## How it works
 

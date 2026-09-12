@@ -1,2 +1,14 @@
+# Cloudflare uploads everything not listed here as a public static asset,
+# so without these the repo's own documentation would be served from the
+# site: flield.com/README.md, /CONTRIBUTING.md, and the issue templates were
+# all returning 200 and were indexable as thin duplicates of pages that
+# already exist. They belong on GitHub; a 404 is the right answer here.
+*.md
+.github
+
+# Repo config, likewise not part of the site.
+.gitignore
+.assetsignore
+
 .git
 .wrangler

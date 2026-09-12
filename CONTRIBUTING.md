@@ -16,6 +16,15 @@ to merge.
   need one, open an issue first to discuss it.
 - **`generator.js` stands alone**: it has no dependency on the UI (`index.html`,
   `style.css`), so it can be reused in other projects. Keep it that way.
+- **The site is three pages**: the app (`index.html` + `style.css`), the guide
+  (`guide/index.html` + `guide.css`), and `404.html`. The guide and the 404 page
+  share `guide.css`; the app does not, because `style.css` gives `body` a fixed,
+  non-scrolling viewport that a document page can't use. `guide.css` copies the
+  handful of design tokens it needs from `style.css`, so a token changed in one
+  needs changing in the other.
+- **Documentation lives at [flield.com/guide](https://flield.com/guide/)**, not in
+  the repo. `USAGE.md` is a stub pointing there on purpose: a second copy would
+  only drift. Corrections to the walkthrough go in `guide/index.html`.
 
 ## Reporting bugs
 
@@ -35,7 +44,8 @@ so a clear problem statement makes it much easier to judge fit.
 ## Submitting changes
 
 1. Fork the repo and create a branch from `main`.
-2. Serve the folder locally to test: `python3 -m http.server 8080`.
+2. Serve the folder locally to test: `python3 -m http.server 8080`. The app is
+   at `/`, the guide at `/guide/`, and the 404 page at `/404.html`.
 3. Keep changes focused; unrelated formatting or refactors make a diff harder
    to review.
 4. Open a pull request describing what changed and why, and link any related

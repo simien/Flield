@@ -1,0 +1,519 @@
+/* The guide is a scrolling document, so it can't share style.css: that
+   file puts display:flex, height:100vh, and overflow:hidden on body for
+   the app's fixed, non-scrolling viewport. What it borrows instead is the
+   token block below, copied from style.css's :root so the two pages read
+   as one site. Only the tokens this page actually uses are copied, which
+   keeps the drift surface small; if a value changes there, change it here
+   too. Same rule as the app: dark is the default regardless of the
+   system setting, and light applies only when the toggle has written
+   data-theme="light" (see the blocking script in this page's head, which
+   reads the same flield-theme key the app writes). */
+:root {
+  color-scheme: dark;
+  --bg: #09090b;
+  --well: #0f0f11;
+  --panel: #18181b;
+  --muted: #27272a;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --input: rgba(255, 255, 255, 0.05);
+  --text: #fafafa;
+  --text-muted: #a1a1aa;
+  --text-subtle: #71717a;
+  --primary: #e4e4e7;
+  --radius-sm: 8px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  /* Shared by the header's padding and the contents menu's offset, so the
+     menu keeps clearing the header's bottom border if this ever changes. */
+  --header-pad-y: 14px;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f4f5;
+  --well: #fafafa;
+  --panel: #ffffff;
+  --muted: #f4f4f5;
+  --border: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.18);
+  --input: rgba(0, 0, 0, 0.04);
+  --text: #18181b;
+  --text-muted: #52525b;
+  --text-subtle: #71717a;
+  --primary: #18181b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+/* One column, capped at a comfortable measure. The app is edge to edge by
+   necessity; prose shouldn't be. This width holds a line to roughly 70
+   characters at the 17px base, the range prose is easiest to read in; it
+   was 90 at the first pass, which is well past comfortable. */
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 24px 96px;
+}
+
+/* Site header: the wordmark returns to the app, which is the only
+   navigation two pages need. */
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.site-header .wrap {
+  /* Positioning context for the contents menu on narrow screens, where it
+     spans the header's gutters instead of hanging off its button. */
+  position: relative;
+  padding: var(--header-pad-y) 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.wordmark {
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.wordmark span {
+  color: var(--text-subtle);
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Fixed height rather than padding alone: these are inline-flex, so a
+   button holding a 16px icon sizes to the icon while a text-only one sizes
+   to the 1.65 line-height it inherits from body, and the two come out
+   several pixels apart. 32px and 0 12px are the app's own button metrics
+   (see .controls button in style.css), so the two pages match. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--input);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--muted);
+}
+
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--bg);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  background: var(--primary);
+}
+
+h1, h2, h3 {
+  /* Short blocks, so even line lengths matter more than orphan avoidance. */
+  text-wrap: balance;
+}
+
+/* The header is sticky, so an anchor jump would otherwise park the heading
+   underneath it. Clears its height plus the h2 border and padding. */
+h2[id], h3[id] {
+  scroll-margin-top: 88px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .nav-toc-caret {
+    transition: none;
+  }
+}
+
+h1 {
+  font-size: clamp(30px, 5vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 56px 0 14px;
+}
+
+.lede {
+  font-size: 18px;
+  color: var(--text-muted);
+  margin: 0 0 40px;
+  text-wrap: balance;
+}
+
+h2 {
+  font-size: 25px;
+  letter-spacing: -0.015em;
+  margin: 56px 0 14px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+h3 {
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  margin: 34px 0 10px;
+}
+
+p, li, td {
+  color: var(--text-muted);
+  /* Keeps a line's last word from being left alone on a line of its own.
+     Ignored by browsers that don't support it, which just wrap as before. */
+  text-wrap: pretty;
+}
+
+p {
+  margin: 0 0 16px;
+}
+
+strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Secondary detail: an enumeration a reader scans rather than reads, set
+   down a step so it doesn't compete with the paragraph it follows. */
+.meta {
+  font-size: 15px;
+  color: var(--text-subtle);
+}
+
+a {
+  color: var(--text);
+  text-decoration-color: var(--text-subtle);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  text-decoration-color: var(--text);
+}
+
+ul, ol {
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+
+li {
+  margin-bottom: 8px;
+}
+
+/* Contents popover. The header's .wrap is the positioning context, so the
+   menu hangs off the button without any measuring in script. */
+.nav-toc {
+  position: relative;
+}
+
+.btn-icon {
+  width: 32px;
+  padding: 0;
+}
+
+.nav-toc-caret {
+  opacity: 0.6;
+  transition: transform 0.15s ease;
+}
+
+#tocBtn[aria-expanded="true"] .nav-toc-caret {
+  transform: rotate(180deg);
+}
+
+.nav-toc-menu {
+  position: absolute;
+  top: calc(100% + var(--header-pad-y) + 8px);
+  right: 0;
+  z-index: 20;
+  min-width: 264px;
+  max-height: min(70vh, 460px);
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.nav-toc-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-toc-menu li {
+  margin: 0;
+}
+
+.nav-toc-menu a {
+  display: block;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.nav-toc-menu a:hover {
+  background: var(--muted);
+  color: var(--text);
+}
+
+/* Filled in by the scroll spy, so the menu says where you are as well as
+   where you can go. */
+.nav-toc-menu a[aria-current="true"] {
+  background: var(--input);
+  color: var(--text);
+  font-weight: 550;
+}
+
+/* Below this the header runs out of room for four controls. GitHub is the
+   one to drop: the page footer carries the same link.
+
+   The menu also stops hanging off its button here. Anchored to the button,
+   a menu wider than the button's distance from the right edge runs off the
+   left of the screen; anchored to the header it spans gutter to gutter
+   instead, which is also the easier tap target. */
+@media (max-width: 600px) {
+  .btn-github {
+    display: none;
+  }
+  .nav-toc {
+    position: static;
+  }
+  .nav-toc-menu {
+    top: calc(100% + 8px);
+    left: 24px;
+    right: 24px;
+    width: auto;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .nav-toc-label {
+    display: none;
+  }
+}
+
+/* Figures. Every image declares its intrinsic size in the markup, so the
+   aspect-ratio box is reserved before the bytes arrive and nothing below
+   jumps as they land. */
+.shot {
+  margin: 0 0 32px;
+}
+
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--well);
+}
+
+.shot figcaption {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--text-subtle);
+  text-wrap: pretty;
+}
+
+.shot figcaption strong {
+  color: var(--text-muted);
+}
+
+/* Stacked rather than side by side: at this column width a three-up row
+   would leave each clip near 190px across, too small to read the motion
+   these are here to show. */
+.shot-row {
+  margin: 0 0 12px;
+}
+
+/* Tables carry a lot of this guide's comparisons, so they get the panel
+   surface and a header that holds while the row list runs long. */
+.table-scroll {
+  overflow-x: auto;
+  margin: 0 0 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+  min-width: 420px;
+}
+
+th, td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  vertical-align: top;
+}
+
+th {
+  background: var(--well);
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+/* A control's on-screen name, matching the .ui-ref treatment the in-app
+   tutorial uses for the same purpose. Where the real control carries an
+   icon, the chip carries the same one, so a reader can match the sentence
+   to the button without a screenshot for every reference. Inline-flex so
+   icon and label sit on a shared baseline box; the em-based size keeps the
+   glyph tied to the surrounding text rather than to a fixed pixel value. */
+.ui-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--input);
+  color: var(--text);
+  font-size: 0.88em;
+  font-weight: 500;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.ui-ref-icon {
+  width: 1.05em;
+  height: 1.05em;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+/* The help button shows only its glyph, so its chip does too. */
+.ui-ref-icon-only {
+  padding: 2px 4px;
+}
+
+.note {
+  border-left: 2px solid var(--border-strong);
+  background: var(--well);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 14px 18px;
+  margin: 0 0 20px;
+}
+
+.note p:last-child {
+  margin-bottom: 0;
+}
+
+/* 404. Centred in the viewport rather than sitting under the header like
+   a document, since there is nothing to scroll. */
+.notfound {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 30em;
+}
+
+.notfound-code {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--text-subtle);
+  margin: 0 0 8px;
+}
+
+.notfound h1 {
+  margin: 0 0 14px;
+}
+
+.notfound-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0 28px;
+}
+
+.notfound code {
+  font-size: 0.92em;
+  padding: 1px 5px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--input);
+  color: var(--text-muted);
+}
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 64px;
+  padding-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 13px;
+  color: var(--text-subtle);
+}
+
+.site-footer a {
+  color: var(--text-subtle);
+}
+
+.site-footer a:hover {
+  color: var(--text);
+}
+
+/* Matches the app: keep the keyboard ring consistent across both pages. */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--text-subtle);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
