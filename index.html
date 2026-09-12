@@ -29,14 +29,14 @@
   <meta property="og:site_name" content="Flield" />
   <meta property="og:title" content="Flield: Pixel Art Generator" />
   <meta property="og:description" content="A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF." />
-  <meta property="og:image" content="https://flield.com/screenshot.png?v=4" />
+  <meta property="og:image" content="https://flield.com/screenshot.png?v=5" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="900" />
   <meta property="og:image:alt" content="A generated three-color composition in Flield" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Flield: Pixel Art Generator" />
   <meta name="twitter:description" content="A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF." />
-  <meta name="twitter:image" content="https://flield.com/screenshot.png?v=4" />
+  <meta name="twitter:image" content="https://flield.com/screenshot.png?v=5" />
   <meta name="twitter:image:alt" content="A generated three-color composition in Flield" />
   <meta name="theme-color" content="#09090b" />
 
@@ -66,7 +66,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=51" />
+  <link rel="stylesheet" href="style.css?v=52" />
   <script src="vendor/gif/gif.js"></script>
   <script src="vendor/floating-ui/core.min.js"></script>
   <script src="vendor/floating-ui/dom.min.js"></script>
@@ -508,14 +508,14 @@
       <div class="field">
         <label>Field strength <span class="l-fieldStrengthVal"></span></label>
         <div class="field-row">
-          <input type="range" class="l-fieldStrength" min="0" max="1" step="0.01" />
+          <input type="range" class="l-fieldStrength" min="0" max="1" step="0.005" />
           <button type="button" class="lock-btn" data-for="fieldStrength" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
         </div>
       </div>
       <div class="field">
         <label>Flow scale <span class="l-fieldScaleVal"></span></label>
         <div class="field-row">
-          <input type="range" class="l-fieldScale" min="5" max="150" />
+          <input type="range" class="l-fieldScale" min="8" max="600" />
           <button type="button" class="lock-btn" data-for="fieldScale" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
         </div>
       </div>
@@ -636,7 +636,7 @@
     </footer>
   </div>
 
-  <script src="generator.js?v=6"></script>
+  <script src="generator.js?v=7"></script>
   <script>
     // Inline replacements for the icons that used to come from the
     // Phosphor webfont (224KB for the ~19 glyphs this app actually uses).
@@ -1132,8 +1132,8 @@
         density: 0.5,
         densityMin: 0,
         densityMax: 0.5,
-        fieldStrength: 0.6,
-        fieldScale: 40,
+        fieldStrength: 0.3,
+        fieldScale: 80,
         flowAngle: 45,
         flowStretch: 3,
         fieldOctaves: 2,
@@ -1152,8 +1152,8 @@
         density: 0.5,
         densityMin: 0,
         densityMax: 0.5,
-        fieldStrength: 0.6,
-        fieldScale: 25,
+        fieldStrength: 0.3,
+        fieldScale: 50,
         flowAngle: 200,
         flowStretch: 3,
         fieldOctaves: 2,
@@ -1220,8 +1220,12 @@
       document.getElementById(prefix + "-densityVal").textContent = layer.density.toFixed(2);
       document.getElementById(prefix + "-densityMinVal").textContent = layer.densityMin.toFixed(2);
       document.getElementById(prefix + "-densityMaxVal").textContent = layer.densityMax.toFixed(2);
-      document.getElementById(prefix + "-fieldStrengthVal").textContent = layer.fieldStrength.toFixed(2);
-      document.getElementById(prefix + "-fieldScaleVal").textContent = layer.fieldScale;
+      // Two decimals, three only when the value sits on a half step (a
+      // state from before the field gain, halved on load).
+      const strength = layer.fieldStrength;
+      document.getElementById(prefix + "-fieldStrengthVal").textContent =
+        Math.round(strength * 1000) % 10 ? strength.toFixed(3) : strength.toFixed(2);
+      document.getElementById(prefix + "-fieldScaleVal").textContent = layer.fieldScale + "px";
       document.getElementById(prefix + "-flowAngleVal").textContent = layer.flowAngle + "°";
       document.getElementById(prefix + "-flowStretchVal").textContent = layer.flowStretch.toFixed(1);
       document.getElementById(prefix + "-fieldOctavesVal").textContent = layer.fieldOctaves;
@@ -1271,8 +1275,15 @@
       }
     }
 
+    // Bumped whenever a saved field's meaning changes; upgradeState()
+    // below converts older snapshots so they still render the same.
+    //   v2: fieldScale is canvas pixels (was grid cells), and
+    //       fieldStrength is multiplied by FIELD_GAIN in the generator.
+    const STATE_VERSION = 2;
+
     function readOptions() {
       return {
+        v: STATE_VERSION,
         bgColor: document.getElementById("bgColor").value,
         width: parseInt(document.getElementById("width").value, 10) || 100,
         height: parseInt(document.getElementById("height").value, 10) || 100,
@@ -1286,6 +1297,27 @@
 
     let lastResult = null;
     let lastOptions = null;
+
+    // Converts a snapshot from an earlier STATE_VERSION (a shared link, a
+    // saved slot) in place. Both v1 conversions are exact, so the picture
+    // comes out cell-for-cell identical: scale in cells times block size
+    // is the same scale in pixels, and strength over FIELD_GAIN times
+    // FIELD_GAIN is the original multiplier (the slider's 0.005 step
+    // holds a halved 0.01 value exactly). A scale beyond the slider's
+    // range is clamped; at that size the field is flatter than the
+    // canvas anyway.
+    function upgradeState(data) {
+      if (!data || (data.v || 1) >= STATE_VERSION) return data;
+      const scaleMax = parseFloat(document.querySelector(".l-fieldScale, #layerA-fieldScale").max);
+      ["layerA", "layerB"].forEach((key) => {
+        const layer = data[key];
+        if (!layer) return;
+        layer.fieldScale = Math.min(scaleMax, layer.fieldScale * (data.blockSize || 1));
+        layer.fieldStrength = layer.fieldStrength / FIELD_GAIN;
+      });
+      data.v = STATE_VERSION;
+      return data;
+    }
 
     // Chrome/Safari have no native "filled portion" pseudo-element for
     // range inputs (Firefox does: ::-moz-range-progress), so the fill is
@@ -1315,7 +1347,29 @@
       });
     }
 
+    // Split in two so a slider drag can refresh its label on every input
+    // event (cheap, and the value tooltip reads it right away) while the
+    // generate-and-draw half runs at most once per animation frame,
+    // however many input events land in between.
     function render() {
+      drawComposition(prepareRender());
+    }
+
+    let pendingOptions = null;
+    let renderFrame = 0;
+
+    function scheduleRender() {
+      pendingOptions = prepareRender();
+      if (renderFrame) return;
+      renderFrame = requestAnimationFrame(() => {
+        renderFrame = 0;
+        const options = pendingOptions;
+        pendingOptions = null;
+        drawComposition(options);
+      });
+    }
+
+    function prepareRender() {
       updateShapeMaskDirectionUI();
       const options = readOptions();
       document.getElementById("blockSizeVal").textContent = options.blockSize + "px";
@@ -1329,7 +1383,10 @@
           `Background ${options.bgColor}, layer A ${options.layerA.color} (seed ${options.layerA.seed}), ` +
           `layer B ${options.layerB.color} (seed ${options.layerB.seed}).`
       );
+      return options;
+    }
 
+    function drawComposition(options) {
       const { gridA, gridB, cols, rows } = generate(options);
       renderToCanvas(canvas, {
         width: options.width,
@@ -1347,7 +1404,7 @@
       lastOptions = options;
     }
 
-    document.querySelector(".controls").addEventListener("input", render);
+    document.querySelector(".controls").addEventListener("input", scheduleRender);
 
     function hslToRgb(h, s, l) {
       s /= 100;
@@ -1370,8 +1427,112 @@
     // A random hue at moderate saturation and a mid-to-dark lightness,
     // so a random background reads as a backdrop (something layer
     // colors show up against) rather than competing with them.
-    function randomBgColor() {
-      return hslToHex(Math.random() * 360, 20 + Math.random() * 60, 8 + Math.random() * 35);
+    // Best-of-N sampling shared by the background and layer color picks
+    // below: draw up to `tries` candidates, keep the first that clears
+    // every separation target (score >= 1), otherwise the closest miss.
+    // Never loops forever on a range that can't satisfy a target; it
+    // just returns the best that range can do.
+    function bestOf(tries, draw, score) {
+      let best = null;
+      let bestScore = -Infinity;
+      for (let i = 0; i < tries; i++) {
+        const candidate = draw();
+        const s = score(candidate);
+        if (s > bestScore) {
+          best = candidate;
+          bestScore = s;
+        }
+        if (s >= 1) break;
+      }
+      return best;
+    }
+
+    // How far apart a roll tries to keep things, so three independently
+    // random colors still read as three: layers at least this many
+    // degrees of hue apart, and every layer this many lightness points
+    // from the background.
+    const MIN_HUE_SEPARATION = 35;
+    const MIN_LIGHTNESS_SEPARATION = 20;
+    const COLOR_TRIES = 24;
+
+    function hueDistance(a, b) {
+      const d = Math.abs(a - b) % 360;
+      return Math.min(d, 360 - d);
+    }
+
+    // `avoidLightness`: lightness values (locked layer colors) the
+    // background should stay clear of; empty on a fresh load.
+    function randomBgColor(avoidLightness = []) {
+      const pick = bestOf(
+        COLOR_TRIES,
+        () => [Math.random() * 360, 20 + Math.random() * 60, 8 + Math.random() * 35],
+        ([, , l]) =>
+          avoidLightness.length
+            ? Math.min(...avoidLightness.map((other) => Math.abs(l - other) / MIN_LIGHTNESS_SEPARATION))
+            : 1
+      );
+      return hslToHex(...pick);
+    }
+
+    // A layer's color, drawn from its own palette ranges but steered away
+    // from the background's lightness and, when it makes sense, the other
+    // layer's hue. Hue separation is skipped when the palette range can't
+    // hold two hues that far apart (Earth tones) or hue barely shows at
+    // all (Monochrome's saturation), so a deliberately narrow palette
+    // still gets exactly what it asked for.
+    function randomizeLayerColor(prefix) {
+      const el = document.getElementById(prefix + "-color");
+      const other = prefix === "layerA" ? "layerB" : "layerA";
+      const bgL = hexToHsl(document.getElementById("bgColor").value).l;
+      // Layer A is rolled before B, so A only avoids B's hue if B's color
+      // is locked (otherwise B is about to move anyway and will avoid A).
+      const otherIsFixed = prefix === "layerB" || lockedFields.has(other + "-color");
+      const hueWidth = Math.abs(
+        parseFloat(document.getElementById(prefix + "-hueMax").value) -
+          parseFloat(document.getElementById(prefix + "-hueMin").value)
+      );
+      const satMax = parseFloat(document.getElementById(prefix + "-satMax").value);
+      const otherHue =
+        otherIsFixed && hueWidth >= MIN_HUE_SEPARATION * 2 && satMax >= 15
+          ? hexToHsl(document.getElementById(other + "-color").value).h
+          : null;
+      const pick = bestOf(
+        COLOR_TRIES,
+        () => [randomInLayerRange(prefix, "hue"), randomInLayerRange(prefix, "sat"), randomInLayerRange(prefix, "light")],
+        ([h, , l]) => {
+          let score = Math.abs(l - bgL) / MIN_LIGHTNESS_SEPARATION;
+          if (otherHue !== null) score = Math.min(score, hueDistance(h, otherHue) / MIN_HUE_SEPARATION);
+          return score;
+        }
+      );
+      el.value = hslToHex(...pick);
+    }
+
+    // Random's odds per option, so the strong, composition-dominating
+    // looks (an 8-way kaleidoscope, a 3x3 wallpaper tile, any shape
+    // mask) turn up as occasional surprises instead of one roll in
+    // eight. Options not listed weigh 1.
+    const SYMMETRY_WEIGHTS = { quad: 3, none: 3, horizontal: 2, vertical: 2, rotational: 2, diagonal: 1.5, kaleidoscope: 1, tile: 0.5 };
+    const SHAPE_MASK_WEIGHTS = { none: 5 };
+
+    function weightedPick(values, weights) {
+      const total = values.reduce((sum, v) => sum + (weights[v] ?? 1), 0);
+      let roll = Math.random() * total;
+      for (const v of values) {
+        roll -= weights[v] ?? 1;
+        if (roll < 0) return v;
+      }
+      return values[values.length - 1];
+    }
+
+    // Log-uniform over the slider's range, so a roll favors the fine
+    // grids the tool is built around (the median lands near 12px) while
+    // the chunky end still shows up now and then. A uniform pick over
+    // 2 to 80 would be a chunky 20px-plus grid three rolls in four.
+    function randomLogRange(el) {
+      const lo = Math.log(parseFloat(el.min));
+      const hi = Math.log(parseFloat(el.max));
+      el.value = Math.round(Math.exp(lo + Math.random() * (hi - lo)));
     }
 
     function hexToHsl(hex) {
@@ -1416,7 +1577,7 @@
       full: { hueMin: 0, hueMax: 360, satMin: 55, satMax: 85, lightMin: 45, lightMax: 65 },
       pastel: { hueMin: 0, hueMax: 360, satMin: 25, satMax: 45, lightMin: 75, lightMax: 90 },
       neon: { hueMin: 0, hueMax: 360, satMin: 85, satMax: 100, lightMin: 50, lightMax: 60 },
-      earth: { hueMin: 20, hueMax: 45, satMin: 35, satMax: 60, lightMin: 25, lightMax: 50 },
+      earth: { hueMin: 15, hueMax: 60, satMin: 35, satMax: 60, lightMin: 25, lightMax: 50 },
       mono: { hueMin: 0, hueMax: 360, satMin: 0, satMax: 8, lightMin: 15, lightMax: 85 },
     };
 
@@ -1507,16 +1668,14 @@
       if (field === "seed") {
         el.value = Math.random().toString(36).slice(2, 10);
       } else if (field === "color") {
-        el.value = hslToHex(
-          randomInLayerRange(prefix, "hue"),
-          randomInLayerRange(prefix, "sat"),
-          randomInLayerRange(prefix, "light")
-        );
+        randomizeLayerColor(prefix);
       } else if (field === "density") {
         el.value = randomInLayerRange(prefix, "density");
+      } else if (field === "fieldScale") {
+        randomLogRange(el);
       } else if (el.tagName === "SELECT") {
         const options = Array.from(el.options).map((o) => o.value);
-        el.value = options[Math.floor(Math.random() * options.length)];
+        el.value = weightedPick(options, field === "symmetry" ? SYMMETRY_WEIGHTS : {});
       } else {
         randomizeRangeInput(el);
       }
@@ -1543,21 +1702,27 @@
       if (undoHistory.length > MAX_UNDO_HISTORY) undoHistory.shift();
       updateUndoButton();
 
+      // Background first, so each layer's color can be steered clear of
+      // it (see randomizeLayerColor). If the background is unlocked it
+      // in turn steers clear of any layer color that is locked.
+      if (!lockedFields.has("bgColor")) {
+        const lockedLayerLightness = ["layerA", "layerB"]
+          .filter((prefix) => lockedFields.has(prefix + "-color"))
+          .map((prefix) => hexToHsl(document.getElementById(prefix + "-color").value).l);
+        document.getElementById("bgColor").value = randomBgColor(lockedLayerLightness);
+      }
       ["layerA", "layerB"].forEach((prefix) => {
         RANDOMIZABLE_FIELDS.forEach((field) => {
           if (!lockedFields.has(prefix + "-" + field)) randomizeElement(prefix, field);
         });
       });
-      if (!lockedFields.has("bgColor")) {
-        document.getElementById("bgColor").value = randomBgColor();
-      }
       if (!lockedFields.has("blockSize")) {
-        randomizeRangeInput(document.getElementById("blockSize"));
+        randomLogRange(document.getElementById("blockSize"));
       }
       if (!lockedFields.has("shapeMask")) {
         const el = document.getElementById("shapeMask");
         const opts = Array.from(el.options).map((o) => o.value);
-        el.value = opts[Math.floor(Math.random() * opts.length)];
+        el.value = weightedPick(opts, SHAPE_MASK_WEIGHTS);
         // Direction rides along with the shape mask under one lock rather
         // than getting its own, so a landed-on corner/side/stripe reads
         // as a full reroll instead of always defaulting to the same
@@ -1801,7 +1966,7 @@
       btn.addEventListener("click", () => {
         const raw = localStorage.getItem(PRESET_KEY_PREFIX + btn.dataset.slot);
         if (!raw) return;
-        const data = JSON.parse(raw);
+        const data = upgradeState(JSON.parse(raw));
         applyGeneral(data);
         applyDefaults("layerA", data.layerA);
         applyDefaults("layerB", data.layerB);
@@ -1878,7 +2043,7 @@
         color,
         density: 0.3 + Math.random() * 0.3,
         fieldStrength: 0,
-        fieldScale: 40,
+        fieldScale: 320,
         flowAngle: 0,
         flowStretch: 1,
         fieldOctaves: 1,
@@ -1995,8 +2160,8 @@
           seed: Math.random().toString(36).slice(2),
           color: "#38bdf8",
           density: 0.3 + Math.random() * 0.3,
-          fieldStrength: 0.5,
-          fieldScale: 30,
+          fieldStrength: 0.25,
+          fieldScale: 120,
           flowAngle: Math.random() * 360,
           flowStretch: 3,
           fieldOctaves: 2,
@@ -2007,8 +2172,8 @@
           seed: Math.random().toString(36).slice(2),
           color: "#f472b6",
           density: 0.2 + Math.random() * 0.2,
-          fieldStrength: 0.5,
-          fieldScale: 20,
+          fieldStrength: 0.25,
+          fieldScale: 80,
           flowAngle: Math.random() * 360,
           flowStretch: 2,
           fieldOctaves: 2,
@@ -2165,7 +2330,7 @@
       const encoded = new URLSearchParams(location.search).get("state");
       if (!encoded) return false;
       try {
-        const data = JSON.parse(atob(encoded));
+        const data = upgradeState(JSON.parse(atob(encoded)));
         applyGeneral(data);
         applyDefaults("layerA", data.layerA);
         applyDefaults("layerB", data.layerB);

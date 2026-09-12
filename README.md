@@ -11,7 +11,7 @@ A browser-based generative pixel art tool for creating unique three-color compos
 <!-- ?v= busts GitHub's and browsers' image cache for this file; bump it
      whenever screenshot.png is replaced, or a cached copy can outlive
      the actual file update for a while. -->
-![Flield screenshot](screenshot.png?v=4)
+![Flield screenshot](screenshot.png?v=5)
 
 ## Examples
 
@@ -34,6 +34,7 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 ## Features
 
 - Every page load opens on a freshly randomized composition
+- Randomize keeps the three colors readable: layers are steered at least 35 degrees of hue apart and 20 lightness points from the background (inside each layer's palette range), block size favors fine grids, and the loudest symmetry and mask options come up as occasional surprises rather than one roll in eight
 - Two independently configurable color layers, each with its own seed, density, and directional flow field
 - Eight symmetry modes: 4-way mirror, horizontal, vertical, 180-degree rotational, diagonal, 8-way kaleidoscope, tile, and none
 - Optional shape masks, circle, diamond, vignette (and its inverse), a directional corner or side vignette, and stripes, each with a seeded dithered edge or fade instead of a hard cutoff
@@ -65,4 +66,4 @@ Flield is plain HTML, CSS, and JavaScript. No build step, no package manager.
 
 ## How it works
 
-Each layer's shape comes from a seeded value noise field (a small Perlin-style implementation in `generator.js`), rotated and stretched to create a directional flow instead of isolated static. That field biases each cell's fill probability rather than gating cells on or off directly, which produces smooth density gradients across the canvas. Symmetry modes apply as a final mirror, rotation, or (for Tile) translation pass over the generated grid. A shape mask, when set, constrains or fades the composition, a circle, diamond, vignette, corner or side vignette, or stripes, with a seeded dither along the transition instead of a hard cutoff, so the edge reads as part of the texture rather than a clipped shape.
+Each layer's shape comes from a seeded value noise field (a small Perlin-style implementation in `generator.js`), rotated and stretched to create a directional flow instead of isolated static. That field biases each cell's fill probability rather than gating cells on or off directly, which produces smooth density gradients across the canvas. Grids are flat typed arrays, the field is cached between renders that don't change it, and the canvas is painted once at cell resolution and scaled up, so a full-resolution render stays well under a frame at typical sizes. Symmetry modes apply as a final mirror, rotation, or (for Tile) translation pass over the generated grid. A shape mask, when set, constrains or fades the composition, a circle, diamond, vignette, corner or side vignette, or stripes, with a seeded dither along the transition instead of a hard cutoff, so the edge reads as part of the texture rather than a clipped shape.

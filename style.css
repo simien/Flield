@@ -141,8 +141,17 @@ input[type="range"]:focus-visible {
   flex-direction: column;
   min-height: 0;
   /* Shared by the canvas area and the site footer, so the legend and
-     links sit on the same inset as the artwork's edges. */
-  --artboard-pad: 40px;
+     links sit on the same inset as the artwork's edges: sidebar, right
+     edge, and bottom. The brand keeps its own 20px at the top. */
+  --artboard-pad: 25px;
+  /* Chrome the artboard has to clear: the brand row at the top (20px
+     inset plus its 32px line) and the footer at the bottom (32px line
+     plus its inset), each followed by the artboard padding. The larger
+     of the two is applied to both ends, so the artwork centers on the
+     browser's full height rather than on whatever is left between them. */
+  --artboard-clear-top: calc(52px + var(--artboard-pad));
+  --artboard-clear-bottom: calc(32px + var(--artboard-pad) * 2);
+  --artboard-clear: max(var(--artboard-clear-top), var(--artboard-clear-bottom));
 }
 
 /* The name sits centered over the artboard, out of the sidebar's way
@@ -1252,12 +1261,15 @@ button.secondary:hover:not(:disabled) {
   background: var(--input-hover);
 }
 
+/* Fills the whole artboard side (the brand and footer paint over its
+   padding), so centering here is centering on the viewport. */
 .canvas-area {
-  flex: 1;
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--artboard-pad);
+  padding: var(--artboard-clear) var(--artboard-pad);
   overflow: auto;
 }
 
@@ -1269,6 +1281,8 @@ button.secondary:hover:not(:disabled) {
    20px, since it belongs to the header row. */
 .site-footer {
   flex-shrink: 0;
+  margin-top: auto;
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1342,9 +1356,12 @@ button.secondary:hover:not(:disabled) {
   }
 }
 
+/* Both caps resolve against .canvas-area's padding box, so a tall
+   preset shrinks to fit between the brand and the footer instead of
+   running under either; the browser keeps the canvas's aspect ratio. */
 #preview {
   max-width: 100%;
-  max-height: 80vh;
+  max-height: 100%;
   border: 1px solid var(--border);
   border-radius: 4px;
   box-shadow: var(--shadow-lg);
@@ -1366,7 +1383,24 @@ button.secondary:hover:not(:disabled) {
 
 .button-row > button {
   flex: 1;
+  /* Lets a button shrink below its content width instead of spilling
+     past the row's padding; the export row's three buttons otherwise
+     overflow the sidebar by a few pixels. */
+  min-width: 0;
   margin-top: 0;
+}
+
+/* The GIF split keeps its natural width (label plus the 30px select);
+   PNG and SVG share whatever is left. */
+.button-row > .split-btn {
+  flex: 0 0 auto;
+}
+
+/* Three labeled buttons plus a select in one 260px row: the default
+   12px side padding is 4px too much per button to fit. */
+.controls-footer .button-row > button,
+.controls-footer .button-row .split-btn-main {
+  padding: 0 8px;
 }
 
 .footer-link-row {

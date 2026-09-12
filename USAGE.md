@@ -10,7 +10,7 @@
 
 - Every composition is **three colors**: a background, plus two independently generated artwork layers.
 - Each layer runs on its own **seed**, so the same seed and settings always regenerate the same result.
-- The canvas sits on the right, with the Flield name in its top corner; every control that shapes it lives in the sidebar on the left.
+- The canvas sits on the right, centered under the Flield name; every control that shapes it lives in the sidebar on the left.
 - Every page load opens on a **freshly randomized** composition instead of a fixed default, background color, block size, and shape mask aside (more on why in [Locks](#locks)).
 
 ## In-app tutorial
@@ -35,6 +35,8 @@ The sidebar becomes a drawer instead of a permanent column. A toggle button in t
 ### Sliders
 
 The click and drag target reaches well past the thin line you see, so grabbing a slider doesn't take a precise hit.
+
+**Flow scale** is measured in canvas pixels, so a setting reads the same at any block size. **Field strength** puts clear banding around the middle of its range; a link or saved slot from before this change loads with its strength halved and renders exactly as it did.
 
 ### Scrolling
 
@@ -80,7 +82,7 @@ All three stay out of the way while you're typing in a field, and the legend sit
 
 ## Exploring an art direction with Auto-randomize
 
-1. Click **Random** to reroll every unlocked field at once. Good for a first look, but left alone this just cycles through unrelated compositions.
+1. Click **Random** to reroll every unlocked field at once. Good for a first look, but left alone this just cycles through unrelated compositions. A roll is steered, not blind: the two layers are kept apart in hue and both are kept apart from the background in lightness, as far as each layer's Palette Range allows, so three random colors still read as three.
 2. **Lock down what you want to keep**, and let the rest stay unlocked. For example: lock a layer's seed and symmetry, leave density and flow field unlocked.
 3. Click the **Auto-randomize** button (▶, next to Random) to repeat that reroll on a timer, from every 0.5 seconds up to every 10.
 

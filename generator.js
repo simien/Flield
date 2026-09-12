@@ -1,6 +1,13 @@
 // Seeded, deterministic pixel-art generator.
 // String seed -> 32-bit hash -> mulberry32 PRNG, so the same seed always
 // produces the same image regardless of when/where it's regenerated.
+//
+// Grids are flat Uint8Arrays indexed y * cols + x (1 = filled), which is
+// several times faster to build, mirror, and draw than an array of row
+// arrays and is what lets a full-resolution render stay under a frame at
+// typical sizes. Every pass below is written to produce exactly the same
+// cells as the earlier row-array version for the same inputs, so seeds
+// and shared links keep rendering the same picture.
 
 function hashStringToSeed(str) {
   let h = 1779033703 ^ str.length;
@@ -89,6 +96,8 @@ function fbm(noise2D, x, y, octaves) {
 // Samples the flow field at a grid coordinate: rotates into flow-aligned
 // space then stretches along the flow axis so features elongate into
 // streaks pointing in the flow direction, like blown sand or cloud bands.
+// `scale` here is in grid cells; callers convert from the pixel value the
+// UI exposes (see buildGrid).
 function sampleFlowField(noise2D, x, y, { scale, angleRad, stretch, octaves }) {
   const cos = Math.cos(angleRad);
   const sin = Math.sin(angleRad);
@@ -99,13 +108,113 @@ function sampleFlowField(noise2D, x, y, { scale, angleRad, stretch, octaves }) {
   return fbm(noise2D, nx, ny, octaves); // -1..1
 }
 
-// Mirrors a region's columns outward: for each filled cell at (y, x) with
+// The fractal noise sum rarely gets far from zero (its typical magnitude
+// is about 0.11, and 0.42 at the 99th percentile), so a field strength
+// slider that multiplied it directly spent most of its travel on a
+// barely visible effect. Strength is multiplied by this gain before it
+// biases density, which puts clear banding at mid-slider. States saved
+// before this existed carry their strength halved on load (see the
+// state version handling in index.html), which reproduces the exact
+// same multiplier and therefore the exact same cells.
+const FIELD_GAIN = 2;
+
+// The flow field for a layer's unique region, sampled once and reused
+// across renders that only change something else (density, color,
+// smoothing, symmetry within the same region size, the shape mask).
+// Sampling the noise is by far the most expensive part of a render, and
+// a slider drag on any of those other fields would otherwise recompute
+// an identical field on every frame. Float64 so the cached values are
+// bit-identical to a fresh sample. A handful of entries covers both
+// layers plus the favicon and tutorial demos without growing unbounded.
+const FIELD_CACHE_LIMIT = 6;
+const fieldCache = new Map();
+
+// Gradient table as two flat arrays, indexed by hash & 7; the same eight
+// directions makePerlin uses.
+const GRAD_X = new Float64Array([1, -1, 0, 0, 1, -1, 1, -1]);
+const GRAD_Y = new Float64Array([0, 0, 1, -1, 1, 1, -1, -1]);
+
+function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octaves) {
+  const key = `${seed}|${fillCols}|${fillRows}|${scale}|${angleRad}|${stretch}|${octaves}`;
+  const cached = fieldCache.get(key);
+  if (cached) return cached;
+
+  // This is makePerlin + fbm + sampleFlowField inlined into one loop:
+  // the same permutation shuffle, the same expressions in the same order
+  // (so every value is bit-identical to calling those functions), just
+  // without a closure call, an object, and an array-of-arrays lookup per
+  // octave per cell. Those three were most of a cold render's time.
+  const rand = seededRandom(seed + "|field");
+  const p = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) p[i] = i;
+  for (let i = 255; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    const tmp = p[i];
+    p[i] = p[j];
+    p[j] = tmp;
+  }
+  const perm = new Uint8Array(512);
+  for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+
+  const cos = Math.cos(angleRad);
+  const sin = Math.sin(angleRad);
+  let maxAmp = 0;
+  for (let o = 0, amp = 1; o < octaves; o++, amp *= 0.5) maxAmp += amp;
+
+  const values = new Float64Array(fillRows * fillCols);
+  for (let y = 0; y < fillRows; y++) {
+    const row = y * fillCols;
+    for (let x = 0; x < fillCols; x++) {
+      const rx = x * cos + y * sin;
+      const ry = -x * sin + y * cos;
+      const bx = rx / stretch / scale;
+      const by = ry / scale;
+      let total = 0;
+      let amp = 1;
+      let freq = 1;
+      for (let o = 0; o < octaves; o++) {
+        const sx = bx * freq;
+        const sy = by * freq;
+        const flx = Math.floor(sx);
+        const fly = Math.floor(sy);
+        const xi = flx & 255;
+        const yi = fly & 255;
+        const xf = sx - flx;
+        const yf = sy - fly;
+        const u = xf * xf * xf * (xf * (xf * 6 - 15) + 10);
+        const v = yf * yf * yf * (yf * (yf * 6 - 15) + 10);
+        const aa = perm[perm[xi] + yi] & 7;
+        const ba = perm[perm[xi + 1] + yi] & 7;
+        const ab = perm[perm[xi] + yi + 1] & 7;
+        const bb = perm[perm[xi + 1] + yi + 1] & 7;
+        const gaa = GRAD_X[aa] * xf + GRAD_Y[aa] * yf;
+        const gba = GRAD_X[ba] * (xf - 1) + GRAD_Y[ba] * yf;
+        const gab = GRAD_X[ab] * xf + GRAD_Y[ab] * (yf - 1);
+        const gbb = GRAD_X[bb] * (xf - 1) + GRAD_Y[bb] * (yf - 1);
+        const x1 = gaa + u * (gba - gaa);
+        const x2 = gab + u * (gbb - gab);
+        total += (x1 + v * (x2 - x1)) * amp;
+        amp *= 0.5;
+        freq *= 2;
+      }
+      values[row + x] = maxAmp > 0 ? total / maxAmp : 0;
+    }
+  }
+
+  if (fieldCache.size >= FIELD_CACHE_LIMIT) {
+    fieldCache.delete(fieldCache.keys().next().value);
+  }
+  fieldCache.set(key, values);
+  return values;
+}
+
+// Mirrors a region's columns outward: for each cell at (y, x) with
 // x < fillCols, also sets its left-right reflection across the full width.
 function mirrorHorizontal(grid, cols, fillRows, fillCols) {
   for (let y = 0; y < fillRows; y++) {
+    const row = y * cols;
     for (let x = 0; x < fillCols; x++) {
-      const mx = cols - 1 - x;
-      if (mx >= 0 && mx < cols) grid[y][mx] = grid[y][x];
+      grid[row + (cols - 1 - x)] = grid[row + x];
     }
   }
 }
@@ -115,8 +224,8 @@ function mirrorHorizontal(grid, cols, fillRows, fillCols) {
 function mirrorVertical(grid, rows, cols, fillRows) {
   for (let y = 0; y < fillRows; y++) {
     const my = rows - 1 - y;
-    if (my < 0 || my >= rows) continue;
-    for (let x = 0; x < cols; x++) grid[my][x] = grid[y][x];
+    if (my === y) continue;
+    grid.copyWithin(my * cols, y * cols, y * cols + cols);
   }
 }
 
@@ -126,9 +235,10 @@ function mirrorRotational(grid, rows, cols, fillRows) {
   for (let y = 0; y < fillRows; y++) {
     const my = rows - 1 - y;
     if (my < 0 || my >= rows) continue;
+    const row = y * cols;
+    const mrow = my * cols;
     for (let x = 0; x < cols; x++) {
-      const mx = cols - 1 - x;
-      grid[my][mx] = grid[y][x];
+      grid[mrow + (cols - 1 - x)] = grid[row + x];
     }
   }
 }
@@ -136,13 +246,15 @@ function mirrorRotational(grid, rows, cols, fillRows) {
 // True diagonal reflection only exists for a square region, so this
 // mirrors across the largest square centered in the given region and
 // leaves any leftover rectangular margin (when cols != rows) untouched.
-function mirrorDiagonal(grid, regionCols, regionRows) {
+// `cols` is the grid's full stride; the region is regionCols x regionRows
+// at the top-left.
+function mirrorDiagonal(grid, cols, regionCols, regionRows) {
   const size = Math.min(regionCols, regionRows);
   const offX = Math.floor((regionCols - size) / 2);
   const offY = Math.floor((regionRows - size) / 2);
   for (let ly = 0; ly < size; ly++) {
     for (let lx = ly + 1; lx < size; lx++) {
-      grid[offY + lx][offX + ly] = grid[offY + ly][offX + lx];
+      grid[(offY + lx) * cols + offX + ly] = grid[(offY + ly) * cols + offX + lx];
     }
   }
 }
@@ -160,9 +272,34 @@ const TILE_REPEATS = 3;
 function tileGrid(grid, cols, rows, fillCols, fillRows) {
   for (let y = 0; y < rows; y++) {
     const sy = y % fillRows;
+    const row = y * cols;
+    const srow = sy * cols;
     for (let x = 0; x < cols; x++) {
       const sx = x % fillCols;
-      if (sy !== y || sx !== x) grid[y][x] = grid[sy][sx];
+      if (sy !== y || sx !== x) grid[row + x] = grid[srow + sx];
+    }
+  }
+}
+
+// One cellular-automaton smoothing pass over the unique region: a cell
+// with five or more filled neighbors fills, two or fewer empties, and
+// anything in between stays. Reads from `src`, writes to `dst`.
+function smoothPass(src, dst, cols, fillCols, fillRows) {
+  for (let y = 0; y < fillRows; y++) {
+    const y0 = y > 0 ? y - 1 : y;
+    const y1 = y < fillRows - 1 ? y + 1 : y;
+    for (let x = 0; x < fillCols; x++) {
+      const x0 = x > 0 ? x - 1 : x;
+      const x1 = x < fillCols - 1 ? x + 1 : x;
+      let count = -src[y * cols + x];
+      for (let ny = y0; ny <= y1; ny++) {
+        const nrow = ny * cols;
+        for (let nx = x0; nx <= x1; nx++) count += src[nrow + nx];
+      }
+      const i = y * cols + x;
+      if (count >= 5) dst[i] = 1;
+      else if (count <= 2) dst[i] = 0;
+      else dst[i] = src[i];
     }
   }
 }
@@ -176,9 +313,12 @@ function tileGrid(grid, cols, rows, fillCols, fillRows) {
 // "kaleidoscope" composes all three: the unique quadrant gets a diagonal
 // mirror first, then that quadrant is mirrored out horizontally and
 // vertically, producing 8-way symmetry.
-function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field }) {
-  const rand = seededRandom(seed);
-  const grid = Array.from({ length: rows }, () => new Array(cols).fill(false));
+function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, blockSize }) {
+  // mulberry32 inlined (see the function of that name above for the
+  // readable form): the same state update and output arithmetic, so the
+  // sequence is identical, minus a closure call per cell.
+  let rngState = hashStringToSeed(seed) | 0;
+  let grid = new Uint8Array(rows * cols);
 
   const isTile = symmetry === "tile";
   const fillCols = isTile
@@ -189,50 +329,54 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field })
     : HALF_ROWS_SYMMETRIES.has(symmetry) ? Math.ceil(rows / 2) : rows;
 
   const useField = field && field.strength > 0;
-  const noise2D = useField ? makePerlin(seed + "|field") : null;
-  const angleRad = useField ? (field.angle * Math.PI) / 180 : 0;
-
-  for (let y = 0; y < fillRows; y++) {
-    for (let x = 0; x < fillCols; x++) {
-      let p = density;
-      if (useField) {
-        const n = sampleFlowField(noise2D, x, y, {
-          scale: field.scale,
-          angleRad,
-          stretch: field.stretch,
-          octaves: field.octaves,
-        });
-        p = Math.min(1, Math.max(0, density + field.strength * n));
+  if (useField) {
+    // field.scale is in canvas pixels so the same setting reads the same
+    // at any block size; the noise itself is sampled per cell.
+    const values = getFlowField(
+      seed,
+      fillCols,
+      fillRows,
+      field.scale / blockSize,
+      (field.angle * Math.PI) / 180,
+      field.stretch,
+      field.octaves
+    );
+    const gain = field.strength * FIELD_GAIN;
+    for (let y = 0; y < fillRows; y++) {
+      const row = y * cols;
+      const frow = y * fillCols;
+      for (let x = 0; x < fillCols; x++) {
+        const p = Math.min(1, Math.max(0, density + gain * values[frow + x]));
+        rngState = (rngState + 0x6d2b79f5) | 0;
+        let r = Math.imul(rngState ^ (rngState >>> 15), 1 | rngState);
+        r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+        grid[row + x] = ((r ^ (r >>> 14)) >>> 0) / 4294967296 < p ? 1 : 0;
       }
-      grid[y][x] = rand() < p;
+    }
+  } else {
+    for (let y = 0; y < fillRows; y++) {
+      const row = y * cols;
+      for (let x = 0; x < fillCols; x++) {
+        rngState = (rngState + 0x6d2b79f5) | 0;
+        let r = Math.imul(rngState ^ (rngState >>> 15), 1 | rngState);
+        r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+        grid[row + x] = ((r ^ (r >>> 14)) >>> 0) / 4294967296 < density ? 1 : 0;
+      }
     }
   }
 
-  for (let pass = 0; pass < smoothPasses; pass++) {
-    const next = grid.map((row) => row.slice());
-    for (let y = 0; y < fillRows; y++) {
-      for (let x = 0; x < fillCols; x++) {
-        let count = 0;
-        for (let dy = -1; dy <= 1; dy++) {
-          for (let dx = -1; dx <= 1; dx++) {
-            if (dx === 0 && dy === 0) continue;
-            const ny = y + dy;
-            const nx = x + dx;
-            if (ny >= 0 && ny < fillRows && nx >= 0 && nx < fillCols && grid[ny][nx]) count++;
-          }
-        }
-        if (count >= 5) next[y][x] = true;
-        else if (count <= 2) next[y][x] = false;
-        else next[y][x] = grid[y][x];
-      }
-    }
-    for (let y = 0; y < fillRows; y++) {
-      for (let x = 0; x < fillCols; x++) grid[y][x] = next[y][x];
+  if (smoothPasses > 0) {
+    let next = new Uint8Array(rows * cols);
+    for (let pass = 0; pass < smoothPasses; pass++) {
+      smoothPass(grid, next, cols, fillCols, fillRows);
+      const tmp = grid;
+      grid = next;
+      next = tmp;
     }
   }
 
   if (symmetry === "diagonal" || symmetry === "kaleidoscope") {
-    mirrorDiagonal(grid, fillCols, fillRows);
+    mirrorDiagonal(grid, cols, fillCols, fillRows);
   }
 
   if (HALF_COLS_SYMMETRIES.has(symmetry)) {
@@ -254,32 +398,60 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field })
   return grid;
 }
 
-function fillCells(ctx, grid, cols, rows, blockSize) {
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      if (grid[y][x]) ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
-    }
-  }
+// Canvas pixel packing for the scratch ImageData below: one 32-bit write
+// per cell instead of a fillRect per cell. Byte order in the buffer is
+// the platform's, hence the endianness probe.
+const LITTLE_ENDIAN = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
+
+function packColor(hex) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return LITTLE_ENDIAN
+    ? ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0
+    : ((r << 24) | (g << 16) | (b << 8) | 255) >>> 0;
 }
 
+let scratchCanvas = null;
+
+// Draws both grids in one pass: paints the composition at one pixel per
+// cell into a scratch canvas, then scales it up by blockSize with image
+// smoothing off, so each cell lands as a crisp blockSize square. Two
+// draw calls regardless of grid size, versus one fillRect per filled
+// cell before, which was most of a render's time at fine block sizes.
 function renderToCanvas(canvas, { width, height, blockSize, bgColor, colorA, colorB, gridA, gridB, cols, rows }) {
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = colorA;
-  fillCells(ctx, gridA, cols, rows, blockSize);
-  ctx.fillStyle = colorB;
-  fillCells(ctx, gridB, cols, rows, blockSize);
+
+  if (!scratchCanvas) scratchCanvas = document.createElement("canvas");
+  if (scratchCanvas.width !== cols || scratchCanvas.height !== rows) {
+    scratchCanvas.width = cols;
+    scratchCanvas.height = rows;
+  }
+  const sctx = scratchCanvas.getContext("2d");
+  const image = sctx.createImageData(cols, rows);
+  const pixels = new Uint32Array(image.data.buffer);
+  const bg = packColor(bgColor);
+  const a = packColor(colorA);
+  const b = packColor(colorB);
+  for (let i = 0; i < pixels.length; i++) {
+    pixels[i] = gridA[i] ? a : gridB[i] ? b : bg;
+  }
+  sctx.putImageData(image, 0, 0);
+
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(scratchCanvas, 0, 0, cols, rows, 0, 0, cols * blockSize, rows * blockSize);
 }
 
-// Merges a boolean grid's filled cells into rectangles instead of one
-// <rect> per cell: first collapses each row into horizontal runs of
-// consecutive filled cells, then extends a run's rect downward through
-// following rows as long as a later row has a run with the identical x
-// and width. Keeps SVG file size practical at fine block sizes, where a
-// naive per-cell approach can produce hundreds of thousands of elements.
+// Merges a grid's filled cells into rectangles instead of one <rect> per
+// cell: first collapses each row into horizontal runs of consecutive
+// filled cells, then extends a run's rect downward through following
+// rows as long as a later row has a run with the identical x and width.
+// Keeps SVG file size practical at fine block sizes, where a naive
+// per-cell approach can produce hundreds of thousands of elements.
 // Every filled cell ends up covered by exactly one rect (open rects that
 // fail to extend are closed immediately), so this never changes the
 // rendered result, only how many <rect> elements represent it.
@@ -288,39 +460,39 @@ function mergeGridToRects(grid, cols, rows) {
   let openRects = [];
 
   for (let y = 0; y < rows; y++) {
+    const rowStart = y * cols;
     const runs = [];
+    // Runs keyed by their x and width, so matching an open rect against
+    // this row is a lookup rather than a scan of every run.
+    const runByKey = new Map();
     let x = 0;
     while (x < cols) {
-      if (!grid[y][x]) {
+      if (!grid[rowStart + x]) {
         x++;
         continue;
       }
       const startX = x;
-      while (x < cols && grid[y][x]) x++;
-      runs.push({ x: startX, w: x - startX });
+      while (x < cols && grid[rowStart + x]) x++;
+      const run = { x: startX, w: x - startX, used: false };
+      runs.push(run);
+      runByKey.set(startX * (cols + 1) + run.w, run);
     }
 
-    const usedRunIndexes = new Set();
     const stillOpen = [];
-
     for (const rect of openRects) {
-      const matchIndex = runs.findIndex(
-        (run, i) => !usedRunIndexes.has(i) && run.x === rect.x && run.w === rect.w
-      );
-      if (matchIndex === -1) {
+      const run = runByKey.get(rect.x * (cols + 1) + rect.w);
+      if (!run || run.used) {
         closedRects.push(rect);
       } else {
         rect.h += 1;
+        run.used = true;
         stillOpen.push(rect);
-        usedRunIndexes.add(matchIndex);
       }
     }
 
-    runs.forEach((run, i) => {
-      if (!usedRunIndexes.has(i)) {
-        stillOpen.push({ x: run.x, y, w: run.w, h: 1 });
-      }
-    });
+    for (const run of runs) {
+      if (!run.used) stillOpen.push({ x: run.x, y, w: run.w, h: 1 });
+    }
 
     openRects = stillOpen;
   }
@@ -474,9 +646,10 @@ function applyShapeMask(grid, cols, rows, shape, seed, direction) {
 
   if (GRADIENT_SHAPE_MASKS.has(shape)) {
     for (let y = 0; y < rows; y++) {
+      const row = y * cols;
       for (let x = 0; x < cols; x++) {
         if (rand() > maskKeepProbability(shape, direction, x, y, cols, rows)) {
-          grid[y][x] = false;
+          grid[row + x] = 0;
         }
       }
     }
@@ -486,11 +659,12 @@ function applyShapeMask(grid, cols, rows, shape, seed, direction) {
   const inner = 1 - SHAPE_MASK_FEATHER;
   const outer = 1 + SHAPE_MASK_FEATHER;
   for (let y = 0; y < rows; y++) {
+    const row = y * cols;
     for (let x = 0; x < cols; x++) {
       const d = shapeDistance(shape, x, y, cols, rows);
       if (d <= inner) continue;
       if (d >= outer || rand() > 1 - (d - inner) / (outer - inner)) {
-        grid[y][x] = false;
+        grid[row + x] = 0;
       }
     }
   }
@@ -520,33 +694,26 @@ function generate(options) {
   const cols = Math.max(1, Math.floor(options.width / options.blockSize));
   const rows = Math.max(1, Math.floor(options.height / options.blockSize));
 
-  const gridA = buildGrid({
-    seed: options.layerA.seed,
-    cols,
-    rows,
-    density: options.layerA.density,
-    symmetry: options.layerA.symmetry,
-    smoothPasses: options.layerA.smoothPasses,
-    field: layerOptionsToField(options.layerA),
-  });
+  const buildLayer = (layer) =>
+    buildGrid({
+      seed: layer.seed,
+      cols,
+      rows,
+      density: layer.density,
+      symmetry: layer.symmetry,
+      smoothPasses: layer.smoothPasses,
+      field: layerOptionsToField(layer),
+      blockSize: options.blockSize,
+    });
 
-  const gridB = buildGrid({
-    seed: options.layerB.seed,
-    cols,
-    rows,
-    density: options.layerB.density,
-    symmetry: options.layerB.symmetry,
-    smoothPasses: options.layerB.smoothPasses,
-    field: layerOptionsToField(options.layerB),
-  });
+  const gridA = buildLayer(options.layerA);
+  const gridB = buildLayer(options.layerB);
 
   applyShapeMask(gridA, cols, rows, options.shapeMask, options.layerA.seed, options.shapeMaskDirection);
   applyShapeMask(gridB, cols, rows, options.shapeMask, options.layerB.seed, options.shapeMaskDirection);
 
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      if (gridA[y][x]) gridB[y][x] = false;
-    }
+  for (let i = 0; i < gridA.length; i++) {
+    if (gridA[i]) gridB[i] = 0;
   }
 
   return { gridA, gridB, cols, rows };
