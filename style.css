@@ -738,6 +738,16 @@ input[type="range"]:focus-visible {
   background: var(--input-hover);
 }
 
+/* A chip whose values the composition currently matches (see
+   updatePresetChips in index.html): the same lifted, muted tile a
+   locked field gets, since it reports a state rather than inviting a
+   click. */
+.preset-chip-row button.active {
+  background: var(--muted);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
 .field label {
   display: flex;
   justify-content: space-between;
@@ -1297,6 +1307,22 @@ button.secondary:hover:not(:disabled) {
 
 .site-footer:hover {
   color: var(--text);
+}
+
+/* The footer animates its color once; its descendants must not add
+   their own transition on top (the global * rule would), or each
+   nesting level re-eases the inherited value and text at different
+   depths (a link, a separator, the year inside its own span, a key
+   chip) appears to fade at different speeds. Only the chip border keeps
+   a transition of its own. */
+.site-footer a,
+.site-footer span,
+.site-footer kbd {
+  transition: none;
+}
+
+.site-footer kbd {
+  transition: border-color 0.15s ease;
 }
 
 .site-footer-links,

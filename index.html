@@ -66,7 +66,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=52" />
+  <link rel="stylesheet" href="style.css?v=53" />
   <script src="vendor/gif/gif.js"></script>
   <script src="vendor/floating-ui/core.min.js"></script>
   <script src="vendor/floating-ui/dom.min.js"></script>
@@ -1375,6 +1375,7 @@
       document.getElementById("blockSizeVal").textContent = options.blockSize + "px";
       updateLayerLabels("layerA", options.layerA);
       updateLayerLabels("layerB", options.layerB);
+      updatePresetChips(options);
       updateRangeFills();
       updateColorSwatches();
       canvas.setAttribute(
@@ -1640,6 +1641,35 @@
         render();
       });
     });
+
+    // Lights a preset chip while the current values still match it,
+    // derived from state rather than from the click: Web is lit however
+    // the size came to be 1920x1080, Tile only while the size is square
+    // with no mask and both layers on 4-way mirror, and a palette chip
+    // only while all six of its ranges still hold. Nudge anything and
+    // the chip goes quiet on its own.
+    function updatePresetChips(options) {
+      document.querySelectorAll(".dimension-preset-btn").forEach((btn) => {
+        const preset = DIMENSION_PRESETS[btn.dataset.preset];
+        const active =
+          options.width === preset.width &&
+          options.height === preset.height &&
+          (!preset.shapeMask || options.shapeMask === preset.shapeMask) &&
+          (!preset.symmetry ||
+            (options.layerA.symmetry === preset.symmetry && options.layerB.symmetry === preset.symmetry));
+        btn.classList.toggle("active", active);
+        btn.setAttribute("aria-pressed", String(active));
+      });
+      ["layerA", "layerB"].forEach((prefix) => {
+        const layer = options[prefix];
+        document.querySelectorAll(`#tab-${prefix} .palette-preset-btn`).forEach((btn) => {
+          const preset = PALETTE_PRESETS[btn.dataset.preset];
+          const active = Object.keys(preset).every((key) => layer[key] === preset[key]);
+          btn.classList.toggle("active", active);
+          btn.setAttribute("aria-pressed", String(active));
+        });
+      });
+    }
 
     // Randomizes one field's DOM element in place, respecting its own
     // type/range so every control (slider, select, color, text) gets a

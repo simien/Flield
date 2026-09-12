@@ -25,7 +25,7 @@ On a first visit, a small **Take the tour** prompt appears above the canvas. Tak
 
 | Tab | What it holds |
 |---|---|
-| **General** | Canvas width and height (with Web, Tablet, Mobile, and Tile presets), background color, grid resolution (block size), and shape mask |
+| **General** | Canvas width and height (with Web, Tablet, Mobile, and Tile presets; a preset's chip stays lit while the values still match it), background color, grid resolution (block size), and shape mask |
 | **Layer A** / **Layer B** | That layer's seed, color, palette range, density range, flow field, symmetry mode, and smoothing |
 
 ### On a narrow screen
