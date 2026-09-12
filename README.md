@@ -102,3 +102,11 @@ Flield is plain HTML, CSS, and JavaScript. No build step, no package manager.
 ## How it works
 
 Each layer's shape comes from a seeded value noise field (a small Perlin-style implementation in `generator.js`), rotated and stretched to create a directional flow instead of isolated static. That field biases each cell's fill probability rather than gating cells on or off directly, which produces smooth density gradients across the canvas. Grids are flat typed arrays, the field is cached between renders that don't change it, and the canvas is painted once at cell resolution and scaled up, so a full-resolution render stays well under a frame at typical sizes. Symmetry modes apply as a final mirror, rotation, or (for Tile) translation pass over the generated grid. A shape mask, when set, constrains or fades the composition, a circle, diamond, vignette, corner or side vignette, or stripes, with a seeded dither along the transition instead of a hard cutoff, so the edge reads as part of the texture rather than a clipped shape.
+
+## Contributing
+
+Bug reports, feature suggestions, and small fixes are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get started, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community expectations.
+
+## License
+
+Flield is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE.md): free to use, modify, and share for any noncommercial purpose (personal projects, hobby use, research, education). Commercial use, including embedding it in or basing a paid product or service on it, requires a separate commercial license. Open a [GitHub issue](https://github.com/simien/Flield/issues) to inquire.
