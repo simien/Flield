@@ -19,7 +19,17 @@
   <title>Flield: Pixel Art Generator</title>
   <meta name="description" content="A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF." />
   <link rel="canonical" href="https://flield.com/" />
+  <!-- Stays the only rel="icon": generateRandomFavicon() rewrites this
+       element's href on load, and a second one would compete with it for
+       the tab icon. -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <!-- icon-192.png is favicon.svg rendered at 6x, so it stays pixel-exact;
+       regenerate it alongside favicon.svg if that ever changes. It covers
+       two jobs the SVG can't: iOS home-screen saves, which ignore SVG and
+       otherwise fall back to a screenshot of the page, and Google's favicon
+       crawler, which wants a square multiple of 48px and reads
+       apple-touch-icon as one of its sources. -->
+  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
 
   <!-- Open Graph and Twitter Card, for link previews on social platforms
        and chat apps. og:image reuses the README screenshot; bump its own
