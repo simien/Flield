@@ -66,7 +66,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=53" />
+  <link rel="stylesheet" href="style.css?v=54" />
   <script src="vendor/gif/gif.js"></script>
   <script src="vendor/floating-ui/core.min.js"></script>
   <script src="vendor/floating-ui/dom.min.js"></script>
@@ -224,7 +224,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 11 of 12</p>
         <h3>Save it, or share a link</h3>
-        <p>Three save slots live in your browser; <span class="ui-ref">Copy Link</span> encodes the same snapshot into a URL anyone can open.</p>
+        <p>Three save slots live in your browser; <span class="ui-ref">Copy Link</span> encodes the same snapshot, locks included, into a URL anyone can open. The small menu beside it can make the link offer Auto-randomize to whoever opens it.</p>
       </div>
 
       <div class="tutorial-step" data-step="11">
@@ -594,7 +594,17 @@
       <div class="footer-link-row">
         <button id="tutorialBtn" class="secondary icon-btn" title="How to use Flield"><i class="ph ph-question-mark"></i></button>
         <button id="themeToggleBtn" class="secondary icon-btn" title="Switch to light theme"><i class="ph ph-sun"></i></button>
-        <button id="copyLinkBtn" class="secondary" title="Copy a link to this exact composition"><i class="ph ph-link"></i> Copy Link</button>
+        <div class="split-btn">
+          <button id="copyLinkBtn" class="secondary split-btn-main" title="Copy a link to this exact composition, locks included"><i class="ph ph-link"></i> Copy Link</button>
+          <!-- Whether the copied link opens as a plain still or also
+               offers the recipient Auto-randomize at the current speed
+               (see #playOffer). The author chooses; nothing is inferred
+               from playback state. -->
+          <select id="linkMode" class="split-btn-select" title="What the link offers when opened">
+            <option value="still" selected>Opens as a still</option>
+            <option value="play">Offers to play</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
@@ -611,6 +621,14 @@
       <span>New here?</span>
       <button type="button" id="tourChipOpenBtn">Take the tour</button>
       <button type="button" id="tourChipDismissBtn" class="tour-chip-dismiss" title="Dismiss"><i class="ph ph-x"></i></button>
+    </div>
+    <!-- Shown to whoever opens a link the author marked "Offers to
+         play": the composition stays still until they choose, and the
+         prompt doubles as an introduction to the Play button. -->
+    <div class="tour-chip play-offer" id="playOffer" hidden>
+      <span id="playOfferText" title="Whoever shared this set up Auto-randomize: locked fields hold, the rest reroll every few seconds. The play button beside Random does the same anytime.">Set up to auto-randomize every <span id="playOfferSpeed"></span></span>
+      <button type="button" id="playOfferStartBtn"><i class="ph ph-play"></i> Play it</button>
+      <button type="button" id="playOfferDismissBtn" class="tour-chip-dismiss" title="Keep the still"><i class="ph ph-x"></i></button>
     </div>
     <div class="canvas-area">
       <canvas id="preview" role="img">Your browser doesn't support canvas rendering, so the generated artwork can't display here.</canvas>
@@ -1298,6 +1316,28 @@
     let lastResult = null;
     let lastOptions = null;
 
+    // A snapshot for a link or a slot: the composition plus the lock
+    // set, so opening it restores how Random and Auto-randomize were
+    // set up, not just what was on the canvas. Undo keeps using the
+    // bare readOptions() on purpose: reverting locks along with a pass
+    // would be surprising.
+    function snapshotForSharing() {
+      return Object.assign(readOptions(), { locks: [...lockedFields] });
+    }
+
+    function applySnapshot(data) {
+      applyGeneral(data);
+      applyDefaults("layerA", data.layerA);
+      applyDefaults("layerB", data.layerB);
+      // A snapshot from before locks were recorded leaves the current
+      // locks alone (on a fresh load, the defaults).
+      if (Array.isArray(data.locks)) {
+        const wanted = new Set(data.locks);
+        document.querySelectorAll(".lock-btn").forEach((btn) => setLock(btn, wanted.has(btn.dataset.targetId)));
+      }
+      render();
+    }
+
     // Converts a snapshot from an earlier STATE_VERSION (a shared link, a
     // saved slot) in place. Both v1 conversions are exact, so the picture
     // comes out cell-for-cell identical: scale in cells times block size
@@ -1814,8 +1854,11 @@
       select.title = `${baseTitle} (currently ${select.options[select.selectedIndex].text})`;
     }
     const gifStepsSelect = document.getElementById("gifSteps");
+    const linkModeSelect = document.getElementById("linkMode");
     syncSelectTitle(autoSpeedSelect, "Auto-randomize speed");
     syncSelectTitle(gifStepsSelect, "GIF step count (uses the auto-randomize speed above as the per-frame delay)");
+    syncSelectTitle(linkModeSelect, "What the link offers when opened");
+    linkModeSelect.addEventListener("change", () => syncSelectTitle(linkModeSelect, "What the link offers when opened"));
     autoSpeedSelect.addEventListener("change", () => syncSelectTitle(autoSpeedSelect, "Auto-randomize speed"));
     gifStepsSelect.addEventListener("change", () =>
       syncSelectTitle(gifStepsSelect, "GIF step count (uses the auto-randomize speed above as the per-frame delay)")
@@ -1829,8 +1872,13 @@
       playBtn.title = "Auto-randomize (Space)";
     }
 
-    function startAutoplay() {
-      performRandomize();
+    // `immediate` (the default, for the button and Space) rerolls at once
+    // so the click has a visible result; a shared link that opens
+    // playing passes false, so its composition shows first and the
+    // first reroll lands one interval later.
+    function startAutoplay(immediate = true) {
+      playOffer.hidden = true;
+      if (immediate) performRandomize();
       autoplayTimer = setInterval(performRandomize, parseInt(autoSpeedSelect.value, 10));
       playBtn.classList.add("playing");
       setIcon(playBtn.querySelector("i"), "pause");
@@ -1840,6 +1888,15 @@
     playBtn.addEventListener("click", () => {
       if (autoplayTimer) stopAutoplay();
       else startAutoplay();
+    });
+
+    // The prompt a recipient sees on a link marked "Offers to play"
+    // (see loadStateFromURL). Playing from it rerolls at once, like the
+    // Play button, since that is the author's variations they came for.
+    const playOffer = document.getElementById("playOffer");
+    document.getElementById("playOfferStartBtn").addEventListener("click", () => startAutoplay());
+    document.getElementById("playOfferDismissBtn").addEventListener("click", () => {
+      playOffer.hidden = true;
     });
 
     autoSpeedSelect.addEventListener("change", () => {
@@ -1985,7 +2042,7 @@
 
     document.querySelectorAll(".preset-save-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const snapshot = Object.assign(readOptions(), { savedAt: Date.now() });
+        const snapshot = Object.assign(snapshotForSharing(), { savedAt: Date.now() });
         localStorage.setItem(PRESET_KEY_PREFIX + btn.dataset.slot, JSON.stringify(snapshot));
         refreshPresetUI(btn.dataset.slot);
         showToast(`Saved to Slot ${btn.dataset.slot}`);
@@ -1996,11 +2053,7 @@
       btn.addEventListener("click", () => {
         const raw = localStorage.getItem(PRESET_KEY_PREFIX + btn.dataset.slot);
         if (!raw) return;
-        const data = upgradeState(JSON.parse(raw));
-        applyGeneral(data);
-        applyDefaults("layerA", data.layerA);
-        applyDefaults("layerB", data.layerB);
-        render();
+        applySnapshot(upgradeState(JSON.parse(raw)));
         showToast(`Loaded Slot ${btn.dataset.slot}`);
       });
     });
@@ -2361,10 +2414,21 @@
       if (!encoded) return false;
       try {
         const data = upgradeState(JSON.parse(atob(encoded)));
-        applyGeneral(data);
-        applyDefaults("layerA", data.layerA);
-        applyDefaults("layerB", data.layerB);
-        render();
+        applySnapshot(data);
+        // A link copied with "Offers to play" chosen sets the recorded
+        // speed and shows the prompt; nothing moves until the recipient
+        // says so.
+        if (data.autoplay) {
+          const option = [...autoSpeedSelect.options].find((o) => o.value === String(data.autoplay));
+          if (option) autoSpeedSelect.value = option.value;
+          syncSelectTitle(autoSpeedSelect, "Auto-randomize speed");
+          const speedText = autoSpeedSelect.options[autoSpeedSelect.selectedIndex].text;
+          document.getElementById("playOfferSpeed").textContent = speedText;
+          document.getElementById("playOfferText").title =
+            `Whoever shared this set up Auto-randomize: locked fields hold, the rest reroll every ${speedText}. ` +
+            "The play button beside Random does the same anytime.";
+          playOffer.hidden = false;
+        }
         return true;
       } catch (err) {
         return false;
@@ -2372,11 +2436,16 @@
     }
 
     document.getElementById("copyLinkBtn").addEventListener("click", async () => {
-      const encoded = btoa(JSON.stringify(readOptions()));
+      const snapshot = snapshotForSharing();
+      // The menu beside the button decides: a link that offers to play
+      // (at the current Auto-randomize speed) is a live instance to drop
+      // into a post, once the recipient accepts; a still is the default.
+      if (linkModeSelect.value === "play") snapshot.autoplay = parseInt(autoSpeedSelect.value, 10);
+      const encoded = btoa(JSON.stringify(snapshot));
       const url = `${location.origin}${location.pathname}?state=${encoded}`;
       try {
         await navigator.clipboard.writeText(url);
-        showToast("Link copied");
+        showToast(snapshot.autoplay ? "Link copied, plays on open" : "Link copied");
       } catch (err) {
         try {
           window.prompt("Copy this link:", url);
@@ -2401,7 +2470,9 @@
     // nudge does.
     // Re-checked inside the timer: opening the tour from "?" within that
     // beat would otherwise surface the chip after the fact.
-    if (!tutorialDismissed) setTimeout(() => { if (!tutorialDismissed) tourChip.hidden = false; }, 700);
+    // Yields to a play offer on the same load; the "?" button still
+    // opens the tour, and the chip returns on the next plain visit.
+    if (!tutorialDismissed) setTimeout(() => { if (!tutorialDismissed && playOffer.hidden) tourChip.hidden = false; }, 700);
   </script>
   <!-- Cloudflare Web Analytics: manual snippet, since flield.com is served
        by a Worker's own static-assets pipeline, which the Automatic

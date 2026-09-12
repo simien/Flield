@@ -67,8 +67,10 @@ The **Tile** preset (General tab, next to Web/Tablet/Mobile) sets up a square ca
 | How many | 3 slots (General tab) | Unlimited |
 | Works across devices/people | No | Yes |
 | Survives a reload | Yes | Yes, and forever |
+| Remembers which fields are locked | Yes | Yes |
+| Can offer Auto-randomize on open | No | Yes, choose **Offers to play** in the menu beside Copy Link; the recipient gets a prompt to play it or keep the still |
 
-Each saved slot shows its three colors and the time it was saved, so you can tell them apart before loading one. Both capture the exact same thing: colors, both layers, everything. Use Saved States to bookmark a composition for yourself; use **Copy Link** (bottom of the sidebar) to hand an exact reproduction to someone else, or to yourself on a different device.
+Each saved slot shows its three colors and the time it was saved, so you can tell them apart before loading one. Both capture the exact same thing: colors, both layers, and the lock set, so a loaded slot or an opened link is ready for Random or Auto-randomize the way it was set up. Use Saved States to bookmark a composition for yourself; use **Copy Link** (bottom of the sidebar) to hand an exact reproduction to someone else, or to yourself on a different device.
 
 ### Keyboard shortcuts
 

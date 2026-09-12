@@ -260,14 +260,18 @@ input[type="range"]:focus-visible {
   top: 20px;
   transform: translateX(-50%);
   align-items: center;
-  gap: 8px;
-  padding: 6px 6px 6px 14px;
+  gap: 12px;
+  /* Room on both sides of the text, and the pill grows with its
+     content on desktop; below the drawer breakpoint it wraps inside
+     the artboard's inset instead. */
+  padding: 6px 6px 6px 18px;
   border-radius: 999px;
   background: var(--panel);
   border: 1px solid var(--border);
   color: var(--text-muted);
   font-size: 13px;
   white-space: nowrap;
+  max-width: calc(100% - 2 * var(--artboard-pad));
   box-shadow: var(--shadow-lg);
   z-index: 19;
   animation: tourChipIn 0.3s ease both;
@@ -282,6 +286,27 @@ input[type="range"]:focus-visible {
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
+/* The play offer is one line; the longer explanation lives in the
+   text's tooltip. A dotted underline marks that there is one. */
+.tour-chip > span:first-child {
+  padding-right: 4px;
+}
+
+@media (max-width: 768px) {
+  .tour-chip {
+    white-space: normal;
+    line-height: 1.4;
+    border-radius: 20px;
+  }
+}
+
+.tour-chip.play-offer > span {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--text-subtle);
+  cursor: help;
+}
+
 .tour-chip button {
   width: auto;
   height: 26px;
@@ -289,6 +314,7 @@ input[type="range"]:focus-visible {
   padding: 0 12px;
   border-radius: 999px;
   font-size: 12px;
+  flex-shrink: 0;
 }
 
 .tour-chip-dismiss {
@@ -1434,8 +1460,14 @@ button.secondary:hover:not(:disabled) {
   gap: 8px;
 }
 
+.footer-link-row .split-btn {
+  flex: 1;
+  min-width: 0;
+}
+
 .footer-link-row #copyLinkBtn {
   flex: 1;
+  min-width: 0;
   margin-top: 0;
 }
 

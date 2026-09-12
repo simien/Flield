@@ -44,7 +44,7 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 - Each sidebar tab shows a padlock when any of its fields are locked (solid once all of them are), so the state of a tab that isn't open stays visible
 - Keyboard shortcuts for the exploration loop, listed under the canvas: R to randomize, Space to start or stop Auto-randomize, Cmd/Ctrl+Z to undo
 - Undo steps back through recent randomize passes, including ones from autoplay or a GIF export
-- A shareable link that encodes the exact composition, colors, both layers, everything, into a URL
+- A shareable link that encodes the exact composition, colors, both layers, and which fields are locked, into a URL; a menu beside Copy Link can make the link offer Auto-randomize to whoever opens it, with a prompt that also introduces the Play button
 - Three save-state slots stored in the browser for revisiting a composition later, each showing its three colors and when it was saved
 - Auto-randomize playback with an adjustable interval, from every 0.5 seconds up to every 10
 - Export to PNG, SVG, or an animated GIF, with frame count (1, 2, 3, 5, 8, or 13) and speed both configurable
