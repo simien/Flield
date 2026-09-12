@@ -66,8 +66,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=56" />
-  <script src="vendor/gif/gif.js"></script>
+  <link rel="stylesheet" href="style.css?v=57" />
 </head>
 <body>
   <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show sidebar"><i class="ph ph-list"></i></button>
@@ -641,6 +640,10 @@
         <button id="tutorialBtn" class="secondary icon-btn" title="How to use Flield"><i class="ph ph-question-mark"></i></button>
         <button id="themeToggleBtn" class="secondary icon-btn" title="Switch to light theme"><i class="ph ph-sun"></i></button>
         <div class="split-btn">
+          <!-- Label and icon swap to "Share" wherever the OS share sheet
+               is available (see the feature-detect below); the id, the
+               menu beside it, and the link it hands off all stay the
+               same either way. -->
           <button id="copyLinkBtn" class="secondary split-btn-main" title="Copy a link to this exact composition, locks included"><i class="ph ph-link"></i> Copy Link</button>
           <!-- Whether the copied link opens as a plain still or also
                offers the recipient Auto-randomize at the current speed
@@ -656,7 +659,8 @@
   </div>
 
   <div class="main-area">
-    <h1 class="brand"><a href="./">Flield</a></h1>
+    <h1 class="brand"><a href="./">Flield<span class="sr-only">: generative pixel art tool</span></a></h1>
+    <p class="sr-only">Flield is a free, browser-based generative pixel art tool. It creates three-color compositions from seeded flow fields and symmetry, with locks to hold the fields you like while the rest randomize, and export to PNG, SVG, or an animated GIF. Runs entirely in the browser, no account or upload needed.</p>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <!-- First-visit nudge toward the tutorial. A modal used to open on
          its own here, on top of the freshly randomized canvas that is
@@ -738,6 +742,7 @@
       "link": "M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z",
       "check": "M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z",
       "question-mark": "M196,96c0,29.47-24.21,54.05-56,59.06V156a12,12,0,0,1-24,0V144a12,12,0,0,1,12-12c24.26,0,44-16.15,44-36s-19.74-36-44-36S84,76.15,84,96a12,12,0,0,1-24,0c0-33.08,30.5-60,68-60S196,62.92,196,96Zm-68,92a20,20,0,1,0,20,20A20,20,0,0,0,128,188Z",
+      "share-network": "M176,156a43.78,43.78,0,0,0-29.09,11L106.1,140.8a44.07,44.07,0,0,0,0-25.6L146.91,89a43.83,43.83,0,1,0-13-20.17L93.09,95a44,44,0,1,0,0,65.94L133.9,187.2A44,44,0,1,0,176,156Zm0-120a20,20,0,1,1-20,20A20,20,0,0,1,176,36ZM64,148a20,20,0,1,1,20-20A20,20,0,0,1,64,148Zm112,72a20,20,0,1,1,20-20A20,20,0,0,1,176,220Z",
     };
 
     function iconSvg(name) {
@@ -2104,6 +2109,27 @@
       URL.revokeObjectURL(url);
     });
 
+    // gif.js (and its worker) are only needed by the export below, which
+    // most visits never touch; loading them here on first use instead of
+    // unconditionally in <head> keeps them off the initial render path.
+    let gifLibPromise = null;
+    function loadGifLib() {
+      if (window.GIF) return Promise.resolve();
+      if (!gifLibPromise) {
+        gifLibPromise = new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "vendor/gif/gif.js";
+          script.onload = resolve;
+          script.onerror = () => {
+            gifLibPromise = null;
+            reject(new Error("Failed to load gif.js"));
+          };
+          document.body.appendChild(script);
+        });
+      }
+      return gifLibPromise;
+    }
+
     // Builds an animated GIF by calling performRandomize() once per step
     // (so it respects the same field locks as manual randomizing) and
     // capturing the canvas after each. Per-frame delay reuses the
@@ -2111,10 +2137,21 @@
     // so total GIF length = speed x steps.
     const downloadGifBtn = document.getElementById("downloadGif");
 
-    downloadGifBtn.addEventListener("click", () => {
+    downloadGifBtn.addEventListener("click", async () => {
       // The export draws its own frames; the preview resumes once the
       // encoder is done (see "finished" below).
       stopSeamlessPreview();
+      downloadGifBtn.disabled = true;
+      downloadGifBtn.innerHTML = iconTag("spinner-gap") + " GIF";
+      try {
+        await loadGifLib();
+      } catch (err) {
+        downloadGifBtn.disabled = false;
+        downloadGifBtn.innerHTML = iconTag("download-simple") + " GIF";
+        showToast("Couldn't load the GIF encoder");
+        syncSeamlessPreview();
+        return;
+      }
       const choice = document.getElementById("gifSteps").value;
       const loop = parseGifChoice(choice);
       const kind = loop ? loop.kind : null;
@@ -2129,11 +2166,6 @@
         height: canvas.height,
         workerScript: "vendor/gif/gif.worker.js",
       });
-
-      // Same label, spinner in place of the icon, so the button keeps
-      // its width and the export row doesn't reflow while it works.
-      downloadGifBtn.disabled = true;
-      downloadGifBtn.innerHTML = iconTag("spinner-gap") + " GIF";
 
       gif.on("finished", (blob) => {
         const url = URL.createObjectURL(blob);
@@ -2725,7 +2757,10 @@
       }
     }
 
-    document.getElementById("copyLinkBtn").addEventListener("click", async () => {
+    // Encodes the current composition (and, per the menu, an autoplay
+    // flag) into the URL the button below hands off, whether that's a
+    // clipboard copy or the OS share sheet.
+    function buildShareLink() {
       const snapshot = snapshotForSharing();
       // The menu beside the button decides: a link that offers to play
       // (at the current Auto-randomize speed) is a live instance to drop
@@ -2733,9 +2768,34 @@
       if (linkModeSelect.value === "play") snapshot.autoplay = parseInt(autoSpeedSelect.value, 10);
       const encoded = btoa(JSON.stringify(snapshot));
       const url = `${location.origin}${location.pathname}?state=${encoded}`;
+      return { url, autoplay: snapshot.autoplay };
+    }
+
+    const copyLinkBtn = document.getElementById("copyLinkBtn");
+
+    // Wherever the OS share sheet exists (Messages, AirDrop, most mobile
+    // and some desktop browsers), the button hands the link straight to
+    // it instead of the clipboard; the label and icon change to match so
+    // it's never a hidden feature riding along under an unrelated label.
+    const canShare = !!navigator.share;
+    if (canShare) {
+      copyLinkBtn.innerHTML = iconTag("share-network") + " Share";
+      copyLinkBtn.title = "Share this exact composition, locks included";
+    }
+
+    copyLinkBtn.addEventListener("click", async () => {
+      const { url, autoplay } = buildShareLink();
+      if (canShare) {
+        try {
+          await navigator.share({ title: "Flield", text: "A composition I made with Flield:", url });
+        } catch (err) {
+          // AbortError on a cancelled share sheet is normal, not a failure.
+        }
+        return;
+      }
       try {
         await navigator.clipboard.writeText(url);
-        showToast(snapshot.autoplay ? "Link copied, plays on open" : "Link copied");
+        showToast(autoplay ? "Link copied, plays on open" : "Link copied");
       } catch (err) {
         try {
           window.prompt("Copy this link:", url);

@@ -186,6 +186,22 @@ input[type="range"]:focus-visible {
   color: var(--text);
 }
 
+/* Content that should reach screen readers and search crawlers without
+   occupying space in this single-viewport app, where nothing scrolls
+   into view: kept in the accessibility tree and DOM text, clipped to a
+   1px box instead of display:none (which drops it from both). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .controls {
   width: 300px;
   flex-shrink: 0;
