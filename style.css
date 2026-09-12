@@ -1298,15 +1298,14 @@ button.secondary:hover:not(:disabled) {
 }
 
 /* Fills the whole artboard side (the brand and footer paint over its
-   padding), so centering here is centering on the viewport. */
+   padding), so centering within it is centering on the viewport. The
+   canvas itself sits at this box's top-left corner and is centered by
+   a transform (see #preview below), not by flex. */
 .canvas-area {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   padding: var(--artboard-clear) var(--artboard-pad);
-  overflow: auto;
+  overflow: hidden;
 }
 
 /* One quiet strip under the canvas: the shortcut legend on the left,
@@ -1408,15 +1407,31 @@ button.secondary:hover:not(:disabled) {
   }
 }
 
-/* Both caps resolve against .canvas-area's padding box, so a tall
-   preset shrinks to fit between the brand and the footer instead of
-   running under either; the browser keeps the canvas's aspect ratio. */
+/* Anchored at the artboard's top-left corner; centerCanvas() in the
+   script translates it to the middle. A translate doesn't move an
+   element's layout position, and a resize that keeps its corner in
+   place isn't a shift either, so the canvas taking a new size on every
+   Random pass or Auto-randomize tick no longer counts toward CLS the
+   way it did when flex re-centered it. Both caps resolve against
+   .canvas-area's padding box, so a tall preset shrinks to fit between
+   the brand and the footer instead of running under either; the
+   browser keeps the canvas's aspect ratio. */
 #preview {
-  max-width: 100%;
-  max-height: 100%;
+  position: absolute;
+  top: var(--artboard-clear);
+  left: var(--artboard-pad);
+  max-width: calc(100% - 2 * var(--artboard-pad));
+  max-height: calc(100% - 2 * var(--artboard-clear));
   border: 1px solid var(--border);
   border-radius: 4px;
   box-shadow: var(--shadow-lg);
+}
+
+/* Until the script sizes it, the canvas is the default 300x150 box;
+   keeping that out of sight means a slow load shows nothing in the
+   artboard, then the artwork, rather than a blank frame that jumps. */
+#preview:not([width]) {
+  visibility: hidden;
 }
 
 .hint {
@@ -1550,6 +1565,16 @@ button.secondary:hover:not(:disabled) {
 .preset-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* The <i> reserves its 1em box on its own, so a button lays out at
+   its final width before the script below fills the icon in; without
+   this, every button with an icon grew by 1em when the SVGs landed. */
+.ph {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex: none;
 }
 
 .ph svg {
@@ -2096,6 +2121,9 @@ button.secondary.tutorial-nav-arrow-wide:hover:not(:disabled) {
 .mini-lock-btn i {
   position: absolute;
   inset: 0;
+  /* Fills the 32px tile rather than keeping the 1em box .ph reserves. */
+  width: auto;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;

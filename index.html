@@ -66,7 +66,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=54" />
+  <link rel="stylesheet" href="style.css?v=55" />
   <script src="vendor/gif/gif.js"></script>
   <script src="vendor/floating-ui/core.min.js"></script>
   <script src="vendor/floating-ui/dom.min.js"></script>
@@ -679,6 +679,15 @@
         <span>&copy; <span id="footerYear"></span></span>
       </div>
     </footer>
+    <!-- Filled in as the markup parses rather than by the main script
+         below: both labels change the legend's width, and setting them
+         after the first paint shifted the strip. UNDO_SHORTCUT is also
+         read by the main script, for the Undo button's tooltip. -->
+    <script>
+      const UNDO_SHORTCUT = /Mac|iPhone|iPad/.test(navigator.platform) ? "\u2318Z" : "Ctrl+Z";
+      document.getElementById("undoKeyLabel").textContent = UNDO_SHORTCUT;
+      document.getElementById("footerYear").textContent = new Date().getFullYear();
+    </script>
   </div>
 
   <script src="generator.js?v=8"></script>
@@ -1231,6 +1240,23 @@
     applyDefaults("layerB", defaults.layerB);
 
     const canvas = document.getElementById("preview");
+
+    // The canvas is anchored at the artboard's top-left corner and
+    // centered with a transform (see #preview in style.css) rather than
+    // by flex: a transform doesn't move an element's layout position,
+    // so the canvas changing size on every Random pass or Auto-randomize
+    // tick isn't a layout shift. Re-run whenever the canvas or the area
+    // around it changes size. ResizeObserver callbacks run after layout
+    // and before paint, so the artwork never lands off-center for a frame.
+    const canvasArea = canvas.parentElement;
+    function centerCanvas() {
+      const x = Math.round((canvasArea.clientWidth - canvas.offsetWidth) / 2 - canvas.offsetLeft);
+      const y = Math.round((canvasArea.clientHeight - canvas.offsetHeight) / 2 - canvas.offsetTop);
+      canvas.style.transform = `translate(${x}px, ${y}px)`;
+    }
+    const canvasSizeObserver = new ResizeObserver(centerCanvas);
+    canvasSizeObserver.observe(canvas);
+    canvasSizeObserver.observe(canvasArea);
 
     function readLayer(prefix) {
       return {
@@ -1841,9 +1867,8 @@
     const undoHistory = [];
     const undoBtn = document.getElementById("undoBtn");
 
-    const UNDO_SHORTCUT = /Mac|iPhone|iPad/.test(navigator.platform) ? "\u2318Z" : "Ctrl+Z";
+    // UNDO_SHORTCUT is set by the inline script under the site footer.
     undoBtn.title = `Undo last randomize (${UNDO_SHORTCUT})`;
-    document.getElementById("undoKeyLabel").textContent = UNDO_SHORTCUT;
 
     function updateUndoButton() {
       undoBtn.disabled = undoHistory.length === 0;
@@ -2303,8 +2328,6 @@
 
       document.querySelector('link[rel="icon"]').href = faviconCanvas.toDataURL("image/png");
     }
-
-    document.getElementById("footerYear").textContent = new Date().getFullYear();
 
     // Below the layout's mobile breakpoint, the sidebar becomes a
     // full-height overlay drawer (see the .sidebar-toggle / .controls
