@@ -22,6 +22,13 @@ Three exported GIFs, each thirteen Auto-randomize passes at a two-second interva
 | ![Full random](examples/full-random.gif) | ![Brand campaign](examples/brand-campaign.gif) | ![Kaleidoscope variations](examples/kaleidoscope-variations.gif) |
 | Only block size and shape mask locked; every other field rerolls each pass. | Fine diagonal streaks fading toward the bottom, colors and flow locked to a brand palette; only density and stretch drift, for a set of on-brand variations. | A chunky 8-way kaleidoscope with symmetry, block size, density, and flow locked; seeds and colors reroll each pass, so every frame is a new pattern in the same language. |
 
+Three more, one of each animated export kind, each a single 3-second cycle (at half the frame rate of the app's own export, to keep the files small). Every setting and both seeds hold; only the animation's phase moves, and the last frame runs back into the first with no cut.
+
+| Loop | Drift | Pulse |
+|---|---|---|
+| ![Loop](examples/loop.gif) | ![Drift](examples/drift.gif) | ![Pulse](examples/pulse.gif) |
+| The flow field breathes around a small closed path and comes back where it started, so the stripes of this 8-way kaleidoscope sway in place. | The green bands slide one way along their flow direction and wrap into themselves, so they never jump; the sparse purple layer, with almost no field strength, holds still behind them. | Density swings on one sine wave, Layer B at 70% of the depth, so the streaks swell and thin without moving. |
+
 ## Purpose
 
 Built to generate images and placeholder graphics without reaching for stock photos or a design tool every time. Swap in a brand color palette, seed a batch of variations, and export the one that fits. The GIF export works well as a subtle animated background or hover state.

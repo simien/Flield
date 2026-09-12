@@ -102,7 +102,7 @@ What comes through is a run of variations that share the same underlying structu
 
 Each kind is one cycle of about three seconds. Its **×3** and **×5** entries are the two ideas combined: that many Auto-randomize passes, each held for the Auto-randomize interval and animated through one full cycle of that kind, then a cut to the next pass. It is the export of watching a preview with Auto-randomize running.
 
-Layer B moves with Layer A rather than in lockstep, like two depths of one flow field: in Drift its heading is its own flow direction and its speed follows its own flow scale and stretch, in Loop it circles the same way from a point a quarter turn further round, and in Pulse it swings the same way at 70% of the depth.
+Layer B moves with Layer A rather than in lockstep, like two depths of one flow field: in Drift its heading is its own flow direction and its speed follows its own flow scale and stretch, in Loop it circles the same way from a point an eighth of a turn further round, and in Pulse it swings the same way at 70% of the depth.
 
 Picking any of them plays that kind on the canvas right away, at the export's own frame rate, so what you see is what the file will be; pick a step count to put the still back. Loop and Drift need some field strength to have anything to move, and all make bigger files than a stepped GIF, since there are 38 frames per cycle instead of a handful; larger blocks bring it down.
 
