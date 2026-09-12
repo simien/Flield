@@ -1,0 +1,36 @@
+{
+  // Deploy config for the Worker that serves flield.com. It was configured
+  // in the Cloudflare dashboard until now, which meant nothing in the repo
+  // recorded how the site is built.
+  //
+  // "flield" must stay exactly as it is: Workers Builds matches on this
+  // name, and a different one would create a second Worker while the domain
+  // kept pointing at the old one.
+  "name": "flield",
+
+  // Matches the date already set on the Worker, so adopting this file
+  // changes no runtime behavior.
+  "compatibility_date": "2026-09-11",
+
+  "assets": {
+    // The repo root, where index.html lives. .assetsignore, alongside this
+    // file, decides what inside it is left out.
+    "directory": "./",
+
+    // The reason this file exists. The default, "none", answers a request
+    // that matches no file with a bare 404 and an empty body, which is what
+    // flield.com does today: 404.html deploys and renders at /404, but
+    // nothing routes misses to it.
+    //
+    // "404-page" serves the nearest 404.html and keeps the 404 status.
+    //
+    // Not "single-page-application": that returns 200 for every unmatched
+    // URL, so every typo and dead link would look to a crawler like a real
+    // page serving the app.
+    "not_found_handling": "404-page"
+
+    // html_handling is deliberately unset, leaving the "auto-trailing-slash"
+    // default already in effect: it's what serves /guide/ from
+    // guide/index.html and redirects /404.html to /404.
+  }
+}

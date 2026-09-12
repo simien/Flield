@@ -9,6 +9,7 @@
 # Repo config, likewise not part of the site.
 .gitignore
 .assetsignore
+wrangler.jsonc
 
 .git
 .wrangler
