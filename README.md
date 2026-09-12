@@ -4,7 +4,7 @@ A browser-based generative pixel art tool for creating unique three-color compos
 
 ## Live demo
 
-[https://simien.github.io/Flield/](https://simien.github.io/Flield/)
+[https://flield.com/](https://flield.com/)
 
 ## Screenshot
 
