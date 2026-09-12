@@ -68,8 +68,6 @@
        or a returning visitor's cached copy silently goes stale. -->
   <link rel="stylesheet" href="style.css?v=56" />
   <script src="vendor/gif/gif.js"></script>
-  <script src="vendor/floating-ui/core.min.js"></script>
-  <script src="vendor/floating-ui/dom.min.js"></script>
 </head>
 <body>
   <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show sidebar"><i class="ph ph-list"></i></button>
@@ -1036,16 +1034,38 @@
       colorPopover.hidden = false;
       swatch.setAttribute("aria-expanded", "true");
 
+      // Placement mirrors "bottom-start" with an 8px gap: aligned to the
+      // swatch's left edge, below it, flipping above when it wouldn't
+      // fit and shifted horizontally to stay clear of the viewport edge.
       function reposition() {
-        FloatingUIDOM.computePosition(swatch, colorPopover, {
-          placement: "bottom-start",
-          middleware: [FloatingUIDOM.offset(8), FloatingUIDOM.flip(), FloatingUIDOM.shift({ padding: 8 })],
-        }).then(({ x, y }) => {
-          colorPopover.style.left = x + "px";
-          colorPopover.style.top = y + "px";
-        });
+        const gap = 8;
+        const padding = 8;
+        const swatchRect = swatch.getBoundingClientRect();
+        const popoverRect = colorPopover.getBoundingClientRect();
+
+        let top = swatchRect.bottom + gap;
+        if (top + popoverRect.height > window.innerHeight - padding) {
+          const above = swatchRect.top - gap - popoverRect.height;
+          if (above >= padding) top = above;
+        }
+
+        let left = swatchRect.left;
+        left = Math.min(left, window.innerWidth - popoverRect.width - padding);
+        left = Math.max(left, padding);
+
+        colorPopover.style.left = left + window.scrollX + "px";
+        colorPopover.style.top = top + window.scrollY + "px";
       }
-      colorAutoUpdateCleanup = FloatingUIDOM.autoUpdate(swatch, colorPopover, reposition);
+      reposition();
+      const repositionResizeObserver = new ResizeObserver(reposition);
+      repositionResizeObserver.observe(colorPopover);
+      window.addEventListener("scroll", reposition, { capture: true, passive: true });
+      window.addEventListener("resize", reposition);
+      colorAutoUpdateCleanup = () => {
+        repositionResizeObserver.disconnect();
+        window.removeEventListener("scroll", reposition, { capture: true });
+        window.removeEventListener("resize", reposition);
+      };
     }
 
     function closeColorPicker() {

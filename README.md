@@ -103,6 +103,17 @@ Flield is plain HTML, CSS, and JavaScript. No build step, no package manager.
 
 Each layer's shape comes from a seeded value noise field (a small Perlin-style implementation in `generator.js`), rotated and stretched to create a directional flow instead of isolated static. That field biases each cell's fill probability rather than gating cells on or off directly, which produces smooth density gradients across the canvas. Grids are flat typed arrays, the field is cached between renders that don't change it, and the canvas is painted once at cell resolution and scaled up, so a full-resolution render stays well under a frame at typical sizes. Symmetry modes apply as a final mirror, rotation, or (for Tile) translation pass over the generated grid. A shape mask, when set, constrains or fades the composition, a circle, diamond, vignette, corner or side vignette, or stripes, with a seeded dither along the transition instead of a hard cutoff, so the edge reads as part of the texture rather than a clipped shape.
 
+## Credits
+
+Flield is otherwise dependency-free; the one vendored third-party library is:
+
+- [gif.js](https://github.com/jnordberg/gif.js) by Johan Nordberg, used for the animated GIF export (`vendor/gif/`). MIT licensed, see [vendor/gif/LICENSE](vendor/gif/LICENSE).
+
+No other code is borrowed, but two public-domain algorithms in `generator.js` are built on published work rather than invented here:
+
+- The flow field's noise (`makePerlin`) is [Ken Perlin](https://en.wikipedia.org/wiki/Ken_Perlin)'s gradient noise, using the fade curve from his 2002 SIGGRAPH paper, "Improved Noise reference implementation."
+- The seeded PRNG (`mulberry32`) is [Tommy Ettinger](https://github.com/tommyettinger)'s public-domain generator of the same name.
+
 ## Contributing
 
 Bug reports, feature suggestions, and small fixes are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get started, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community expectations.
