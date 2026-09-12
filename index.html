@@ -233,7 +233,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 12 of 12</p>
         <h3>Export PNG, SVG, or GIF</h3>
-        <p>The exported GIF replays the exact sequence <span class="ui-ref">Auto-randomize</span> would generate.</p>
+        <p>A stepped GIF replays the exact sequence <span class="ui-ref">Auto-randomize</span> would generate; <span class="ui-ref">Loop</span>, <span class="ui-ref">Drift</span>, and <span class="ui-ref">Pulse</span> hold every setting and animate the composition back to its first frame with no cut; pick one and the canvas previews it. Their <span class="ui-ref">&times;3</span> and <span class="ui-ref">&times;5</span> entries record that many Auto-randomize passes, each animated that way.</p>
       </div>
     </div>
 
@@ -580,14 +580,41 @@
         <button id="downloadPng" class="secondary"><i class="ph ph-download-simple"></i> PNG</button>
         <button id="downloadSvg" class="secondary"><i class="ph ph-download-simple"></i> SVG</button>
         <div class="split-btn">
-          <button id="downloadGif" class="secondary split-btn-main" title="Download animated GIF (uses the auto-randomize speed above as the per-frame delay)"><i class="ph ph-download-simple"></i> GIF</button>
-          <select id="gifSteps" class="split-btn-select" title="GIF step count (uses the auto-randomize speed above as the per-frame delay)">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="5" selected>5</option>
-            <option value="8">8</option>
-            <option value="13">13</option>
+          <button id="downloadGif" class="secondary split-btn-main" title="Download an animated GIF: steps replay Auto-randomize passes at the speed above; the rest animate the composition on screen and cycle back to their first frame with no cut"><i class="ph ph-download-simple"></i> GIF</button>
+          <!-- Step counts replay Auto-randomize passes at the speed menu's
+               interval. The animated kinds hold every setting and cycle
+               back to their first frame: Loop breathes the flow field
+               around a closed path, Drift flows it one way along the flow
+               direction, Pulse swings density. Value:
+               "loop:<kind>:<frames>:<ms per frame>". -->
+          <!-- Values: a bare number is that many Auto-randomize passes as
+               stills; "loop:<kind>" is one 3s cycle of the
+               composition on screen; "set:<kind>:<n>" is n passes, each
+               animated for one cycle and held for the Auto-randomize
+               interval, the export of watching a preview with
+               Auto-randomize running. -->
+          <select id="gifSteps" class="split-btn-select" title="GIF frames">
+            <optgroup label="Steps">
+              <option value="3">3 steps</option>
+              <option value="5" selected>5 steps</option>
+              <option value="8">8 steps</option>
+              <option value="13">13 steps</option>
+            </optgroup>
+            <optgroup label="Loop">
+              <option value="loop:circle">Loop</option>
+              <option value="set:circle:3">Loop &times;3</option>
+              <option value="set:circle:5">Loop &times;5</option>
+            </optgroup>
+            <optgroup label="Drift">
+              <option value="loop:drift">Drift</option>
+              <option value="set:drift:3">Drift &times;3</option>
+              <option value="set:drift:5">Drift &times;5</option>
+            </optgroup>
+            <optgroup label="Pulse">
+              <option value="loop:pulse">Pulse</option>
+              <option value="set:pulse:3">Pulse &times;3</option>
+              <option value="set:pulse:5">Pulse &times;5</option>
+            </optgroup>
           </select>
         </div>
       </div>
@@ -654,7 +681,7 @@
     </footer>
   </div>
 
-  <script src="generator.js?v=7"></script>
+  <script src="generator.js?v=8"></script>
   <script>
     // Inline replacements for the icons that used to come from the
     // Phosphor webfont (224KB for the ~19 glyphs this app actually uses).
@@ -1428,6 +1455,14 @@
     }
 
     function drawComposition(options) {
+      // While an animated kind is previewing, a still draw (a slider
+      // drag, Random, Undo) would flash the still between animation
+      // frames; the preview reads the new settings on its next frame
+      // instead. Exports stop the preview first so they always draw.
+      if (seamlessPreview.active && options.loopPhase === undefined) {
+        lastOptions = options;
+        return;
+      }
       const { gridA, gridB, cols, rows } = generate(options);
       renderToCanvas(canvas, {
         width: options.width,
@@ -1446,6 +1481,53 @@
     }
 
     document.querySelector(".controls").addEventListener("input", scheduleRender);
+
+    // Live preview of an animated GIF kind: choosing Loop, Drift, or Pulse in
+    // the GIF menu plays it on the canvas at the export's own frame
+    // rate, so the export is what's on screen; choosing a step count
+    // puts the still back. Frames are picked by wall-clock time, so a
+    // heavy composition drops frames rather than slowing the cycle.
+    const seamlessPreview = { active: false, frame: 0 };
+    // Every cycle is 38 frames at 80ms (about 3s, 12.5 fps),
+    // well clear of the sub-20ms delays browsers refuse to honor.
+    const CYCLE_FRAMES = 38;
+    const CYCLE_FRAME_MS = 80;
+
+    function parseGifChoice(value) {
+      const parts = value.split(":");
+      if (parts[0] === "loop") return { kind: parts[1], frames: CYCLE_FRAMES, delay: CYCLE_FRAME_MS };
+      if (parts[0] === "set") return { kind: parts[1], set: parseInt(parts[2], 10), frames: CYCLE_FRAMES, delay: CYCLE_FRAME_MS };
+      return null;
+    }
+
+    const SEAMLESS_NAMES = { circle: "Loop", drift: "Drift", pulse: "Pulse" };
+
+    function stopSeamlessPreview(redraw = true) {
+      if (!seamlessPreview.active) return;
+      cancelAnimationFrame(seamlessPreview.frame);
+      seamlessPreview.active = false;
+      seamlessPreview.frame = 0;
+      if (redraw) render();
+    }
+
+    function syncSeamlessPreview() {
+      const loop = parseGifChoice(document.getElementById("gifSteps").value);
+      stopSeamlessPreview(!loop);
+      if (!loop) return;
+      seamlessPreview.active = true;
+      const start = performance.now();
+      let lastIndex = -1;
+      const tick = (now) => {
+        if (!seamlessPreview.active) return;
+        const index = Math.floor((now - start) / loop.delay) % loop.frames;
+        if (index !== lastIndex) {
+          lastIndex = index;
+          drawComposition(Object.assign(readOptions(), { loopMode: loop.kind, loopPhase: index / loop.frames }));
+        }
+        seamlessPreview.frame = requestAnimationFrame(tick);
+      };
+      seamlessPreview.frame = requestAnimationFrame(tick);
+    }
 
     function hslToRgb(h, s, l) {
       s /= 100;
@@ -1855,14 +1937,29 @@
     }
     const gifStepsSelect = document.getElementById("gifSteps");
     const linkModeSelect = document.getElementById("linkMode");
+    const GIF_MENU_TITLE =
+      "GIF frames. Steps: that many Auto-randomize passes as stills, held for the speed above. " +
+      "Loop, Drift, Pulse: one 3s cycle of the composition on screen that loops with no cut (Loop breathes the flow field, " +
+      "Drift flows it one way, Pulse swings density), previewed on the canvas. " +
+      "A \u00d73 or \u00d75 is that many passes, each animated for one cycle and held for the speed above. " +
+      "Larger blocks make a smaller file";
     syncSelectTitle(autoSpeedSelect, "Auto-randomize speed");
-    syncSelectTitle(gifStepsSelect, "GIF step count (uses the auto-randomize speed above as the per-frame delay)");
+    syncSelectTitle(gifStepsSelect, GIF_MENU_TITLE);
     syncSelectTitle(linkModeSelect, "What the link offers when opened");
     linkModeSelect.addEventListener("change", () => syncSelectTitle(linkModeSelect, "What the link offers when opened"));
     autoSpeedSelect.addEventListener("change", () => syncSelectTitle(autoSpeedSelect, "Auto-randomize speed"));
-    gifStepsSelect.addEventListener("change", () =>
-      syncSelectTitle(gifStepsSelect, "GIF step count (uses the auto-randomize speed above as the per-frame delay)")
-    );
+    gifStepsSelect.addEventListener("change", () => {
+      syncSelectTitle(gifStepsSelect, GIF_MENU_TITLE);
+      const wasPreviewing = seamlessPreview.active;
+      syncSeamlessPreview();
+      const option = gifStepsSelect.options[gifStepsSelect.selectedIndex].text;
+      const choice = parseGifChoice(gifStepsSelect.value);
+      if (choice && choice.set) {
+        const hold = autoSpeedSelect.options[autoSpeedSelect.selectedIndex].text;
+        showToast(`Previewing ${SEAMLESS_NAMES[choice.kind]}; ${option} exports ${choice.set} passes at ${hold} each`);
+      } else if (seamlessPreview.active) showToast(`Previewing ${option}`);
+      else if (wasPreviewing) showToast("Preview stopped");
+    });
 
     function stopAutoplay() {
       clearInterval(autoplayTimer);
@@ -1906,14 +2003,19 @@
       }
     });
 
+    // PNG and SVG capture the still: a running preview is stopped (which
+    // redraws the still) and picked up again afterwards.
     document.getElementById("downloadPng").addEventListener("click", () => {
+      stopSeamlessPreview();
       const link = document.createElement("a");
       link.download = `${lastOptions.layerA.seed}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
+      syncSeamlessPreview();
     });
 
     document.getElementById("downloadSvg").addEventListener("click", () => {
+      stopSeamlessPreview();
       const svg = gridToSVG({
         width: lastOptions.width,
         height: lastOptions.height,
@@ -1932,6 +2034,7 @@
       link.download = `${lastOptions.layerA.seed}.svg`;
       link.href = url;
       link.click();
+      syncSeamlessPreview();
       URL.revokeObjectURL(url);
     });
 
@@ -1943,9 +2046,15 @@
     const downloadGifBtn = document.getElementById("downloadGif");
 
     downloadGifBtn.addEventListener("click", () => {
-      const steps = parseInt(document.getElementById("gifSteps").value, 10);
-      const delay = parseInt(autoSpeedSelect.value, 10);
-      const seedForFilename = lastOptions.layerA.seed;
+      // The export draws its own frames; the preview resumes once the
+      // encoder is done (see "finished" below).
+      stopSeamlessPreview();
+      const choice = document.getElementById("gifSteps").value;
+      const loop = parseGifChoice(choice);
+      const kind = loop ? loop.kind : null;
+      const frames = loop ? loop.frames : parseInt(choice, 10);
+      const delay = loop ? loop.delay : parseInt(autoSpeedSelect.value, 10);
+      const seedForFilename = lastOptions.layerA.seed + (loop ? "-" + kind + (loop.set ? "-x" + loop.set : "") : "");
 
       const gif = new GIF({
         workers: 2,
@@ -1955,8 +2064,10 @@
         workerScript: "vendor/gif/gif.worker.js",
       });
 
+      // Same label, spinner in place of the icon, so the button keeps
+      // its width and the export row doesn't reflow while it works.
       downloadGifBtn.disabled = true;
-      downloadGifBtn.innerHTML = iconTag("spinner-gap") + " Rendering...";
+      downloadGifBtn.innerHTML = iconTag("spinner-gap") + " GIF";
 
       gif.on("finished", (blob) => {
         const url = URL.createObjectURL(blob);
@@ -1967,6 +2078,7 @@
         URL.revokeObjectURL(url);
         downloadGifBtn.disabled = false;
         downloadGifBtn.innerHTML = iconTag("download-simple") + " GIF";
+        syncSeamlessPreview();
       });
 
       // Frame generation runs synchronously and can take a moment at a
@@ -1975,9 +2087,40 @@
       // instead of setting it and immediately blocking the main thread
       // before that paint ever happens.
       requestAnimationFrame(() => {
-        for (let i = 0; i < steps; i++) {
-          performRandomize();
-          gif.addFrame(canvas, { copy: true, delay });
+        if (loop && loop.set) {
+          // One Auto-randomize pass per segment, each held for the speed
+          // menu's interval and animated through exactly one cycle of the
+          // kind in that time, then a cut to the next pass, the way the
+          // live preview looks with Auto-randomize running. The passes
+          // feed the undo stack like a stepped export.
+          const hold = parseInt(autoSpeedSelect.value, 10);
+          const perPass = Math.max(13, Math.round(hold / CYCLE_FRAME_MS));
+          for (let pass = 0; pass < loop.set; pass++) {
+            performRandomize();
+            const options = readOptions();
+            for (let i = 0; i < perPass; i++) {
+              drawComposition(Object.assign({}, options, { loopMode: kind, loopPhase: i / perPass }));
+              gif.addFrame(canvas, { copy: true, delay });
+            }
+          }
+          render();
+        } else if (loop) {
+          // Every setting and both seeds hold; only the loop's phase
+          // advances through one full cycle, so frame 0 is the still on
+          // screen and the frame after the last would be frame 0 again. Nothing
+          // touches the DOM or the undo stack, and the canvas is put
+          // back to the still afterwards.
+          const options = readOptions();
+          for (let i = 0; i < frames; i++) {
+            drawComposition(Object.assign({}, options, { loopMode: kind, loopPhase: i / frames }));
+            gif.addFrame(canvas, { copy: true, delay });
+          }
+          render();
+        } else {
+          for (let i = 0; i < frames; i++) {
+            performRandomize();
+            gif.addFrame(canvas, { copy: true, delay });
+          }
         }
         gif.render();
       });

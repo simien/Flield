@@ -92,7 +92,19 @@ What comes through is a run of variations that share the same underlying structu
 
 > **Took a wrong turn?** **Undo** (the arrow at the left of the Random row) steps back through recent randomize passes, most recent first, and grays out once there's nothing left to undo.
 
-**GIF export is the same loop, captured.** The step count option (1, 2, 3, 5, 8, 13) runs that same randomize sequence, frame by frame, at the Auto-randomize interval as the per-frame delay, the exact sequence Auto-randomize would generate rather than whatever the artboard happens to be showing at the moment.
+**GIF export is the same loop, captured.** The step count option (3, 5, 8, 13) runs that same randomize sequence, frame by frame, at the Auto-randomize interval as the per-frame delay, the exact sequence Auto-randomize would generate rather than whatever the artboard happens to be showing at the moment.
+
+**The animated kinds are a different animal.** The rest of the same menu holds every setting and both seeds and animates the composition on screen so the last frame flows straight into the first, with no visible cut:
+
+- **Loop** breathes the flow field around a small closed path, one full turn across the frames. Each cell's dither is fixed by the seed, so shapes grow, shrink, and slide rather than flicker.
+- **Drift** flows the field one way along its flow direction and travels exactly one period, so the pattern's density envelope repeats along that axis at flow scale times stretch pixels.
+- **Pulse** swings density with one sine wave, 40% of each layer's density either way, so the composition inflates and thins. Cells appear and vanish in a stable order, so it breathes rather than sparkles. The one kind that moves without any field strength.
+
+Each kind is one cycle of about three seconds. Its **×3** and **×5** entries are the two ideas combined: that many Auto-randomize passes, each held for the Auto-randomize interval and animated through one full cycle of that kind, then a cut to the next pass. It is the export of watching a preview with Auto-randomize running.
+
+Layer B moves with Layer A rather than in lockstep, like two depths of one flow field: in Drift its heading is its own flow direction and its speed follows its own flow scale and stretch, in Loop it circles the same way from a point a quarter turn further round, and in Pulse it swings the same way at 70% of the depth.
+
+Picking any of them plays that kind on the canvas right away, at the export's own frame rate, so what you see is what the file will be; pick a step count to put the still back. Loop and Drift need some field strength to have anything to move, and all make bigger files than a stepped GIF, since there are 38 frames per cycle instead of a handful; larger blocks bring it down.
 
 ## Widening or narrowing an art direction with Palette Range and Density Range
 

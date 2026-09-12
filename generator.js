@@ -129,13 +129,46 @@ const FIELD_GAIN = 2;
 const FIELD_CACHE_LIMIT = 6;
 const fieldCache = new Map();
 
+// Loops: a phase from 0 to 1 slides the field's sampling origin
+// around a circle of this radius (in noise units) that passes through
+// the origin, so phase 0 is exactly the still render and phase 1 lands
+// back on it. Each cell's dither threshold is fixed by the seed, so as
+// the field moves under it shapes grow, shrink, and drift instead of
+// flickering. Sized so one full turn reads as a slow breath at the base
+// octave; finer octaves travel proportionally further.
+const LOOP_RADIUS = 0.2;
+
+// Drift loops ("drift" mode) travel one noise unit along the flow axis
+// per cycle instead of circling. A one-way loop can only close if the
+// field is periodic along that axis with a period equal to the travel,
+// so in drift mode the lattice wraps every DRIFT_PERIOD units along the
+// flow axis (each octave wraps at DRIFT_PERIOD times its frequency, so
+// all octaves close together). On screen the period is flow scale times
+// stretch pixels, which is how far the pattern moves per loop; the
+// per-cell dither does not repeat, so only the density envelope does.
+const DRIFT_PERIOD = 1;
+
+// Pulse loops swing density with one sine wave per cycle (so phase 0
+// and 1 are the still), by this fraction of each layer's own density.
+const PULSE_DEPTH = 0.4;
+
+// Layer B moves with layer A, not against it, the way two depths of one
+// flow field would: in Loop it circles the same way but starts a
+// quarter turn further round, so the two currents never point exactly
+// alike; in Pulse it swings the same way at this fraction of A's depth.
+// In Drift its heading and speed are already its own (its flow angle,
+// and its flow scale times stretch per cycle).
+const LAYER_B_PHASE_OFFSET = Math.PI / 4;
+const LAYER_B_DEPTH = 0.7;
+
 // Gradient table as two flat arrays, indexed by hash & 7; the same eight
 // directions makePerlin uses.
 const GRAD_X = new Float64Array([1, -1, 0, 0, 1, -1, 1, -1]);
 const GRAD_Y = new Float64Array([0, 0, 1, -1, 1, 1, -1, -1]);
 
-function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octaves) {
-  const key = `${seed}|${fillCols}|${fillRows}|${scale}|${angleRad}|${stretch}|${octaves}`;
+function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octaves, phase, mode, phaseOffset) {
+  const drift = mode === "drift";
+  const key = `${seed}|${fillCols}|${fillRows}|${scale}|${angleRad}|${stretch}|${octaves}|${phase || 0}|${mode || ""}|${phaseOffset || 0}`;
   const cached = fieldCache.get(key);
   if (cached) return cached;
 
@@ -158,6 +191,15 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
 
   const cos = Math.cos(angleRad);
   const sin = Math.sin(angleRad);
+  // Skipped entirely at phase 0 rather than adding a computed zero, so
+  // a still render's arithmetic stays exactly what it was.
+  // Circle: a loop around a circle through the origin, entered at
+  // phaseOffset radians round from the default start; subtracting the
+  // start point keeps phase 0 (and 1) exactly on the still.
+  const looping = drift || (mode === "circle" && phase > 0 && phase < 1);
+  const start = phaseOffset || 0;
+  const offX = !looping ? 0 : drift ? (phase || 0) * DRIFT_PERIOD : LOOP_RADIUS * (Math.cos(2 * Math.PI * phase + start) - Math.cos(start));
+  const offY = !looping || drift ? 0 : LOOP_RADIUS * (Math.sin(2 * Math.PI * phase + start) - Math.sin(start));
   let maxAmp = 0;
   for (let o = 0, amp = 1; o < octaves; o++, amp *= 0.5) maxAmp += amp;
 
@@ -167,8 +209,8 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
     for (let x = 0; x < fillCols; x++) {
       const rx = x * cos + y * sin;
       const ry = -x * sin + y * cos;
-      const bx = rx / stretch / scale;
-      const by = ry / scale;
+      const bx = looping ? rx / stretch / scale + offX : rx / stretch / scale;
+      const by = looping ? ry / scale + offY : ry / scale;
       let total = 0;
       let amp = 1;
       let freq = 1;
@@ -177,16 +219,21 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
         const sy = by * freq;
         const flx = Math.floor(sx);
         const fly = Math.floor(sy);
-        const xi = flx & 255;
+        // Drift mode wraps the lattice along the flow axis so the field
+        // is periodic there (see DRIFT_PERIOD); circle mode and stills
+        // use the plain 256-entry wrap.
+        const period = DRIFT_PERIOD * freq;
+        const xi = drift ? (((flx % period) + period) % period) & 255 : flx & 255;
+        const xi1 = drift ? (((flx + 1) % period + period) % period) & 255 : xi + 1;
         const yi = fly & 255;
         const xf = sx - flx;
         const yf = sy - fly;
         const u = xf * xf * xf * (xf * (xf * 6 - 15) + 10);
         const v = yf * yf * yf * (yf * (yf * 6 - 15) + 10);
         const aa = perm[perm[xi] + yi] & 7;
-        const ba = perm[perm[xi + 1] + yi] & 7;
+        const ba = perm[perm[xi1] + yi] & 7;
         const ab = perm[perm[xi] + yi + 1] & 7;
-        const bb = perm[perm[xi + 1] + yi + 1] & 7;
+        const bb = perm[perm[xi1] + yi + 1] & 7;
         const gaa = GRAD_X[aa] * xf + GRAD_Y[aa] * yf;
         const gba = GRAD_X[ba] * (xf - 1) + GRAD_Y[ba] * yf;
         const gab = GRAD_X[ab] * xf + GRAD_Y[ab] * (yf - 1);
@@ -313,7 +360,7 @@ function smoothPass(src, dst, cols, fillCols, fillRows) {
 // "kaleidoscope" composes all three: the unique quadrant gets a diagonal
 // mirror first, then that quadrant is mirrored out horizontally and
 // vertically, producing 8-way symmetry.
-function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, blockSize }) {
+function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, blockSize, phase, loopMode, phaseOffset }) {
   // mulberry32 inlined (see the function of that name above for the
   // readable form): the same state update and output arithmetic, so the
   // sequence is identical, minus a closure call per cell.
@@ -339,7 +386,10 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
       field.scale / blockSize,
       (field.angle * Math.PI) / 180,
       field.stretch,
-      field.octaves
+      field.octaves,
+      phase,
+      loopMode,
+      phaseOffset
     );
     const gain = field.strength * FIELD_GAIN;
     for (let y = 0; y < fillRows; y++) {
@@ -684,7 +734,11 @@ function layerOptionsToField(layer) {
 // layer B so it only occupies cells layer A left empty. That keeps the two
 // shapes mutually exclusive (no color mixing) and, since layer A rarely
 // covers 100% of the canvas, leaves the background visible in the gaps
-// both layers leave behind.
+// both layers leave behind. `options.loopPhase` (0 to 1, optional) is
+// the loop phase, and `options.loopMode` picks the kind:
+// "circle" (see LOOP_RADIUS), "drift" (DRIFT_PERIOD), or "pulse"
+// (PULSE_DEPTH). Circle and drift move the field, so a layer with no
+// field strength stays still through them.
 function generate(options) {
   // Floor rather than ceil, so cols/rows * blockSize never exceeds the
   // canvas: a block that only partly fit would otherwise get clipped
@@ -694,20 +748,33 @@ function generate(options) {
   const cols = Math.max(1, Math.floor(options.width / options.blockSize));
   const rows = Math.max(1, Math.floor(options.height / options.blockSize));
 
-  const buildLayer = (layer) =>
-    buildGrid({
+  const mode = options.loopMode;
+  const phase = options.loopPhase || 0;
+  const wave = Math.sin(2 * Math.PI * phase);
+  // See LAYER_B_PHASE_OFFSET / LAYER_B_DEPTH: B moves with A, offset
+  // and gentler, rather than in lockstep or against it.
+  const buildLayer = (layer, isB) => {
+    const depth = isB ? LAYER_B_DEPTH : 1;
+    const field = layerOptionsToField(layer);
+    let density = layer.density;
+    if (mode === "pulse") density = Math.min(1, Math.max(0, density * (1 + PULSE_DEPTH * depth * wave)));
+    return buildGrid({
       seed: layer.seed,
       cols,
       rows,
-      density: layer.density,
+      density,
       symmetry: layer.symmetry,
       smoothPasses: layer.smoothPasses,
-      field: layerOptionsToField(layer),
+      field,
       blockSize: options.blockSize,
+      phase,
+      loopMode: mode,
+      phaseOffset: isB ? LAYER_B_PHASE_OFFSET : 0,
     });
+  };
 
-  const gridA = buildLayer(options.layerA);
-  const gridB = buildLayer(options.layerB);
+  const gridA = buildLayer(options.layerA, false);
+  const gridB = buildLayer(options.layerB, true);
 
   applyShapeMask(gridA, cols, rows, options.shapeMask, options.layerA.seed, options.shapeMaskDirection);
   applyShapeMask(gridB, cols, rows, options.shapeMask, options.layerB.seed, options.shapeMaskDirection);

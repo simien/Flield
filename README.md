@@ -47,7 +47,7 @@ See [USAGE.md](USAGE.md) for the sidebar walkthrough and a couple of techniques 
 - A shareable link that encodes the exact composition, colors, both layers, and which fields are locked, into a URL; a menu beside Copy Link can make the link offer Auto-randomize to whoever opens it, with a prompt that also introduces the Play button
 - Three save-state slots stored in the browser for revisiting a composition later, each showing its three colors and when it was saved
 - Auto-randomize playback with an adjustable interval, from every 0.5 seconds up to every 10
-- Export to PNG, SVG, or an animated GIF, with frame count (1, 2, 3, 5, 8, or 13) and speed both configurable
+- Export to PNG, SVG, or an animated GIF: a step count (3, 5, 8, or 13 Auto-randomize passes at the chosen speed), or a 3-second animation of the composition on screen that cycles back to its first frame with no cut, Loop (the flow field breathes around a closed path), Drift (it flows one way along the flow direction), or Pulse (density swings), each previewed live on the canvas as soon as it is picked; a ×3 or ×5 variant records that many Auto-randomize passes, each animated that way
 - A built-in tutorial, twelve short steps with a live example each, covering Random, the sidebar, dimension presets, the shape mask, locks, palette and density ranges, Auto-randomize, Undo, and saving and exporting; a first visit gets a small "Take the tour" prompt above the canvas rather than a modal
 - Toast confirmations for actions that change something off-screen: Lock All / Unlock All, Undo, saving or loading a slot, and Copy Link
 - Responsive sidebar that collapses into a toggleable drawer on narrow screens
