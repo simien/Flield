@@ -489,11 +489,11 @@
       <div class="color-row">
         <div class="field">
           <label for="width">Width (px)</label>
-          <input type="number" id="width" value="1200" min="16" step="16" />
+          <input type="number" id="width" value="1200" min="16" max="8192" step="16" />
         </div>
         <div class="field">
           <label for="height">Height (px)</label>
-          <input type="number" id="height" value="630" min="16" step="16" />
+          <input type="number" id="height" value="630" min="16" max="8192" step="16" />
         </div>
       </div>
 
@@ -1687,6 +1687,15 @@
     //   v2: fieldScale is canvas pixels (was grid cells), and
     //       fieldStrength is multiplied by FIELD_GAIN in the generator.
     const STATE_VERSION = 2;
+    // The longest side a canvas will be, whatever asks for more: a typed
+    // value, a saved slot, or a link. The link's size field is 20 bits
+    // wide, so one could ask for a million pixels a side; at 32000 a
+    // render took twenty seconds and several gigabytes, and the canvas
+    // came out blank because it was past what a browser will draw. The
+    // number is generous for a background (twice a 4K hero) and is the
+    // inputs' max as well, so the field says what the canvas does.
+    const MAX_SIDE_PX = 8192;
+    const clampSide = (value) => Math.min(MAX_SIDE_PX, Math.max(16, parseInt(value, 10) || 100));
 
     // Two durations on one scale: how long a motion cycle lasts, and how
     // long Auto-randomize waits before rerolling. They were one number
@@ -1720,8 +1729,8 @@
         speed: speedMs(parseInt(speedInput.value, 10)),
         interval: speedMs(parseInt(intervalInput.value, 10)),
         bgColor: document.getElementById("bgColor").value,
-        width: parseInt(document.getElementById("width").value, 10) || 100,
-        height: parseInt(document.getElementById("height").value, 10) || 100,
+        width: clampSide(document.getElementById("width").value),
+        height: clampSide(document.getElementById("height").value),
         blockSize: parseInt(document.getElementById("blockSize").value, 10),
         shapeMask: document.getElementById("shapeMask").value,
         shapeMaskDirection: document.getElementById("shapeMaskDirection").value,
@@ -2739,8 +2748,8 @@
         intervalInput.value = Math.max(lo, Math.round(speedStep(values.interval) / step) * step);
       }
       document.getElementById("bgColor").value = values.bgColor;
-      document.getElementById("width").value = values.width;
-      document.getElementById("height").value = values.height;
+      document.getElementById("width").value = clampSide(values.width);
+      document.getElementById("height").value = clampSide(values.height);
       document.getElementById("blockSize").value = values.blockSize;
       document.getElementById("shapeMask").value = values.shapeMask || "none";
       // Rebuild the direction options for the restored shape now, rather

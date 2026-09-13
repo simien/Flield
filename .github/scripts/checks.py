@@ -107,10 +107,45 @@ def check_anchors():
 
 
 # 5. Cache busting -------------------------------------------------------
-# index.html asks for style.css and generator.js with a ?v= query, and says
-# in its own comment to bump it whenever either file changes. Forgetting is
-# invisible locally and serves a returning visitor a stale stylesheet.
+# Every page asks for the project's own evolving files with a ?v= query:
+# style.css and generator.js from the app, guide.css and generator.js from
+# the document pages, and the screenshot from all of them plus the README.
+# Forgetting to bump is invisible locally and serves a returning visitor a
+# stale copy; bumping one page and not another is how 404.html served an
+# older guide.css than the guide did; bumping without a change throws away
+# every visitor's cache for nothing. All three are caught here.
+ASSET_REF = re.compile(r"\b(style\.css|generator\.js|guide\.css|screenshot\.(?:png|webp))\?v=(\d+)")
+VERSIONED = PAGES + ["README.md"]
+# The files behind each versioned name. The screenshot's png and webp are
+# captured together and share one number, so they count as one asset.
+ASSET_FILES = {
+    "style.css": {"style.css"},
+    "generator.js": {"generator.js"},
+    "guide.css": {"guide.css"},
+    "screenshot": {"screenshot.png", "screenshot.webp"},
+}
+
+
+def asset_versions(text_for):
+    """{asset: {page: {versions}}} across every file that references one."""
+    found = {}
+    for page in VERSIONED:
+        for asset, v in ASSET_REF.findall(text_for(page)):
+            key = "screenshot" if asset.startswith("screenshot.") else asset
+            found.setdefault(key, {}).setdefault(page, set()).add(int(v))
+    return found
+
+
 def check_cache_bust(base):
+    now = asset_versions(read)
+    # Needs no base: one file, one number, wherever it is requested from.
+    for asset, pages in sorted(now.items()):
+        if len(set().union(*pages.values())) > 1:
+            fail(
+                "cache bust",
+                f"{asset} is requested at different versions: "
+                + ", ".join(f"{p} ?v={'/'.join(map(str, sorted(v)))}" for p, v in sorted(pages.items())),
+            )
     if not base:
         notes.append("cache bust: skipped, no base ref to compare against")
         return
@@ -125,25 +160,33 @@ def check_cache_bust(base):
     if not touched:
         notes.append("cache bust: nothing changed")
         return
-    before = subprocess.run(
-        ["git", "show", f"{base}:index.html"], cwd=ROOT, text=True, capture_output=True
-    ).stdout
-    after = read("index.html")
 
-    def version(html, asset):
-        m = re.search(re.escape(asset) + r"\?v=(\d+)", html)
-        return m.group(1) if m else None
+    def before(rel):
+        shown = subprocess.run(
+            ["git", "show", f"{base}:{rel}"], cwd=ROOT, text=True, capture_output=True
+        )
+        return shown.stdout if shown.returncode == 0 else ""
 
-    for asset in ("style.css", "generator.js"):
-        if asset not in touched:
+    old = asset_versions(before)
+    for asset, files in ASSET_FILES.items():
+        was = set().union(*old.get(asset, {}).values()) if old.get(asset) else set()
+        is_now = set().union(*now.get(asset, {}).values()) if now.get(asset) else set()
+        if not was or not is_now:
             continue
-        old, new = version(before, asset), version(after, asset)
-        if old is None or new is None:
-            fail("cache bust", f"no ?v= found for {asset}")
-        elif old == new:
-            fail("cache bust", f"{asset} changed but its ?v= is still {new}")
-        else:
-            notes.append(f"cache bust: {asset} {old} -> {new}")
+        # The highest number is the one a fixed-up page catches up to, so
+        # a commit that only brings a lagging page level is not a bump.
+        was, is_now = max(was), max(is_now)
+        if files & touched:
+            if was == is_now:
+                fail("cache bust", f"{asset} changed but its ?v= is still {is_now}")
+            else:
+                notes.append(f"cache bust: {asset} {was} -> {is_now}")
+        elif was != is_now:
+            fail(
+                "cache bust",
+                f"{asset} did not change but its ?v= moved {was} -> {is_now}; "
+                "a needless bump throws away every visitor's cache",
+            )
 
 
 # 6. Shared link format -------------------------------------------------

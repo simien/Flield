@@ -20,10 +20,16 @@ after committing, not before.
 
 ## Cache busting is load-bearing
 
-`index.html` requests `style.css?v=N` and `generator.js?v=N`. Bump the number
-when you change that file, and **leave it alone when you haven't**. A missed
-bump serves a returning visitor a stale stylesheet; a needless bump throws
-away every visitor's cache for nothing. CI checks both directions.
+Every page requests the project's own evolving files with a `?v=N` query:
+`style.css` and `generator.js` from the app, `guide.css` from the guide, the
+explainers and `404.html`, `generator.js` again from the explainers, and
+`screenshot.png` (with its `.webp` twin, on one number) from every page plus
+the README. Bump the
+number when you change that file, on **every page that requests it**, and
+**leave it alone when you haven't**. A missed bump serves a returning visitor
+a stale stylesheet; a bump on four pages and not the fifth is how `404.html`
+served an older `guide.css` than the guide did; a needless bump throws away
+every visitor's cache for nothing. CI checks all three.
 
 ## style.css: later wins at equal specificity
 

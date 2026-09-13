@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Same contract as the other two pages: dark by default, light only
+  <!-- Same contract as every other page: dark by default, light only
        for a visitor who has toggled it before. -->
   <script>
     try {
@@ -24,7 +24,7 @@
        path that misses, at any depth. -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
-  <link rel="stylesheet" href="/guide.css?v=2" />
+  <link rel="stylesheet" href="/guide.css?v=4" />
 </head>
 <body>
   <header class="site-header">
@@ -41,13 +41,25 @@
     <div class="notfound">
       <p class="notfound-code">404</p>
       <h1>Page not found</h1>
-      <p>There's no page at this address. Flield is a single-canvas app with one guide beside it, so the two links below are the whole site.</p>
+      <p>There's no page at this address. Flield is one app, a guide, and three short explainers, and every one of them is a link away from here.</p>
       <p class="notfound-actions">
         <a class="btn btn-primary" href="/">Open the app</a>
         <a class="btn" href="/guide/">Read the guide</a>
       </p>
       <p class="meta">If you followed a shared composition link that didn't open, the settings ride in the URL's query string. Check that it copied in full, including everything after the <code>?</code>.</p>
     </div>
+    <footer class="site-footer">
+      <div class="site-footer-row">
+        <a href="/flow-fields/">Flow Fields</a>
+        <a href="/animated-backgrounds/">Animated Backgrounds</a>
+        <a href="/seamless-backgrounds/">Seamless Backgrounds</a>
+      </div>
+      <div class="site-footer-row">
+        <a href="/guide/">Guide</a>
+        <a href="https://github.com/simien/Flield" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP</a>
+      </div>
+    </footer>
   </main>
 </body>
 </html>

@@ -1,7 +1,7 @@
 /* The guide is a scrolling document, so it can't share style.css: that
    file puts display:flex, height:100vh, and overflow:hidden on body for
    the app's fixed, non-scrolling viewport. What it borrows instead is the
-   token block below, copied from style.css's :root so the two pages read
+   token block below, copied from style.css's :root so the pages read
    as one site. Only the tokens this page actually uses are copied, which
    keeps the drift surface small; if a value changes there, change it here
    too. Same rule as the app: dark is the default regardless of the
@@ -35,12 +35,12 @@
   --well: #fafafa;
   --panel: #ffffff;
   --muted: #f4f4f5;
-  --border: rgba(0, 0, 0, 0.1);
-  --border-strong: rgba(0, 0, 0, 0.18);
-  --input: rgba(0, 0, 0, 0.04);
-  --text: #18181b;
-  --text-muted: #52525b;
-  --text-subtle: #71717a;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --input: #ffffff;
+  --text: #09090b;
+  --text-muted: #71717a;
+  --text-subtle: #a1a1aa;
   --primary: #18181b;
 }
 
@@ -70,7 +70,7 @@ body {
 }
 
 /* Site header: the wordmark returns to the app, which is the only
-   navigation two pages need. */
+   navigation a document page needs. */
 .site-header {
   border-bottom: 1px solid var(--border);
   background: var(--panel);
@@ -113,7 +113,7 @@ body {
    button holding a 16px icon sizes to the icon while a text-only one sizes
    to the 1.65 line-height it inherits from body, and the two come out
    several pixels apart. 32px and 0 12px are the app's own button metrics
-   (see .controls button in style.css), so the two pages match. */
+   (see .controls button in style.css), so the pages match. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -519,7 +519,7 @@ tr:last-child td {
   color: var(--text);
 }
 
-/* Matches the app: keep the keyboard ring consistent across both pages. */
+/* Matches the app: keep the keyboard ring consistent across every page. */
 a:focus-visible,
 button:focus-visible {
   outline: 2px solid var(--text-subtle);
