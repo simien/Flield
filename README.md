@@ -1,5 +1,8 @@
 # Flield
 
+[![checks](https://img.shields.io/github/actions/workflow/status/simien/Flield/checks.yml?branch=main&label=checks)](https://github.com/simien/Flield/actions/workflows/checks.yml)
+[![license](https://img.shields.io/badge/license-PolyForm%20Noncommercial-orange)](LICENSE.md)
+
 A browser-based generative pixel art tool for creating unique three-color compositions (a background plus two artwork layers) from seeded flow fields and symmetry. The name is a contraction of "flow field," the noise mechanic the tool is built on.
 
 ## Live demo
@@ -137,3 +140,8 @@ Bug reports, feature suggestions, and small fixes are welcome. See [CONTRIBUTING
 ## License
 
 Flield is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE.md): free to use, modify, and share for any noncommercial purpose (personal projects, hobby use, research, education). Commercial use, including embedding it in or basing a paid product or service on it, requires a separate commercial license. Open a [GitHub issue](https://github.com/simien/Flield/issues) to inquire.
+
+**Images you make with Flield are yours.** Use them anywhere, commercially
+included, with no attribution required. The license above covers this
+repository's source code, not the artwork the tool produces: the settings and
+seeds are yours, and so is what comes out of them.
