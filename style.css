@@ -1557,8 +1557,22 @@ button {
 /* The bare default above is the primary style, and Random is the only
    button that uses it; every other button opts into .secondary or its
    own flat treatment and carries its own hover. */
-#randomizeBtn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--primary) 85%, var(--panel));
+/* Everything wearing the primary fill dims by the same amount on hover.
+   Play carries that fill while it's running, but its own rule is an id
+   selector and outranked button.secondary's hover, so it was the one
+   primary-filled control on screen that didn't answer the pointer.
+
+   Behind (hover: hover) because a touch browser leaves :hover stuck on
+   whatever was tapped last: without the guard, Random would sit dimmed
+   on a phone from the tap that ran it until the next tap somewhere
+   else. The split's two halves light separately, the way they already
+   do in the unfilled state. */
+@media (hover: hover) {
+  #randomizeBtn:hover:not(:disabled),
+  #playBtn.playing:hover:not(:disabled),
+  #playBtn.playing + .split-btn-select:hover {
+    background-color: color-mix(in srgb, var(--primary) 85%, var(--panel));
+  }
 }
 
 button:active:not(:disabled):not(.tab-btn) {
