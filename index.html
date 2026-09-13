@@ -78,7 +78,7 @@
       "Symmetry modes, including the 4-way mirror that tiles without a seam",
       "Per-field locks that hold a value through a randomize pass",
       "Palette Range and Density Range to constrain how far randomization wanders",
-      "Separate Speed and Auto-randomize interval sliders, from a quarter of a second to sixteen",
+      "Separate Speed and Auto-randomize interval sliders, from one second to sixteen",
       "Shareable URLs and three browser-local save slots, both carrying the lock set",
       "Runs entirely in the browser with no account, upload, or third-party dependency"
     ],
@@ -187,7 +187,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=103" />
+  <link rel="stylesheet" href="style.css?v=105" />
 </head>
 <body>
   <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show settings" aria-pressed="false"><i class="ph ph-list"></i></button>
@@ -545,7 +545,7 @@
       <div class="field">
         <label for="motion">Motion</label>
         <p class="hint">Plays on the canvas as soon as you pick one.</p>
-      <p class="hint hint-warn">Motion flashes the whole canvas. Leave it off if flashing affects you.</p>
+      <p class="hint hint-warn">Motion flashes the whole canvas. Skip it if flashing affects you.</p>
         <select id="motion">
           <option value="none" selected>None (still)</option>
           <option value="circle">Loop</option>
@@ -563,12 +563,11 @@
       <div class="field" id="speedField" hidden>
         <label for="speed">Speed <span class="field-value" id="speedVal"></span></label>
         <p class="hint">How long a cycle takes on screen and in GIFs.</p>
-        <!-- Starts at a half second, not a quarter. Pulse swings the whole
-             canvas between 39% and 81% covered, which on a high-contrast
-             palette is a large-area luminance flash, and one per cycle.
-             A quarter-second cycle is four a second, over the three that
-             WCAG 2.3.1 allows. A half is two, under it. -->
-        <input type="range" id="speed" min="8" max="48" value="24" />
+        <!-- Starts at one second. Pulse swings the whole canvas between
+             39% and 81% covered, which on a high-contrast palette is a
+             large-area change in brightness, once a cycle. WCAG 2.3.1
+             allows three of those a second. A one second cycle is one. -->
+        <input type="range" id="speed" min="16" max="48" value="24" />
       </div>
 
       <h2 class="section-title">Auto-randomize</h2>
@@ -583,10 +582,10 @@
              number: one, two, four, eight, sixteen. Halve the step for
              half-steps, at the cost of stops reading 1.4s and 11.3s.
 
-             It starts at a second where Speed starts at a quarter of
-             one, which is the two controls earning their separation: a
-             quarter-second cycle is a real look, and a quarter-second
-             reroll is a strobe you cannot read a composition out of. -->
+             Both sliders start at a second now: Speed because of the
+             flash rate (see its own comment), this one because you
+             cannot read a composition thrown away four times a second
+             either. Stepped is the difference between them. -->
         <input type="range" id="interval" min="16" max="48" step="8" value="24" />
       </div>
 

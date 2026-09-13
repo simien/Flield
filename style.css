@@ -55,6 +55,19 @@
      --text-heading sits one step off the body text rather than at it:
      a setting's name wants to sit clearly between the section rule over
      it and its own description under it. */
+  /* The sidebar's vertical rhythm, as five steps rather than the six
+     near-identical values it grew: 4 and 8 group a control's own parts,
+     20 separates one control from the next, and 32 opens a section. The
+     gap between steps is what makes them read as structure; 4 against 6
+     against 8 just reads as drift. 12 earns a step of its own because a
+     heading sits closer to what it heads than controls sit to each
+     other. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 20px;
+  --space-5: 32px;
+
   --text: #fafafa;
   --text-heading: #d4d4d8;
   --text-muted: #a1a1aa;
@@ -923,7 +936,7 @@ input[type="range"]:focus-visible {
 }
 
 .field {
-  margin-bottom: 14px;
+  margin-bottom: var(--space-4);
 }
 
 /* A trailing fill of "░" (see ::after) stands in for the divider line
@@ -952,7 +965,8 @@ input[type="range"]:focus-visible {
      single grey fixes that because the two themes want it moved in
      opposite directions. */
   color: var(--text);
-  margin: 28px 0 14px;
+  /* Further from what came before than from what it heads. */
+  margin: var(--space-5) 0 var(--space-3);
 }
 
 /* A title that opens its panel (Layer A/B's "Fill") has nothing above
@@ -980,7 +994,7 @@ input[type="range"]:focus-visible {
    the content unfolds inside the same border below a divider, rather
    than the header and body being two separate boxes with a gap. */
 .palette-section {
-  margin: 2px 0 14px;
+  margin: 0 0 var(--space-4);
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1030,7 +1044,7 @@ input[type="range"]:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 14px;
+  margin-bottom: var(--space-4);
 }
 
 .preset-chip-row button {
@@ -1071,7 +1085,7 @@ input[type="range"]:focus-visible {
   align-items: center;
   font-size: 12px;
   font-weight: 500;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-2);
   /* Between the section title above and the description below, which is
      where a setting's name belongs. The description could not be dimmed
      to open that gap: on the light panel the muted grey it uses already
@@ -2024,15 +2038,40 @@ button.secondary:hover:not(:disabled) {
    after. Same size as the title it sits under; the color carries the
    difference on its own. */
 .field .hint {
-  margin-top: -2px;
-  margin-bottom: 8px;
+  /* Pulled back to --space-1 from the label's --space-2, so a
+     description sits nearer its own title than the control it explains. */
+  margin-top: calc(var(--space-1) - var(--space-2));
+  margin-bottom: var(--space-2);
 }
 
-/* One hint carries a health warning rather than an explanation, so it is
-   the one that does not recede. Same size and weight as its neighbours;
-   the colour is the whole difference, because a warning styled as a
-   banner gets dismissed as chrome and read past. */
+/* Two descriptions are one block, not two. */
+.field .hint + .hint {
+  margin-top: calc(var(--space-1) - var(--space-2));
+}
+
+/* One hint carries a health warning rather than an explanation. It reads
+   in the same colour as the description above it, because a notice that
+   shouts gets taken for chrome and read past. A hanging marker carries
+   the difference instead, the way a footnote does. */
 .hint-warn {
+  padding-left: 13px;
+  text-indent: -13px;
+}
+
+/* An asterisk is drawn small and parked up near the ascender, so at the
+   text's own size it reads as a footnote mark rather than as part of the
+   line. 1.54em makes its ink exactly the x-height of the 12px text, and
+   the negative vertical-align drops it from its own baseline onto the
+   text's, so it fills the same band the lowercase letters do. The zero
+   line-height keeps the bigger glyph from opening the line box up.
+   5px plus the glyph's advance is the 13px the hang is indented by, so
+   a second line starts under the first word rather than under the mark. */
+.hint-warn::before {
+  content: "*";
+  font-size: 1.54em;
+  line-height: 0;
+  vertical-align: -0.356em;
+  padding-right: 5px;
   color: var(--text);
 }
 
