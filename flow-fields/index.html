@@ -16,7 +16,7 @@
     }
   </script>
   <title>What is a flow field? A visual explanation, with live examples</title>
-  <meta name="description" content="A flow field steers noise into directional streaks instead of static. What that means, why rotating and stretching the sampling space produces bands, and why the field biases density rather than gating it." />
+  <meta name="description" content="A flow field is a grid of directions. What the field is, where the numbers come from, and six different things you can draw from them, with live demos." />
   <link rel="canonical" href="https://flield.com/flow-fields/" />
   <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
   <link rel="apple-touch-icon" sizes="192x192" href="../icon-192.png" />
@@ -26,14 +26,14 @@
   <meta property="og:url" content="https://flield.com/flow-fields/" />
   <meta property="og:site_name" content="Flield" />
   <meta property="og:title" content="What is a flow field? A visual explanation, with live examples" />
-  <meta property="og:description" content="A flow field steers noise into directional streaks instead of static. What that means, why rotating and stretching the sampling space produces bands, and why the field biases density rather than gating it." />
+  <meta property="og:description" content="A flow field is a grid of directions. What the field is, where the numbers come from, and six different things you can draw from them, with live demos." />
   <meta property="og:image" content="https://flield.com/screenshot.png?v=5" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="900" />
   <meta property="og:image:alt" content="A generated three-color composition in Flield" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="What is a flow field? A visual explanation, with live examples" />
-  <meta name="twitter:description" content="A flow field steers noise into directional streaks instead of static. What that means, why rotating and stretching the sampling space produces bands, and why the field biases density rather than gating it." />
+  <meta name="twitter:description" content="A flow field is a grid of directions. What the field is, where the numbers come from, and six different things you can draw from them, with live demos." />
   <meta name="twitter:image" content="https://flield.com/screenshot.png?v=5" />
   <meta name="theme-color" content="#09090b" />
 
@@ -46,7 +46,7 @@
     "@type": "TechArticle",
     "@id": "https://flield.com/flow-fields/#article",
     "headline": "What is a flow field? A visual explanation, with live examples",
-    "description": "A flow field steers noise into directional streaks instead of static. What that means, why rotating and stretching the sampling space produces bands, and why the field biases density rather than gating it.",
+    "description": "A flow field is a grid of directions. What the field is, where the numbers come from, and six different things you can draw from them, with live demos.",
     "url": "https://flield.com/flow-fields/",
     "mainEntityOfPage": "https://flield.com/flow-fields/",
     "about": { "@id": "https://flield.com/#app" },
@@ -65,7 +65,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="../guide.css?v=2" />
+  <link rel="stylesheet" href="../guide.css?v=3" />
 </head>
 <body>
   <header class="site-header">
@@ -80,11 +80,21 @@
 
   <main class="wrap">
     <h1>What is a flow field?</h1>
-    <p class="lede">A flow field is a grid of directional forces that steers noise into organic drifts instead of static. Everything on this page is generated live, in your browser, by the same code that runs <a href="../">Flield</a>.</p>
+    <p class="lede">A flow field is a grid of directions. Every point on it says which way to go. Give it to a drawing and the randomness stops scattering and starts flowing.</p>
+
+    <h2 id="definition">The short definition</h2>
+
+    <p>Take a patch of space and put a number at every point. Turn each number into an angle. You now have a field of arrows, and anything you drop on it has somewhere to go.</p>
+
+    <p>The numbers almost always come from a noise function, usually Perlin or simplex. Noise gives you values that drift smoothly rather than jump about. Neighbouring arrows end up pointing nearly the same way, so the field reads as a current rather than a mess.</p>
+
+    <p>What you do with the field is a separate choice. Most generative art releases particles onto it and draws their trails. You can also read the numbers as brightness, as a height, as a nudge on some other decision. The field is just the numbers. The picture is what you make of them.</p>
+
+    <p>The rest of this page shows that idea working, using <a href="../">Flield</a>, a generator that runs in the browser. Every panel below is drawn live by the same code the app uses. Where a name is Flield's own rather than the general term, it says so.</p>
 
     <h2 id="static">Static, and then not</h2>
 
-    <p>Start with the difference the field makes. Both panels below use the same seed, the same density, and the same colors. The only thing that changes is whether a flow field is steering the result.</p>
+    <p>Start with the difference a field makes. Both panels below use the same seed, the same density, and the same colors. The only thing that changes is whether a flow field is steering the result.</p>
 
     <div class="demo">
       <div class="demo-canvases">
@@ -103,13 +113,75 @@
       <p class="demo-caption">Left, every cell decides on its own and the result is evenly scattered. Right, a field biases those decisions, and the same randomness gathers into bands and thins into valleys.</p>
     </div>
 
-    <h2 id="classic">The classic version, and this one</h2>
+    <h2 id="classic">Six ways to draw one field</h2>
 
     <p>In most generative art, a flow field is literally a grid of vectors. You sample noise at each point, turn the value into an angle, and release particles that steer by whatever angle they're standing on. The particles trace the field, and the drawing is the trails they leave.</p>
 
-    <p>Flield does something related but not identical, and the difference is worth stating because it's the reason the output looks like woven fabric rather than like hair.</p>
+    <p>A field is a set of numbers. Tracing particles through it is one thing you can do with those numbers. Flield does that, and five other things.</p>
 
-    <p>There are no particles here, and no per-cell vectors. Instead the <em>sampling space itself</em> is rotated and stretched before the noise is read from it. Sample isotropic noise at plain grid coordinates and you get blobs with no preferred direction. Rotate the coordinates toward a heading and divide one axis by a stretch factor first, and the same noise function returns values that vary slowly along that heading and quickly across it. Blobs become streaks, pointing where you aimed them.</p>
+    <p>The six names below are Flield's, not the field's. No one else calls them this. They are worth a look anyway, because each one is a different answer to the same question: you have the numbers, so what do you draw?</p>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Texture</th><th>What it makes of the field</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Streaks</strong></td><td>Reads the value as a nudge on how likely each cell is to fill. Combed bands.</td></tr>
+          <tr><td><strong>Nebula</strong></td><td>Folds the value at zero. The curves the field crosses there turn into bright filaments with dark gaps around them.</td></tr>
+          <tr><td><strong>Marble</strong></td><td>Moves where each cell reads from, using a second and coarser field. Then it does what Streaks does.</td></tr>
+          <tr><td><strong>Contours</strong></td><td>Cuts the value into levels and draws the lines between them. A contour map of the field.</td></tr>
+          <tr><td><strong>Streamlines</strong></td><td>Turns the value into an angle and traces particles along it. The classic construction.</td></tr>
+          <tr><td><strong>Weave</strong></td><td>Streamlines twice over, the second set a quarter turn across the first.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Two of them are worth explaining in full. They are the two furthest apart, and they are below. The rest are variations on one or the other.</p>
+
+    <h2 id="streamlines">Streamlines: the vectors, traced</h2>
+
+    <p>This is the classic construction. The left panel below is the field itself. One arrow per patch of grid, each pointing where a particle standing there would go.</p>
+
+    <p>The right panel is what you get by dropping particles on that field and recording where they went. Turn the curl up and the arrows swing further off the flow direction. The strands bend with them, because both are reading the same numbers.</p>
+
+    <div class="demo">
+      <div class="demo-canvases">
+        <div class="demo-pane">
+          <p class="demo-label">The vectors</p>
+          <canvas id="arrowCanvas" width="320" height="240"></canvas>
+        </div>
+        <div class="demo-pane">
+          <p class="demo-label">Particles tracing them</p>
+          <canvas id="streamCanvas" width="320" height="240"></canvas>
+        </div>
+      </div>
+      <div class="demo-controls">
+        <div class="demo-control">
+          <label for="curlRange">Curl</label>
+          <input type="range" id="curlRange" min="0" max="1" value="0.45" step="0.01" />
+          <span class="demo-value" id="curlValue">0.45</span>
+        </div>
+        <div class="demo-control">
+          <label for="trailRange">Trail length</label>
+          <input type="range" id="trailRange" min="1" max="10" value="5" step="0.1" />
+          <span class="demo-value" id="trailValue">5.0</span>
+        </div>
+      </div>
+      <p class="demo-caption">At zero curl every arrow points the same way and the particles run in straight lines. The noise is what makes a field a field.</p>
+    </div>
+
+    <p>Two details do most of the work here.</p>
+
+    <p>The first is that each particle lives for exactly one animation cycle. Then it starts again from its own fixed point. That is what lets an animated flow field close on itself, rather than cut between two frames.</p>
+
+    <p>The second is that a young trail wraps onto the far end of its own path. So the amount of strand on screen never dips.</p>
+
+    <p>The trails land in the same grid of cells as everything else in the tool. That is how they end up mirrored, kaleidoscoped, masked to a circle and exported as SVG.</p>
+
+    <h2 id="streaks">Streaks: the field as a bias</h2>
+
+    <p>Streaks never builds a vector at all, and it is why the tool's default output looks like woven fabric rather than like hair. Here the <em>sampling space itself</em> is rotated and stretched before the noise is read from it. Sample isotropic noise at plain grid coordinates and you get blobs with no preferred direction. Rotate the coordinates toward a heading first, and divide one axis by a stretch factor. The same noise function now returns values that vary slowly along that heading and quickly across it. Blobs become streaks, pointing where you aimed them.</p>
 
     <pre><code>function sampleFlowField(noise2D, x, y, { scale, angleRad, stretch, octaves }) {
   const cos = Math.cos(angleRad);
@@ -168,7 +240,7 @@ if (useField) {
 }
 grid[y][x] = rand() &lt; p;</code></pre>
 
-    <p>Now a cell in a dense region is merely <em>likely</em> to fill, and one in a sparse region is merely unlikely. Regions blend into each other through a gradient of probability instead of meeting at an edge, and the texture stays grainy everywhere rather than going solid where the field is strong. That is the difference between the two panels in the first demo, and it is one comparison operator.</p>
+    <p>Now a cell in a dense region is merely <em>likely</em> to fill, and one in a sparse region is merely unlikely. Regions blend into each other through a gradient of probability, instead of meeting at an edge. The texture stays grainy everywhere, rather than going solid where the field is strong. That is the difference between the two panels in the first demo, and it is one comparison operator.</p>
 
     <h2 id="octaves">Layering the noise</h2>
 
@@ -176,23 +248,35 @@ grid[y][x] = rand() &lt; p;</code></pre>
 
     <p>The noise underneath is <a href="https://en.wikipedia.org/wiki/Ken_Perlin" target="_blank" rel="noopener">Ken Perlin</a>'s gradient noise, using the fade curve from his 2002 improved reference implementation, seeded so the same string always produces the same field.</p>
 
-    <h2 id="try">Try it, or read it</h2>
+    <h2 id="try">Try it</h2>
 
-    <p>Every control described here is in the app, on each layer's tab: Field Strength, Field Scale, Flow Angle, Flow Stretch, and Octaves. <a href="../">Open Flield</a> and drag them, or read the <a href="../guide/">guide</a> for the rest of the tool.</p>
+    <p>Every control on this page is in the app, on each layer's tab, under Flow field. Texture picks which of the six you are drawing. Field Strength, Flow Scale, Flow Direction, Flow Stretch and Turbulence steer all six.</p>
 
-    <p>The implementation is one file, <a href="https://github.com/simien/Flield/blob/main/generator.js" target="_blank" rel="noopener"><code>generator.js</code></a>, with no dependencies and no build step. It has no knowledge of the interface, so it runs anywhere a canvas does, which is how the demos on this page work: the same functions, at a smaller size.</p>
+    <p>Some of them change name as you switch, because the job changes. On Streamlines and Weave, strength becomes Curl, stretch becomes Trail length and the smoothing passes become Strand weight. On Contours, strength becomes Levels, because what it buys there is a count of lines.</p>
+
+    <p><a href="../">Open Flield</a> and drag them, or read the <a href="../guide/">guide</a> for the rest of the tool.</p>
+
+    <p>Two pages take the field further. <a href="../animated-backgrounds/">Looping animated backgrounds</a> sets it moving and closes the loop with no cut. <a href="../seamless-backgrounds/">Seamless tiling backgrounds</a> mirrors it into a tile that repeats with no seam.</p>
+
+    <p>The implementation is one file, <a href="https://github.com/simien/Flield/blob/main/generator.js" target="_blank" rel="noopener"><code>generator.js</code></a>, with no dependencies and no build step. It knows nothing about the interface, so it runs anywhere a canvas does. That is how the demos on this page work. The same functions, at a smaller size.</p>
 
     <p class="meta">Flield is free for noncommercial use under the <a href="https://github.com/simien/Flield/blob/main/LICENSE.md" target="_blank" rel="noopener">PolyForm Noncommercial License</a>.</p>
 
     <footer class="site-footer">
-      <a href="../">Open App</a>
-      <a href="../guide/">Guide</a>
-      <a href="https://github.com/simien/Flield" target="_blank" rel="noopener">GitHub.com</a>
-      <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP.com</a>
+      <div class="site-footer-row">
+        <a href="../guide/">Guide</a>
+        <a href="../animated-backgrounds/">Animated Backgrounds</a>
+        <a href="../seamless-backgrounds/">Seamless Backgrounds</a>
+      </div>
+      <div class="site-footer-row">
+        <a href="../">Open App</a>
+        <a href="https://github.com/simien/Flield" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP</a>
+      </div>
     </footer>
   </main>
 
-  <script src="../generator.js?v=10"></script>
+  <script src="../generator.js?v=11"></script>
   <script>
     // Phosphor's own path data, the same two glyphs and the same
     // flield-theme key the app and the guide use, so a choice made on any
@@ -235,7 +319,7 @@ grid[y][x] = rand() &lt; p;</code></pre>
       };
     }
 
-    const BLOCK = 4;
+    const BLOCK = 2;
 
     // A layer built from the page's shared palette, with only the fields
     // each demo actually varies passed in.
@@ -254,12 +338,12 @@ grid[y][x] = rand() &lt; p;</code></pre>
       }, overrides);
     }
 
-    function paint(canvas, layerA, layerB) {
+    function paint(canvas, layerA, layerB, blockSize) {
       const palette = paletteFor();
       const options = {
         width: canvas.width,
         height: canvas.height,
-        blockSize: BLOCK,
+        blockSize: blockSize || BLOCK,
         bgColor: palette.bg,
         layerA,
         layerB,
@@ -379,8 +463,107 @@ grid[y][x] = rand() &lt; p;</code></pre>
     angleRange.addEventListener("input", renderPair);
     stretchRange.addEventListener("input", renderPair);
 
+    // Demo 3: the vector field drawn as arrows, beside the streamlines
+    // those arrows produce. Both sides read the same noise through the
+    // same call the generator uses, and both apply STREAM_TURN to it, so
+    // an arrow really does point where the strand crossing it is going.
+    const arrowCanvas = document.getElementById("arrowCanvas");
+    const streamCanvas = document.getElementById("streamCanvas");
+    const curlRange = document.getElementById("curlRange");
+    const trailRange = document.getElementById("trailRange");
+    const curlValue = document.getElementById("curlValue");
+    const trailValue = document.getElementById("trailValue");
+
+    const STREAM_DEMO_SEED = "streamlines";
+    const STREAM_SCALE_PX = 110;
+    const STREAM_ANGLE = 20;
+    // Arrows every this many canvas pixels. Close enough to read as a
+    // field, far enough apart that the heads don't collide.
+    const ARROW_SPACING = 22;
+    const streamNoise = makePerlin(STREAM_DEMO_SEED + "|field");
+
+    // The heading a particle standing at this cell would take: the flow
+    // direction, swung off it by the field value. Identical to what
+    // drawStreamlines does per step, minus the interpolation between
+    // cells. Sampled unstretched, because a heading wants isotropic
+    // noise under it.
+    function streamAngleAt(x, y, curl) {
+      const angleRad = (STREAM_ANGLE * Math.PI) / 180;
+      const n = sampleFlowField(streamNoise, x, y, {
+        scale: STREAM_SCALE_PX / BLOCK,
+        angleRad,
+        stretch: 1,
+        octaves: 2,
+      });
+      return angleRad + n * STREAM_TURN * curl;
+    }
+
+    function renderArrows() {
+      const curl = Number(curlRange.value);
+      const palette = paletteFor();
+      const ctx = arrowCanvas.getContext("2d");
+      ctx.fillStyle = palette.bg;
+      ctx.fillRect(0, 0, arrowCanvas.width, arrowCanvas.height);
+      ctx.strokeStyle = palette.a;
+      ctx.fillStyle = palette.a;
+      ctx.lineWidth = 1.5;
+      ctx.lineCap = "round";
+      const half = ARROW_SPACING * 0.34;
+      for (let py = ARROW_SPACING / 2; py < arrowCanvas.height; py += ARROW_SPACING) {
+        for (let px = ARROW_SPACING / 2; px < arrowCanvas.width; px += ARROW_SPACING) {
+          // The generator samples per grid cell, so the arrow asks the
+          // field about the cell it is sitting on rather than the pixel.
+          const angle = streamAngleAt(px / BLOCK, py / BLOCK, curl);
+          const dx = Math.cos(angle) * half;
+          const dy = Math.sin(angle) * half;
+          ctx.beginPath();
+          ctx.moveTo(px - dx, py - dy);
+          ctx.lineTo(px + dx, py + dy);
+          ctx.stroke();
+          // A dot for the head, rather than two more strokes for a
+          // barbed one: at this size the barbs read as noise.
+          ctx.beginPath();
+          ctx.arc(px + dx, py + dy, 1.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function renderStream() {
+      const palette = paletteFor();
+      const curl = Number(curlRange.value);
+      const stretch = Number(trailRange.value);
+      const common = {
+        texture: "streamlines",
+        fieldStrength: curl,
+        fieldScale: STREAM_SCALE_PX,
+        flowAngle: STREAM_ANGLE,
+        flowStretch: stretch,
+        smoothPasses: 0,
+      };
+      // One layer, not the page's usual two: the arrows describe one
+      // field, and a second colour tracing a different one would
+      // undercut the only thing this pair is here to show.
+      paint(
+        streamCanvas,
+        layer(STREAM_DEMO_SEED, palette.a, 0.24, common),
+        layer(STREAM_DEMO_SEED + "-b", palette.b, 0, common)
+      );
+    }
+
+    function renderStreamPair() {
+      curlValue.textContent = Number(curlRange.value).toFixed(2);
+      trailValue.textContent = Number(trailRange.value).toFixed(1);
+      renderArrows();
+      renderStream();
+    }
+
+    curlRange.addEventListener("input", renderStreamPair);
+    trailRange.addEventListener("input", renderStreamPair);
+
     function renderAll() {
       renderCompare();
+      renderStreamPair();
       renderPair();
     }
 

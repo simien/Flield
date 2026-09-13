@@ -16,7 +16,7 @@
     }
   </script>
   <title>How to make a seamless tiling background, without an image to start from</title>
-  <meta name="description" content="Why a 4-way mirror guarantees a tile repeats with no seam, what breaks it, and how to generate a tileable background in your own colors instead of converting a photo you already have." />
+  <meta name="description" content="Why the edges of a tile have to match, why mirroring guarantees they do, what breaks it, and how to generate a tileable background in your own colors." />
   <link rel="canonical" href="https://flield.com/seamless-backgrounds/" />
   <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
   <link rel="apple-touch-icon" sizes="192x192" href="../icon-192.png" />
@@ -26,14 +26,14 @@
   <meta property="og:url" content="https://flield.com/seamless-backgrounds/" />
   <meta property="og:site_name" content="Flield" />
   <meta property="og:title" content="How to make a seamless tiling background, without an image to start from" />
-  <meta property="og:description" content="Why a 4-way mirror guarantees a tile repeats with no seam, what breaks it, and how to generate a tileable background in your own colors instead of converting a photo you already have." />
+  <meta property="og:description" content="Why the edges of a tile have to match, why mirroring guarantees they do, what breaks it, and how to generate a tileable background in your own colors." />
   <meta property="og:image" content="https://flield.com/screenshot.png?v=5" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="900" />
   <meta property="og:image:alt" content="A generated three-color composition in Flield" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="How to make a seamless tiling background, without an image to start from" />
-  <meta name="twitter:description" content="Why a 4-way mirror guarantees a tile repeats with no seam, what breaks it, and how to generate a tileable background in your own colors instead of converting a photo you already have." />
+  <meta name="twitter:description" content="Why the edges of a tile have to match, why mirroring guarantees they do, what breaks it, and how to generate a tileable background in your own colors." />
   <meta name="twitter:image" content="https://flield.com/screenshot.png?v=5" />
   <meta name="theme-color" content="#09090b" />
 
@@ -46,7 +46,7 @@
     "@type": "TechArticle",
     "@id": "https://flield.com/seamless-backgrounds/#article",
     "headline": "How to make a seamless tiling background, without an image to start from",
-    "description": "Why a 4-way mirror guarantees a tile repeats with no seam, what breaks it, and how to generate a tileable background in your own colors instead of converting a photo you already have.",
+    "description": "Why the edges of a tile have to match, why mirroring guarantees they do, what breaks it, and how to generate a tileable background in your own colors.",
     "url": "https://flield.com/seamless-backgrounds/",
     "mainEntityOfPage": "https://flield.com/seamless-backgrounds/",
     "about": { "@id": "https://flield.com/#app" },
@@ -65,7 +65,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="../guide.css?v=2" />
+  <link rel="stylesheet" href="../guide.css?v=3" />
 </head>
 <body>
   <header class="site-header">
@@ -80,11 +80,23 @@
 
   <main class="wrap">
     <h1>How to make a seamless tiling background</h1>
-    <p class="lede">A tile is seamless when its left edge matches its right and its top matches its bottom. There is a way to guarantee that rather than retouch your way toward it, and it costs one setting.</p>
+    <p class="lede">A tile is seamless when its left edge matches its right and its top matches its bottom. Lay it out in a grid and the joins disappear.</p>
+
+    <h2 id="definition">The short definition</h2>
+
+    <p>A repeating background is one small image drawn over and over. The browser butts each copy against the next. Wherever two copies meet, the right edge of one lands beside the left edge of the other.</p>
+
+    <p>If those two edges do not match, you see a line. Repeat it across a page and the lines form a grid. That is what everyone means by a visible seam, and the eye is unreasonably good at spotting it.</p>
+
+    <p>There are two ways out. You can take an image you already have and edit its edges until they agree, which is what offset-and-clone does in an image editor. Or you can generate the image so its edges agree from the start, and never have an edge to fix.</p>
+
+    <p>This page is about the second route, shown with <a href="../">Flield</a>, a generator that runs in the browser. Both panels below are drawn live by the same code the app uses. Where a name is Flield's own rather than the general term, it says so.</p>
 
     <h2 id="proof">The seam, and its absence</h2>
 
-    <p>Below, the left panel is a single tile and the right panel is that same tile repeated nine times. Switch the symmetry and watch the grid on the right: with a 4-way mirror the repeat is invisible, and without one every boundary announces itself.</p>
+    <p>Below, the left panel is a single tile and the right panel is that same tile repeated nine times. Switch the symmetry and watch the grid on the right. With a 4-way mirror the repeat is invisible. Without one, every boundary announces itself.</p>
+
+    <p>4-way mirror is Flield's name for the setting. Mirroring a tile so it repeats is an old idea and goes by other names elsewhere.</p>
 
     <div class="demo">
       <div class="demo-canvases">
@@ -113,21 +125,21 @@
 
     <h2 id="why">Why mirroring works</h2>
 
-    <p>The usual way to make a texture tile is to generate something, notice the seam, and then fix it: offset the image by half its width and height, then clone and blur until the cross in the middle stops being visible. It works, it is tedious, and it degrades the texture exactly where you touch it.</p>
+    <p>The usual way to make a texture tile is to generate something, notice the seam, then fix it. You offset the image by half its width and height. Then you clone and blur until the cross in the middle stops showing. It works, it is tedious, and it degrades the texture exactly where you touch it.</p>
 
     <p>Mirroring makes the seam impossible instead of repairing it. Generate only the top-left quadrant, then mirror it across the vertical axis and the horizontal one. The last column is now a copy of the first, and the last row is a copy of the first. When two copies sit side by side, the pixels meeting at the boundary are identical by construction, so there is nothing to blend. The pattern reads as continuous because, across that edge, it is.</p>
 
     <p>That is the whole mechanism, and it is why the middle option in the demo above only half works. Mirroring across one axis buys you seamlessness along one pair of edges. You need both.</p>
 
     <div class="note">
-      <p>The cost is symmetry you can see. A mirrored tile is a mirrored tile, and at large sizes the eye finds the axis. It matters less than you would expect for a background texture at small scale, and not at all for a repeating pattern where the symmetry reads as part of the design.</p>
+      <p>The cost is symmetry you can see. A mirrored tile is a mirrored tile, and at large sizes the eye finds the axis. It matters less than you would expect for a background texture at small scale. For a repeating pattern it does not matter at all, because the symmetry reads as part of the design.</p>
     </div>
 
     <h2 id="preset">What the Tile preset does</h2>
 
-    <p>In the app, the <strong>Tile</strong> dimension preset sets all of this at once. It squares the canvas at 512 by 512, puts both layers on a 4-way mirror, and turns the shape mask off, then locks the last two so a randomize pass can't undo them while you explore.</p>
+    <p><strong>Tile</strong> is a Flield control, a dimension preset that sets all of this at once. It squares the canvas at 512 by 512, puts both layers on a 4-way mirror and turns the shape mask off. Then it locks the last two, so a randomize pass cannot undo them while you explore.</p>
 
-    <p>The shape mask has to go because it breaks the edge equality the mirror just established. A centered circle, a vignette, or a corner fade is positioned relative to the canvas rather than generated as part of the pattern, so it does not repeat: tile a vignette and you get a grid of dark blotches. Anything that treats the canvas as a frame rather than as a swatch is incompatible with tiling, and the preset resolves that by removing it.</p>
+    <p>The shape mask has to go because it breaks the edge equality the mirror just established. A centered circle, a vignette or a corner fade sits relative to the canvas. It is not generated as part of the pattern, so it does not repeat. Tile a vignette and you get a grid of dark blotches. Anything that treats the canvas as a frame rather than as a swatch is incompatible with tiling, and the preset resolves that by removing it.</p>
 
     <p>512 is not a device size. It is a round, highly divisible number for a texture swatch, which means common block sizes divide it evenly and no partial cell is left at an edge. A partial cell at the edge would reintroduce the seam by a different route.</p>
 
@@ -144,9 +156,9 @@
 
     <h2 id="colors">Doing it in your own colors</h2>
 
-    <p>This is where generating beats converting. Every other seamless-texture tool starts from an image you supply, which means the palette is whatever the source photograph happened to contain, and matching a brand means editing toward it afterward.</p>
+    <p>This is where generating beats converting. Every other seamless-texture tool starts from an image you supply. So the palette is whatever the source photograph happened to contain, and matching a brand means editing toward it afterward.</p>
 
-    <p>There is no source image here. The three colors are parameters, so a brand palette goes in directly and every tile that comes out is already correct. Set the hue, saturation, and lightness ranges under <span class="ui-ref">Palette Range</span>, lock the colors, and let everything else reroll: you get an unlimited run of different tiles that are all on-brand, rather than one tile you then have to recolor.</p>
+    <p>There is no source image here. The three colors are parameters, so a brand palette goes in directly and every tile that comes out is already correct. Set the hue, saturation and lightness ranges under <span class="ui-ref">Palette Range</span>. Lock the colors and let everything else reroll. You get an endless run of different tiles that are all on-brand, instead of one tile you have to recolor afterwards.</p>
 
     <h2 id="use">Using the result</h2>
 
@@ -160,25 +172,33 @@
   background-size: 256px 256px;
 }</code></pre>
 
-    <p>SVG is usually the better export for this. The output is rectangles rather than pixels, so it scales to any size without softening, and the files are small because the format stores the shapes instead of every cell.</p>
+    <p>SVG is usually the better export for this. The output is rectangles rather than pixels, so it scales to any size without softening. The files stay small too, because the format stores the shapes instead of every cell.</p>
 
-    <p>A tile can also move. The same mirroring holds while a <a href="../flow-fields/">flow field</a> animates underneath it, so a tiled background can drift or breathe without the repeat ever showing. That is covered in the <a href="../guide/">guide</a>, under Motion.</p>
+    <p>A tile can also move. The mirroring holds while a <a href="../flow-fields/">flow field</a> animates underneath it. So a tiled background can drift or breathe and the repeat still never shows. The <a href="../guide/">guide</a> covers that under Motion, and <a href="../animated-backgrounds/">looping animated backgrounds</a> covers how the loop closes.</p>
+
+    <p>The texture inside a tile is yours to pick as well. Each layer draws its field one of six ways. Soft bands, cloudy filaments, marbled swirls, contour lines, fine strands or a woven mesh. They all tile the same way, so the seam is safe whichever you choose. <a href="../flow-fields/">The flow field explainer</a> shows all six.</p>
 
     <h2 id="try">Try it</h2>
 
-    <p><a href="../">Open Flield</a>, press <span class="ui-ref">Tile</span> under the canvas dimensions, and press Random until something fits. The <a href="../guide/">guide</a> covers the rest of the controls, and <a href="../flow-fields/">the flow field explainer</a> covers what is shaping the texture underneath.</p>
+    <p><a href="../">Open Flield</a> and press <span class="ui-ref">Tile</span> under the canvas dimensions. Then press Random until something fits. The <a href="../guide/">guide</a> covers the rest of the controls. <a href="../flow-fields/">The flow field explainer</a> covers what shapes the texture underneath.</p>
 
     <p class="meta">Flield is free for noncommercial use under the <a href="https://github.com/simien/Flield/blob/main/LICENSE.md" target="_blank" rel="noopener">PolyForm Noncommercial License</a>.</p>
 
     <footer class="site-footer">
-      <a href="../">Open App</a>
-      <a href="../guide/">Guide</a>
-      <a href="../flow-fields/">Flow Fields</a>
-      <a href="https://github.com/simien/Flield" target="_blank" rel="noopener">GitHub.com</a>
+      <div class="site-footer-row">
+        <a href="../guide/">Guide</a>
+        <a href="../flow-fields/">Flow Fields</a>
+        <a href="../animated-backgrounds/">Animated Backgrounds</a>
+      </div>
+      <div class="site-footer-row">
+        <a href="../">Open App</a>
+        <a href="https://github.com/simien/Flield" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP</a>
+      </div>
     </footer>
   </main>
 
-  <script src="../generator.js?v=10"></script>
+  <script src="../generator.js?v=11"></script>
   <script>
     // Phosphor's own path data, the same two glyphs and the same
     // flield-theme key the app and the guide use, so a choice made on any
@@ -203,7 +223,7 @@
     // into the repeat panel, so the right-hand canvas shows the actual
     // exported tile repeating rather than a separately generated image.
     const TILE_PX = 256;
-    const BLOCK = 8;
+    const BLOCK = 4;
     const REPEATS = 3;
 
     let tileSeed = "seamless";

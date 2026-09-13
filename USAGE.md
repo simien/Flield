@@ -12,12 +12,13 @@ The guide covers:
 
 - **The basics.** Three colors, two seeded layers, and why a fresh page load keeps its background, block size, and shape mask.
 - **Using the controls.** What each tab holds, how the layout rearranges into a bottom bar and sheet on a phone, and what the scroll fades, confirmations, and hold-to-confirm buttons mean.
+- **Texture.** Six ways to draw one field, from dithered bands to topographic contours to particle trails, and the sliders that change name between them.
 - **Locks.** Holding a field's value through a randomize pass, and which three start locked.
 - **Tiling without a seam.** What the Tile preset changes, and why it locks what it locks.
 - **Saving and sharing.** Browser slots against shareable links, including the link that offers Auto-randomize on open.
 - **Keyboard shortcuts.** R, Space, and Undo.
 - **Exploring with Auto-randomize.** Locking down an art direction, then letting the rest drift.
-- **Motion.** Loop, Drift, Wind, and Pulse, each with an example clip.
+- **Motion.** Loop, Drift, Wind, and Pulse, each with an example clip, and the Speed slider that sets a cycle, kept apart from the Auto-randomize interval.
 - **Palette Range and Density Range.** Constraining how far a randomized value can wander.
 
 The same walkthrough is also built into the app itself: the **?** button, at

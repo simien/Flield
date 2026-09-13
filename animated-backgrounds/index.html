@@ -16,7 +16,7 @@
     }
   </script>
   <title>How to make a looping animated background for a website</title>
-  <meta name="description" content="Four kinds of motion that return to their first frame with no cut, which file format to use for a hero background, and why a small repeating tile usually beats a full-width video." />
+  <meta name="description" content="When a seamless loop is worth the trouble and when it is not, four kinds of motion that return to their first frame with no cut, and which file format to use for a hero background." />
   <link rel="canonical" href="https://flield.com/animated-backgrounds/" />
   <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
   <link rel="apple-touch-icon" sizes="192x192" href="../icon-192.png" />
@@ -26,14 +26,14 @@
   <meta property="og:url" content="https://flield.com/animated-backgrounds/" />
   <meta property="og:site_name" content="Flield" />
   <meta property="og:title" content="How to make a looping animated background for a website" />
-  <meta property="og:description" content="Four kinds of motion that return to their first frame with no cut, which file format to use for a hero background, and why a small repeating tile usually beats a full-width video." />
+  <meta property="og:description" content="When a seamless loop is worth the trouble and when it is not, four kinds of motion that return to their first frame with no cut, and which file format to use for a hero background." />
   <meta property="og:image" content="https://flield.com/screenshot.png?v=5" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="900" />
   <meta property="og:image:alt" content="A generated three-color composition in Flield" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="How to make a looping animated background for a website" />
-  <meta name="twitter:description" content="Four kinds of motion that return to their first frame with no cut, which file format to use for a hero background, and why a small repeating tile usually beats a full-width video." />
+  <meta name="twitter:description" content="When a seamless loop is worth the trouble and when it is not, four kinds of motion that return to their first frame with no cut, and which file format to use for a hero background." />
   <meta name="twitter:image" content="https://flield.com/screenshot.png?v=5" />
   <meta name="theme-color" content="#09090b" />
 
@@ -46,7 +46,7 @@
     "@type": "TechArticle",
     "@id": "https://flield.com/animated-backgrounds/#article",
     "headline": "How to make a looping animated background for a website",
-    "description": "Four kinds of motion that return to their first frame with no cut, which file format to use for a hero background, and why a small repeating tile usually beats a full-width video.",
+    "description": "When a seamless loop is worth the trouble and when it is not, four kinds of motion that return to their first frame with no cut, and which file format to use for a hero background.",
     "url": "https://flield.com/animated-backgrounds/",
     "mainEntityOfPage": "https://flield.com/animated-backgrounds/",
     "about": { "@id": "https://flield.com/#app" },
@@ -65,7 +65,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="../guide.css?v=2" />
+  <link rel="stylesheet" href="../guide.css?v=3" />
   <style>
     /* The four motions sit in a 2x2 rather than the shared .demo-canvases
        pair, since they are four peers being compared rather than a
@@ -95,9 +95,29 @@
 
   <main class="wrap">
     <h1>How to make a looping animated background</h1>
-    <p class="lede">A background that loops badly is worse than one that doesn't move. The cut is the thing people notice, and once seen it can't be unseen. Here are four ways to move a composition so the last frame runs into the first with nothing to see.</p>
+    <p class="lede">Not every moving background has to loop. Plenty run once, or play long enough that nobody reaches the end. But if yours does repeat, the cut is the part people notice. This page is about four ways to move a composition so the last frame runs into the first with nothing to see.</p>
+
+    <h2 id="definition">The short definition</h2>
+
+    <p>A loop is seamless when the last frame and the first frame are the same. Play it on repeat and there is no moment where the picture jumps.</p>
+
+    <p>Getting there with footage means trimming until the two ends nearly agree, then hiding the rest. Getting there with generated motion means building the movement out of something that comes back round on its own. A circle. A wave. Anything that repeats.</p>
+
+    <p>The second kind cannot have a seam, because the last frame is not merely close to the first. It is computed from the same inputs.</p>
+
+    <p>This page is about the second route, shown with <a href="../">Flield</a>, a generator that runs in the browser. Every panel below is drawn live by the same code the app uses. Where a name is Flield's own rather than the general term, it says so.</p>
+
+    <h2 id="whether">When a loop is worth it</h2>
+
+    <p>It earns its keep when a background repeats often and stays on screen. A hero section someone scrolls past slowly. A card sitting in a list. A texture behind a form. A cut every few seconds in the corner of the eye is the kind of thing people feel before they can name.</p>
+
+    <p>It matters less than you might think in other places. A short intro that plays once and stops has no seam to hide. Motion tied to scrolling never repeats on its own clock. A long ambient clip may loop so rarely that a soft crossfade is a perfectly good answer, and video gives you photographic detail that this tool cannot.</p>
+
+    <p>What follows assumes you want the repeat, because that is the case this tool was built for. If you do not, most of it still applies except the part about closing the cycle.</p>
 
     <h2 id="motions">The four motions</h2>
+
+    <p>Loop, Drift, Wind and Pulse are Flield's names for four ways of moving a composition. The names are the app's own. The idea underneath, motion built from something periodic, is not.</p>
 
     <p>All four below are running live, in this page, on the same composition. Only the kind of movement differs. Each completes one full cycle and starts over, and the point is that you can't tell where.</p>
 
@@ -127,11 +147,23 @@
       <p class="demo-caption">Loop breathes around a closed path and returns where it started. Drift travels one way and wraps into itself. Wind travels and bends as it goes, like a gust crossing the frame. Pulse holds still and swells.</p>
     </div>
 
-    <h2 id="why">Why these loop and a video clip usually doesn't</h2>
+    <h2 id="length">How long a cycle lasts</h2>
 
-    <p>The ordinary way to get a looping background is to film or render something, then trim until the ends roughly agree and hope a crossfade hides the rest. The seam is still there; it has been made blurry.</p>
+    <p>A loop needs a length as well as a shape. Pick a Motion and a <strong>Speed</strong> slider appears under it. It sets how long one cycle runs. The range is a quarter of a second up to sixteen.</p>
 
-    <p>Nothing is trimmed here. The motion is a parameter, not a recording. Every frame is generated from a phase value between 0 and 1, and each kind of movement is built from something that is mathematically periodic in that phase: a point traveling a circle, a lattice that wraps at a fixed interval, a sine wave. When phase reaches 1 the inputs are identical to phase 0, so the frames are identical too. The loop isn't matched, it's guaranteed.</p>
+    <p>An export uses that same number. A GIF records whole cycles. Set four seconds and you get a four second file. Drop it into a page and let it repeat.</p>
+
+    <p><strong>Reroll every</strong>, just below it, does something else. That slider says how often Auto-randomize throws the composition away and builds a new one. Speed says how fast the one you have moves. Most backgrounds want one of these and not the other, so they are two separate sliders.</p>
+
+    <p>What moves depends on the layer's <a href="../flow-fields/">texture</a> too. Four of the six shade the grid. For those, a motion moves the field and the pattern follows along.</p>
+
+    <p><strong>Streamlines</strong> and <strong>Weave</strong> trace particles instead. Drift and Wind send the particles running along the field. Pulse grows and shrinks their trails. The cycle still closes. Each particle lives for exactly one cycle, then starts again from where it began.</p>
+
+    <h2 id="why">Why these close on their own</h2>
+
+    <p>The usual way to loop a recording is to trim until the ends nearly agree, then crossfade over what is left. That works, and for a lot of footage it is the only option. The seam does not go away though. It gets softened.</p>
+
+    <p>Nothing is trimmed here. The motion is a parameter, not a recording. Every frame comes from a phase value between 0 and 1. Each kind of movement is built from something that repeats over that phase. A point traveling a circle. A lattice that wraps at a fixed interval. A sine wave. When phase reaches 1 the inputs are identical to phase 0, so the frames are identical too. The loop isn't matched, it's guaranteed.</p>
 
     <p>That is the same argument as <a href="../seamless-backgrounds/">the seamless tile</a>, one dimension over. There, mirroring makes the left edge equal the right. Here, periodicity makes the last frame equal the first.</p>
 
@@ -141,7 +173,7 @@
 
     <h3>First, consider not using a video at all</h3>
 
-    <p>If the background is a texture rather than a scene, the right file is a small <a href="../seamless-backgrounds/">seamless tile</a> that CSS repeats, not a full-width anything. A 512 by 512 animated tile covers a 4K hero at a fraction of the bytes, scales to any viewport for free, needs no <code>&lt;video&gt;</code> element, no autoplay policy, no poster frame, and no fallback. It is both the cheaper answer and the one with less to go wrong.</p>
+    <p>If the background is a texture rather than a scene, the right file is a small <a href="../seamless-backgrounds/">seamless tile</a> that CSS repeats, not a full-width anything. A 512 by 512 animated tile covers a 4K hero for a fraction of the bytes. It scales to any viewport for free. It needs no <code>&lt;video&gt;</code> element, no autoplay policy, no poster frame and no fallback. It is both the cheaper answer and the one with less to go wrong.</p>
 
     <pre><code>.hero {
   background-image: url("tile.gif");
@@ -188,7 +220,7 @@
   &lt;source src="background.mp4" type="video/mp4"&gt;
 &lt;/video&gt;</code></pre>
 
-    <p>All four attributes are load-bearing. Without <code>muted</code> and <code>playsinline</code>, mobile browsers refuse to autoplay or take the video fullscreen. The <code>poster</code> covers the gap before the first frame decodes, and it is also what someone sees if their browser or their data saver declines to play video at all.</p>
+    <p>All four attributes are load-bearing. Without <code>muted</code> and <code>playsinline</code>, mobile browsers refuse to autoplay or take the video fullscreen. The <code>poster</code> covers the gap before the first frame decodes. It is also what someone sees if their browser or their data saver declines to play video at all.</p>
 
     <div class="note">
       <p>Respect <code>prefers-reduced-motion</code>. A moving background is decoration, and for some people it is a genuine problem rather than a preference. Serve the poster frame instead, which the exports here make easy: a still PNG of the same composition is one more export from the same settings.</p>
@@ -196,27 +228,35 @@
 
     <h2 id="roadmap">On adding MP4</h2>
 
-    <p>Flield runs entirely in the browser, with no server, no build step, and one vendored dependency. Any new export has to hold that line, which rules out the usual answer of shipping a WebAssembly build of FFmpeg: tens of megabytes to add one format is not a trade this tool should make.</p>
+    <p>Flield runs entirely in the browser, with no server, no build step, and one vendored dependency. Any new export has to hold that line. That rules out the usual answer, which is to ship a WebAssembly build of FFmpeg. Tens of megabytes for one more format is not a trade this tool should make.</p>
 
-    <p>The viable route is the browser's own <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API" target="_blank" rel="noopener">WebCodecs API</a>, which encodes frames natively, plus a small multiplexer to wrap them into a file. That keeps the addition to one more vendored script, roughly the footprint of the GIF encoder already here, and gives exact control over every frame, which matters because an imprecise frame duration is precisely what would break a loop that is otherwise guaranteed.</p>
+    <p>The viable route is the browser's own <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API" target="_blank" rel="noopener">WebCodecs API</a>, which encodes frames natively, plus a small multiplexer to wrap them into a file. That keeps the addition to one more vendored script, about the size of the GIF encoder already here. It also gives exact control over every frame. That control matters. A frame duration that is even slightly off is the one thing that would break a loop which is otherwise guaranteed.</p>
 
     <p>If you'd find that useful, <a href="https://github.com/simien/Flield/issues" target="_blank" rel="noopener">say so on the issue tracker</a>. It is the clearest signal for what gets built next.</p>
 
     <h2 id="try">Try it</h2>
 
-    <p><a href="../">Open Flield</a> and pick a Motion in the General tab. It plays on the canvas immediately, which is exactly what an export will record. The <a href="../guide/">guide</a> covers the speed and frame controls, <a href="../flow-fields/">the flow field explainer</a> covers what is moving underneath, and <a href="../seamless-backgrounds/">the tiling page</a> covers making it repeat.</p>
+    <p><a href="../">Open Flield</a> and pick a Motion in the General tab. It plays on the canvas straight away. That is exactly what an export records. The Speed slider under it sets how long a cycle runs.</p>
+
+    <p>For the rest: the <a href="../guide/">guide</a> covers the export controls. <a href="../flow-fields/">The flow field explainer</a> covers the six textures moving underneath. <a href="../seamless-backgrounds/">The tiling page</a> covers making it repeat.</p>
 
     <p class="meta">Flield is free for noncommercial use under the <a href="https://github.com/simien/Flield/blob/main/LICENSE.md" target="_blank" rel="noopener">PolyForm Noncommercial License</a>.</p>
 
     <footer class="site-footer">
-      <a href="../">Open App</a>
-      <a href="../guide/">Guide</a>
-      <a href="../flow-fields/">Flow Fields</a>
-      <a href="../seamless-backgrounds/">Seamless Backgrounds</a>
+      <div class="site-footer-row">
+        <a href="../guide/">Guide</a>
+        <a href="../flow-fields/">Flow Fields</a>
+        <a href="../seamless-backgrounds/">Seamless Backgrounds</a>
+      </div>
+      <div class="site-footer-row">
+        <a href="../">Open App</a>
+        <a href="https://github.com/simien/Flield" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP</a>
+      </div>
     </footer>
   </main>
 
-  <script src="../generator.js?v=10"></script>
+  <script src="../generator.js?v=11"></script>
   <script>
     // Phosphor's own path data, the same two glyphs and the same
     // flield-theme key the app and the guide use, so a choice made on any
@@ -235,7 +275,7 @@
     const playBtn = document.getElementById("playBtn");
 
     const MODES = ["circle", "drift", "wind", "pulse"];
-    const BLOCK = 5;
+    const BLOCK = 2;
     // One cycle per this many milliseconds, matching the app's own slowest
     // comfortable reading of a loop rather than racing through it.
     const CYCLE_MS = 6000;

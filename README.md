@@ -105,6 +105,7 @@ of the sidebar or the end of the settings panel on a phone.
 
 - A freshly randomized composition on every page load
 - Two independent layers, each with its own seed, color, density, and directional flow field
+- Six textures per layer, all reading one field: Streaks, Nebula and Marble bias how likely a cell is to fill, Contours draws the field's level lines, and Streamlines and Weave trace particles along it
 - Eight symmetry modes, from 4-way mirror to 8-way kaleidoscope
 - Shape masks (circle, diamond, vignette and its inverse, corner or side vignette, stripes), dithered along the edge rather than cut off
 - Readable color by construction: layers held 35 degrees of hue apart, and 20 lightness points off the background
@@ -122,7 +123,7 @@ of the sidebar or the end of the settings panel on a phone.
 
 - Loop, Drift, Wind, or Pulse move a composition instead of replacing it, cycling back with no cut
 - Plays on the canvas the moment you pick one, which is exactly what a GIF records
-- One speed menu sets both how fast it moves and how often it rerolls
+- Separate sliders for how fast it moves and how often it rerolls, the first from a quarter of a second, the second stepping in doublings from one
 
 ### Exporting and sharing
 
