@@ -16,6 +16,10 @@
      the GIF menu in a panel and the speed menu on the bar can't drift
      to different widths; the touch tiers below resize it with the
      control it's attached to. */
+  /* The primary fill under a pointer. Everything wearing that fill dims
+     by the same amount, background and border together, so a filled
+     control never ends up with a ring brighter than its own face. */
+  --primary-hover: color-mix(in srgb, var(--primary) 85%, var(--panel));
   --caret-w: 30px;
   /* The progress wash on a hold-to-confirm button. Tinted from the
      primary so it reads as the action arriving, and kept translucent so
@@ -845,6 +849,14 @@ input[type="range"]:focus-visible {
   border-color: var(--primary);
 }
 
+/* The seam between the halves stays the main button's own right border,
+   the way it is in the unfilled state. Without this the caret's left
+   edge draws a line of its own the moment one half dims and the two
+   stop matching. */
+#playBtn.playing + .split-btn-select {
+  border-left-color: transparent;
+}
+
 /* A segmented control: the track is a sunken well, the active segment
    a raised pill with a soft shadow, and the rest plain muted text.
    shadcn's Tabs: a muted track, and the active trigger takes the input
@@ -1571,7 +1583,12 @@ button {
   #randomizeBtn:hover:not(:disabled),
   #playBtn.playing:hover:not(:disabled),
   #playBtn.playing + .split-btn-select:hover {
-    background-color: color-mix(in srgb, var(--primary) 85%, var(--panel));
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+  }
+
+  #playBtn.playing + .split-btn-select:hover {
+    border-left-color: transparent;
   }
 }
 
