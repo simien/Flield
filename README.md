@@ -18,7 +18,7 @@ mechanic it runs on.
 <!-- ?v= busts GitHub's and browsers' image cache for this file; bump it
      whenever screenshot.png is replaced, or a cached copy can outlive
      the actual file update for a while. -->
-![Flield screenshot](screenshot.png?v=5)
+![Flield screenshot](screenshot.png?v=6)
 
 ## Examples
 

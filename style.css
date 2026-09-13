@@ -2028,6 +2028,14 @@ button.secondary:hover:not(:disabled) {
   margin-bottom: 8px;
 }
 
+/* One hint carries a health warning rather than an explanation, so it is
+   the one that does not recede. Same size and weight as its neighbours;
+   the colour is the whole difference, because a warning styled as a
+   banner gets dismissed as chrome and read past. */
+.hint-warn {
+  color: var(--text);
+}
+
 /* Not in the strip above the bar on a phone: that row exists to put one
    control within reach of the artwork, and a paragraph in it costs a
    line of the picture for something already read in the sheet. */

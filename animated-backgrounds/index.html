@@ -27,14 +27,14 @@
   <meta property="og:site_name" content="Flield" />
   <meta property="og:title" content="How to make a looping animated background for a website" />
   <meta property="og:description" content="When a seamless loop is worth the trouble and when it is not, four kinds of motion that return to their first frame with no cut, and which file format to use for a hero background." />
-  <meta property="og:image" content="https://flield.com/screenshot.png?v=5" />
+  <meta property="og:image" content="https://flield.com/screenshot.png?v=6" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="900" />
   <meta property="og:image:alt" content="A generated three-color composition in Flield" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="How to make a looping animated background for a website" />
   <meta name="twitter:description" content="When a seamless loop is worth the trouble and when it is not, four kinds of motion that return to their first frame with no cut, and which file format to use for a hero background." />
-  <meta name="twitter:image" content="https://flield.com/screenshot.png?v=5" />
+  <meta name="twitter:image" content="https://flield.com/screenshot.png?v=6" />
   <meta name="theme-color" content="#09090b" />
 
   <!-- TechArticle, matching the guide and the other explainers, with the
@@ -51,7 +51,7 @@
     "mainEntityOfPage": "https://flield.com/animated-backgrounds/",
     "about": { "@id": "https://flield.com/#app" },
     "inLanguage": "en",
-    "image": "https://flield.com/screenshot.png?v=5",
+    "image": "https://flield.com/screenshot.png?v=6",
     "datePublished": "2026-09-13",
     "dateModified": "2026-09-13",
     "proficiencyLevel": "Beginner",
@@ -153,6 +153,8 @@
 
     <p>An export uses that same number. A GIF records whole cycles. Set four seconds and you get a four second file. Drop it into a page and let it repeat.</p>
 
+    <p>The slider starts at half a second rather than lower. A cycle is one change of brightness across the whole frame, and two a second stays under the three that <a href="https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html" target="_blank" rel="noopener">WCAG 2.3.1</a> allows. Worth keeping in mind for whatever you build with the file, too.</p>
+
     <p><strong>Reroll every</strong>, just below it, does something else. That slider says how often Auto-randomize throws the composition away and builds a new one. Speed says how fast the one you have moves. Most backgrounds want one of these and not the other, so they are two separate sliders.</p>
 
     <p>What moves depends on the layer's <a href="../flow-fields/">texture</a> too. Four of the six shade the grid. For those, a motion moves the field and the pattern follows along.</p>
@@ -223,7 +225,7 @@
     <p>All four attributes are load-bearing. Without <code>muted</code> and <code>playsinline</code>, mobile browsers refuse to autoplay or take the video fullscreen. The <code>poster</code> covers the gap before the first frame decodes. It is also what someone sees if their browser or their data saver declines to play video at all.</p>
 
     <div class="note">
-      <p>Respect <code>prefers-reduced-motion</code>. A moving background is decoration, and for some people it is a genuine problem rather than a preference. Serve the poster frame instead, which the exports here make easy: a still PNG of the same composition is one more export from the same settings.</p>
+      <p>Respect <code>prefers-reduced-motion</code>. A moving background is decoration, and for some people it is a genuine problem rather than a preference. Flield honours it too: a link carrying a motion opens still rather than playing itself. Serve the poster frame instead, which the exports here make easy: a still PNG of the same composition is one more export from the same settings.</p>
     </div>
 
     <h2 id="roadmap">On adding MP4</h2>
