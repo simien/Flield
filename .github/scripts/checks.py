@@ -114,15 +114,16 @@ def check_anchors():
 # stale copy; bumping one page and not another is how 404.html served an
 # older guide.css than the guide did; bumping without a change throws away
 # every visitor's cache for nothing. All three are caught here.
-ASSET_REF = re.compile(r"\b(style\.css|generator\.js|guide\.css|screenshot\.(?:png|webp))\?v=(\d+)")
+ASSET_REF = re.compile(r"\b(style\.css|generator\.js|guide\.css|screenshot(?:-\d+)?\.(?:png|webp))\?v=(\d+)")
 VERSIONED = PAGES + ["README.md"]
-# The files behind each versioned name. The screenshot's png and webp are
-# captured together and share one number, so they count as one asset.
+# The files behind each versioned name. The screenshot's png and its webp
+# copies are cut from one capture and share one number, so they count as
+# one asset.
 ASSET_FILES = {
     "style.css": {"style.css"},
     "generator.js": {"generator.js"},
     "guide.css": {"guide.css"},
-    "screenshot": {"screenshot.png", "screenshot.webp"},
+    "screenshot": {"screenshot.png", "screenshot.webp", "screenshot-800.webp"},
 }
 
 
@@ -160,6 +161,14 @@ def check_cache_bust(base):
     if not touched:
         notes.append("cache bust: nothing changed")
         return
+    # A file that did not exist on the base has no stale copy in anyone's
+    # cache, so adding one (a new size of the screenshot, say) is not a
+    # change that needs a bump.
+    added = subprocess.run(
+        ["git", "diff", "--name-only", "--diff-filter=A", f"{base}...HEAD"],
+        cwd=ROOT, text=True, capture_output=True,
+    )
+    touched -= set(added.stdout.split())
 
     def before(rel):
         shown = subprocess.run(

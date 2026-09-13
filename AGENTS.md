@@ -23,8 +23,8 @@ after committing, not before.
 Every page requests the project's own evolving files with a `?v=N` query:
 `style.css` and `generator.js` from the app, `guide.css` from the guide, the
 explainers and `404.html`, `generator.js` again from the explainers, and
-`screenshot.png` (with its `.webp` twin, on one number) from every page plus
-the README. Bump the
+`screenshot.png` (with its two `.webp` copies, on one number) from every page
+plus the README. Bump the
 number when you change that file, on **every page that requests it**, and
 **leave it alone when you haven't**. A missed bump serves a returning visitor
 a stale stylesheet; a bump on four pages and not the fifth is how `404.html`
