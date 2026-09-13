@@ -168,6 +168,7 @@ def check_cache_bust(base):
         return shown.stdout if shown.returncode == 0 else ""
 
     old = asset_versions(before)
+    compared = len(notes)
     for asset, files in ASSET_FILES.items():
         was = set().union(*old.get(asset, {}).values()) if old.get(asset) else set()
         is_now = set().union(*now.get(asset, {}).values()) if now.get(asset) else set()
@@ -187,6 +188,8 @@ def check_cache_bust(base):
                 f"{asset} did not change but its ?v= moved {was} -> {is_now}; "
                 "a needless bump throws away every visitor's cache",
             )
+    if len(notes) == compared:
+        notes.append("cache bust: no versioned file changed")
 
 
 # 6. Shared link format -------------------------------------------------
