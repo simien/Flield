@@ -3,7 +3,9 @@
 [![checks](https://img.shields.io/github/actions/workflow/status/simien/Flield/checks.yml?branch=main&label=checks)](https://github.com/simien/Flield/actions/workflows/checks.yml)
 [![license](https://img.shields.io/badge/license-PolyForm%20Noncommercial-orange)](LICENSE.md)
 
-A browser-based generative pixel art tool for creating unique three-color compositions (a background plus two artwork layers) from seeded flow fields and symmetry. The name is a contraction of "flow field," the noise mechanic the tool is built on.
+A browser-based generative pixel art tool. It builds three-color compositions,
+a background plus two artwork layers, from seeded flow fields and symmetry.
+The name is a contraction of "flow field," the mechanic it runs on.
 
 ## Live demo
 
@@ -41,7 +43,9 @@ Three exported GIFs, each thirteen Auto-randomize passes at a two-second interva
   </tr>
 </table>
 
-Four more, one of each animated export kind, each a single 3-second cycle (at half the frame rate of the app's own export, to keep the files small). Every setting and both seeds hold; only the animation's phase moves, and the last frame runs back into the first with no cut.
+Four more, one per motion, each a single 3-second cycle at half the app's own
+frame rate to keep the files small. Every setting and both seeds hold; only
+the phase moves, and the last frame runs back into the first with no cut.
 
 <!-- Two columns rather than the three above: four kinds split evenly, and
      each clip renders about half again as large, which these need since the
@@ -75,38 +79,59 @@ Four more, one of each animated export kind, each a single 3-second cycle (at ha
 
 ## Purpose
 
-Built to generate images and placeholder graphics without reaching for stock photos or a design tool every time. Swap in a brand color palette, seed a batch of variations, and export the one that fits. The GIF export works well as a subtle animated background or hover state.
+Built to generate images and placeholder graphics without reaching for stock
+photos or a design tool every time. Swap in a brand color palette, seed a
+batch of variations, and export the one that fits. The GIF export works well
+as a subtle animated background or hover state.
 
-The generator itself (`generator.js`) is independent of the UI, so the noise field, symmetry, and grid logic can be reused in other projects.
+`generator.js` is independent of the UI, so the noise field, symmetry, and
+grid logic can be reused elsewhere.
 
-See the [guide](https://flield.com/guide/) for a walkthrough of the controls and a couple of techniques worth knowing, like locking fields to explore variations on one art direction with Auto-randomize. It shows each control with the icon it carries in the app, and plays an example of each motion. The same walkthrough is also built into the app itself: the **?** button (bottom of the sidebar, and at the end of the settings panel on a phone) opens a short tutorial with a live example for each step.
+The [guide](https://flield.com/guide/) walks through every control with the
+icon it carries in the app, and plays an example of each motion. The same
+walkthrough is built into the app: the **?** button opens it, at the bottom
+of the sidebar or the end of the settings panel on a phone.
 
 ## Features
 
-- Every page load opens on a freshly randomized composition
-- Randomize keeps the three colors readable: layers are steered at least 35 degrees of hue apart and 20 lightness points from the background (inside each layer's palette range), block size favors fine grids, and the loudest symmetry and mask options come up as occasional surprises rather than one roll in eight
-- Two independently configurable color layers, each with its own seed, density, and directional flow field
-- Eight symmetry modes: 4-way mirror, horizontal, vertical, 180-degree rotational, diagonal, 8-way kaleidoscope, tile, and none
-- Optional shape masks, circle, diamond, vignette (and its inverse), a directional corner or side vignette, and stripes, each with a seeded dithered edge or fade instead of a hard cutoff
-- A Tile dimension preset for a square canvas that repeats with no visible seam (not to be confused with the Tile symmetry mode above): shape mask off, both layers on 4-way mirror, so left edge matches right edge and top matches bottom exactly
-- Palette range controls (hue, saturation, lightness) with five presets, plus fully custom ranges
-- Density range controls, so a randomize pass can't drift all the way to a solid fill or an empty layer
-- Per-field locks, covering every layer setting plus background color, block size, and shape mask, so a randomize pass can hold specific settings steady while re-rolling the rest
-- Each sidebar tab shows a padlock when any of its fields are locked (solid once all of them are), so the state of a tab that isn't open stays visible
-- Keyboard shortcuts for the exploration loop, listed under the canvas: R to randomize, Space to start or stop Auto-randomize, Cmd/Ctrl+Z to undo
-- Undo steps back through recent randomize passes, including ones from autoplay. A GIF export counts as one step rather than one per frame, and the composition a session started from is never evicted from the history, however long that session runs
-- A shareable link that encodes the exact composition, colors, both layers, and which fields are locked, into a URL; a menu beside Copy Link can make the link offer Auto-randomize to whoever opens it, with a prompt that also introduces the Play button
-- Three save-state slots stored in the browser for revisiting a composition later, each showing its three colors and when it was saved
-- Auto-randomize playback with an adjustable interval, from every second up to every 10. The same interval sets how long one motion cycle takes, so a single control governs both how fast a composition moves and how often it rerolls
-- A Motion setting that moves the composition instead of replacing it, cycling back to its first frame with no cut: Loop (the flow field breathes around a closed path), Drift (it flows one way along the flow direction), Wind (it flows one way and bends as it goes, rising and settling like a gust), or Pulse (density swings). Pick one and the canvas plays it straight away, which is exactly what a GIF will record
-- Export to PNG, SVG, or an animated GIF. The GIF records however many passes you ask for: stills at the chosen interval, or, with a Motion set, each pass animated through one cycle. A whole export is capped at 240 frames, so a long one trades smoothness rather than running to hundreds of megabytes
-- A built-in tutorial, thirteen short steps with a live example each, covering Random, the tabs, dimension presets, the shape mask, locks, palette and density ranges, Auto-randomize, Undo, saving and exporting, and motion, with a canvas that runs a cycle of each kind; a first visit gets a small "Take the tour" prompt above the canvas rather than a modal
-- Toast confirmations for actions that change something off-screen: Lock All / Unlock All, Undo, saving or loading a slot, and Copy Link
-- The five actions that can't be walked back, Lock All, Unlock All, Undo, loading a slot, and saving over one that already holds something, arm on a one-second hold rather than a press. The button fills as it goes, and letting go early leaves a hint instead
-- On a phone the sidebar becomes a bar fixed along the bottom, holding Undo, Auto-randomize and Random within thumb reach, plus a button for each of the two panels it raises as a sheet: one for settings, one for exporting and sharing. The sheet stops short of the artwork and the canvas shrinks to match, so a value can be judged against the result as it changes, and the setting last reached for stays above the bar once the sheet is closed. Portrait screens open on the Mobile preset so the artwork fills the screen it is viewed on
-- Dark theme by default, with a toggle for light, remembered across visits
-- Fully offline: every dependency is vendored in the repo, no CDN, no network connection needed
-- A generated favicon: the browser tab icon regenerates on every load, in the same three colors as the composition on screen, over a static `favicon.svg` and a 192px PNG that iOS home-screen saves and search crawlers use
+### Generating
+
+- A freshly randomized composition on every page load
+- Two independent layers, each with its own seed, color, density, and directional flow field
+- Eight symmetry modes, from 4-way mirror to 8-way kaleidoscope
+- Shape masks (circle, diamond, vignette and its inverse, corner or side vignette, stripes), dithered along the edge rather than cut off
+- Readable color by construction: layers held 35 degrees of hue apart, and 20 lightness points off the background
+- A Tile preset for a square canvas that repeats with no visible seam
+
+### Steering a result
+
+- Per-field locks hold what you like steady while the rest rerolls
+- Palette and density ranges bound how far a reroll can wander
+- Auto-randomize on an interval, from one second to ten
+- Undo walks back through recent passes, and never evicts the composition you started from
+- The five actions that can't be walked back arm on a one-second hold, not a press
+
+### Motion
+
+- Loop, Drift, Wind, or Pulse move a composition instead of replacing it, cycling back with no cut
+- Plays on the canvas the moment you pick one, which is exactly what a GIF records
+- One speed menu sets both how fast it moves and how often it rerolls
+
+### Exporting and sharing
+
+- PNG, SVG, or animated GIF, capped at 240 frames so a long export trades smoothness rather than size
+- An SVG carries a link back to its own composition, so a file found later reopens in the editor
+- Copy Link encodes the whole composition, locks included, into a URL
+- Three browser save slots, each showing its three colors and when it was saved
+
+### Interface
+
+- On a phone, a bar within thumb reach and a sheet that stops short of the artwork, so a value can be judged against the result as it changes
+- A thirteen-step tutorial with a live example at every step
+- Keyboard shortcuts for the exploration loop: `R`, `Space`, `Cmd/Ctrl+Z`
+- Dark by default, light on a toggle, remembered across visits
+- A favicon regenerated on each load in the same three colors as the canvas
+- Fully offline: every dependency vendored, no CDN, no network needed
 
 ## Running locally
 
@@ -120,7 +145,22 @@ The guide is served alongside it at `http://localhost:8080/guide/`.
 
 ## How it works
 
-Each layer's shape comes from a seeded value noise field (a small Perlin-style implementation in `generator.js`), rotated and stretched to create a directional flow instead of isolated static. That field biases each cell's fill probability rather than gating cells on or off directly, which produces smooth density gradients across the canvas. Grids are flat typed arrays, the field is cached between renders that don't change it, and the canvas is painted once at cell resolution and scaled up, so a full-resolution render stays well under a frame at typical sizes. Symmetry modes apply as a final mirror, rotation, or (for Tile) translation pass over the generated grid. A shape mask, when set, constrains or fades the composition, a circle, diamond, vignette, corner or side vignette, or stripes, with a seeded dither along the transition instead of a hard cutoff, so the edge reads as part of the texture rather than a clipped shape.
+Each layer's shape comes from a seeded value noise field, a small
+Perlin-style implementation in `generator.js`, rotated and stretched into a
+directional flow rather than isolated static.
+
+That field biases each cell's fill probability instead of switching cells on
+or off, which is what produces smooth density gradients across the canvas
+rather than a hard scatter.
+
+Symmetry applies last, as a mirror, rotation, or translation pass over the
+finished grid. A shape mask, when set, constrains or fades the result with a
+seeded dither along the transition, so the edge reads as part of the texture
+instead of a clipped shape.
+
+Grids are flat typed arrays, the field is cached between renders that don't
+change it, and the canvas is painted once at cell resolution and scaled up.
+A full-resolution render stays well under a frame at typical sizes.
 
 ## Credits
 
@@ -139,9 +179,12 @@ Bug reports, feature suggestions, and small fixes are welcome. See [CONTRIBUTING
 
 ## License
 
-Flield is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE.md): free to use, modify, and share for any noncommercial purpose (personal projects, hobby use, research, education). Commercial use, including embedding it in or basing a paid product or service on it, requires a separate commercial license. Open a [GitHub issue](https://github.com/simien/Flield/issues) to inquire.
+**The code** is under the [PolyForm Noncommercial License 1.0.0](LICENSE.md):
+free to use, modify, and share for any noncommercial purpose. Building it into
+a paid product or service needs a separate commercial license, so open a
+[GitHub issue](https://github.com/simien/Flield/issues) to ask.
 
-**Images you make with Flield are yours.** Use them anywhere, commercially
-included, with no attribution required. The license above covers this
-repository's source code, not the artwork the tool produces: the settings and
-seeds are yours, and so is what comes out of them.
+**The images you make with it are yours.** Use them anywhere, commercially
+included, with no attribution required. The license covers this repository's
+source code, not the artwork the tool produces.
+
