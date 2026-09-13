@@ -16,8 +16,8 @@
       // localStorage can be unavailable (private browsing, blocked); dark stays the default.
     }
   </script>
-  <title>Flield: Pixel Art Generator</title>
-  <meta name="description" content="A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF." />
+  <title>Flield: Seamless Animated Background Generator</title>
+  <meta name="description" content="Generate seamless animated backgrounds in your brand colors. Seeded three-color pixel art from flow fields and symmetry, looping with no cut. GIF, SVG, PNG." />
   <link rel="canonical" href="https://flield.com/" />
   <!-- Stays the only rel="icon": generateRandomFavicon() rewrites this
        element's href on load, and a second one would compete with it for
@@ -38,15 +38,15 @@
   <meta property="og:locale" content="en_US" />
   <meta property="og:url" content="https://flield.com/" />
   <meta property="og:site_name" content="Flield" />
-  <meta property="og:title" content="Flield: Pixel Art Generator" />
-  <meta property="og:description" content="A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF." />
+  <meta property="og:title" content="Flield: Seamless Animated Background Generator" />
+  <meta property="og:description" content="Generate seamless animated backgrounds in your brand colors. Seeded three-color pixel art from flow fields and symmetry, looping with no cut. GIF, SVG, PNG." />
   <meta property="og:image" content="https://flield.com/screenshot.png?v=5" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="900" />
   <meta property="og:image:alt" content="A generated three-color composition in Flield" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Flield: Pixel Art Generator" />
-  <meta name="twitter:description" content="A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF." />
+  <meta name="twitter:title" content="Flield: Seamless Animated Background Generator" />
+  <meta name="twitter:description" content="Generate seamless animated backgrounds in your brand colors. Seeded three-color pixel art from flow fields and symmetry, looping with no cut. GIF, SVG, PNG." />
   <meta name="twitter:image" content="https://flield.com/screenshot.png?v=5" />
   <meta name="twitter:image:alt" content="A generated three-color composition in Flield" />
   <meta name="theme-color" content="#09090b" />
@@ -58,7 +58,7 @@
     "@id": "https://flield.com/#app",
     "name": "Flield",
     "url": "https://flield.com/",
-    "description": "A browser-based generative pixel art tool. Create three-color compositions from seeded flow fields and symmetry, then export as PNG, SVG, or an animated GIF.",
+    "description": "Generate seamless animated backgrounds in your brand colors. Seeded three-color pixel art from flow fields and symmetry, looping with no cut. GIF, SVG, PNG.",
     "applicationCategory": "DesignApplication",
     "operatingSystem": "Any (runs in a web browser)",
     "screenshot": "https://flield.com/screenshot.png?v=5",
@@ -70,14 +70,14 @@
       "priceCurrency": "USD"
     },
     "featureList": [
+      "Loop, Drift, Wind, and Pulse animations that return to their first frame with no cut",
+      "Animated GIF export, plus SVG and PNG for stills",
       "Two independently seeded layers over a background color, three colors in all",
       "Seeded flow fields with adjustable scale, strength, and stretch",
       "Symmetry modes, including the 4-way mirror that tiles without a seam",
       "Per-field locks that hold a value through a randomize pass",
       "Palette Range and Density Range to constrain how far randomization wanders",
       "Auto-randomize on a timer, from every 0.5 to every 10 seconds",
-      "PNG, SVG, and animated GIF export",
-      "Loop, Drift, Wind, and Pulse animations that return to their first frame with no cut",
       "Shareable URLs and three browser-local save slots, both carrying the lock set",
       "Runs entirely in the browser with no account, upload, or third-party dependency"
     ],
@@ -793,7 +793,7 @@
   </div>
 
   <div class="main-area">
-    <p class="sr-only">Flield is a free, browser-based generative pixel art tool. It creates three-color compositions from seeded flow fields and symmetry, with locks to hold the fields you like while the rest randomize, and export to PNG, SVG, or an animated GIF. Runs entirely in the browser, no account or upload needed.</p>
+    <p class="sr-only">Flield is a free, browser-based generator for seamless animated backgrounds. It creates three-color pixel art compositions from seeded flow fields and symmetry, sets them moving with Loop, Drift, Wind, or Pulse so a cycle returns to its first frame with no cut, and exports to animated GIF, SVG, or PNG. Locks hold the fields you like while the rest randomize. Runs entirely in the browser, no account or upload needed.</p>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <!-- First-visit nudge toward the tutorial. A modal used to open on
          its own here, on top of the freshly randomized canvas that is
@@ -822,7 +822,7 @@
            this area gets. It used to float over the top of the artboard
            on its own line, which made the artwork sit between two bands
            of text instead of above one. -->
-      <h1 class="brand"><a href="./">Flield<span class="sr-only">: generative pixel art tool</span></a></h1>
+      <h1 class="brand"><a href="./">Flield<span class="sr-only">: seamless animated background generator</span></a></h1>
       <!-- Shortcut legend for the exploration loop (see the keydown
            handler near the end of the script). Hidden on narrow and
            touch-only layouts, where there's no keyboard to bind. The
