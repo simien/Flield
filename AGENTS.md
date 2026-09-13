@@ -228,6 +228,14 @@ Links from before the compact format arrive as `?state=`, base64'd JSON,
 and still open. Don't drop that path: it is what is written inside every
 SVG exported up to now.
 
+## Two deployments read main
+
+flield.com is the Cloudflare Worker described by `wrangler.jsonc`, and the
+repo's GitHub Pages site is live behind it as a fallback. `.nojekyll` is
+what keeps Pages from running Jekyll over the files, so it stays. Anything
+Cloudflare-only (`_headers`, the 404 routing in `wrangler.jsonc`) is
+simply absent on the Pages copy; that is accepted, not a bug to fix.
+
 ## Preview
 
 Any static file server works; there is nothing to build.
