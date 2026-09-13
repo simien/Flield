@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <!-- Dark is the default theme regardless of the system's own setting;
        this only ever adds data-theme="light" for a visitor who's
        explicitly toggled it before, and runs before the stylesheet
@@ -121,7 +121,7 @@
       {
         "@type": "HowToStep",
         "name": "Reroll the canvas with Random",
-        "text": "Click Random, or press the R key, and every setting in the sidebar gets a fresh value. It's the fastest way to see what the tool does."
+        "text": "Press Random, or the R key, and every unlocked setting gets a fresh value. It's the fastest way to see what the tool does."
       },
       {
         "@type": "HowToStep",
@@ -161,7 +161,7 @@
       {
         "@type": "HowToStep",
         "name": "Step back with Undo",
-        "text": "Undo, or Cmd/Ctrl+Z, walks back through recent passes, whether they came from a click, autoplay, or a GIF export."
+        "text": "Undo, or Cmd/Ctrl+Z, walks back through recent passes, whether they came from a press, autoplay, or a GIF export."
       },
       {
         "@type": "HowToStep",
@@ -176,7 +176,7 @@
       {
         "@type": "HowToStep",
         "name": "Animate it",
-        "text": "The GIF menu's Loop, Drift, Wind, and Pulse hold every setting and move the composition through one cycle that lands back on its first frame, with no cut. Their times-three and times-five entries record that many Auto-randomize passes, each animated that way."
+        "text": "Motion, in the General tab, moves the composition instead of replacing it: Loop, Drift, Wind, and Pulse each hold every setting and run one cycle that lands back on its first frame, with no cut. Pick one and the canvas plays it straight away. A cycle lasts as long as the speed beside the play button, and a GIF records what you are watching."
       }
     ]
   }
@@ -186,11 +186,34 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=57" />
+  <link rel="stylesheet" href="style.css?v=92" />
 </head>
 <body>
-  <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show sidebar"><i class="ph ph-list"></i></button>
+  <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show settings" aria-pressed="false"><i class="ph ph-list"></i></button>
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- The exploration loop's home below the sheet breakpoint. Empty
+       here on purpose: syncActionBar() in the script moves the live
+       .explore-row and the sheet's own toggle in and out of it as the
+       breakpoint crosses, so both keep every listener bound elsewhere
+       in this file and the page never holds two copies of an id. -->
+  <!-- The setting you last reached for, held above the bar once the
+       sheet is out of the way, so a value can be dialled in against the
+       artwork at full size instead of through a 135px-wide preview. The
+       real field moves in here and back rather than being mirrored, so
+       it keeps the listeners that make it work. -->
+  <div class="last-control" id="lastControl" hidden>
+    <div class="last-control-slot" id="lastControlSlot"></div>
+    <button type="button" class="secondary icon-btn last-control-close" id="lastControlClose" title="Hide this control" aria-label="Hide this control"><i class="ph ph-x"></i></button>
+  </div>
+
+  <nav class="action-bar" id="actionBar" aria-label="Main actions" hidden>
+    <!-- Switches the sheet to the export panel, the way the toggle
+         appended after it switches to the settings panel. Export is
+         three formats and a mode menu, so it needs the sheet's room
+         rather than a single tap. -->
+    <button type="button" id="barExportBtn" class="secondary icon-btn" title="Export or share" aria-label="Export or share" aria-pressed="false"><i class="ph ph-download-simple"></i></button>
+  </nav>
 
   <div class="tutorial-backdrop" id="tutorialBackdrop" hidden></div>
   <div class="tutorial-modal" id="tutorialModal" role="dialog" aria-modal="true" aria-label="How to use Flield" hidden>
@@ -225,7 +248,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 2 of 13</p>
         <h3>Random rerolls the canvas</h3>
-        <p>One click, or the <span class="ui-ref">R</span> key, and every setting in the sidebar gets a fresh value. It's the fastest way to see what the tool does; the rest of this tour is about steering it.</p>
+        <p>One press, or the <span class="ui-ref">R</span> key, and every unlocked setting gets a fresh value. It's the fastest way to see what the tool does; the rest of this tour is about steering it.</p>
       </div>
 
       <div class="tutorial-step" data-step="2">
@@ -321,7 +344,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 9 of 13</p>
         <h3>Explore with Auto-randomize</h3>
-        <p>Lock what you like, then slowly unlock the rest while it plays (<span class="ui-ref">Space</span> starts and stops it), watching results narrow toward a collection worth keeping. Prefer more control? Skip the button and click <span class="ui-ref">Random</span> by hand instead.</p>
+        <p>Lock what you like, then slowly unlock the rest while it plays (<span class="ui-ref">Space</span> starts and stops it), watching results narrow toward a collection worth keeping. Prefer more control? Skip the button and reach for <span class="ui-ref">Random</span> by hand instead.</p>
       </div>
 
       <div class="tutorial-step" data-step="9">
@@ -331,7 +354,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 10 of 13</p>
         <h3>Undo steps back</h3>
-        <p>Went too far? <span class="ui-ref">Undo</span> (or <span class="ui-ref">Cmd/Ctrl+Z</span>) walks back through recent passes, whether they came from a click, autoplay, or a GIF export.</p>
+        <p>Went too far? <span class="ui-ref">Undo</span> (or <span class="ui-ref">Cmd/Ctrl+Z</span>) walks back through recent passes, whether they came from a press, autoplay, or a GIF export.</p>
       </div>
 
       <div class="tutorial-step" data-step="10">
@@ -357,7 +380,7 @@
            each animated kind in turn, with its name beside it, since
            four names only mean something once they're attached to four
            motions. Name on the left, canvas on the right, the way the
-           GIF menu and the artboard sit on screen (and the way the
+           Motion field and the artboard sit on screen (and the way the
            Auto-randomize demo above is arranged). -->
       <div class="tutorial-step" data-step="12">
         <div class="tutorial-demo tutorial-demo-animate">
@@ -366,7 +389,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 13 of 13</p>
         <h3>Animate it</h3>
-        <p>The GIF menu's <span class="ui-ref">Loop</span>, <span class="ui-ref">Drift</span>, <span class="ui-ref">Wind</span>, and <span class="ui-ref">Pulse</span> hold every setting and move the composition through one cycle that lands back on its first frame, with no cut. Pick one and the canvas plays it. Their <span class="ui-ref">&times;3</span> and <span class="ui-ref">&times;5</span> entries record that many Auto-randomize passes, each animated that way.</p>
+        <p><span class="ui-ref">Motion</span>, in the General tab, moves the composition instead of replacing it. <span class="ui-ref">Loop</span>, <span class="ui-ref">Drift</span>, <span class="ui-ref">Wind</span>, and <span class="ui-ref">Pulse</span> each hold every setting and run one cycle that lands back on its first frame, with no cut. Pick one and the canvas plays it straight away; a cycle lasts as long as the speed beside the play button. Leave <span class="ui-ref">Auto-randomize</span> running as well and each pass rerolls before it animates. The GIF button records whatever you are watching.</p>
       </div>
     </div>
 
@@ -418,6 +441,12 @@
   </div>
 
   <div class="controls">
+    <!-- Only ever visible as the bottom sheet below the breakpoint: the
+         grabber that drags the sheet down to dismiss it or up to give it
+         the screen, and closes it on a plain tap. A button rather than a
+         bare div so it is reachable without a pointer at all; its label
+         tracks the panel showing (see syncSheetButtons). -->
+    <button type="button" class="sheet-handle" id="sheetHandle" aria-label="Close panel"></button>
     <div class="controls-header">
       <!-- The exploration loop, the three controls pressed over and
            over: Undo, Auto-randomize (with its speed), Random. Lock and
@@ -425,11 +454,10 @@
            their own row below. The brand lives over the artboard (see
            .brand in .main-area) so this row has the full width. -->
       <div class="explore-row">
-          <button id="undoBtn" class="secondary icon-btn" title="Undo last randomize" disabled><i class="ph ph-arrow-counter-clockwise"></i></button>
+          <button id="undoBtn" class="secondary icon-btn" title="Undo last randomize" data-hold="Hold to undo" disabled><i class="ph ph-arrow-counter-clockwise"></i></button>
           <div class="split-btn">
             <button id="playBtn" class="secondary split-btn-main" title="Auto-randomize (Space)"><i class="ph ph-play"></i></button>
             <select id="autoSpeed" class="split-btn-select" title="Auto-randomize speed">
-              <option value="500">0.5s</option>
               <option value="1000">1s</option>
               <option value="2000" selected>2s</option>
               <option value="3000">3s</option>
@@ -437,12 +465,12 @@
               <option value="10000">10s</option>
             </select>
           </div>
-          <button id="randomizeBtn" title="Randomize every unlocked field (R)"><i class="ph ph-shuffle"></i> Random</button>
+          <button id="randomizeBtn" title="Randomize every unlocked field (R)"><i class="ph ph-shuffle"></i> <span class="btn-label">Random</span></button>
       </div>
 
       <div class="button-row">
-        <button id="lockAllBtn" class="secondary" title="Lock all fields"><i class="ph ph-lock-simple"></i> Lock</button>
-        <button id="unlockAllBtn" class="secondary" title="Unlock all fields"><i class="ph ph-lock-simple-open"></i> Unlock</button>
+        <button id="lockAllBtn" class="secondary" title="Lock all fields" data-hold="Hold to lock all"><i class="ph ph-lock-simple"></i> Lock</button>
+        <button id="unlockAllBtn" class="secondary" title="Unlock all fields" data-hold="Hold to unlock all"><i class="ph ph-lock-simple-open"></i> Unlock</button>
       </div>
 
       <div class="tabs">
@@ -518,6 +546,17 @@
         <select id="shapeMaskDirection"></select>
       </div>
 
+      <div class="field">
+        <label for="motion">Motion</label>
+        <select id="motion" title="What the composition does when it moves. Anything but None plays on the canvas straight away, one cycle per the speed beside the play button, and is what a GIF records">
+          <option value="none" selected>None (still)</option>
+          <option value="circle">Loop</option>
+          <option value="drift">Drift</option>
+          <option value="wind">Wind</option>
+          <option value="pulse">Pulse</option>
+        </select>
+      </div>
+
       <h2 class="section-title">Saved states</h2>
       <p class="hint">Snapshot the full composition, both layers and colors, into a slot to reload anytime.</p>
       <div class="preset-row" data-slot="1">
@@ -525,21 +564,21 @@
         <span class="preset-swatches" aria-hidden="true"></span>
         <span class="preset-status" id="preset-status-1">empty</span>
         <button type="button" class="preset-btn preset-save-btn" data-slot="1" title="Save current state to Slot 1"><i class="ph ph-floppy-disk"></i></button>
-        <button type="button" class="preset-btn preset-load-btn" data-slot="1" title="Load Slot 1" disabled><i class="ph ph-folder-open"></i></button>
+        <button type="button" class="preset-btn preset-load-btn" data-slot="1" title="Load Slot 1" data-hold="Hold to load Slot 1" disabled><i class="ph ph-folder-open"></i></button>
       </div>
       <div class="preset-row" data-slot="2">
         <span class="preset-label">Slot 2</span>
         <span class="preset-swatches" aria-hidden="true"></span>
         <span class="preset-status" id="preset-status-2">empty</span>
         <button type="button" class="preset-btn preset-save-btn" data-slot="2" title="Save current state to Slot 2"><i class="ph ph-floppy-disk"></i></button>
-        <button type="button" class="preset-btn preset-load-btn" data-slot="2" title="Load Slot 2" disabled><i class="ph ph-folder-open"></i></button>
+        <button type="button" class="preset-btn preset-load-btn" data-slot="2" title="Load Slot 2" data-hold="Hold to load Slot 2" disabled><i class="ph ph-folder-open"></i></button>
       </div>
       <div class="preset-row" data-slot="3">
         <span class="preset-label">Slot 3</span>
         <span class="preset-swatches" aria-hidden="true"></span>
         <span class="preset-status" id="preset-status-3">empty</span>
         <button type="button" class="preset-btn preset-save-btn" data-slot="3" title="Save current state to Slot 3"><i class="ph ph-floppy-disk"></i></button>
-        <button type="button" class="preset-btn preset-load-btn" data-slot="3" title="Load Slot 3" disabled><i class="ph ph-folder-open"></i></button>
+        <button type="button" class="preset-btn preset-load-btn" data-slot="3" title="Load Slot 3" data-hold="Hold to load Slot 3" disabled><i class="ph ph-folder-open"></i></button>
       </div>
     </div>
 
@@ -709,56 +748,31 @@
     </div>
 
     <div class="controls-footer">
+      <h2 class="section-title export-title">Export &amp; share</h2>
       <div class="button-row">
         <button id="downloadPng" class="secondary"><i class="ph ph-download-simple"></i> PNG</button>
         <button id="downloadSvg" class="secondary"><i class="ph ph-download-simple"></i> SVG</button>
         <div class="split-btn">
           <button id="downloadGif" class="secondary split-btn-main" title="Download an animated GIF: steps replay Auto-randomize passes at the speed above; the rest animate the composition on screen and cycle back to their first frame with no cut"><i class="ph ph-download-simple"></i> GIF</button>
-          <!-- Step counts replay Auto-randomize passes at the speed menu's
-               interval. The animated kinds hold every setting and cycle
-               back to their first frame: Loop breathes the flow field
-               around a closed path, Drift flows it one way along the flow
-               direction, Pulse swings density. Value:
-               "loop:<kind>:<frames>:<ms per frame>". -->
-          <!-- Values: a bare number is that many Auto-randomize passes as
-               stills; "loop:<kind>" is one 3s cycle of the
-               composition on screen; "set:<kind>:<n>" is n passes, each
-               animated for one cycle and held for the Auto-randomize
-               interval, the export of watching a preview with
-               Auto-randomize running. -->
-          <select id="gifSteps" class="split-btn-select" title="GIF frames">
-            <optgroup label="Steps">
-              <option value="3">3 steps</option>
-              <option value="5" selected>5 steps</option>
-              <option value="8">8 steps</option>
-              <option value="13">13 steps</option>
-            </optgroup>
-            <optgroup label="Loop">
-              <option value="loop:circle">Loop</option>
-              <option value="set:circle:3">Loop &times;3</option>
-              <option value="set:circle:5">Loop &times;5</option>
-            </optgroup>
-            <optgroup label="Drift">
-              <option value="loop:drift">Drift</option>
-              <option value="set:drift:3">Drift &times;3</option>
-              <option value="set:drift:5">Drift &times;5</option>
-            </optgroup>
-            <optgroup label="Wind">
-              <option value="loop:wind">Wind</option>
-              <option value="set:wind:3">Wind &times;3</option>
-              <option value="set:wind:5">Wind &times;5</option>
-            </optgroup>
-            <optgroup label="Pulse">
-              <option value="loop:pulse">Pulse</option>
-              <option value="set:pulse:3">Pulse &times;3</option>
-              <option value="set:pulse:5">Pulse &times;5</option>
-            </optgroup>
+          <!-- How many passes to record. A pass is one composition: with
+               Motion set it is animated through one cycle, and with
+               Auto-randomize running each pass rerolls before it. Motion
+               on its own has nothing to advance between passes, so it
+               records a single looping cycle whatever this says. -->
+          <select id="gifSteps" class="split-btn-select" title="GIF length">
+            <option value="1">1 pass</option>
+            <option value="3">3 passes</option>
+            <option value="5" selected>5 passes</option>
+            <option value="8">8 passes</option>
+            <option value="13">13 passes</option>
           </select>
         </div>
       </div>
       <div class="footer-link-row">
-        <button id="tutorialBtn" class="secondary icon-btn" title="How to use Flield"><i class="ph ph-question-mark"></i></button>
-        <button id="themeToggleBtn" class="secondary icon-btn" title="Switch to light theme"><i class="ph ph-sun"></i></button>
+        <div class="app-chrome" id="appChrome">
+          <button id="tutorialBtn" class="secondary icon-btn" title="How to use Flield"><i class="ph ph-question-mark"></i></button>
+          <button id="themeToggleBtn" class="secondary icon-btn" title="Switch to light theme"><i class="ph ph-sun"></i></button>
+        </div>
         <div class="split-btn">
           <!-- Label and icon swap to "Share" wherever the OS share sheet
                is available (see the feature-detect below); the id, the
@@ -779,7 +793,6 @@
   </div>
 
   <div class="main-area">
-    <h1 class="brand"><a href="./">Flield<span class="sr-only">: generative pixel art tool</span></a></h1>
     <p class="sr-only">Flield is a free, browser-based generative pixel art tool. It creates three-color compositions from seeded flow fields and symmetry, with locks to hold the fields you like while the rest randomize, and export to PNG, SVG, or an animated GIF. Runs entirely in the browser, no account or upload needed.</p>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <!-- First-visit nudge toward the tutorial. A modal used to open on
@@ -805,6 +818,11 @@
     </div>
 
     <footer class="site-footer">
+      <!-- The page's h1, and the left anchor of the one chrome strip
+           this area gets. It used to float over the top of the artboard
+           on its own line, which made the artwork sit between two bands
+           of text instead of above one. -->
+      <h1 class="brand"><a href="./">Flield<span class="sr-only">: generative pixel art tool</span></a></h1>
       <!-- Shortcut legend for the exploration loop (see the keydown
            handler near the end of the script). Hidden on narrow and
            touch-only layouts, where there's no keyboard to bind. The
@@ -820,9 +838,9 @@
              docs and the only crawlable link into them. -->
         <a href="./guide/">Guide</a>
         <span>&middot;</span>
-        <a href="https://github.com/simien" target="_blank" rel="noopener">GitHub.com</a>
+        <a href="https://github.com/simien" target="_blank" rel="noopener">GitHub</a>
         <span>&middot;</span>
-        <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP.com</a>
+        <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP</a>
         <span>&middot;</span>
         <span>&copy; <span id="footerYear"></span></span>
       </div>
@@ -1546,7 +1564,14 @@
     // bare readOptions() on purpose: reverting locks along with a pass
     // would be surprising.
     function snapshotForSharing() {
-      return Object.assign(readOptions(), { locks: [...lockedFields] });
+      const snapshot = Object.assign(readOptions(), { locks: [...lockedFields] });
+      // Motion is part of what the piece is, not a playback preference,
+      // so it travels with every link rather than only the ones marked
+      // to play. Left off entirely when there is none, so links from
+      // still compositions are no longer than they were.
+      const kind = currentMotion();
+      if (kind) snapshot.motion = kind;
+      return snapshot;
     }
 
     function applySnapshot(data) {
@@ -1559,7 +1584,12 @@
         const wanted = new Set(data.locks);
         document.querySelectorAll(".lock-btn").forEach((btn) => setLock(btn, wanted.has(btn.dataset.targetId)));
       }
+      // Absent on every link and slot written before Motion existed,
+      // which is exactly the "none" they were made with.
+      const motion = document.getElementById("motion");
+      motion.value = [...motion.options].some((o) => o.value === data.motion) ? data.motion : "none";
       render();
+      syncSeamlessPreview();
     }
 
     // Converts a snapshot from an earlier STATE_VERSION (a shared link, a
@@ -1679,22 +1709,71 @@
 
     document.querySelector(".controls").addEventListener("input", scheduleRender);
 
-    // Live preview of an animated GIF kind: choosing Loop, Drift, or Pulse in
-    // the GIF menu plays it on the canvas at the export's own frame
-    // rate, so the export is what's on screen; choosing a step count
-    // puts the still back. Frames are picked by wall-clock time, so a
+    // Live preview of a motion: choosing anything but None in the
+    // Motion field plays it on the canvas for one beat per cycle, so
+    // the export is what's on screen; choosing None puts the still
+    // back. Frames are picked by wall-clock time, so a
     // heavy composition drops frames rather than slowing the cycle.
     const seamlessPreview = { active: false, frame: 0 };
-    // Every cycle is 38 frames at 80ms (about 3s, 12.5 fps),
-    // well clear of the sub-20ms delays browsers refuse to honor.
-    const CYCLE_FRAMES = 38;
+    // The redraw cadence, 12.5 fps, well clear of the sub-20ms delays
+    // browsers refuse to honor. It sets how often the preview repaints
+    // and what counts as a smooth export before the budget below trims
+    // it; the cycle's length comes from the speed menu, not from here.
     const CYCLE_FRAME_MS = 80;
+    // Frames in one cycle of the tutorial's animated demo, which runs on
+    // its own small canvas at a fixed size rather than off the beat.
+    const CYCLE_FRAMES = 38;
 
-    function parseGifChoice(value) {
-      const parts = value.split(":");
-      if (parts[0] === "loop") return { kind: parts[1], frames: CYCLE_FRAMES, delay: CYCLE_FRAME_MS };
-      if (parts[0] === "set") return { kind: parts[1], set: parseInt(parts[2], 10), frames: CYCLE_FRAMES, delay: CYCLE_FRAME_MS };
-      return null;
+    // A whole export is capped at this many frames however it is
+    // configured. Without it the cost is the product of two menus: five
+    // beats of Wind at 10s used to come to 625 frames of a full canvas,
+    // which is minutes of in-browser encoding for a file nobody can
+    // use. What gives when the cap binds is smoothness on the longest
+    // exports, which is the right thing to trade: a ten second cycle is
+    // slow motion, where a low frame rate reads fine.
+    const GIF_FRAME_BUDGET = 240;
+    // Below this a beat stops reading as motion at all, so the budget is
+    // allowed to be exceeded rather than go under it. Only reachable
+    // past twenty beats, which the menu doesn't offer; it's a floor, not
+    // an operating point.
+    const MIN_FRAMES_PER_BEAT = 12;
+
+    function currentBeatMs() {
+      return parseInt(autoSpeedSelect.value, 10);
+    }
+
+    // One beat's worth of frames: as smooth as the old fixed 80ms
+    // cadence until the budget can't afford it, then as many as it can.
+    function beatFrames(beats, beatMs) {
+      const smooth = Math.round(beatMs / CYCLE_FRAME_MS);
+      const affordable = Math.floor(GIF_FRAME_BUDGET / beats);
+      return Math.max(MIN_FRAMES_PER_BEAT, Math.min(smooth, affordable));
+    }
+
+    function currentMotion() {
+      const value = document.getElementById("motion").value;
+      return value === "none" ? null : value;
+    }
+
+    // What a GIF would record right now, read off the three controls
+    // that each own one axis: Motion says what a pass looks like, the
+    // speed menu says how long a pass lasts, and the length menu says
+    // how many. They used to be two menus with the kinds and the counts
+    // multiplied together into one flat list, which is why choosing an
+    // animation quietly changed the export and why the speed only
+    // applied to half the entries.
+    //
+    // Passes only mean something when the composition changes between
+    // them. Motion alone loops one composition, so the length is held at
+    // one rather than emitting the same cycle several times over.
+    function exportPlan() {
+      const kind = currentMotion();
+      const beatMs = currentBeatMs();
+      const rerolls = !kind || !!autoplayTimer;
+      const beats = rerolls ? parseInt(gifStepsSelect.value, 10) : 1;
+      if (!kind) return { kind: null, beats, rerolls, frames: 1, delay: beatMs };
+      const frames = beatFrames(beats, beatMs);
+      return { kind, beats, rerolls, frames, delay: Math.round(beatMs / frames) };
     }
 
     const SEAMLESS_NAMES = { circle: "Loop", drift: "Drift", wind: "Wind", pulse: "Pulse" };
@@ -1708,18 +1787,25 @@
     }
 
     function syncSeamlessPreview() {
-      const loop = parseGifChoice(document.getElementById("gifSteps").value);
-      stopSeamlessPreview(!loop);
-      if (!loop) return;
+      const kind = currentMotion();
+      stopSeamlessPreview(!kind);
+      if (!kind) return;
       seamlessPreview.active = true;
       const start = performance.now();
-      let lastIndex = -1;
+      let lastStep = -1;
       const tick = (now) => {
         if (!seamlessPreview.active) return;
-        const index = Math.floor((now - start) / loop.delay) % loop.frames;
-        if (index !== lastIndex) {
-          lastIndex = index;
-          drawComposition(Object.assign(readOptions(), { loopMode: loop.kind, loopPhase: index / loop.frames }));
+        const elapsed = now - start;
+        // Redraws on the fixed cadence, not on the export's frame count:
+        // the budget is an export concern, and a preview throttled by it
+        // would stutter for no reason. Reading the beat each tick lets
+        // the speed menu take effect without a restart.
+        const step = Math.floor(elapsed / CYCLE_FRAME_MS);
+        if (step !== lastStep) {
+          lastStep = step;
+          const beat = currentBeatMs();
+          const phase = (elapsed % beat) / beat;
+          drawComposition(Object.assign(readOptions(), { loopMode: kind, loopPhase: phase }));
         }
         seamlessPreview.frame = requestAnimationFrame(tick);
       };
@@ -2030,11 +2116,16 @@
       }
     }
 
-    // Keeps the full state from just before each randomize pass (manual
-    // clicks, autoplay ticks, and GIF-export frames all funnel through
-    // performRandomize, so all three feed the same undo stack), capped so
-    // it can't grow without bound over a long autoplay or GIF session.
-    const MAX_UNDO_HISTORY = 20;
+    // Keeps the full state from just before each randomize pass. Manual
+    // clicks and autoplay ticks each record one; a GIF export records
+    // one for the whole run rather than one per frame, since what you
+    // want back afterwards is the composition you had before the export,
+    // not its thirteenth intermediate step.
+    //
+    // At the 2s default a twenty-deep stack was forty seconds of
+    // autoplay, which is nothing. A hundred entries of a small options
+    // object costs little and covers a few minutes.
+    const MAX_UNDO_HISTORY = 100;
     const undoHistory = [];
     const undoBtn = document.getElementById("undoBtn");
 
@@ -2045,10 +2136,20 @@
       undoBtn.disabled = undoHistory.length === 0;
     }
 
-    function performRandomize() {
+    function recordUndoState() {
       undoHistory.push(readOptions());
-      if (undoHistory.length > MAX_UNDO_HISTORY) undoHistory.shift();
+      // Evicts the second-oldest, not the oldest. Index 0 is where the
+      // session began, and dropping that first is exactly backwards:
+      // it's the one point someone is most likely to want back after a
+      // long run of passes has carried them somewhere else.
+      if (undoHistory.length > MAX_UNDO_HISTORY) undoHistory.splice(1, 1);
       updateUndoButton();
+    }
+
+    // record=false for the passes inside a GIF export, which records
+    // its own single entry before the run starts.
+    function performRandomize(record = true) {
+      if (record) recordUndoState();
 
       // Background first, so each layer's color can be steered clear of
       // it (see randomizeLayerColor). If the background is unlocked it
@@ -2083,7 +2184,7 @@
       render();
     }
 
-    document.getElementById("randomizeBtn").addEventListener("click", performRandomize);
+    document.getElementById("randomizeBtn").addEventListener("click", () => performRandomize());
 
     undoBtn.addEventListener("click", () => {
       const previous = undoHistory.pop();
@@ -2133,28 +2234,28 @@
     }
     const gifStepsSelect = document.getElementById("gifSteps");
     const linkModeSelect = document.getElementById("linkMode");
+    const motionSelect = document.getElementById("motion");
     const GIF_MENU_TITLE =
-      "GIF frames. Steps: that many Auto-randomize passes as stills, held for the speed above. " +
-      "Loop, Drift, Wind, Pulse: one 3s cycle of the composition on screen that loops with no cut (Loop breathes the flow field, " +
-      "Drift flows it one way, Wind flows it one way and bends it as it goes, Pulse swings density), previewed on the canvas. " +
-      "A \u00d73 or \u00d75 is that many passes, each animated for one cycle and held for the speed above. " +
-      "Larger blocks make a smaller file";
-    syncSelectTitle(autoSpeedSelect, "Auto-randomize speed");
+      "How many passes the GIF records. A pass is one composition, held for the speed beside it; " +
+      "with Motion set it is animated through one cycle instead, and with Auto-randomize running each pass rerolls first. " +
+      "Motion on its own records a single looping cycle whatever this says. Larger blocks make a smaller file";
+    const SPEED_TITLE =
+      "How long one pass lasts: the gap between Auto-randomize rerolls, and the length of one Motion cycle";
+    syncSelectTitle(autoSpeedSelect, SPEED_TITLE);
     syncSelectTitle(gifStepsSelect, GIF_MENU_TITLE);
     syncSelectTitle(linkModeSelect, "What the link offers when opened");
     linkModeSelect.addEventListener("change", () => syncSelectTitle(linkModeSelect, "What the link offers when opened"));
-    autoSpeedSelect.addEventListener("change", () => syncSelectTitle(autoSpeedSelect, "Auto-randomize speed"));
-    gifStepsSelect.addEventListener("change", () => {
-      syncSelectTitle(gifStepsSelect, GIF_MENU_TITLE);
+    autoSpeedSelect.addEventListener("change", () => syncSelectTitle(autoSpeedSelect, SPEED_TITLE));
+    gifStepsSelect.addEventListener("change", () => syncSelectTitle(gifStepsSelect, GIF_MENU_TITLE));
+
+    // Motion is the only one of the three that changes what's on screen
+    // the moment it's set, so it's the one that says so.
+    motionSelect.addEventListener("change", () => {
       const wasPreviewing = seamlessPreview.active;
       syncSeamlessPreview();
-      const option = gifStepsSelect.options[gifStepsSelect.selectedIndex].text;
-      const choice = parseGifChoice(gifStepsSelect.value);
-      if (choice && choice.set) {
-        const hold = autoSpeedSelect.options[autoSpeedSelect.selectedIndex].text;
-        showToast(`Previewing ${SEAMLESS_NAMES[choice.kind]}; ${option} exports ${choice.set} passes at ${hold} each`);
-      } else if (seamlessPreview.active) showToast(`Previewing ${option}`);
-      else if (wasPreviewing) showToast("Preview stopped");
+      const kind = currentMotion();
+      if (kind) showToast(`Playing ${SEAMLESS_NAMES[kind]}`);
+      else if (wasPreviewing) showToast("Motion off");
     });
 
     function stopAutoplay() {
@@ -2277,12 +2378,14 @@
         syncSeamlessPreview();
         return;
       }
-      const choice = document.getElementById("gifSteps").value;
-      const loop = parseGifChoice(choice);
-      const kind = loop ? loop.kind : null;
-      const frames = loop ? loop.frames : parseInt(choice, 10);
-      const delay = loop ? loop.delay : parseInt(autoSpeedSelect.value, 10);
-      const seedForFilename = lastOptions.layerA.seed + (loop ? "-" + kind + (loop.set ? "-x" + loop.set : "") : "");
+      const plan = exportPlan();
+      const kind = plan.kind;
+      const frames = plan.frames;
+      const delay = plan.delay;
+      const seedForFilename =
+        lastOptions.layerA.seed +
+        (kind ? "-" + kind : "") +
+        (plan.rerolls && plan.beats > 1 ? "-x" + plan.beats : "");
 
       const gif = new GIF({
         workers: 2,
@@ -2310,16 +2413,16 @@
       // instead of setting it and immediately blocking the main thread
       // before that paint ever happens.
       requestAnimationFrame(() => {
-        if (loop && loop.set) {
+        if (kind && plan.rerolls) {
           // One Auto-randomize pass per segment, each held for the speed
           // menu's interval and animated through exactly one cycle of the
           // kind in that time, then a cut to the next pass, the way the
           // live preview looks with Auto-randomize running. The passes
-          // feed the undo stack like a stepped export.
-          const hold = parseInt(autoSpeedSelect.value, 10);
-          const perPass = Math.max(13, Math.round(hold / CYCLE_FRAME_MS));
-          for (let pass = 0; pass < loop.set; pass++) {
-            performRandomize();
+          // are a single entry on the undo stack, not one per pass.
+          const perPass = plan.frames;
+          recordUndoState();
+          for (let pass = 0; pass < plan.beats; pass++) {
+            performRandomize(false);
             const options = readOptions();
             for (let i = 0; i < perPass; i++) {
               drawComposition(Object.assign({}, options, { loopMode: kind, loopPhase: i / perPass }));
@@ -2327,7 +2430,7 @@
             }
           }
           render();
-        } else if (loop) {
+        } else if (kind) {
           // Every setting and both seeds hold; only the loop's phase
           // advances through one full cycle, so frame 0 is the still on
           // screen and the frame after the last would be frame 0 again. Nothing
@@ -2340,8 +2443,11 @@
           }
           render();
         } else {
-          for (let i = 0; i < frames; i++) {
-            performRandomize();
+          // Same again: the whole stepped run is one entry, so undoing
+          // after an export lands on the composition you exported from.
+          recordUndoState();
+          for (let i = 0; i < plan.beats; i++) {
+            performRandomize(false);
             gif.addFrame(canvas, { copy: true, delay });
           }
         }
@@ -2404,6 +2510,17 @@
       }
       row.querySelector(".preset-status").textContent = data ? formatSavedAt(data.savedAt) : "empty";
       row.querySelector(".preset-load-btn").disabled = !data;
+      // An empty slot has nothing to lose, so the first save into one is
+      // a plain press; once it holds something, saving means overwriting
+      // a composition that outlives the tab, and that wants the hold.
+      const saveBtn = row.querySelector(".preset-save-btn");
+      if (data) {
+        saveBtn.dataset.hold = `Hold to overwrite Slot ${slot}`;
+        saveBtn.title = `Overwrite Slot ${slot} with the current state`;
+      } else {
+        delete saveBtn.dataset.hold;
+        saveBtn.title = `Save current state to Slot ${slot}`;
+      }
     }
 
     document.querySelectorAll(".preset-save-btn").forEach((btn) => {
@@ -2528,24 +2645,299 @@
     }
 
     // Below the layout's mobile breakpoint, the sidebar becomes a
-    // full-height overlay drawer (see the .sidebar-toggle / .controls
-    // rules in style.css) instead of a permanent column.
+    // sheet over the bottom of the screen (see the .sidebar-toggle /
+    // .controls rules in style.css) instead of a permanent column.
     const sidebarToggle = document.getElementById("sidebarToggle");
     const sidebarBackdrop = document.getElementById("sidebarBackdrop");
 
-    function setSidebarOpen(open) {
-      document.body.classList.toggle("sidebar-open", open);
-      setIcon(sidebarToggle.querySelector("i"), open ? "x" : "list");
-      sidebarToggle.title = open ? "Hide sidebar" : "Show sidebar";
+    function sheetShowing() {
+      if (!document.body.classList.contains("sidebar-open")) return null;
+      return document.body.classList.contains("sheet-export") ? "export" : "settings";
     }
 
-    sidebarToggle.addEventListener("click", () => {
-      setSidebarOpen(!document.body.classList.contains("sidebar-open"));
-    });
+    function syncSheetButtons() {
+      const showing = sheetShowing();
+      sidebarToggle.classList.toggle("is-active", showing === "settings");
+      barExportBtn.classList.toggle("is-active", showing === "export");
+      sidebarToggle.setAttribute("aria-pressed", String(showing === "settings"));
+      barExportBtn.setAttribute("aria-pressed", String(showing === "export"));
+      sidebarToggle.title = showing === "settings" ? "Hide settings" : "Show settings";
+      barExportBtn.title = showing === "export" ? "Hide export options" : "Export or share";
+      sheetHandle.setAttribute(
+        "aria-label",
+        showing === "export" ? "Close export options" : "Close settings"
+      );
+    }
+
+    function setSidebarOpen(open) {
+      document.body.classList.toggle("sidebar-open", open);
+      if (!open) document.body.classList.remove("sheet-tall");
+      // The held control and the sheet are never up together: the sheet
+      // needs the field back in its scroll area, and the strip only has
+      // a job once the sheet is out of the way.
+      if (open) returnLastField();
+      else showLastField();
+      syncSheetButtons();
+    }
+
+    // Tapping a panel's own button while it's up closes the sheet;
+    // tapping the other one swaps panels without the sheet moving.
+    function showSheetPanel(mode) {
+      if (sheetShowing() === mode) {
+        setSidebarOpen(false);
+        return;
+      }
+      document.body.classList.toggle("sheet-export", mode === "export");
+      setSidebarOpen(true);
+    }
+
+    sidebarToggle.addEventListener("click", () => showSheetPanel("settings"));
     sidebarBackdrop.addEventListener("click", () => setSidebarOpen(false));
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") setSidebarOpen(false);
     });
+
+    // Undo, Auto-randomize and Random are the three controls pressed
+    // over and over, and inside the panel every one of them costs an
+    // open and a close. Below the breakpoint they move to a fixed bar at
+    // the bottom of the screen, in thumb reach, with the sheet's toggle
+    // beside them; above it they go back to the sidebar header. The
+    // same elements move both ways rather than a second copy living in
+    // the markup, so the listeners bound above and further down this
+    // file follow them and no id is ever on the page twice.
+    const actionBar = document.getElementById("actionBar");
+    const barExportBtn = document.getElementById("barExportBtn");
+    // Declared here rather than beside the drag handlers below:
+    // syncSheetButtons() reads both, and syncActionBar() calls it well
+    // before this script reaches that section.
+    const controls = document.querySelector(".controls");
+    const sheetHandle = document.getElementById("sheetHandle");
+    const exploreRow = document.querySelector(".explore-row");
+    const controlsHeader = document.querySelector(".controls-header");
+    const appChrome = document.getElementById("appChrome");
+    const footerLinkRow = document.querySelector(".footer-link-row");
+    const narrowLayout = window.matchMedia("(max-width: 768px)");
+
+    function syncActionBar() {
+      // Whatever the layout is about to become, the held field belongs
+      // in the panel first; the sidebar has no strip to hold it.
+      returnLastField();
+      if (narrowLayout.matches) {
+        actionBar.prepend(exploreRow);
+        actionBar.append(sidebarToggle);
+        actionBar.hidden = false;
+        // The export panel is the footer, so the two controls that
+        // aren't about the composition move to the end of the settings
+        // scroll instead of riding along with the download buttons.
+        controlsBody.insertBefore(appChrome, scrollFadeBottom);
+      } else {
+        // Widening out of the sheet layout leaves the sidebar on
+        // screen for good, so the open state goes with it.
+        setSidebarOpen(false);
+        document.body.classList.remove("sheet-export");
+        actionBar.hidden = true;
+        controlsHeader.prepend(exploreRow);
+        document.body.prepend(sidebarToggle);
+        footerLinkRow.prepend(appChrome);
+      }
+    }
+
+    barExportBtn.addEventListener("click", () => showSheetPanel("export"));
+
+    // Whichever setting was last reached for gets held above the bar
+    // once the sheet is closed, so it can be dialled in against the
+    // artwork at full size. The field itself moves, the way the
+    // exploration row moves into the bar, so every listener bound to it
+    // still applies and no id is duplicated; lastFieldHome is what puts
+    // it back exactly where it came from, including inside a layer
+    // panel built from the template.
+    const lastControl = document.getElementById("lastControl");
+    const lastControlSlot = document.getElementById("lastControlSlot");
+    let lastTouchedField = null;
+    let lastFieldHome = null;
+
+    // Everything that reaches here is the user reaching for a control:
+    // randomize passes and snapshot loads assign to .value directly and
+    // never dispatch, and the one place this file does dispatch is the
+    // colour popover relaying a drag to its native input, which is a
+    // real interaction and should count. Hence no isTrusted test, which
+    // would have thrown that one case away.
+    function rememberTouchedField(e) {
+      const field = e.target.closest(".field");
+      if (field && controlsBody.contains(field)) lastTouchedField = field;
+    }
+
+    controlsBody.addEventListener("input", rememberTouchedField, true);
+    controlsBody.addEventListener("change", rememberTouchedField, true);
+
+    function returnLastField() {
+      if (!lastFieldHome) return;
+      lastFieldHome.parent.insertBefore(lastTouchedField, lastFieldHome.next);
+      lastFieldHome = null;
+      lastControl.hidden = true;
+      document.body.classList.remove("has-last-control");
+      // The field is back in the scroll area, so its height counts again.
+      updateScrollFade();
+    }
+
+    function showLastField() {
+      if (!narrowLayout.matches || !lastTouchedField || lastFieldHome) return;
+      lastFieldHome = {
+        parent: lastTouchedField.parentElement,
+        next: lastTouchedField.nextElementSibling,
+      };
+      lastControlSlot.appendChild(lastTouchedField);
+      lastControl.hidden = false;
+      document.body.classList.add("has-last-control");
+    }
+
+    document.getElementById("lastControlClose").addEventListener("click", () => {
+      returnLastField();
+      lastTouchedField = null;
+    });
+
+    new ResizeObserver(() => {
+      document.documentElement.style.setProperty(
+        "--last-control-h",
+        `${lastControl.offsetHeight}px`
+      );
+    }).observe(lastControl);
+
+    syncActionBar();
+    narrowLayout.addEventListener("change", syncActionBar);
+
+    // Drag the handle, the gesture the shape already promises. The sheet
+    // opens at the height that keeps the whole canvas on screen; drag up
+    // and it takes the room instead, for when the settings matter more
+    // than the view. Down goes back a stop, and from the first stop it
+    // dismisses. A plain tap dismisses too. Only the handle listens, so
+    // the sheet's own scrolling body is left alone.
+    const SHEET_DISMISS_PX = 80;
+    const SHEET_EXPAND_PX = 60;
+    const SHEET_TAP_PX = 4;
+    let sheetDragFrom = null;
+
+    function endSheetDrag(e) {
+      if (sheetDragFrom === null) return;
+      const moved = e.clientY - sheetDragFrom;
+      sheetDragFrom = null;
+      // Handing the transform back to the stylesheet is what springs the
+      // sheet to whichever stop the class list now names.
+      controls.style.transition = "";
+      controls.style.transform = "";
+      const wasTall = document.body.classList.contains("sheet-tall");
+      if (moved < -SHEET_EXPAND_PX) {
+        if (sheetShowing() === "settings") document.body.classList.add("sheet-tall");
+      } else if (moved > SHEET_DISMISS_PX) {
+        if (wasTall) document.body.classList.remove("sheet-tall");
+        else setSidebarOpen(false);
+      } else if (Math.abs(moved) < SHEET_TAP_PX) {
+        setSidebarOpen(false);
+      }
+    }
+
+    sheetHandle.addEventListener("pointerdown", (e) => {
+      sheetDragFrom = e.clientY;
+      sheetHandle.setPointerCapture(e.pointerId);
+      // The sheet has to track the finger exactly while it's held.
+      controls.style.transition = "none";
+    });
+
+    sheetHandle.addEventListener("pointermove", (e) => {
+      if (sheetDragFrom === null) return;
+      // Downward only. Following a finger upward would lift the sheet
+      // off the bar and open a gap under it; that direction is read as
+      // intent and snaps on release instead.
+      controls.style.transform = `translateY(${Math.max(0, e.clientY - sheetDragFrom)}px)`;
+    });
+
+    sheetHandle.addEventListener("pointerup", endSheetDrag);
+    sheetHandle.addEventListener("pointercancel", endSheetDrag);
+
+    // Lock All, Unlock All and Undo each throw away something that took
+    // a while to arrive at, and none of them can be walked back: undo
+    // pops its history without recording what it replaced, so there is
+    // no way forward again. On the bar all three sit under a thumb, and
+    // Undo is 12px from Play. A press alone no longer runs them: the
+    // button fills over HOLD_MS and fires once it is full, and a press
+    // that lets go early becomes a hint instead of the action.
+    // The fill in style.css has to run for exactly as long as the timer
+    // below, or the bar lands early or late. Published from here so the
+    // two can't drift: this is the only place the duration is written.
+    const HOLD_MS = 1000;
+    document.documentElement.style.setProperty("--hold-duration", `${HOLD_MS}ms`);
+    let holdTimer = null;
+    let holdingBtn = null;
+    let holdCompleted = false;
+
+    function endHold() {
+      clearTimeout(holdTimer);
+      holdTimer = null;
+      if (holdingBtn) {
+        holdingBtn.classList.remove("holding");
+        holdingBtn.removeEventListener("pointerleave", endHold);
+        holdingBtn = null;
+      }
+    }
+
+    // Delegated, not bound per button: a save slot gains and loses its
+    // data-hold as the slot fills and empties (see refreshPresetUI), so
+    // there is no fixed set to attach to at startup.
+    document.addEventListener("pointerdown", (e) => {
+      const btn = e.target.closest("[data-hold]");
+      if (!btn || btn.disabled) return;
+      endHold();
+      holdCompleted = false;
+      holdingBtn = btn;
+      btn.classList.add("holding");
+      // Sliding off the button abandons the hold. Bound per press and
+      // taken off again by endHold, so these don't pile up.
+      btn.addEventListener("pointerleave", endHold);
+      holdTimer = setTimeout(() => {
+        const held = holdingBtn;
+        endHold();
+        holdCompleted = true;
+        // Fires at the moment the fill lands rather than on release, so
+        // a full bar means it is already done. Scripted clicks report
+        // detail 0, which is what gets this past the gate below.
+        held.click();
+      }, HOLD_MS);
+    });
+
+    // Releasing anywhere ends it, including after sliding off the button.
+    document.addEventListener("pointerup", endHold);
+    document.addEventListener("pointercancel", endHold);
+
+    // Capturing on the document, so this runs ahead of the handlers
+    // bound to the buttons themselves whatever order they registered in.
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn = e.target.closest("[data-hold]");
+        if (!btn) return;
+        // No pointer behind it: a keyboard activation, or the scripted
+        // click above. Both are deliberate, so neither needs the guard.
+        if (e.detail === 0) return;
+        e.preventDefault();
+        e.stopPropagation();
+        // The click that follows the release of a hold that already
+        // fired. Swallowed, but there is nothing to tell the user.
+        if (holdCompleted) {
+          holdCompleted = false;
+          return;
+        }
+        showToast(btn.dataset.hold);
+      },
+      true
+    );
+
+    // The settings panel and the tall stop get their heights from the
+    // stylesheet, but the export panel's is whatever its buttons come
+    // to. Publishing the measured height keeps .canvas-area's one rule
+    // correct for all three instead of naming each of them.
+    new ResizeObserver(() => {
+      document.documentElement.style.setProperty("--sheet-actual", `${controls.offsetHeight}px`);
+    }).observe(controls);
 
     // Tutorial modal: a "?" button opens a short guide, one step at a
     // time, each with a small animated demo of the actual control being
@@ -2937,7 +3329,22 @@
       // from its HTML attribute instead of getting its own starting
       // background like a shared link or saved state would carry.
       document.getElementById("bgColor").value = randomBgColor();
-      performRandomize();
+      // A 1200x630 canvas on a portrait phone is bound by width, not
+      // height: it lands about 180px tall inside an artboard 615px
+      // deep, so most of the screen is empty and a 1200px composition
+      // shown 343px wide has its block grid scaled past the point of
+      // being visible at all. Portrait screens open on the Mobile
+      // preset instead, which fills that depth and shows the grid
+      // nearer its own scale. Opening size only: a shared link carries
+      // its own dimensions through loadStateFromURL above, size is not
+      // in RANDOMIZABLE_FIELDS, and the preset chip lights itself off
+      // the values (see updatePresetChips), so nothing else needs to
+      // know this happened.
+      if (narrowLayout.matches && window.innerHeight > window.innerWidth) {
+        document.getElementById("width").value = DIMENSION_PRESETS.mobile.width;
+        document.getElementById("height").value = DIMENSION_PRESETS.mobile.height;
+      }
+      performRandomize(false);
     }
     generateRandomFavicon();
     updateScrollFade();
