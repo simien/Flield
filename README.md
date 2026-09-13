@@ -115,7 +115,7 @@ of the sidebar or the end of the settings panel on a phone.
 
 - Per-field locks hold what you like steady while the rest rerolls
 - Palette and density ranges bound how far a reroll can wander
-- Auto-randomize on an interval, from one second to ten
+- Auto-randomize on an interval, from one second to sixteen
 - Undo walks back through recent passes, and never evicts the composition you started from
 - The five actions that can't be walked back arm on a one-second hold, not a press
 

@@ -227,7 +227,7 @@ SVG exported up to now.
 Any static file server works; there is nothing to build.
 
 ```bash
-python3 -m http.server 8931
+python3 -m http.server 8080
 ```
 
 Claude Code has this wired up in `.claude/launch.json` (gitignored) as the
