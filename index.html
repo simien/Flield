@@ -126,7 +126,7 @@
       {
         "@type": "HowToStep",
         "name": "Move between the three tabs",
-        "text": "General holds canvas settings. Layer A and Layer B hold each layer's own look."
+        "text": "General holds the canvas settings and Motion. Layer A and Layer B hold each layer's own look."
       },
       {
         "@type": "HowToStep",
@@ -136,7 +136,7 @@
       {
         "@type": "HowToStep",
         "name": "Pick a size, or tile it",
-        "text": "The Web, Tablet, and Mobile presets set common dimensions. Tile squares the canvas and mirrors both layers so it repeats with no visible seam."
+        "text": "The Web, Tablet, and Mobile presets set common dimensions; a phone held upright starts on Mobile so the artwork fills the screen. Tile squares the canvas and mirrors both layers so it repeats with no visible seam."
       },
       {
         "@type": "HowToStep",
@@ -146,7 +146,7 @@
       {
         "@type": "HowToStep",
         "name": "Lock a field to keep it",
-        "text": "A locked field holds its value through a randomize pass instead of getting a new one. Lock All and Unlock All apply to everything at once, and a tab shows a padlock once any of its fields are locked."
+        "text": "A locked field holds its value through a randomize pass instead of getting a new one. Lock All and Unlock All apply to everything at once, and because neither can be walked back they arm on a one-second hold rather than a press. A tab shows a padlock once any of its fields are locked."
       },
       {
         "@type": "HowToStep",
@@ -161,17 +161,17 @@
       {
         "@type": "HowToStep",
         "name": "Step back with Undo",
-        "text": "Undo, or Cmd/Ctrl+Z, walks back through recent passes, whether they came from a press, autoplay, or a GIF export."
+        "text": "Undo, or Cmd/Ctrl+Z, walks back through recent passes, whether they came from a press or from autoplay; a GIF export counts as one step rather than one per frame. There is no way forward again, so the button arms on a one-second hold. The keyboard shortcut is immediate."
       },
       {
         "@type": "HowToStep",
         "name": "Save it, or share a link",
-        "text": "Three save slots live in your browser. Copy Link encodes the same snapshot, locks included, into a URL anyone can open, and the small menu beside it can make that link offer Auto-randomize to whoever opens it."
+        "text": "Three save slots live in your browser. Loading one, and saving over one that already holds something, each arm on a one-second hold, since both replace work that cannot be recovered; the first save into an empty slot is a plain press. Copy Link encodes the same snapshot, locks and motion included, into a URL anyone can open, and the small menu beside it can make that link offer Auto-randomize to whoever opens it."
       },
       {
         "@type": "HowToStep",
         "name": "Export a PNG, SVG, or GIF",
-        "text": "PNG and SVG save the still. A stepped GIF of 3 to 13 steps replays the exact sequence Auto-randomize would generate, one pass per frame, each held for the speed set beside the play button."
+        "text": "PNG and SVG save the still. A GIF records however many passes you ask for: with Motion off, that is the sequence Auto-randomize would generate, one still per pass, each held for the speed beside the play button. A whole export is capped at 240 frames, so a long one trades smoothness rather than size."
       },
       {
         "@type": "HowToStep",
@@ -186,7 +186,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=92" />
+  <link rel="stylesheet" href="style.css?v=93" />
 </head>
 <body>
   <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show settings" aria-pressed="false"><i class="ph ph-list"></i></button>
@@ -261,7 +261,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 3 of 13</p>
         <h3>Three tabs, one canvas</h3>
-        <p><span class="ui-ref">General</span> holds canvas settings; <span class="ui-ref">Layer A</span> and <span class="ui-ref">Layer B</span> hold each layer's own look.</p>
+        <p><span class="ui-ref">General</span> holds the canvas settings and <span class="ui-ref">Motion</span>; <span class="ui-ref">Layer A</span> and <span class="ui-ref">Layer B</span> hold each layer's own look.</p>
       </div>
 
       <div class="tutorial-step" data-step="3">
@@ -286,7 +286,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 5 of 13</p>
         <h3>Pick a size, or tile it</h3>
-        <p>Web, Tablet, and Mobile presets set common dimensions. <span class="ui-ref">Tile</span> squares the canvas and mirrors both layers so it repeats with no visible seam.</p>
+        <p>Web, Tablet, and Mobile presets set common dimensions; a phone held upright starts on <span class="ui-ref">Mobile</span> so the artwork fills the screen. <span class="ui-ref">Tile</span> squares the canvas and mirrors both layers so it repeats with no visible seam.</p>
       </div>
 
       <div class="tutorial-step" data-step="5">
@@ -312,7 +312,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 7 of 13</p>
         <h3>Lock a field to keep it</h3>
-        <p>A locked field holds its value through a randomize pass instead of getting a new one. <span class="ui-ref">Lock All</span> / <span class="ui-ref">Unlock All</span> apply to everything at once, and a tab shows a padlock once any of its fields are locked.</p>
+        <p>A locked field holds its value through a randomize pass instead of getting a new one. <span class="ui-ref">Lock All</span> / <span class="ui-ref">Unlock All</span> apply to everything at once, and since neither can be walked back they arm on a one-second hold rather than a press. A tab shows a padlock once any of its fields are locked.</p>
       </div>
 
       <div class="tutorial-step" data-step="7">
@@ -354,7 +354,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 10 of 13</p>
         <h3>Undo steps back</h3>
-        <p>Went too far? <span class="ui-ref">Undo</span> (or <span class="ui-ref">Cmd/Ctrl+Z</span>) walks back through recent passes, whether they came from a press, autoplay, or a GIF export.</p>
+        <p>Went too far? <span class="ui-ref">Undo</span> (or <span class="ui-ref">Cmd/Ctrl+Z</span>) walks back through recent passes, whether they came from a press or from autoplay; a GIF export counts as one step, not one per frame. There is no way forward again, so the button arms on a one-second hold. The shortcut is immediate.</p>
       </div>
 
       <div class="tutorial-step" data-step="10">
@@ -364,7 +364,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 11 of 13</p>
         <h3>Save it, or share a link</h3>
-        <p>Three save slots live in your browser; <span class="ui-ref">Copy Link</span> encodes the same snapshot, locks included, into a URL anyone can open. The small menu beside it can make the link offer Auto-randomize to whoever opens it.</p>
+        <p>Three save slots live in your browser. Loading one, or saving over one that already holds something, arms on a one-second hold, since both replace work you cannot get back; the first save into an empty slot is a plain press. <span class="ui-ref">Copy Link</span> encodes the same snapshot, locks and motion included, into a URL anyone can open, and the menu beside it can make that link offer Auto-randomize.</p>
       </div>
 
       <div class="tutorial-step" data-step="11">
@@ -373,7 +373,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 12 of 13</p>
         <h3>Export PNG, SVG, or GIF</h3>
-        <p>PNG and SVG save the still. A stepped GIF (3 to 13 steps) replays the exact sequence <span class="ui-ref">Auto-randomize</span> would generate, one pass per frame, each held for the speed set beside the play button.</p>
+        <p>PNG and SVG save the still. A GIF records however many passes you ask for: with <span class="ui-ref">Motion</span> off, that is the sequence <span class="ui-ref">Auto-randomize</span> would generate, one still per pass, each held for the speed beside the play button. A whole export is capped at 240 frames, so a long one trades smoothness rather than size.</p>
       </div>
 
       <!-- A second live canvas (see startTutorialAnimate): one cycle of
