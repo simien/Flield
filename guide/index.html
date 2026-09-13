@@ -221,7 +221,7 @@
     <p>Read <a href="../flow-fields/">what is a flow field?</a> for the arrow grid drawn out beside the strands it produces.</p>
 
     <h3>Speed and interval</h3>
-    <p>Two sliders in the General tab, on one scale that gives the fast end as much travel as the slow one. <strong>Speed</strong> runs from a quarter of a second up to sixteen. <strong>Reroll every</strong> starts at one second and steps in doublings. A quarter-second cycle is a real look. A quarter-second reroll is a strobe you cannot read a composition out of.</p>
+    <p>Two sliders in the General tab, on one scale that gives the fast end as much travel as the slow one. Both start at one second and run up to sixteen. <strong>Reroll every</strong> steps in doublings, because a reroll cadence is a choice between a few speeds rather than something to dial in.</p>
     <p><strong>Speed</strong> is how long a motion takes to come back round. It appears under Motion once you have picked one, since there is no cycle to time before that. <strong>Reroll every</strong>, under its own heading, is how long Auto-randomize waits before it rerolls.</p>
     <p>They are separate because they answer different questions. A composition that drifts slowly while rerolling quickly is a perfectly reasonable thing to want.</p>
     <p>An export has to reconcile them in the one case where both are running. There, a pass is a whole motion cycle rather than a reroll interval. The seam that makes a GIF loop is the cycle's own end, so cutting one short at the reroll would be the wrong trade. With Motion off there is no cycle, and a pass is one still held for the reroll interval.</p>
@@ -344,7 +344,7 @@
 
     <div class="note">
       <p>Motion flashes the whole canvas. Pulse is the clearest case: it swings the covered area between roughly 39% and 81%, once a cycle, and on a high-contrast palette that is a large area changing brightness.</p>
-      <p>The Speed slider therefore starts at half a second, which is two of those a second. <a href="https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html" target="_blank" rel="noopener">WCAG 2.3.1</a> puts the limit at three. If flashing affects you, leave Motion off. If your system asks for reduced motion, a shared link carrying a motion will not start it on its own.</p>
+      <p>The Speed slider therefore starts at one second, which is one of those a second. <a href="https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html" target="_blank" rel="noopener">WCAG 2.3.1</a> puts the limit at three. If flashing affects you, leave Motion off. If your system asks for reduced motion, a shared link carrying a motion will not start it on its own.</p>
     </div>
     <p><strong>Motion</strong>, in the General tab, holds every setting and both seeds, then animates the composition on screen. The last frame flows straight into the first, with no visible cut. There are four kinds beside <strong>None</strong>: <strong>Loop</strong>, <strong>Drift</strong>, <strong>Wind</strong>, and <strong>Pulse</strong>. Pick one and the canvas plays it straight away, which is also exactly what a GIF will record.</p>
 

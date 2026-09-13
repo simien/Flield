@@ -123,7 +123,7 @@ of the sidebar or the end of the settings panel on a phone.
 
 - Loop, Drift, Wind, or Pulse move a composition instead of replacing it, cycling back with no cut
 - Plays on the canvas the moment you pick one, which is exactly what a GIF records
-- Separate sliders for how fast it moves and how often it rerolls, the first from a quarter of a second, the second stepping in doublings from one
+- Separate sliders for how fast it moves and how often it rerolls, both from one second to sixteen, with the reroll stepping in doublings
 
 ### Exporting and sharing
 
