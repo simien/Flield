@@ -548,6 +548,15 @@
         <select id="shapeMaskDirection"></select>
       </div>
 
+      <!-- Its own section rather than the last field under Settings:
+           motion is what the site leads with, so it should be findable
+           as a heading, and it is one of the four controls that drive
+           animation (see AGENTS.md) rather than a canvas setting. Second
+           in the tab, not first: size, colors and mask come before how
+           it moves, a still is the default, and the flash warning below
+           should not be the first line a new visitor reads. -->
+      <h2 class="section-title">Motion</h2>
+
       <div class="field">
         <label for="motion">Motion</label>
         <p class="hint">Plays on the canvas as soon as you pick one.</p>
@@ -563,9 +572,9 @@
 
       <!-- Revealed with a motion, the same way the shape mask's
            direction is revealed with a shape that has one. A cycle
-           length means nothing without a cycle, and holding the pair
-           together is what keeps it from reading as part of the
-           Auto-randomize interval below. -->
+           length means nothing without a cycle, and keeping the pair
+           under one heading is what keeps it from reading as part of
+           the Auto-randomize interval in the next section. -->
       <div class="field" id="speedField" hidden>
         <label for="speed">Speed <span class="field-value" id="speedVal"></span></label>
         <p class="hint">How long a cycle takes on screen and in GIFs.</p>
@@ -909,7 +918,7 @@
     </script>
   </div>
 
-  <script src="generator.js?v=11"></script>
+  <script src="generator.js?v=12"></script>
   <script>
     // Inline replacements for the icons that used to come from the
     // Phosphor webfont (224KB for the ~19 glyphs this app actually uses).
