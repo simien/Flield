@@ -140,6 +140,21 @@ of the sidebar or the end of the settings panel on a phone.
 - A favicon regenerated on each load in the same three colors as the canvas
 - Fully offline: every dependency vendored, no CDN, no network needed
 
+## Background
+
+Three explainers on how this works, each running the real generator live
+rather than showing a screenshot of it:
+
+- [What is a flow field?](https://flield.com/flow-fields/), on steering noise
+  into directional streaks instead of static, and why the field biases
+  density rather than gating it.
+- [How to make a seamless tiling background](https://flield.com/seamless-backgrounds/),
+  on why a 4-way mirror guarantees a tile repeats with no seam, and what
+  breaks it.
+- [How to make a looping animated background](https://flield.com/animated-backgrounds/),
+  on the four motions, why they return to their first frame exactly, and
+  which file format a hero background actually wants.
+
 ## Running locally
 
 Flield is plain HTML, CSS, and JavaScript. No build step, no package manager.

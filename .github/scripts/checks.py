@@ -19,7 +19,14 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-PAGES = ["index.html", "guide/index.html", "404.html"]
+PAGES = [
+    "index.html",
+    "guide/index.html",
+    "flow-fields/index.html",
+    "seamless-backgrounds/index.html",
+    "animated-backgrounds/index.html",
+    "404.html",
+]
 failures = []
 notes = []
 
