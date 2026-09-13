@@ -134,7 +134,7 @@
   </header>
 
   <main class="wrap">
-    <h1>Using Flield</h1>
+    <h1>Using Flield: looping motion, tiling, and locks</h1>
     <p class="lede">Flield builds three-color compositions from seeded flow fields and symmetry. Pressing <span class="ui-ref"><svg class="ui-ref-icon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240.49,175.51a12,12,0,0,1,0,17l-24,24a12,12,0,0,1-17-17L203,196h-2.09a76.17,76.17,0,0,1-61.85-31.83L97.38,105.78A52.1,52.1,0,0,0,55.06,84H32a12,12,0,0,1,0-24H55.06a76.17,76.17,0,0,1,61.85,31.83l41.71,58.39A52.1,52.1,0,0,0,200.94,172H203l-3.52-3.51a12,12,0,0,1,17-17Zm-95.62-72.62a12,12,0,0,0,16.93-1.13A52,52,0,0,1,200.94,84H203l-3.52,3.51a12,12,0,0,0,17,17l24-24a12,12,0,0,0,0-17l-24-24a12,12,0,0,0-17,17L203,60h-2.09a76,76,0,0,0-57.2,26A12,12,0,0,0,144.87,102.89Zm-33.74,50.22a12,12,0,0,0-16.93,1.13A52,52,0,0,1,55.06,172H32a12,12,0,0,0,0,24H55.06a76,76,0,0,0,57.2-26A12,12,0,0,0,111.13,153.11Z"/></svg>Random</span> shows you what it does. Everything below is about steering it toward something you meant.</p>
 
     <!-- Eager, with its intrinsic size declared, since it sits above the
@@ -230,6 +230,7 @@
     <h3>Sliders</h3>
     <p>The click and drag target reaches well past the thin line you see, so grabbing a slider doesn't take a precise hit.</p>
     <p><strong>Flow scale</strong> is measured in canvas pixels, so a setting reads the same at any block size. <strong>Field strength</strong> puts clear banding around the middle of its range. A link or saved slot from before that change loads with its strength halved, so it renders exactly as it did.</p>
+    <p>Width and height stop at 8192 pixels a side. A larger number is brought back to that. Past it a render takes tens of seconds, and the browser will not draw the canvas anyway.</p>
 
     <h3>Scrolling</h3>
     <p>A tab's content can run longer than the sidebar is tall. A soft fade shows up at whichever edge still has more to see, top, bottom or both. It clears once you have scrolled all the way to that edge.</p>

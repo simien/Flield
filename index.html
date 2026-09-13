@@ -857,6 +857,12 @@
 
   <div class="main-area">
     <p class="sr-only">Flield is a free, browser-based generator for seamless animated backgrounds. It creates three-color pixel art compositions from seeded flow fields and symmetry, drawing each field one of six ways, from density-biased streaks to topographic contours to streamlines traced by particles running along it, sets them moving with Loop, Drift, Wind, or Pulse so a cycle returns to its first frame with no cut, and exports to animated GIF, SVG, or PNG. Locks hold the fields you like while the rest randomize. Runs entirely in the browser, no account or upload needed.</p>
+    <!-- The three explainers were two clicks from here, through the
+         guide's footer, which is one more than a crawler gives a page
+         it has not decided about yet. Out of the tab order, since a
+         keyboard user should not land on something they cannot see;
+         a screen reader still finds them in browse mode. -->
+    <p class="sr-only">Read more: <a href="./flow-fields/" tabindex="-1">what is a flow field</a>, <a href="./seamless-backgrounds/" tabindex="-1">how to make a seamless tiling background</a>, and <a href="./animated-backgrounds/" tabindex="-1">how to make a looping animated background</a>.</p>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <!-- First-visit nudge toward the tutorial. A modal used to open on
          its own here, on top of the freshly randomized canvas that is
@@ -1905,6 +1911,13 @@
     }
 
     document.querySelector(".controls").addEventListener("input", scheduleRender);
+    // A typed size past the cap already renders at the cap (readOptions
+    // clamps it); snapping the field on change keeps it from saying
+    // 10000 over a canvas that is 8192.
+    ["width", "height"].forEach((id) => {
+      const el = document.getElementById(id);
+      el.addEventListener("change", () => { el.value = clampSide(el.value); });
+    });
 
     // Live preview of a motion: choosing anything but None in the
     // Motion field plays it on the canvas at the Speed slider's pace, so
