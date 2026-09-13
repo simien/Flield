@@ -184,10 +184,10 @@ const LAYER_B_DEPTH = 0.7;
 const GRAD_X = new Float64Array([1, -1, 0, 0, 1, -1, 1, -1]);
 const GRAD_Y = new Float64Array([0, 0, 1, -1, 1, 1, -1, -1]);
 
-function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octaves, phase, mode, phaseOffset) {
+function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octaves, phase, mode, phaseOffset, warp) {
   const drift = mode === "drift";
   const wind = mode === "wind";
-  const key = `${seed}|${fillCols}|${fillRows}|${scale}|${angleRad}|${stretch}|${octaves}|${phase || 0}|${mode || ""}|${phaseOffset || 0}`;
+  const key = `${seed}|${fillCols}|${fillRows}|${scale}|${angleRad}|${stretch}|${octaves}|${phase || 0}|${mode || ""}|${phaseOffset || 0}|${warp || 0}`;
   const cached = fieldCache.get(key);
   if (cached) return cached;
 
@@ -225,7 +225,11 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
   // where on its circle the warp field is sampled from. Layer B enters
   // the circle at its own start, like Loop.
   const turn = 2 * Math.PI * (phase || 0);
-  const gust = wind ? WIND_WARP * (1 - Math.cos(turn)) / 2 : 0;
+  // `warp` is the same displacement held at a constant amount instead of
+  // rising and falling with the phase, which is what the marble texture
+  // is (see MARBLE_WARP). A wind gust adds to it rather than replacing
+  // it, so a marbled layer still gusts.
+  const gust = (wind ? WIND_WARP * (1 - Math.cos(turn)) / 2 : 0) + (warp || 0);
   const gustX = wind ? WIND_WARP_RADIUS * (Math.cos(turn + start) - Math.cos(start)) : 0;
   const gustY = wind ? WIND_WARP_RADIUS * (Math.sin(turn + start) - Math.sin(start)) : 0;
   // Both Drift and Wind wrap the lattice along the flow axis.
@@ -267,8 +271,18 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
       if (gust > 0) {
         // Two samples of the warp field, well apart in it so the x and
         // y displacements aren't the same pattern.
-        const wx = sample(bx * WIND_WARP_SCALE + 13.7 + gustX, by * WIND_WARP_SCALE + 5.3 + gustY);
-        const wy = sample(bx * WIND_WARP_SCALE + 47.1 + gustX, by * WIND_WARP_SCALE + 29.9 + gustY);
+        //
+        // The warp reads the plain lattice, which repeats only every 256
+        // units, so drift's travel is left out of the coordinates it is
+        // read at: carried in, it would not come back where it started
+        // and the cycle would not close. Wind already leaves its own
+        // travel out for its own reasons (see offX), and circle's offset
+        // returns to zero by itself, so this only bites on a warp that
+        // is on for the whole cycle, which is marble's.
+        const wx0 = (drift ? rx / stretch / scale : bx) * WIND_WARP_SCALE;
+        const wy0 = (drift ? ry / scale : by) * WIND_WARP_SCALE;
+        const wx = sample(wx0 + 13.7 + gustX, wy0 + 5.3 + gustY);
+        const wy = sample(wx0 + 47.1 + gustX, wy0 + 29.9 + gustY);
         bx += gust * wx;
         by += gust * wy;
       }
@@ -414,6 +428,247 @@ function smoothPass(src, dst, cols, fillCols, fillRows) {
   }
 }
 
+// One dilation pass over the unique region: every empty cell that
+// orthogonally touches a filled one fills. Reads from `src`, writes to
+// `dst`. This is what the smoothing slider does to a streamlines layer,
+// see the note above STREAM_STEP.
+function dilatePass(src, dst, cols, fillCols, fillRows) {
+  for (let y = 0; y < fillRows; y++) {
+    const row = y * cols;
+    for (let x = 0; x < fillCols; x++) {
+      const i = row + x;
+      dst[i] =
+        src[i] ||
+        (x > 0 && src[i - 1]) ||
+        (x < fillCols - 1 && src[i + 1]) ||
+        (y > 0 && src[i - cols]) ||
+        (y < fillRows - 1 && src[i + cols])
+          ? 1
+          : 0;
+    }
+  }
+}
+
+// Streamlines --------------------------------------------------------
+//
+// The second texture, and the one the literature means by "flow field":
+// turn the noise into a heading at every point, drop particles on the
+// grid, and step each one along whatever direction it is standing on.
+// What gets drawn is the trail it leaves behind. The first texture (see
+// sampleFlowField) never builds a vector at all; it rotates and
+// stretches the sampling space so the same noise reads as streaks, and
+// uses the value to bias how likely a cell is to fill.
+//
+// Both share everything around them. The heading here is read off the
+// very field getFlowField already builds, so all four motions drive a
+// streamlines layer without knowing it exists, and the trails land in
+// the same Uint8Array, so symmetry, the shape mask, layer stacking, and
+// every exporter treat them like any other cells. Eight-way symmetric
+// streamlines and an exactly looping GIF of them both fall out of that.
+
+// Integration step, in cells. Under one cell so a strand comes out
+// continuous rather than dotted; halving it again only doubles the work
+// for the same picture.
+const STREAM_STEP = 0.5;
+
+// How far the field can swing a heading off the flow direction at full
+// strength: half a turn each way, so a strong field is free to double a
+// strand back on itself.
+const STREAM_TURN = Math.PI;
+
+// Trail length, in field wavelengths per unit of flow stretch. Sized so
+// a default composition draws strands rather than dashes or
+// canvas-length rakes.
+const STREAM_TRAIL = 0.35;
+
+// A running particle covers this many trail lengths per cycle. Higher
+// reads as faster and costs proportionally more integration; the trail
+// itself is the same length either way.
+const STREAM_TRAVEL = 2;
+
+// Coverage is capped here before the particle count is solved for it,
+// because the count goes to infinity as coverage approaches 1 (see
+// below) and strands laid thickly enough to cover 85% of a canvas have
+// already merged into a solid field with no strand left to see.
+const STREAM_MAX_COVERAGE = 0.85;
+
+// A step's heading is otherwise two trigonometric calls, and a busy
+// frame takes a million steps, so the headings are precomputed once per
+// layer into this many buckets across the field's -1..1 range. At 2048
+// buckets the worst rounding is a thousandth of a turn, well under a
+// cell's worth of drift over a whole trail.
+const STREAM_LUT = 2048;
+const streamCos = new Float64Array(STREAM_LUT);
+const streamSin = new Float64Array(STREAM_LUT);
+
+// Marble ---------------------------------------------------------------
+//
+// Streaks, with the sampling coordinates displaced by a second, coarser
+// reading of the same noise before the field is read from them. Domain
+// warping: straight bands come out folded and drawn into each other, the
+// way stone or poured paint does. It reuses the displacement Wind
+// already builds (see WIND_WARP), held at a constant amount rather than
+// swelling once per cycle, so it costs two extra noise samples a cell
+// and no new machinery. Tuned by eye: at half this the bands only lean,
+// and at twice it they fold back on themselves into mush.
+const MARBLE_WARP = 1.1;
+
+// Nebula ---------------------------------------------------------------
+//
+// Ridged noise. Folding the field at zero turns its zero crossings, a
+// set of curves running through the canvas, into the densest places on
+// it, with everything either side falling away. That is the difference
+// between filaments with voids between them and plain bands.
+//
+// The fold's pivot is the field's own mean magnitude, measured rather
+// than assumed: it moves with the octave count and the scale, and
+// pinning it to a constant would make the density slider mean a
+// different coverage at every setting. Measured, the bias averages zero
+// and density keeps meaning the fraction of the canvas covered. The
+// extra gain is because a folded value only travels about a third as
+// far as the raw one does, so without it the whole slider would spend
+// its travel on a barely visible effect, the same reason FIELD_GAIN
+// exists.
+const NEBULA_GAIN = 3;
+
+// Contours -------------------------------------------------------------
+//
+// Isolines: the field is cut into evenly spaced levels and a cell fills
+// according to how close it sits to one of them, which draws the
+// topographic map of the field rather than its shading. Field strength
+// buys levels, up to this many, and the layer's density is read as how
+// far either side of a level line a cell can be and still fill. That
+// makes density mean the same thing it means everywhere else, the
+// fraction of the canvas covered: the distance to the nearest level is
+// near enough uniform over 0 to 1/2, so filling out to `density` of it
+// covers `density` of the canvas.
+const CONTOUR_LEVELS = 30;
+
+// Weave ----------------------------------------------------------------
+//
+// Streamlines run twice over one field, the second pass a quarter turn
+// off the first, so the two sets of strands cross. Each pass is thinned
+// so the pair together still covers the density asked for: two passes
+// each covering c leave 1 - (1 - c)^2, so c is one minus the root.
+const WEAVE_CROSS = Math.PI / 2;
+
+// The two textures that trace particles rather than biasing a cell's
+// chance of filling. Named rather than compared inline because three
+// separate passes need to know, and a missed one is a layer that
+// silently stops animating.
+function isParticleTexture(texture) {
+  return texture === "streamlines" || texture === "weave";
+}
+
+// Bilinear read of the field at a fractional cell, clamped at the
+// region's edge. Nearest-neighbour here is visibly faceted: a strand
+// crossing a cell boundary kinks instead of curving.
+function fieldAt(values, fillCols, fillRows, x, y) {
+  const cx = x < 0 ? 0 : x > fillCols - 1 ? fillCols - 1 : x;
+  const cy = y < 0 ? 0 : y > fillRows - 1 ? fillRows - 1 : y;
+  const x0 = cx | 0;
+  const y0 = cy | 0;
+  const x1 = x0 + 1 < fillCols ? x0 + 1 : x0;
+  const y1 = y0 + 1 < fillRows ? y0 + 1 : y0;
+  const fx = cx - x0;
+  const fy = cy - y0;
+  const r0 = y0 * fillCols;
+  const r1 = y1 * fillCols;
+  const top = values[r0 + x0] + (values[r0 + x1] - values[r0 + x0]) * fx;
+  const bot = values[r1 + x0] + (values[r1 + x1] - values[r1 + x0]) * fx;
+  return top + (bot - top) * fy;
+}
+
+// Traces the layer's particles into `grid`, one cell per step.
+//
+// The animation is the reason for `travelCells`. Each particle lives
+// exactly one cycle and respawns at its own fixed point, and the birth
+// offsets are spread evenly rather than randomly, so at phase 1 every
+// particle is the same age it was at phase 0 and the loop closes on the
+// still. Its trail is a fixed length of arc behind the head; a head
+// less than a trail's length past its spawn wraps the remainder onto
+// the far end of the path, so the amount of strand on screen never
+// changes and no particle ever fades in.
+function drawStreamlines(grid, cols, {
+  seed, fillCols, fillRows, values, strength, angleRad, density, trailCells, countCells, travelCells, phase, strandCells,
+}) {
+  for (let i = 0; i < STREAM_LUT; i++) {
+    const a = angleRad + ((i / (STREAM_LUT - 1)) * 2 - 1) * STREAM_TURN * strength;
+    streamCos[i] = Math.cos(a) * STREAM_STEP;
+    streamSin[i] = Math.sin(a) * STREAM_STEP;
+  }
+  // With strength at zero the field is not consulted at all and every
+  // step takes the middle of the table, which is the flow direction.
+  const straight = !values || strength === 0;
+  const mid = (STREAM_LUT - 1) / 2;
+  const scale = mid;
+
+  // How many particles it takes to cover `density` of the region. A
+  // trail crossing ground another already covered adds nothing, so
+  // laying down n trails of area A_t over an area A leaves roughly
+  // 1 - exp(-n*A_t/A) of it covered; solving that for n is what keeps
+  // the slider meaning the same fraction of filled cells it means for
+  // the other texture. A trail's area is its length times its width,
+  // which is why the strand weight the smoothing passes will add has to
+  // be known here: without it, turning the weight up would fill the
+  // canvas rather than draw the same picture in a heavier line.
+  //
+  // `countCells` is the trail length the slider asks for, and
+  // `trailCells` the length actually drawn, which Pulse swings around
+  // it. Solving the count against the first rather than the second is
+  // what makes Pulse visible at all: solve it against the length being
+  // drawn and the count falls by exactly what the length gained,
+  // holding coverage flat through the cycle.
+  const area = fillCols * fillRows;
+  const wanted = Math.min(STREAM_MAX_COVERAGE, Math.max(0, density));
+  // An empty layer draws nothing, rather than the one particle a floor
+  // of 1 would leave crawling across it.
+  if (wanted <= 0) return;
+  const count = Math.max(1, Math.round((-Math.log(1 - wanted) * area) / (countCells * strandCells)));
+
+  const rand = seededRandom(seed + "|stream");
+  // Everything below counts in steps rather than cells: the trail's
+  // length, the path's length (one lifetime of travel, or just the
+  // trail when nothing is moving), and where along it the head is.
+  const trailSteps = trailCells / STREAM_STEP;
+  const pathSteps = travelCells > 0 ? travelCells / STREAM_STEP : trailSteps;
+  const steps = Math.ceil(pathSteps);
+
+  for (let i = 0; i < count; i++) {
+    let px = rand() * fillCols;
+    let py = rand() * fillRows;
+    const born = i / count;
+    const age = travelCells > 0 ? phase - born - Math.floor(phase - born) : 0;
+    const head = travelCells > 0 ? age * pathSteps : trailSteps;
+    const from = head - trailSteps;
+    // A head less than a trail's length past its spawn: the rest of the
+    // trail hangs off the far end of the path instead of being missing,
+    // so the strand count on screen never dips.
+    const wrapFrom = from < 0 ? pathSteps + from : Infinity;
+
+    for (let s = 0; s <= steps; s++) {
+      if ((s >= from && s <= head) || s >= wrapFrom) {
+        grid[(py | 0) * cols + (px | 0)] = 1;
+      }
+      const n = straight ? 0 : fieldAt(values, fillCols, fillRows, px, py);
+      let k = (mid + n * scale) | 0;
+      if (k < 0) k = 0;
+      else if (k >= STREAM_LUT) k = STREAM_LUT - 1;
+      px += streamCos[k];
+      py += streamSin[k];
+      // Off one edge and back on the other, rather than dying there.
+      // The field is not periodic, so a strand does not continue across
+      // the seam; it stops and a new one starts, which is what keeps
+      // the amount of strand on screen constant. A single step never
+      // overshoots an edge by more than a cell.
+      if (px < 0) px += fillCols;
+      else if (px >= fillCols) px -= fillCols;
+      if (py < 0) py += fillRows;
+      else if (py >= fillRows) py -= fillRows;
+    }
+  }
+}
+
 // Builds a boolean grid (rows x cols) using seeded randomness, optional
 // mirror/rotational/diagonal symmetry, an optional flow field that
 // biases local density, and optional cellular-automaton smoothing.
@@ -423,7 +678,7 @@ function smoothPass(src, dst, cols, fillCols, fillRows) {
 // "kaleidoscope" composes all three: the unique quadrant gets a diagonal
 // mirror first, then that quadrant is mirrored out horizontally and
 // vertically, producing 8-way symmetry.
-function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, blockSize, phase, loopMode, phaseOffset }) {
+function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, blockSize, phase, loopMode, phaseOffset, texture, trailScale }) {
   // mulberry32 inlined (see the function of that name above for the
   // readable form): the same state update and output arithmetic, so the
   // sequence is identical, minus a closure call per cell.
@@ -438,10 +693,105 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
     ? Math.ceil(rows / TILE_REPEATS)
     : HALF_ROWS_SYMMETRIES.has(symmetry) ? Math.ceil(rows / 2) : rows;
 
-  const useField = field && field.strength > 0;
-  if (useField) {
+  const streaming = isParticleTexture(texture);
+  // Drift moves a streamlines layer by running its particles down the
+  // field, not by sliding the field under them, so the field they steer
+  // by is the still one; Loop and Wind move the field itself, the same
+  // way they do for streaks, and the strands follow it. Wind does both.
+  const running = streaming && (loopMode === "drift" || loopMode === "wind");
+  const fieldMode = streaming && loopMode === "drift" ? null : loopMode;
+  const fieldPhase = streaming && loopMode === "drift" ? 0 : phase;
+  const hasField = field && field.strength > 0;
+
+  if (streaming) {
+    // field.scale is in canvas pixels, as below, and flow stretch is
+    // read as trail length here rather than as how far the noise is
+    // pulled along the flow axis, so the field itself is sampled
+    // unstretched: a heading wants isotropic noise under it.
+    const scaleCells = field.scale / blockSize;
+    const angleRad = (field.angle * Math.PI) / 180;
+    const values = field.strength > 0
+      ? getFlowField(seed, fillCols, fillRows, scaleCells, angleRad, 1, field.octaves, fieldPhase, fieldMode, phaseOffset)
+      : null;
+    const countCells = Math.max(2, Math.round(field.stretch * scaleCells * STREAM_TRAIL));
+    const woven = texture === "weave";
+    // See WEAVE_CROSS: each of the two passes covers less, so that what
+    // they leave between them is the density the slider asked for.
+    const passDensity = woven ? 1 - Math.sqrt(Math.max(0, 1 - density)) : density;
+    const pass = {
+      fillCols,
+      fillRows,
+      values,
+      strength: field.strength,
+      density: passDensity,
+      trailCells: Math.max(2, Math.round(countCells * (trailScale || 1))),
+      countCells,
+      travelCells: running ? countCells * STREAM_TRAVEL : 0,
+      // Each dilation pass grows a strand by a cell on both sides.
+      strandCells: 2 * (smoothPasses || 0) + 1,
+      phase: phase || 0,
+    };
+    drawStreamlines(grid, cols, Object.assign({ seed, angleRad }, pass));
+    if (woven) {
+      // Its own particle seed, or the second pass would start every
+      // strand exactly where the first one did and the mesh would be a
+      // row of crosses rather than a weave.
+      drawStreamlines(grid, cols, Object.assign({
+        seed: seed + "|weave",
+        angleRad: angleRad + WEAVE_CROSS,
+      }, pass));
+    }
+  } else if (texture === "contours" && hasField) {
+    // Contours and nebula read the same field streaks does, and differ
+    // only in what they make of the value; see CONTOUR_LEVELS and
+    // NEBULA_PIVOT for the two profiles.
+    const values = getFlowField(
+      seed, fillCols, fillRows, field.scale / blockSize, (field.angle * Math.PI) / 180,
+      field.stretch, field.octaves, phase, loopMode, phaseOffset
+    );
+    const levels = CONTOUR_LEVELS * field.strength;
+    // Zero would divide by it, and a hair above zero is an empty layer,
+    // which is what a density of zero should draw.
+    const reach = Math.max(1e-6, density);
+    for (let y = 0; y < fillRows; y++) {
+      const row = y * cols;
+      const frow = y * fillCols;
+      for (let x = 0; x < fillCols; x++) {
+        const t = values[frow + x] * levels;
+        const d = Math.abs(t - Math.round(t));
+        const p = d < reach ? 1 - d / reach : 0;
+        rngState = (rngState + 0x6d2b79f5) | 0;
+        let r = Math.imul(rngState ^ (rngState >>> 15), 1 | rngState);
+        r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+        grid[row + x] = ((r ^ (r >>> 14)) >>> 0) / 4294967296 < p ? 1 : 0;
+      }
+    }
+  } else if (texture === "nebula" && hasField) {
+    const values = getFlowField(
+      seed, fillCols, fillRows, field.scale / blockSize, (field.angle * Math.PI) / 180,
+      field.stretch, field.octaves, phase, loopMode, phaseOffset
+    );
+    const gain = field.strength * FIELD_GAIN * NEBULA_GAIN;
+    let total = 0;
+    for (let i = 0; i < values.length; i++) total += values[i] < 0 ? -values[i] : values[i];
+    const pivot = values.length ? total / values.length : 0;
+    for (let y = 0; y < fillRows; y++) {
+      const row = y * cols;
+      const frow = y * fillCols;
+      for (let x = 0; x < fillCols; x++) {
+        const n = values[frow + x];
+        const p = Math.min(1, Math.max(0, density + gain * (pivot - (n < 0 ? -n : n))));
+        rngState = (rngState + 0x6d2b79f5) | 0;
+        let r = Math.imul(rngState ^ (rngState >>> 15), 1 | rngState);
+        r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+        grid[row + x] = ((r ^ (r >>> 14)) >>> 0) / 4294967296 < p ? 1 : 0;
+      }
+    }
+  } else if (hasField) {
     // field.scale is in canvas pixels so the same setting reads the same
-    // at any block size; the noise itself is sampled per cell.
+    // at any block size; the noise itself is sampled per cell. Marble is
+    // this same pass over a field whose sampling coordinates have been
+    // displaced first, which is the only thing that separates the two.
     const values = getFlowField(
       seed,
       fillCols,
@@ -452,7 +802,8 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
       field.octaves,
       phase,
       loopMode,
-      phaseOffset
+      phaseOffset,
+      texture === "marble" ? MARBLE_WARP : 0
     );
     const gain = field.strength * FIELD_GAIN;
     for (let y = 0; y < fillRows; y++) {
@@ -481,7 +832,12 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
   if (smoothPasses > 0) {
     let next = new Uint8Array(rows * cols);
     for (let pass = 0; pass < smoothPasses; pass++) {
-      smoothPass(grid, next, cols, fillCols, fillRows);
+      // A streamline strand is one cell wide, and the cellular pass
+      // reads a hairline cell's two neighbours as "too few, empty it",
+      // so the same slider grows strands instead of smoothing them.
+      // See the note above dilatePass.
+      if (streaming) dilatePass(grid, next, cols, fillCols, fillRows);
+      else smoothPass(grid, next, cols, fillCols, fillRows);
       const tmp = grid;
       grid = next;
       next = tmp;
@@ -814,7 +1170,9 @@ function layerOptionsToField(layer) {
 // the loop phase, and `options.loopMode` picks the kind:
 // "circle" (see LOOP_RADIUS), "drift" (DRIFT_PERIOD), "wind"
 // (WIND_WARP), or "pulse" (PULSE_DEPTH). Circle, drift, and wind move
-// the field, so a layer with no field strength stays still through them.
+// the field, so a streaks layer with no field strength stays still
+// through them; a streamlines layer runs its particles under drift and
+// wind, so that one moves whether it has a field to bend it or not.
 function generate(options) {
   // Floor rather than ceil, so cols/rows * blockSize never exceeds the
   // canvas: a block that only partly fit would otherwise get clipped
@@ -833,7 +1191,15 @@ function generate(options) {
     const depth = isB ? LAYER_B_DEPTH : 1;
     const field = layerOptionsToField(layer);
     let density = layer.density;
-    if (mode === "pulse") density = Math.min(1, Math.max(0, density * (1 + PULSE_DEPTH * depth * wave)));
+    let trailScale = 1;
+    if (mode === "pulse") {
+      // Pulse swells a streaks layer by swinging its density. On a
+      // streamlines layer the same swing goes to trail length instead:
+      // adding particles pops whole strands into existence, and growing
+      // the ones already there doesn't.
+      if (isParticleTexture(layer.texture)) trailScale = 1 + PULSE_DEPTH * depth * wave;
+      else density = Math.min(1, Math.max(0, density * (1 + PULSE_DEPTH * depth * wave)));
+    }
     return buildGrid({
       seed: layer.seed,
       cols,
@@ -846,6 +1212,8 @@ function generate(options) {
       phase,
       loopMode: mode,
       phaseOffset: isB ? LAYER_B_PHASE_OFFSET : 0,
+      texture: layer.texture,
+      trailScale,
     });
   };
 

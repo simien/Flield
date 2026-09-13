@@ -74,10 +74,11 @@
       "Animated GIF export, plus SVG and PNG for stills",
       "Two independently seeded layers over a background color, three colors in all",
       "Seeded flow fields with adjustable scale, strength, and stretch",
+      "Six textures per layer from one field: streaks, nebula, marble, contours, streamlines, and weave",
       "Symmetry modes, including the 4-way mirror that tiles without a seam",
       "Per-field locks that hold a value through a randomize pass",
       "Palette Range and Density Range to constrain how far randomization wanders",
-      "Auto-randomize on a timer, from every 0.5 to every 10 seconds",
+      "Separate Speed and Auto-randomize interval sliders, from a quarter of a second to sixteen",
       "Shareable URLs and three browser-local save slots, both carrying the lock set",
       "Runs entirely in the browser with no account, upload, or third-party dependency"
     ],
@@ -110,7 +111,7 @@
     "@type": "HowTo",
     "@id": "https://flield.com/#how-to",
     "name": "How to use Flield",
-    "description": "Flield builds three-color compositions from flow fields: grids of directional forces that steer noise into organic drifts instead of static. Each layer follows its own field, shaping density into bands and clusters. This is how to steer that, then save the result.",
+    "description": "Flield builds three-color compositions from flow fields: grids of directional forces that steer noise into organic drifts instead of static. Each layer follows its own field, and its texture decides what that field draws, from bands and clusters to topographic contours to the trails of particles running along it. This is how to steer that, then save the result.",
     "about": { "@id": "https://flield.com/#app" },
     "inLanguage": "en",
     "image": "https://flield.com/screenshot.png?v=5",
@@ -171,12 +172,12 @@
       {
         "@type": "HowToStep",
         "name": "Export a PNG, SVG, or GIF",
-        "text": "PNG and SVG save the still. A GIF records however many passes you ask for: with Motion off, that is the sequence Auto-randomize would generate, one still per pass, each held for the speed beside the play button. A whole export is capped at 240 frames, so a long one trades smoothness rather than size."
+        "text": "PNG and SVG save the still. A GIF records however many passes you ask for: with Motion off, that is the sequence Auto-randomize would generate, one still per pass, each held for the Reroll every interval. A whole export is capped at 240 frames, so a long one trades smoothness rather than size."
       },
       {
         "@type": "HowToStep",
         "name": "Animate it",
-        "text": "Motion, in the General tab, moves the composition instead of replacing it: Loop, Drift, Wind, and Pulse each hold every setting and run one cycle that lands back on its first frame, with no cut. Pick one and the canvas plays it straight away. A cycle lasts as long as the speed beside the play button, and a GIF records what you are watching."
+        "text": "Motion, in the General tab, moves the composition instead of replacing it: Loop, Drift, Wind, and Pulse each hold every setting and run one cycle that lands back on its first frame, with no cut. Pick one and the canvas plays it straight away. A cycle lasts as long as the Speed slider under it says, and a GIF records what you are watching."
       }
     ]
   }
@@ -186,7 +187,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=96" />
+  <link rel="stylesheet" href="style.css?v=101" />
 </head>
 <body>
   <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show settings" aria-pressed="false"><i class="ph ph-list"></i></button>
@@ -238,7 +239,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 1 of 13</p>
         <h3>What's a flow field?</h3>
-        <p>In generative art, a flow field is a grid of directional forces that steers noise into organic drifts instead of static. Every layer here follows its own field to shape density into bands and clusters, which is where the name comes from.</p>
+        <p>In generative art, a flow field is a grid of directional forces that steers noise into organic drifts instead of static. Every layer here follows its own field, and its <span class="ui-ref">Texture</span> decides what the field draws: six of them, from <strong>Streaks</strong>, which shapes density into bands and clusters, through <strong>Contours</strong>, which draws its level lines, to <strong>Streamlines</strong>, which traces particles along the directions themselves.</p>
       </div>
 
       <div class="tutorial-step" data-step="1">
@@ -373,7 +374,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 12 of 13</p>
         <h3>Export PNG, SVG, or GIF</h3>
-        <p>PNG and SVG save the still. A GIF records however many passes you ask for: with <span class="ui-ref">Motion</span> off, that is the sequence <span class="ui-ref">Auto-randomize</span> would generate, one still per pass, each held for the speed beside the play button. A whole export is capped at 240 frames, so a long one trades smoothness rather than size.</p>
+        <p>PNG and SVG save the still. A GIF records however many passes you ask for: with <span class="ui-ref">Motion</span> off, that is the sequence <span class="ui-ref">Auto-randomize</span> would generate, one still per pass, each held for the <span class="ui-ref">Reroll every</span> interval. A whole export is capped at 240 frames, so a long one trades smoothness rather than size.</p>
       </div>
 
       <!-- A second live canvas (see startTutorialAnimate): one cycle of
@@ -389,7 +390,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 13 of 13</p>
         <h3>Animate it</h3>
-        <p><span class="ui-ref">Motion</span>, in the General tab, moves the composition instead of replacing it. <span class="ui-ref">Loop</span>, <span class="ui-ref">Drift</span>, <span class="ui-ref">Wind</span>, and <span class="ui-ref">Pulse</span> each hold every setting and run one cycle that lands back on its first frame, with no cut. Pick one and the canvas plays it straight away; a cycle lasts as long as the speed beside the play button. Leave <span class="ui-ref">Auto-randomize</span> running as well and each pass rerolls before it animates. The GIF button records whatever you are watching.</p>
+        <p><span class="ui-ref">Motion</span>, in the General tab, moves the composition instead of replacing it. <span class="ui-ref">Loop</span>, <span class="ui-ref">Drift</span>, <span class="ui-ref">Wind</span>, and <span class="ui-ref">Pulse</span> each hold every setting and run one cycle that lands back on its first frame, with no cut. Pick one and the canvas plays it straight away; a cycle lasts as long as the <span class="ui-ref">Speed</span> slider under it says. Leave <span class="ui-ref">Auto-randomize</span> running as well and each pass rerolls before it animates. The GIF button records whatever you are watching.</p>
       </div>
     </div>
 
@@ -449,22 +450,15 @@
     <button type="button" class="sheet-handle" id="sheetHandle" aria-label="Close panel"></button>
     <div class="controls-header">
       <!-- The exploration loop, the three controls pressed over and
-           over: Undo, Auto-randomize (with its speed), Random. Lock and
-           Unlock, which constrain that loop rather than drive it, get
-           their own row below. The brand lives over the artboard (see
-           .brand in .main-area) so this row has the full width. -->
+           over: Undo, Auto-randomize, Random. Auto-randomize's interval
+           lives in the General tab as the Speed slider, since it is the
+           same beat a motion cycle runs on. Lock and Unlock, which
+           constrain that loop rather than drive it, get their own row
+           below. The brand lives over the artboard (see .brand in
+           .main-area) so this row has the full width. -->
       <div class="explore-row">
           <button id="undoBtn" class="secondary icon-btn" title="Undo last randomize" data-hold="Hold to undo" disabled><i class="ph ph-arrow-counter-clockwise"></i></button>
-          <div class="split-btn">
-            <button id="playBtn" class="secondary split-btn-main" title="Auto-randomize (Space)"><i class="ph ph-play"></i></button>
-            <select id="autoSpeed" class="split-btn-select" title="Auto-randomize speed">
-              <option value="1000">1s</option>
-              <option value="2000" selected>2s</option>
-              <option value="3000">3s</option>
-              <option value="5000">5s</option>
-              <option value="10000">10s</option>
-            </select>
-          </div>
+          <button id="playBtn" class="secondary icon-btn" title="Auto-randomize (Space)"><i class="ph ph-play"></i></button>
           <button id="randomizeBtn" title="Randomize every unlocked field (R)"><i class="ph ph-shuffle"></i> <span class="btn-label">Random</span></button>
       </div>
 
@@ -517,7 +511,7 @@
       </div>
 
       <div class="field">
-        <label for="blockSize">Block size (grid resolution) <span id="blockSizeVal">2px</span></label>
+        <label for="blockSize">Block size (grid resolution) <span class="field-value" id="blockSizeVal">2px</span></label>
         <div class="field-row">
           <input type="range" id="blockSize" min="2" max="80" value="2" />
           <button type="button" class="lock-btn" data-for="blockSize" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
@@ -548,7 +542,8 @@
 
       <div class="field">
         <label for="motion">Motion</label>
-        <select id="motion" title="How the composition moves. Plays on the canvas as soon as you pick one">
+        <p class="hint">Plays on the canvas as soon as you pick one.</p>
+        <select id="motion">
           <option value="none" selected>None (still)</option>
           <option value="circle">Loop</option>
           <option value="drift">Drift</option>
@@ -557,8 +552,38 @@
         </select>
       </div>
 
+      <!-- Revealed with a motion, the same way the shape mask's
+           direction is revealed with a shape that has one. A cycle
+           length means nothing without a cycle, and holding the pair
+           together is what keeps it from reading as part of the
+           Auto-randomize interval below. -->
+      <div class="field" id="speedField" hidden>
+        <label for="speed">Speed <span class="field-value" id="speedVal"></span></label>
+        <p class="hint">How long a cycle takes on screen and in GIFs.</p>
+        <input type="range" id="speed" min="0" max="48" value="24" />
+      </div>
+
+      <h2 class="section-title">Auto-randomize</h2>
+
+      <div class="field">
+        <label for="interval">Reroll every <span class="field-value" id="intervalVal"></span></label>
+        <p class="hint">Time between rerolls while it runs.</p>
+        <!-- Stepped where Speed is not: a reroll cadence is a choice
+             between a handful of speeds rather than something to dial
+             in, and stops it can land between would read as a fault.
+             Eight index steps is a doubling, so every stop is a round
+             number: one, two, four, eight, sixteen. Halve the step for
+             half-steps, at the cost of stops reading 1.4s and 11.3s.
+
+             It starts at a second where Speed starts at a quarter of
+             one, which is the two controls earning their separation: a
+             quarter-second cycle is a real look, and a quarter-second
+             reroll is a strobe you cannot read a composition out of. -->
+        <input type="range" id="interval" min="16" max="48" step="8" value="24" />
+      </div>
+
       <h2 class="section-title">Saved states</h2>
-      <p class="hint">Snapshot the full composition, both layers and colors, into a slot to reload anytime.</p>
+      <p class="hint">Snapshot the whole composition into a slot.</p>
       <div class="preset-row" data-slot="1">
         <span class="preset-label">Slot 1</span>
         <span class="preset-swatches" aria-hidden="true"></span>
@@ -612,7 +637,7 @@
           <i class="ph ph-caret-down"></i>
         </button>
         <div class="palette-content" hidden>
-          <p class="hint">Randomized colors are drawn from within these windows, not the whole wheel.</p>
+          <p class="hint">Randomized colors come from these windows.</p>
 
           <div class="preset-chip-row">
             <button type="button" class="palette-preset-btn" data-preset="full">Full spectrum</button>
@@ -623,34 +648,34 @@
           </div>
 
           <div class="field">
-            <label>Hue min <span class="l-hueMinVal"></span></label>
+            <label>Hue min <span class="l-hueMinVal field-value"></span></label>
             <input type="range" class="l-hueMin" min="0" max="360" />
           </div>
           <div class="field">
-            <label>Hue max <span class="l-hueMaxVal"></span></label>
+            <label>Hue max <span class="l-hueMaxVal field-value"></span></label>
             <input type="range" class="l-hueMax" min="0" max="360" />
           </div>
           <div class="field">
-            <label>Saturation min <span class="l-satMinVal"></span></label>
+            <label>Saturation min <span class="l-satMinVal field-value"></span></label>
             <input type="range" class="l-satMin" min="0" max="100" />
           </div>
           <div class="field">
-            <label>Saturation max <span class="l-satMaxVal"></span></label>
+            <label>Saturation max <span class="l-satMaxVal field-value"></span></label>
             <input type="range" class="l-satMax" min="0" max="100" />
           </div>
           <div class="field">
-            <label>Lightness min <span class="l-lightMinVal"></span></label>
+            <label>Lightness min <span class="l-lightMinVal field-value"></span></label>
             <input type="range" class="l-lightMin" min="0" max="100" />
           </div>
           <div class="field">
-            <label>Lightness max <span class="l-lightMaxVal"></span></label>
+            <label>Lightness max <span class="l-lightMaxVal field-value"></span></label>
             <input type="range" class="l-lightMax" min="0" max="100" />
           </div>
         </div>
       </div>
 
       <div class="field">
-        <label>Base density <span class="l-densityVal"></span></label>
+        <label>Base density <span class="l-densityVal field-value"></span></label>
         <div class="field-row">
           <input type="range" class="l-density" min="0" max="1" step="0.01" />
           <button type="button" class="lock-btn" data-for="density" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
@@ -663,13 +688,13 @@
           <i class="ph ph-caret-down"></i>
         </button>
         <div class="palette-content" hidden>
-          <p class="hint">Randomized density is drawn from within this window, so a randomize pass never drifts all the way to a solid fill (or, at the low end, an empty layer).</p>
+          <p class="hint">Keeps a randomized density off both extremes.</p>
           <div class="field">
-            <label>Density min <span class="l-densityMinVal"></span></label>
+            <label>Density min <span class="l-densityMinVal field-value"></span></label>
             <input type="range" class="l-densityMin" min="0" max="1" step="0.01" />
           </div>
           <div class="field">
-            <label>Density max <span class="l-densityMaxVal"></span></label>
+            <label>Density max <span class="l-densityMaxVal field-value"></span></label>
             <input type="range" class="l-densityMax" min="0" max="1" step="0.01" />
           </div>
         </div>
@@ -678,35 +703,51 @@
       <h2 class="section-title">Flow field</h2>
 
       <div class="field">
-        <label>Field strength <span class="l-fieldStrengthVal"></span></label>
+        <label>Texture</label>
+        <p class="hint l-textureHint"></p>
+        <div class="field-row">
+          <select class="l-texture">
+            <option value="streaks">Streaks</option>
+            <option value="nebula">Nebula</option>
+            <option value="marble">Marble</option>
+            <option value="contours">Contours</option>
+            <option value="streamlines">Streamlines</option>
+            <option value="weave">Weave</option>
+          </select>
+          <button type="button" class="lock-btn" data-for="texture" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label><span class="l-fieldStrengthName">Field strength</span> <span class="l-fieldStrengthVal field-value"></span></label>
         <div class="field-row">
           <input type="range" class="l-fieldStrength" min="0" max="1" step="0.005" />
           <button type="button" class="lock-btn" data-for="fieldStrength" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
         </div>
       </div>
       <div class="field">
-        <label>Flow scale <span class="l-fieldScaleVal"></span></label>
+        <label>Flow scale <span class="l-fieldScaleVal field-value"></span></label>
         <div class="field-row">
           <input type="range" class="l-fieldScale" min="8" max="600" />
           <button type="button" class="lock-btn" data-for="fieldScale" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
         </div>
       </div>
       <div class="field">
-        <label>Flow direction <span class="l-flowAngleVal"></span></label>
+        <label>Flow direction <span class="l-flowAngleVal field-value"></span></label>
         <div class="field-row">
           <input type="range" class="l-flowAngle" min="0" max="359" />
           <button type="button" class="lock-btn" data-for="flowAngle" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
         </div>
       </div>
       <div class="field">
-        <label>Flow stretch <span class="l-flowStretchVal"></span></label>
+        <label><span class="l-flowStretchName">Flow stretch</span> <span class="l-flowStretchVal field-value"></span></label>
         <div class="field-row">
           <input type="range" class="l-flowStretch" min="1" max="10" step="0.1" />
           <button type="button" class="lock-btn" data-for="flowStretch" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
         </div>
       </div>
       <div class="field">
-        <label>Turbulence (octaves) <span class="l-fieldOctavesVal"></span></label>
+        <label>Turbulence (octaves) <span class="l-fieldOctavesVal field-value"></span></label>
         <div class="field-row">
           <input type="range" class="l-fieldOctaves" min="1" max="4" />
           <button type="button" class="lock-btn" data-for="fieldOctaves" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
@@ -732,7 +773,7 @@
         </div>
       </div>
       <div class="field">
-        <label>Smoothing passes <span class="l-smoothVal"></span></label>
+        <label><span class="l-smoothPassesName">Smoothing passes</span> <span class="l-smoothVal field-value"></span></label>
         <div class="field-row">
           <input type="range" class="l-smoothPasses" min="0" max="5" />
           <button type="button" class="lock-btn" data-for="smoothPasses" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
@@ -742,7 +783,7 @@
 
     <div class="tab-panel" id="tab-layerA" hidden></div>
     <div class="tab-panel" id="tab-layerB" hidden>
-      <p class="hint">Layer B only shows in the gaps Layer A leaves empty. Lower either layer's density to let the background show through.</p>
+      <p class="hint">Layer B fills the gaps Layer A leaves.</p>
     </div>
     <div class="scroll-fade scroll-fade-bottom" aria-hidden="true"></div>
     </div>
@@ -764,7 +805,6 @@
             <option value="3">3 passes</option>
             <option value="5" selected>5 passes</option>
             <option value="8">8 passes</option>
-            <option value="13">13 passes</option>
           </select>
         </div>
       </div>
@@ -793,7 +833,7 @@
   </div>
 
   <div class="main-area">
-    <p class="sr-only">Flield is a free, browser-based generator for seamless animated backgrounds. It creates three-color pixel art compositions from seeded flow fields and symmetry, sets them moving with Loop, Drift, Wind, or Pulse so a cycle returns to its first frame with no cut, and exports to animated GIF, SVG, or PNG. Locks hold the fields you like while the rest randomize. Runs entirely in the browser, no account or upload needed.</p>
+    <p class="sr-only">Flield is a free, browser-based generator for seamless animated backgrounds. It creates three-color pixel art compositions from seeded flow fields and symmetry, drawing each field one of six ways, from density-biased streaks to topographic contours to streamlines traced by particles running along it, sets them moving with Loop, Drift, Wind, or Pulse so a cycle returns to its first frame with no cut, and exports to animated GIF, SVG, or PNG. Locks hold the fields you like while the rest randomize. Runs entirely in the browser, no account or upload needed.</p>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <!-- First-visit nudge toward the tutorial. A modal used to open on
          its own here, on top of the freshly randomized canvas that is
@@ -856,7 +896,7 @@
     </script>
   </div>
 
-  <script src="generator.js?v=10"></script>
+  <script src="generator.js?v=11"></script>
   <script>
     // Inline replacements for the icons that used to come from the
     // Phosphor webfont (224KB for the ~19 glyphs this app actually uses).
@@ -972,7 +1012,7 @@
     // these whose lock is engaged.
     const RANDOMIZABLE_FIELDS = [
       "seed", "color", "density", "fieldStrength", "fieldScale",
-      "flowAngle", "flowStretch", "fieldOctaves", "symmetry", "smoothPasses",
+      "flowAngle", "flowStretch", "fieldOctaves", "texture", "symmetry", "smoothPasses",
     ];
     const lockedFields = new Set();
 
@@ -1071,6 +1111,20 @@
     }
     buildLayerControls(document.getElementById("tab-layerA"), "layerA");
     buildLayerControls(document.getElementById("tab-layerB"), "layerB");
+
+    // A last line carrying one word reads as a mistake in a column this
+    // narrow, and the CSS for it does not work here: with
+    // `text-wrap: pretty` on and off, the same lines widow at every
+    // width the sidebar and the phone sheet take. So the last two words
+    // are tied with a non-breaking space, which the line breaker cannot
+    // decline. Text only, and re-run for the hints the script rewrites.
+    const NBSP = "\u00a0";
+    function tieLastWords(el) {
+      if (!el || el.children.length) return;
+      const text = el.textContent.replace(/\u00a0/g, " ").trim();
+      el.textContent = text.replace(/\s+(\S+)$/, NBSP + "$1");
+    }
+    document.querySelectorAll(".controls .hint").forEach(tieLastWords);
 
     // Custom color picker: a 2D saturation/lightness square plus a hue
     // strip, in a Floating UI-positioned popover shared by every swatch.
@@ -1380,6 +1434,7 @@
         flowAngle: 45,
         flowStretch: 3,
         fieldOctaves: 2,
+        texture: "streaks",
         symmetry: "quad",
         smoothPasses: 1,
       },
@@ -1400,6 +1455,7 @@
         flowAngle: 200,
         flowStretch: 3,
         fieldOctaves: 2,
+        texture: "streaks",
         symmetry: "none",
         smoothPasses: 1,
       },
@@ -1422,6 +1478,9 @@
       document.getElementById(prefix + "-flowAngle").value = values.flowAngle;
       document.getElementById(prefix + "-flowStretch").value = values.flowStretch;
       document.getElementById(prefix + "-fieldOctaves").value = values.fieldOctaves;
+      // Absent from every slot and link written before the second
+      // texture existed, which is exactly the one they were made with.
+      document.getElementById(prefix + "-texture").value = values.texture || "streaks";
       document.getElementById(prefix + "-symmetry").value = values.symmetry;
       document.getElementById(prefix + "-smoothPasses").value = values.smoothPasses;
     }
@@ -1465,12 +1524,73 @@
         flowAngle: parseInt(document.getElementById(prefix + "-flowAngle").value, 10),
         flowStretch: parseFloat(document.getElementById(prefix + "-flowStretch").value),
         fieldOctaves: parseInt(document.getElementById(prefix + "-fieldOctaves").value, 10),
+        texture: document.getElementById(prefix + "-texture").value,
         symmetry: document.getElementById(prefix + "-symmetry").value,
         smoothPasses: parseInt(document.getElementById(prefix + "-smoothPasses").value, 10),
       };
     }
 
+    // Every texture steers by the same five flow controls, but some of
+    // them do a visibly different job once the field is a heading
+    // rather than a shade, so the labels say which job. Nothing is
+    // remapped behind the scenes that isn't renamed here.
+    //
+    // The hints stay to one clause each. They are read past on the way
+    // to a slider, not studied, and on a phone the sidebar is a sheet
+    // over the artwork where every line costs a line of the picture.
+    // A title attribute would be the obvious place for the rest and is
+    // the wrong one: it never appears on a touch device. The guide
+    // carries the full explanation instead.
+    // Base density is deliberately not in here. Contours reads it as
+    // line weight, but the Density Range panel under it, and the min and
+    // max inside that, all keep saying density, and renaming one of the
+    // four made the cluster disagree with itself.
+    const TEXTURE_NAMES = ["fieldStrength", "flowStretch", "smoothPasses"];
+    const BIASED = {
+      fieldStrength: "Field strength",
+      flowStretch: "Flow stretch",
+      smoothPasses: "Smoothing passes",
+    };
+    const TRACED = {
+      fieldStrength: "Curl",
+      flowStretch: "Trail length",
+      smoothPasses: "Strand weight",
+    };
+    const TEXTURE_LABELS = {
+      streaks: Object.assign({
+        hint: "Biases each cell's chance of filling. Bands.",
+      }, BIASED),
+      nebula: Object.assign({
+        hint: "Folded at zero: filaments, with voids between.",
+      }, BIASED),
+      marble: Object.assign({
+        hint: "Streaks folded by a second, coarser field.",
+      }, BIASED),
+      contours: Object.assign({}, BIASED, {
+        hint: "The field's level lines, not its shading.",
+        fieldStrength: "Levels",
+        // Levels are countable, so the readout counts them rather than
+        // showing the strength the slider happens to store. Anything
+        // renamed to a unit it doesn't read in needs one of these, or
+        // the label says one thing and the number beside it another.
+        fieldStrengthValue: (strength) => String(Math.max(1, Math.round(CONTOUR_LEVELS * strength))),
+      }),
+      streamlines: Object.assign({
+        hint: "Particles traced along the field's headings.",
+      }, TRACED),
+      weave: Object.assign({
+        hint: "Streamlines twice, the second set crossing.",
+      }, TRACED),
+    };
+
     function updateLayerLabels(prefix, layer) {
+      const texture = TEXTURE_LABELS[layer.texture] || TEXTURE_LABELS.streaks;
+      const hint = document.getElementById(prefix + "-textureHint");
+      hint.textContent = texture.hint;
+      tieLastWords(hint);
+      TEXTURE_NAMES.forEach((key) => {
+        document.getElementById(prefix + "-" + key + "Name").textContent = texture[key];
+      });
       document.getElementById(prefix + "-hueMinVal").textContent = layer.hueMin + "°";
       document.getElementById(prefix + "-hueMaxVal").textContent = layer.hueMax + "°";
       document.getElementById(prefix + "-satMinVal").textContent = layer.satMin + "%";
@@ -1481,10 +1601,12 @@
       document.getElementById(prefix + "-densityMinVal").textContent = layer.densityMin.toFixed(2);
       document.getElementById(prefix + "-densityMaxVal").textContent = layer.densityMax.toFixed(2);
       // Two decimals, three only when the value sits on a half step (a
-      // state from before the field gain, halved on load).
+      // state from before the field gain, halved on load), unless the
+      // texture reads the slider as something with a unit of its own.
       const strength = layer.fieldStrength;
-      document.getElementById(prefix + "-fieldStrengthVal").textContent =
-        Math.round(strength * 1000) % 10 ? strength.toFixed(3) : strength.toFixed(2);
+      document.getElementById(prefix + "-fieldStrengthVal").textContent = texture.fieldStrengthValue
+        ? texture.fieldStrengthValue(strength)
+        : Math.round(strength * 1000) % 10 ? strength.toFixed(3) : strength.toFixed(2);
       document.getElementById(prefix + "-fieldScaleVal").textContent = layer.fieldScale + "px";
       document.getElementById(prefix + "-flowAngleVal").textContent = layer.flowAngle + "°";
       document.getElementById(prefix + "-flowStretchVal").textContent = layer.flowStretch.toFixed(1);
@@ -1535,15 +1657,55 @@
       }
     }
 
+    // Speed times a cycle, so it appears with one and goes away with it,
+    // its description along with it: the hint lives inside the field.
+    // If it is the field currently pinned above the bar on a phone (see
+    // showLastField), it goes home first: hiding it there would leave an
+    // empty strip with a close button and nothing in it.
+    function updateMotionUI() {
+      const field = document.getElementById("speedField");
+      const show = !!currentMotion();
+      if (!show && field.closest("#lastControl")) returnLastField();
+      field.hidden = !show;
+    }
+
     // Bumped whenever a saved field's meaning changes; upgradeState()
     // below converts older snapshots so they still render the same.
     //   v2: fieldScale is canvas pixels (was grid cells), and
     //       fieldStrength is multiplied by FIELD_GAIN in the generator.
     const STATE_VERSION = 2;
 
+    // Two durations on one scale: how long a motion cycle lasts, and how
+    // long Auto-randomize waits before rerolling. They were one number
+    // for a while, which was wrong. They answer different questions, and
+    // a GIF only needs them reconciled in the one case where both are
+    // running, which exportPlan settles by making a pass a whole motion
+    // cycle rather than a reroll interval.
+    //
+    // Both sliders carry a step index, not milliseconds. The useful
+    // range covers two orders of magnitude, and a linear millisecond
+    // slider would spend four fifths of its travel above four seconds;
+    // eight steps to a doubling puts the same amount of travel between
+    // a quarter second and a half as between eight seconds and sixteen.
+    const SPEED_BASE_MS = 250;
+    const SPEED_PER_DOUBLING = 8;
+    // 250ms doubled six times. Its own constant because the link's tail
+    // has to be wide enough to hold every step (checks.py verifies it).
+    const SPEED_MAX_STEP = 48;
+    const speedInput = document.getElementById("speed");
+    const intervalInput = document.getElementById("interval");
+    const speedMs = (step) => Math.round(SPEED_BASE_MS * 2 ** (step / SPEED_PER_DOUBLING));
+    const speedStep = (ms) =>
+      Math.min(SPEED_MAX_STEP, Math.max(0, Math.round(Math.log2(ms / SPEED_BASE_MS) * SPEED_PER_DOUBLING)));
+    // Two decimals below a second, where the steps are 30ms apart and a
+    // single one would show two of them as the same number.
+    const formatSpeed = (ms) => (ms / 1000).toFixed(ms < 1000 ? 2 : 1) + "s";
+
     function readOptions() {
       return {
         v: STATE_VERSION,
+        speed: speedMs(parseInt(speedInput.value, 10)),
+        interval: speedMs(parseInt(intervalInput.value, 10)),
         bgColor: document.getElementById("bgColor").value,
         width: parseInt(document.getElementById("width").value, 10) || 100,
         height: parseInt(document.getElementById("height").value, 10) || 100,
@@ -1665,8 +1827,11 @@
 
     function prepareRender() {
       updateShapeMaskDirectionUI();
+      updateMotionUI();
       const options = readOptions();
       document.getElementById("blockSizeVal").textContent = options.blockSize + "px";
+      document.getElementById("speedVal").textContent = formatSpeed(options.speed);
+      document.getElementById("intervalVal").textContent = formatSpeed(options.interval);
       updateLayerLabels("layerA", options.layerA);
       updateLayerLabels("layerB", options.layerB);
       updatePresetChips(options);
@@ -1710,16 +1875,25 @@
     document.querySelector(".controls").addEventListener("input", scheduleRender);
 
     // Live preview of a motion: choosing anything but None in the
-    // Motion field plays it on the canvas for one beat per cycle, so
+    // Motion field plays it on the canvas at the Speed slider's pace, so
     // the export is what's on screen; choosing None puts the still
     // back. Frames are picked by wall-clock time, so a
     // heavy composition drops frames rather than slowing the cycle.
     const seamlessPreview = { active: false, frame: 0 };
-    // The redraw cadence, 12.5 fps, well clear of the sub-20ms delays
-    // browsers refuse to honor. It sets how often the preview repaints
-    // and what counts as a smooth export before the budget below trims
-    // it; the cycle's length comes from the speed menu, not from here.
+    // The slowest the preview is allowed to repaint, 12.5 fps. It is
+    // also what counts as a smooth export before the budget below trims
+    // it; the cycle's length comes from the Speed slider, not from here.
     const CYCLE_FRAME_MS = 80;
+
+    // How finely the preview samples a cycle, and the floor on how often
+    // it may repaint to manage it. A fixed cadence is wrong at both ends
+    // of the Speed slider: at its fastest, 80ms apart is three frames to
+    // a cycle, which strobes rather than moves, and the composition
+    // looks the same at every speed because the phase jumps a third of
+    // a turn either way. Twenty-five to a cycle is exactly the old fixed
+    // cadence at a two second beat, so nothing at or above that changes.
+    const PREVIEW_FRAMES_PER_CYCLE = 25;
+    const PREVIEW_MIN_FRAME_MS = 16;
     // Frames in one cycle of the tutorial's animated demo, which runs on
     // its own small canvas at a fixed size rather than off the beat.
     const CYCLE_FRAMES = 38;
@@ -1738,8 +1912,21 @@
     // an operating point.
     const MIN_FRAMES_PER_BEAT = 12;
 
-    function currentBeatMs() {
-      return parseInt(autoSpeedSelect.value, 10);
+    // A GIF frame delay is written in hundredths of a second, and
+    // browsers replace anything under two of them with a tenth, so a
+    // beat is never cut into more frames than it has 20ms slices for.
+    // The Speed slider's fastest beat is 250ms, which buys the twelve
+    // frames above with a millisecond to spare, so this never binds
+    // today. It is here so that lowering SPEED_BASE_MS shortens the GIF
+    // rather than silently changing the speed it plays back at.
+    const MIN_GIF_DELAY_MS = 20;
+
+    function currentCycleMs() {
+      return speedMs(parseInt(speedInput.value, 10));
+    }
+
+    function currentIntervalMs() {
+      return speedMs(parseInt(intervalInput.value, 10));
     }
 
     // One beat's worth of frames: as smooth as the old fixed 80ms
@@ -1747,7 +1934,8 @@
     function beatFrames(beats, beatMs) {
       const smooth = Math.round(beatMs / CYCLE_FRAME_MS);
       const affordable = Math.floor(GIF_FRAME_BUDGET / beats);
-      return Math.max(MIN_FRAMES_PER_BEAT, Math.min(smooth, affordable));
+      const honored = Math.floor(beatMs / MIN_GIF_DELAY_MS);
+      return Math.max(2, Math.min(Math.max(MIN_FRAMES_PER_BEAT, Math.min(smooth, affordable)), honored));
     }
 
     function currentMotion() {
@@ -1755,25 +1943,31 @@
       return value === "none" ? null : value;
     }
 
-    // What a GIF would record right now, read off the three controls
-    // that each own one axis: Motion says what a pass looks like, the
-    // speed menu says how long a pass lasts, and the length menu says
-    // how many. They used to be two menus with the kinds and the counts
-    // multiplied together into one flat list, which is why choosing an
-    // animation quietly changed the export and why the speed only
-    // applied to half the entries.
+    // What a GIF would record right now, read off the controls that
+    // each own one axis: Motion says what a pass looks like, Speed says
+    // how long an animated pass runs, Reroll every says how long a still
+    // one is held, and the length menu says how many. They used to be
+    // two menus with the kinds and the counts multiplied together into
+    // one flat list, which is why choosing an animation quietly changed
+    // the export and why the speed only applied to half the entries.
+    //
+    // A pass is one whole motion cycle whenever there is a motion, even
+    // with Auto-randomize running on a different interval. That is the
+    // one place the two durations have to be reconciled, and cutting a
+    // cycle short at the reroll is the wrong way to do it: the seam that
+    // makes an export loop is the cycle's own end.
     //
     // Passes only mean something when the composition changes between
     // them. Motion alone loops one composition, so the length is held at
     // one rather than emitting the same cycle several times over.
     function exportPlan() {
       const kind = currentMotion();
-      const beatMs = currentBeatMs();
       const rerolls = !kind || !!autoplayTimer;
       const beats = rerolls ? parseInt(gifStepsSelect.value, 10) : 1;
-      if (!kind) return { kind: null, beats, rerolls, frames: 1, delay: beatMs };
-      const frames = beatFrames(beats, beatMs);
-      return { kind, beats, rerolls, frames, delay: Math.round(beatMs / frames) };
+      if (!kind) return { kind: null, beats, rerolls, frames: 1, delay: currentIntervalMs() };
+      const cycleMs = currentCycleMs();
+      const frames = beatFrames(beats, cycleMs);
+      return { kind, beats, rerolls, frames, delay: Math.round(cycleMs / frames) };
     }
 
     const SEAMLESS_NAMES = { circle: "Loop", drift: "Drift", wind: "Wind", pulse: "Pulse" };
@@ -1796,14 +1990,17 @@
       const tick = (now) => {
         if (!seamlessPreview.active) return;
         const elapsed = now - start;
-        // Redraws on the fixed cadence, not on the export's frame count:
-        // the budget is an export concern, and a preview throttled by it
-        // would stutter for no reason. Reading the beat each tick lets
-        // the speed menu take effect without a restart.
-        const step = Math.floor(elapsed / CYCLE_FRAME_MS);
+        // Redraws on a cadence cut from the cycle, not on the export's
+        // frame count: the budget is an export concern, and a preview
+        // throttled by it would stutter for no reason. Both the cadence
+        // and the beat are read each tick, so the Speed slider takes
+        // effect without a restart. A composition too heavy to keep up
+        // drops frames rather than slowing the cycle down.
+        const beat = currentCycleMs();
+        const cadence = Math.max(PREVIEW_MIN_FRAME_MS, Math.min(CYCLE_FRAME_MS, beat / PREVIEW_FRAMES_PER_CYCLE));
+        const step = Math.floor(elapsed / cadence);
         if (step !== lastStep) {
           lastStep = step;
-          const beat = currentBeatMs();
           const phase = (elapsed % beat) / beat;
           drawComposition(Object.assign(readOptions(), { loopMode: kind, loopPhase: phase }));
         }
@@ -1920,6 +2117,11 @@
     // eight. Options not listed weigh 1.
     const SYMMETRY_WEIGHTS = { quad: 3, none: 3, horizontal: 2, vertical: 2, rotational: 2, diagonal: 1.5, kaleidoscope: 1, tile: 0.5 };
     const SHAPE_MASK_WEIGHTS = { none: 5 };
+    // Streaks stays the house texture, weighted against the five others
+    // put together, but not by so much that a few passes of Random never
+    // turn one of them up.
+    const TEXTURE_WEIGHTS = { streaks: 5 };
+    const SELECT_WEIGHTS = { symmetry: SYMMETRY_WEIGHTS, texture: TEXTURE_WEIGHTS };
 
     function weightedPick(values, weights) {
       const total = values.reduce((sum, v) => sum + (weights[v] ?? 1), 0);
@@ -2110,7 +2312,7 @@
         randomLogRange(el);
       } else if (el.tagName === "SELECT") {
         const options = Array.from(el.options).map((o) => o.value);
-        el.value = weightedPick(options, field === "symmetry" ? SYMMETRY_WEIGHTS : {});
+        el.value = weightedPick(options, SELECT_WEIGHTS[field] || {});
       } else {
         randomizeRangeInput(el);
       }
@@ -2219,16 +2421,18 @@
       showToast("All fields unlocked");
     });
 
-    // Auto-randomize: repeatedly calls performRandomize on an interval
-    // whose length is read live from the speed <select>, so changing
-    // speed while playing takes effect on the next tick without a
-    // separate stop/restart step from the user.
+    // Auto-randomize: calls performRandomize, then schedules the next
+    // call. One tick at a time rather than a setInterval, because the
+    // wait has to be re-read whenever the Reroll every slider moves.
+    // The restart that used to do that was bound to the wrong slider:
+    // dragging Speed reset the reroll clock and dragging the interval
+    // did nothing at all until Play was stopped and started again.
     const playBtn = document.getElementById("playBtn");
-    const autoSpeedSelect = document.getElementById("autoSpeed");
     let autoplayTimer = null;
 
-    // These two selects show only a caret at rest (see .split-btn-select
-    // in style.css), so the current value is surfaced as a tooltip instead.
+    // The selects left in split buttons show only a caret at rest (see
+    // .split-btn-select in style.css), so the current value is surfaced
+    // as a tooltip instead.
     function syncSelectTitle(select, baseTitle) {
       select.title = `${baseTitle} (currently ${select.options[select.selectedIndex].text})`;
     }
@@ -2242,17 +2446,18 @@
     // is the current value, which syncSelectTitle appends, because these
     // selects render as a bare caret.
     const GIF_MENU_TITLE = "How many passes the GIF records";
-    const SPEED_TITLE = "How long one pass lasts";
-    syncSelectTitle(autoSpeedSelect, SPEED_TITLE);
     syncSelectTitle(gifStepsSelect, GIF_MENU_TITLE);
     syncSelectTitle(linkModeSelect, "What the link offers when opened");
     linkModeSelect.addEventListener("change", () => syncSelectTitle(linkModeSelect, "What the link offers when opened"));
-    autoSpeedSelect.addEventListener("change", () => syncSelectTitle(autoSpeedSelect, SPEED_TITLE));
     gifStepsSelect.addEventListener("change", () => syncSelectTitle(gifStepsSelect, GIF_MENU_TITLE));
 
     // Motion is the only one of the three that changes what's on screen
     // the moment it's set, so it's the one that says so.
     motionSelect.addEventListener("change", () => {
+      // Also called from prepareRender, but that is a frame away behind
+      // scheduleRender, and the select's own change is the moment the
+      // Speed slider should be there or gone.
+      updateMotionUI();
       const wasPreviewing = seamlessPreview.active;
       syncSeamlessPreview();
       const kind = currentMotion();
@@ -2261,7 +2466,7 @@
     });
 
     function stopAutoplay() {
-      clearInterval(autoplayTimer);
+      clearTimeout(autoplayTimer);
       autoplayTimer = null;
       playBtn.classList.remove("playing");
       setIcon(playBtn.querySelector("i"), "play");
@@ -2272,10 +2477,37 @@
     // so the click has a visible result; a shared link that opens
     // playing passes false, so its composition shows first and the
     // first reroll lands one interval later.
+    // When the current wait began. Kept apart from the scheduling so a
+    // wait can be re-timed against the new interval without restarting
+    // it: moving the slider from eight seconds to a half should reroll
+    // about half a second in, not eight, and a drag that re-times on
+    // every input event must not push the tick away each time it does.
+    let rerollWaitFrom = 0;
+
+    // `fresh` starts a new wait; without it the wait already running is
+    // measured against the interval as it now stands, and fires at once
+    // if that has already gone by.
+    function scheduleReroll(fresh) {
+      if (fresh) rerollWaitFrom = performance.now();
+      const remaining = Math.max(0, currentIntervalMs() - (performance.now() - rerollWaitFrom));
+      clearTimeout(autoplayTimer);
+      autoplayTimer = setTimeout(() => {
+        performRandomize();
+        // A pass can stop playback itself (a GIF export does), and the
+        // id is still the fired timeout's until it is reassigned, so
+        // this asks whether anything cleared it rather than assuming.
+        if (autoplayTimer) scheduleReroll(true);
+      }, remaining);
+    }
+
+    intervalInput.addEventListener("input", () => {
+      if (autoplayTimer) scheduleReroll(false);
+    });
+
     function startAutoplay(immediate = true) {
       playOffer.hidden = true;
       if (immediate) performRandomize();
-      autoplayTimer = setInterval(performRandomize, parseInt(autoSpeedSelect.value, 10));
+      scheduleReroll(true);
       playBtn.classList.add("playing");
       setIcon(playBtn.querySelector("i"), "pause");
       playBtn.title = "Stop auto-randomize (Space)";
@@ -2293,13 +2525,6 @@
     document.getElementById("playOfferStartBtn").addEventListener("click", () => startAutoplay());
     document.getElementById("playOfferDismissBtn").addEventListener("click", () => {
       playOffer.hidden = true;
-    });
-
-    autoSpeedSelect.addEventListener("change", () => {
-      if (autoplayTimer) {
-        clearInterval(autoplayTimer);
-        autoplayTimer = setInterval(performRandomize, parseInt(autoSpeedSelect.value, 10));
-      }
     });
 
     // PNG and SVG capture the still: a running preview is stopped (which
@@ -2366,8 +2591,8 @@
     // Builds an animated GIF by calling performRandomize() once per step
     // (so it respects the same field locks as manual randomizing) and
     // capturing the canvas after each. Per-frame delay reuses the
-    // auto-randomize speed control above rather than a separate setting,
-    // so total GIF length = speed x steps.
+    // Speed slider above rather than a separate setting, so total GIF
+    // length = speed x steps.
     const downloadGifBtn = document.getElementById("downloadGif");
 
     downloadGifBtn.addEventListener("click", async () => {
@@ -2421,7 +2646,7 @@
       // before that paint ever happens.
       requestAnimationFrame(() => {
         if (kind && plan.rerolls) {
-          // One Auto-randomize pass per segment, each held for the speed
+          // One Auto-randomize pass per segment, each held for the beat
           // menu's interval and animated through exactly one cycle of the
           // kind in that time, then a cut to the next pass, the way the
           // live preview looks with Auto-randomize running. The passes
@@ -2468,6 +2693,21 @@
     const PRESET_KEY_PREFIX = "featuregen-preset-";
 
     function applyGeneral(values) {
+      // Absent from every slot and link written while the beat was a
+      // five-entry menu that only travelled with an autoplay flag; those
+      // carry it as `autoplay` instead, which decodeCompact copies into
+      // both, since one number is what it meant by both.
+      if (values.speed) speedInput.value = speedStep(values.speed);
+      // The interval slider only stops on multiples of its step, so a
+      // value between two of them is rounded here rather than left to
+      // the browser to clamp downward without saying so. A link written
+      // when the beat was one five-entry menu can carry 3s or 10s,
+      // neither of which is a stop.
+      if (values.interval) {
+        const lo = parseInt(intervalInput.min, 10) || 0;
+        const step = parseInt(intervalInput.step, 10) || 1;
+        intervalInput.value = Math.max(lo, Math.round(speedStep(values.interval) / step) * step);
+      }
       document.getElementById("bgColor").value = values.bgColor;
       document.getElementById("width").value = values.width;
       document.getElementById("height").value = values.height;
@@ -2566,7 +2806,10 @@
         tooltip.className = "slider-tooltip";
         wrap.appendChild(tooltip);
 
-        const valueSpan = input.closest(".field")?.querySelector("label span");
+        // The value pill by name, not by being the only span in the
+        // label: some labels carry a name span too, whose text changes
+        // with the layer's texture, and that one sits first.
+        const valueSpan = input.closest(".field")?.querySelector("label .field-value");
 
         function positionTooltip() {
           const min = parseFloat(input.min) || 0;
@@ -2777,9 +3020,15 @@
     controlsBody.addEventListener("input", rememberTouchedField, true);
     controlsBody.addEventListener("change", rememberTouchedField, true);
 
+    // Puts back whatever was taken, which is not always whatever was
+    // touched last: a control reached for while a field is out on the
+    // strip moves lastTouchedField on without moving the field, and
+    // reading it here would return the wrong element and strand the
+    // right one outside the sidebar. The field travels in lastFieldHome
+    // with the position it has to go back to.
     function returnLastField() {
       if (!lastFieldHome) return;
-      lastFieldHome.parent.insertBefore(lastTouchedField, lastFieldHome.next);
+      lastFieldHome.parent.insertBefore(lastFieldHome.field, lastFieldHome.next);
       lastFieldHome = null;
       lastControl.hidden = true;
       document.body.classList.remove("has-last-control");
@@ -2790,6 +3039,7 @@
     function showLastField() {
       if (!narrowLayout.matches || !lastTouchedField || lastFieldHome) return;
       lastFieldHome = {
+        field: lastTouchedField,
         parent: lastTouchedField.parentElement,
         next: lastTouchedField.nextElementSibling,
       };
@@ -3267,7 +3517,7 @@
     // Two things are load-bearing here, and both fail silently:
     //
     //   - The order of the <option>s for shape mask, motion, symmetry
-    //     and auto-randomize speed, and of COMPACT_LOCK_IDS below. A
+    //     and LEGACY_AUTO_SPEEDS, and of COMPACT_LOCK_IDS below. A
     //     choice travels as its index, so appending to any of them is
     //     free, and reordering one quietly repaints every link already
     //     shared.
@@ -3330,6 +3580,8 @@
       byte: 8,
       color: 24,
       symmetry: 4,
+      texture: 3,
+      speed: 6,
     };
     const COMPACT_SIZE_MAX = 2 ** COMPACT_BITS.size - 1;
 
@@ -3348,6 +3600,37 @@
           .map((key) => `${prefix}-${key}`)
       )
     );
+
+    // The tail: everything added to the format after links were already
+    // in the wild. It is written last and read back with a fallback, so
+    // a link that stops before it decodes to that fallback instead of
+    // throwing, which is how the format can grow without a new
+    // COMPACT_VERSION while nothing ahead of the tail may move.
+    //
+    // Two rules keep that true. Append only, same as the lists above;
+    // and every field's fallback must be zero, because base64 pads the
+    // last byte with up to seven zero bits and an old link's tail is
+    // read straight out of that padding.
+    //
+    // A tail that is all zeros is left off entirely rather than written
+    // out, so a composition using none of it encodes to exactly the
+    // string it did before the tail existed.
+    // The speed menu this replaced held five entries, and an old link
+    // carries its speed as an index into them, so the list outlives the
+    // menu and its order is still part of the format. New links carry
+    // the exact beat in the tail; this field keeps its other job, which
+    // is saying whether the link offers to play at all.
+    const LEGACY_AUTO_SPEEDS = ["1000", "2000", "3000", "5000", "10000"];
+
+    const COMPACT_TAIL_FIELDS = [
+      // key, bits
+      ["layerA-texture", COMPACT_BITS.texture],
+      ["layerB-texture", COMPACT_BITS.texture],
+      ["lock:layerA-texture", 1],
+      ["lock:layerB-texture", 1],
+      ["speed", COMPACT_BITS.speed],
+      ["interval", COMPACT_BITS.speed],
+    ];
 
     // Bits go in and out with arithmetic rather than << and >>, which
     // look like the obvious tools and are not: JS bitwise operators
@@ -3374,14 +3657,20 @@
       const binary = atob(encoded.replace(/-/g, "+").replace(/_/g, "/"));
       const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
       let at = 0;
+      // Running out of bits means the link was cut short on its way
+      // here; the caller drops it rather than render half a picture.
+      function read(width) {
+        if (at + width > bytes.length * 8) throw new Error("truncated link");
+        let value = 0;
+        for (let i = 0; i < width; i++, at++) value = value * 2 + ((bytes[at >> 3] >> (7 - (at % 8))) & 1);
+        return value;
+      }
       return {
-        // Running out of bits means the link was cut short on its way
-        // here; the caller drops it rather than render half a picture.
-        read(width) {
-          if (at + width > bytes.length * 8) throw new Error("truncated link");
-          let value = 0;
-          for (let i = 0; i < width; i++, at++) value = value * 2 + ((bytes[at >> 3] >> (7 - (at % 8))) & 1);
-          return value;
+        read,
+        // The same, for the tail, where running out is not damage but a
+        // link written before the field existed. See COMPACT_TAIL_FIELDS.
+        tail(width) {
+          return at + width > bytes.length * 8 ? 0 : read(width);
         },
       };
     }
@@ -3395,6 +3684,15 @@
     // falls back to the first option rather than throwing the link away.
     const optionAt = (values, index) => values[index] || values[0];
     const compactColor = (value) => "#" + value.toString(16).padStart(6, "0");
+
+    // Index of the closest entry in LEGACY_AUTO_SPEEDS to a beat in ms.
+    function nearestLegacySpeed(ms) {
+      let best = 0;
+      LEGACY_AUTO_SPEEDS.forEach((value, i) => {
+        if (Math.abs(parseInt(value, 10) - ms) < Math.abs(parseInt(LEGACY_AUTO_SPEEDS[best], 10) - ms)) best = i;
+      });
+      return best;
+    }
 
     function addCompactSeed(out, seed) {
       const packed = COMPACT_SEED_PACKED.test(seed);
@@ -3457,9 +3755,25 @@
       COMPACT_LOCK_IDS.forEach((id) => out.add((snapshot.locks || []).includes(id) ? 1 : 0, 1));
       // Zero means a still link. Otherwise the speed's place in the
       // menu, one higher, so the first entry can't read as "still".
-      out.add(snapshot.autoplay ? optionValues("autoSpeed").indexOf(String(snapshot.autoplay)) + 1 : 0, COMPACT_BITS.autoSpeed);
+      // The nearest of the five, since the beat is no longer restricted
+      // to them. Only a link that offers to play writes anything here;
+      // the tail below carries the beat itself either way.
+      out.add(snapshot.autoplay ? nearestLegacySpeed(snapshot.autoplay) + 1 : 0, COMPACT_BITS.autoSpeed);
       addCompactLayer(out, snapshot.layerA);
       addCompactLayer(out, snapshot.layerB);
+      const textures = optionValues("layerA-texture");
+      // Zero means "this link says nothing about it", so the speed is
+      // written one higher, the way the autoSpeed field above is.
+      const tail = COMPACT_TAIL_FIELDS.map(([key]) =>
+        key === "speed" || key === "interval"
+          ? speedStep(snapshot[key] || speedMs(parseInt(speedInput.defaultValue, 10))) + 1
+          : key.startsWith("lock:")
+            ? (snapshot.locks || []).includes(key.slice(5)) ? 1 : 0
+            : optionIndex(textures, snapshot[key.split("-")[0]].texture)
+      );
+      if (tail.some((value) => value)) {
+        tail.forEach((value, i) => out.add(value, COMPACT_TAIL_FIELDS[i][1]));
+      }
       return out.finish();
     }
 
@@ -3485,7 +3799,17 @@
       const speed = input.read(COMPACT_BITS.autoSpeed);
       const layerA = readCompactLayer(input);
       const layerB = readCompactLayer(input);
-      const speeds = optionValues("autoSpeed");
+      const textures = optionValues("layerA-texture");
+      const beats = {};
+      COMPACT_TAIL_FIELDS.forEach(([key, bits]) => {
+        const value = input.tail(bits);
+        if (key === "speed" || key === "interval") beats[key] = value ? speedMs(value - 1) : 0;
+        else if (key.startsWith("lock:")) {
+          if (value) locks.push(key.slice(5));
+        } else {
+          (key.startsWith("layerA") ? layerA : layerB).texture = optionAt(textures, value);
+        }
+      });
       const data = {
         // Version 1 carries what STATE_VERSION 2 means. A later bump
         // takes the next COMPACT_VERSION and leaves this branch reading
@@ -3502,7 +3826,12 @@
         layerA,
         layerB,
       };
-      if (speed && speeds[speed - 1]) data.autoplay = parseInt(speeds[speed - 1], 10);
+      if (speed && LEGACY_AUTO_SPEEDS[speed - 1]) data.autoplay = parseInt(LEGACY_AUTO_SPEEDS[speed - 1], 10);
+      // A link from before the tail says nothing about either duration
+      // unless it offered to play, in which case the one speed it
+      // recorded is what it meant by both.
+      if (beats.speed || data.autoplay) data.speed = beats.speed || data.autoplay;
+      if (beats.interval || data.autoplay) data.interval = beats.interval || data.autoplay;
       return data;
     }
 
@@ -3521,10 +3850,7 @@
         // speed and shows the prompt; nothing moves until the recipient
         // says so.
         if (data.autoplay) {
-          const option = [...autoSpeedSelect.options].find((o) => o.value === String(data.autoplay));
-          if (option) autoSpeedSelect.value = option.value;
-          syncSelectTitle(autoSpeedSelect, "Auto-randomize speed");
-          const speedText = autoSpeedSelect.options[autoSpeedSelect.selectedIndex].text;
+          const speedText = formatSpeed(currentIntervalMs());
           document.getElementById("playOfferSpeed").textContent = speedText;
           document.getElementById("playOfferText").title =
             `Locked fields hold, the rest reroll every ${speedText}`;
@@ -3548,7 +3874,7 @@
       // The menu beside the button decides: a link that offers to play
       // (at the current Auto-randomize speed) is a live instance to drop
       // into a post, once the recipient accepts; a still is the default.
-      if (linkModeSelect.value === "play") snapshot.autoplay = parseInt(autoSpeedSelect.value, 10);
+      if (linkModeSelect.value === "play") snapshot.autoplay = currentIntervalMs();
       return { url: stateUrl(snapshot), autoplay: snapshot.autoplay };
     }
 

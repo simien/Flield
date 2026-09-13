@@ -50,9 +50,13 @@
   --input-hover: rgba(255, 255, 255, 0.09);
   --input-border: rgba(255, 255, 255, 0.15);
   --tab-active-border: var(--input-border);
-  /* Three text levels instead of one color at assorted opacities, so
-     muted text stays a real, predictable color on every surface. */
+  /* Four text levels instead of one color at assorted opacities, so
+     muted text stays a real, predictable color on every surface.
+     --text-heading sits one step off the body text rather than at it:
+     a setting's name wants to sit clearly between the section rule over
+     it and its own description under it. */
   --text: #fafafa;
+  --text-heading: #d4d4d8;
   --text-muted: #a1a1aa;
   --text-subtle: #71717a;
   /* Primary is the foreground inverted onto the surface (white on dark,
@@ -97,6 +101,8 @@
   --input-border: #e4e4e7;
   --tab-active-border: transparent;
   --text: #09090b;
+  /* Brighter reads as darker here; the step is the same size. */
+  --text-heading: #3f3f46;
   --text-muted: #71717a;
   --text-subtle: #a1a1aa;
   --primary: #18181b;
@@ -434,8 +440,7 @@ input[type="range"]:focus-visible {
   width: auto;
 }
 
-.action-bar .icon-btn,
-.action-bar .explore-row .split-btn-main {
+.action-bar .icon-btn {
   min-width: var(--touch-h);
 }
 
@@ -765,12 +770,6 @@ input[type="range"]:focus-visible {
   flex: 1;
 }
 
-/* Icon-only in this row, matching Undo beside it. */
-.explore-row .split-btn-main {
-  min-width: 32px;
-  padding: 0;
-}
-
 /* min-width rather than width: .explore-row buttons and the footer's
    icon buttons both set width:auto to opt out of the full-width button
    default, and with the padding gone that would shrink these to the
@@ -842,19 +841,10 @@ input[type="range"]:focus-visible {
   background-color: var(--input-hover);
 }
 
-#playBtn.playing,
-#playBtn.playing + .split-btn-select {
+#playBtn.playing {
   background-color: var(--primary);
   color: var(--primary-fg);
   border-color: var(--primary);
-}
-
-/* The seam between the halves stays the main button's own right border,
-   the way it is in the unfilled state. Without this the caret's left
-   edge draws a line of its own the moment one half dims and the two
-   stop matching. */
-#playBtn.playing + .split-btn-select {
-  border-left-color: transparent;
 }
 
 /* A segmented control: the track is a sunken well, the active segment
@@ -953,10 +943,15 @@ input[type="range"]:focus-visible {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  /* Muted on purpose: uppercase plus wide tracking already makes this
-     the most prominent line in its group, so the full text color on
-     top of that would out-weigh every control below it. */
-  color: var(--text-muted);
+  /* The brightest text in its group, above the setting titles it
+     introduces: 12.9:1 on the dark panel against their 9.9:1, and
+     19.9:1 against 10.4:1 on the light one. It sat below them for a
+     while, which inverted the hierarchy, a section reading quieter than
+     the fields inside it. Going the other way instead, to
+     --text-subtle, measures 3.7:1 and 2.4:1, both under AA, and no
+     single grey fixes that because the two themes want it moved in
+     opposite directions. */
+  color: var(--text);
   margin: 28px 0 14px;
 }
 
@@ -1077,12 +1072,21 @@ input[type="range"]:focus-visible {
   font-size: 12px;
   font-weight: 500;
   margin-bottom: 6px;
-  color: var(--text-muted);
+  /* Between the section title above and the description below, which is
+     where a setting's name belongs. The description could not be dimmed
+     to open that gap: on the light panel the muted grey it uses already
+     measures 4.5:1, with nothing under it that still reads. Lifting
+     this instead opens the same gap and gains contrast rather than
+     spending it. */
+  color: var(--text-heading);
 }
 
 /* The live value: plain tabular monospace in the full text color, so it
-   reads as data next to its muted label without a box around it. */
-.field label span {
+   reads as the answer next to the quieter name that asks for it. Matched
+   by class rather than by being a span in a label, because a label whose
+   name changes with the layer's texture carries a span for that too, and
+   it is not data. */
+.field label .field-value {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-variant-numeric: tabular-nums;
   font-size: 11px;
@@ -1577,18 +1581,12 @@ button {
    Behind (hover: hover) because a touch browser leaves :hover stuck on
    whatever was tapped last: without the guard, Random would sit dimmed
    on a phone from the tap that ran it until the next tap somewhere
-   else. The split's two halves light separately, the way they already
-   do in the unfilled state. */
+   else. */
 @media (hover: hover) {
   #randomizeBtn:hover:not(:disabled),
-  #playBtn.playing:hover:not(:disabled),
-  #playBtn.playing + .split-btn-select:hover {
+  #playBtn.playing:hover:not(:disabled) {
     background-color: var(--primary-hover);
     border-color: var(--primary-hover);
-  }
-
-  #playBtn.playing + .split-btn-select:hover {
-    border-left-color: transparent;
   }
 }
 
@@ -2001,6 +1999,23 @@ button.secondary:hover:not(:disabled) {
   color: var(--text-muted);
   margin-top: 8px;
   margin-bottom: 12px;
+}
+
+/* A description belongs to the setting above it, so it sits between the
+   title and the control rather than below the whole thing, where it read
+   as a caption on the control before it and a preamble to the next one
+   after. Same size as the title it sits under; the color carries the
+   difference on its own. */
+.field .hint {
+  margin-top: -2px;
+  margin-bottom: 8px;
+}
+
+/* Not in the strip above the bar on a phone: that row exists to put one
+   control within reach of the artwork, and a paragraph in it costs a
+   line of the picture for something already read in the sheet. */
+#lastControl .hint {
+  display: none;
 }
 
 .button-row {
