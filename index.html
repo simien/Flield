@@ -856,7 +856,7 @@
     </script>
   </div>
 
-  <script src="generator.js?v=9"></script>
+  <script src="generator.js?v=10"></script>
   <script>
     // Inline replacements for the icons that used to come from the
     // Phosphor webfont (224KB for the ~19 glyphs this app actually uses).
@@ -2326,6 +2326,11 @@
         gridB: lastResult.gridB,
         cols: lastResult.cols,
         rows: lastResult.rows,
+        // Provenance, not a watermark: nothing is drawn, and an SVG that
+        // gets optimised on its way somewhere loses it without harm. What
+        // it buys is a file you can reopen a year later. Always the plain
+        // still link, whatever the share menu is set to.
+        source: stateUrl(snapshotForSharing()),
       });
       const blob = new Blob([svg], { type: "image/svg+xml" });
       const url = URL.createObjectURL(blob);
@@ -3275,6 +3280,10 @@
       }
     }
 
+    function stateUrl(snapshot) {
+      return `${location.origin}${location.pathname}?state=${btoa(JSON.stringify(snapshot))}`;
+    }
+
     // Encodes the current composition (and, per the menu, an autoplay
     // flag) into the URL the button below hands off, whether that's a
     // clipboard copy or the OS share sheet.
@@ -3284,9 +3293,7 @@
       // (at the current Auto-randomize speed) is a live instance to drop
       // into a post, once the recipient accepts; a still is the default.
       if (linkModeSelect.value === "play") snapshot.autoplay = parseInt(autoSpeedSelect.value, 10);
-      const encoded = btoa(JSON.stringify(snapshot));
-      const url = `${location.origin}${location.pathname}?state=${encoded}`;
-      return { url, autoplay: snapshot.autoplay };
+      return { url: stateUrl(snapshot), autoplay: snapshot.autoplay };
     }
 
     const copyLinkBtn = document.getElementById("copyLinkBtn");
