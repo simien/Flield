@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Same contract as the app and the guide: dark by default, light only
+       for a visitor who has toggled it, read from the shared flield-theme
+       key so the choice carries across pages without a flash. -->
+  <script>
+    try {
+      if (localStorage.getItem("flield-theme") === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    } catch (err) {
+      // localStorage can be unavailable (private browsing, blocked); dark stays the default.
+    }
+  </script>
+  <title>How to make a seamless tiling background, without an image to start from</title>
+  <meta name="description" content="Why a 4-way mirror guarantees a tile repeats with no seam, what breaks it, and how to generate a tileable background in your own colors instead of converting a photo you already have." />
+  <link rel="canonical" href="https://flield.com/seamless-backgrounds/" />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="apple-touch-icon" sizes="192x192" href="../icon-192.png" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:url" content="https://flield.com/seamless-backgrounds/" />
+  <meta property="og:site_name" content="Flield" />
+  <meta property="og:title" content="How to make a seamless tiling background, without an image to start from" />
+  <meta property="og:description" content="Why a 4-way mirror guarantees a tile repeats with no seam, what breaks it, and how to generate a tileable background in your own colors instead of converting a photo you already have." />
+  <meta property="og:image" content="https://flield.com/screenshot.png?v=5" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="900" />
+  <meta property="og:image:alt" content="A generated three-color composition in Flield" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="How to make a seamless tiling background, without an image to start from" />
+  <meta name="twitter:description" content="Why a 4-way mirror guarantees a tile repeats with no seam, what breaks it, and how to generate a tileable background in your own colors instead of converting a photo you already have." />
+  <meta name="twitter:image" content="https://flield.com/screenshot.png?v=5" />
+  <meta name="theme-color" content="#09090b" />
+
+  <!-- TechArticle, matching the guide and the flow fields page, with the
+       same about/@id pointing at the app node so a crawler reads one
+       entity across the site rather than several unrelated things. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "@id": "https://flield.com/seamless-backgrounds/#article",
+    "headline": "How to make a seamless tiling background, without an image to start from",
+    "description": "Why a 4-way mirror guarantees a tile repeats with no seam, what breaks it, and how to generate a tileable background in your own colors instead of converting a photo you already have.",
+    "url": "https://flield.com/seamless-backgrounds/",
+    "mainEntityOfPage": "https://flield.com/seamless-backgrounds/",
+    "about": { "@id": "https://flield.com/#app" },
+    "inLanguage": "en",
+    "image": "https://flield.com/screenshot.png?v=5",
+    "datePublished": "2026-09-13",
+    "dateModified": "2026-09-13",
+    "proficiencyLevel": "Beginner",
+    "author": {
+      "@type": "Person",
+      "@id": "https://simienap.com/#person",
+      "name": "Simien",
+      "url": "https://simienap.com",
+      "sameAs": ["https://github.com/simien"]
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="../guide.css?v=2" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="wordmark" href="../">Flield <span>Seamless Backgrounds</span></a>
+      <div class="header-actions">
+        <a class="btn" href="../guide/">Guide</a>
+        <button type="button" class="btn btn-icon" id="themeToggleBtn" title="Switch to light theme"><svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>How to make a seamless tiling background</h1>
+    <p class="lede">A tile is seamless when its left edge matches its right and its top matches its bottom. There is a way to guarantee that rather than retouch your way toward it, and it costs one setting.</p>
+
+    <h2 id="proof">The seam, and its absence</h2>
+
+    <p>Below, the left panel is a single tile and the right panel is that same tile repeated nine times. Switch the symmetry and watch the grid on the right: with a 4-way mirror the repeat is invisible, and without one every boundary announces itself.</p>
+
+    <div class="demo">
+      <div class="demo-canvases">
+        <div class="demo-pane">
+          <p class="demo-label">One tile</p>
+          <canvas id="tileCanvas" width="256" height="256"></canvas>
+        </div>
+        <div class="demo-pane">
+          <p class="demo-label">Repeated 3 &times; 3</p>
+          <canvas id="repeatCanvas" width="256" height="256"></canvas>
+        </div>
+      </div>
+      <div class="demo-controls">
+        <div class="demo-control">
+          <label for="symmetrySelect">Symmetry</label>
+          <select id="symmetrySelect" class="btn">
+            <option value="quad" selected>4-way mirror</option>
+            <option value="horizontal">Horizontal mirror only</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <button type="button" class="btn" id="rerollBtn">Reroll</button>
+      </div>
+      <p class="demo-caption">Horizontal mirror is the instructive middle case: the vertical seams vanish because left now equals right, but the horizontal ones remain, because nothing has made top equal bottom.</p>
+    </div>
+
+    <h2 id="why">Why mirroring works</h2>
+
+    <p>The usual way to make a texture tile is to generate something, notice the seam, and then fix it: offset the image by half its width and height, then clone and blur until the cross in the middle stops being visible. It works, it is tedious, and it degrades the texture exactly where you touch it.</p>
+
+    <p>Mirroring makes the seam impossible instead of repairing it. Generate only the top-left quadrant, then mirror it across the vertical axis and the horizontal one. The last column is now a copy of the first, and the last row is a copy of the first. When two copies sit side by side, the pixels meeting at the boundary are identical by construction, so there is nothing to blend. The pattern reads as continuous because, across that edge, it is.</p>
+
+    <p>That is the whole mechanism, and it is why the middle option in the demo above only half works. Mirroring across one axis buys you seamlessness along one pair of edges. You need both.</p>
+
+    <div class="note">
+      <p>The cost is symmetry you can see. A mirrored tile is a mirrored tile, and at large sizes the eye finds the axis. It matters less than you would expect for a background texture at small scale, and not at all for a repeating pattern where the symmetry reads as part of the design.</p>
+    </div>
+
+    <h2 id="preset">What the Tile preset does</h2>
+
+    <p>In the app, the <strong>Tile</strong> dimension preset sets all of this at once. It squares the canvas at 512 by 512, puts both layers on a 4-way mirror, and turns the shape mask off, then locks the last two so a randomize pass can't undo them while you explore.</p>
+
+    <p>The shape mask has to go because it breaks the edge equality the mirror just established. A centered circle, a vignette, or a corner fade is positioned relative to the canvas rather than generated as part of the pattern, so it does not repeat: tile a vignette and you get a grid of dark blotches. Anything that treats the canvas as a frame rather than as a swatch is incompatible with tiling, and the preset resolves that by removing it.</p>
+
+    <p>512 is not a device size. It is a round, highly divisible number for a texture swatch, which means common block sizes divide it evenly and no partial cell is left at an edge. A partial cell at the edge would reintroduce the seam by a different route.</p>
+
+    <h2 id="naming">Two different things both called Tile</h2>
+
+    <p>Worth separating, because the names collide.</p>
+
+    <ul>
+      <li><strong>The Tile dimension preset</strong>, described above, makes the whole canvas into one swatch that repeats cleanly when you tile it yourself, in CSS or in a design tool.</li>
+      <li><strong>Tile symmetry</strong>, in each layer's symmetry menu, is a pattern mode: it generates one small region and repeats it three by three <em>inside</em> the canvas. The result is a grid you can see, contained in a single image.</li>
+    </ul>
+
+    <p>The preset is for producing a texture to repeat elsewhere. The symmetry mode is for making a repeated grid the visible subject. They are unrelated, and using the symmetry mode does not make your canvas tileable.</p>
+
+    <h2 id="colors">Doing it in your own colors</h2>
+
+    <p>This is where generating beats converting. Every other seamless-texture tool starts from an image you supply, which means the palette is whatever the source photograph happened to contain, and matching a brand means editing toward it afterward.</p>
+
+    <p>There is no source image here. The three colors are parameters, so a brand palette goes in directly and every tile that comes out is already correct. Set the hue, saturation, and lightness ranges under <span class="ui-ref">Palette Range</span>, lock the colors, and let everything else reroll: you get an unlimited run of different tiles that are all on-brand, rather than one tile you then have to recolor.</p>
+
+    <h2 id="use">Using the result</h2>
+
+    <p>Export a PNG or an SVG at the Tile preset, then repeat it the ordinary way:</p>
+
+    <pre><code>.hero {
+  background-image: url("tile.png");
+  background-repeat: repeat;
+  /* Half the exported size renders the texture at 2x on the
+     same footprint, which keeps it crisp on a dense display. */
+  background-size: 256px 256px;
+}</code></pre>
+
+    <p>SVG is usually the better export for this. The output is rectangles rather than pixels, so it scales to any size without softening, and the files are small because the format stores the shapes instead of every cell.</p>
+
+    <p>A tile can also move. The same mirroring holds while a <a href="../flow-fields/">flow field</a> animates underneath it, so a tiled background can drift or breathe without the repeat ever showing. That is covered in the <a href="../guide/">guide</a>, under Motion.</p>
+
+    <h2 id="try">Try it</h2>
+
+    <p><a href="../">Open Flield</a>, press <span class="ui-ref">Tile</span> under the canvas dimensions, and press Random until something fits. The <a href="../guide/">guide</a> covers the rest of the controls, and <a href="../flow-fields/">the flow field explainer</a> covers what is shaping the texture underneath.</p>
+
+    <p class="meta">Flield is free for noncommercial use under the <a href="https://github.com/simien/Flield/blob/main/LICENSE.md" target="_blank" rel="noopener">PolyForm Noncommercial License</a>.</p>
+
+    <footer class="site-footer">
+      <a href="../">Open App</a>
+      <a href="../guide/">Guide</a>
+      <a href="../flow-fields/">Flow Fields</a>
+      <a href="https://github.com/simien/Flield" target="_blank" rel="noopener">GitHub.com</a>
+    </footer>
+  </main>
+
+  <script src="../generator.js?v=10"></script>
+  <script>
+    // Phosphor's own path data, the same two glyphs and the same
+    // flield-theme key the app and the guide use, so a choice made on any
+    // page carries to the others and looks identical there.
+    const ICONS = {
+      sun: "M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z",
+      moon: "M236.37,139.4a12,12,0,0,0-12-3A84.07,84.07,0,0,1,119.6,31.59a12,12,0,0,0-15-15A108.86,108.86,0,0,0,49.69,55.07,108,108,0,0,0,136,228a107.09,107.09,0,0,0,64.93-21.69,108.86,108.86,0,0,0,38.44-54.94A12,12,0,0,0,236.37,139.4Zm-49.88,47.74A84,84,0,0,1,68.86,69.51,84.93,84.93,0,0,1,92.27,48.29Q92,52.13,92,56A108.12,108.12,0,0,0,200,164q3.87,0,7.71-.27A84.79,84.79,0,0,1,186.49,187.14Z",
+    };
+
+    function iconSvg(name) {
+      return `<svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="${ICONS[name]}"/></svg>`;
+    }
+
+    const THEME_KEY = "flield-theme";
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+
+    const tileCanvas = document.getElementById("tileCanvas");
+    const repeatCanvas = document.getElementById("repeatCanvas");
+    const symmetrySelect = document.getElementById("symmetrySelect");
+
+    // The tile is generated once at this size and then drawn nine times
+    // into the repeat panel, so the right-hand canvas shows the actual
+    // exported tile repeating rather than a separately generated image.
+    const TILE_PX = 256;
+    const BLOCK = 8;
+    const REPEATS = 3;
+
+    let tileSeed = "seamless";
+
+    function paletteFor() {
+      const styles = getComputedStyle(document.documentElement);
+      return {
+        bg: styles.getPropertyValue("--well").trim() || "#0f0f11",
+        a: "#38bdf8",
+        b: "#f472b6",
+      };
+    }
+
+    function layer(seed, color, density, symmetry, overrides) {
+      return Object.assign({
+        seed,
+        color,
+        density,
+        fieldStrength: 0.4,
+        fieldScale: 110,
+        flowAngle: 30,
+        flowStretch: 3,
+        fieldOctaves: 2,
+        symmetry,
+        smoothPasses: 1,
+      }, overrides);
+    }
+
+    function renderTile() {
+      const palette = paletteFor();
+      const symmetry = symmetrySelect.value;
+      const options = {
+        width: TILE_PX,
+        height: TILE_PX,
+        blockSize: BLOCK,
+        bgColor: palette.bg,
+        layerA: layer(tileSeed + "-a", palette.a, 0.42, symmetry),
+        layerB: layer(tileSeed + "-b", palette.b, 0.24, symmetry, {
+          fieldScale: 80,
+          flowAngle: 115,
+        }),
+        // A shape mask would break the edge equality the mirror creates,
+        // which is the point the page is making, so the demo never sets one.
+        shapeMask: "none",
+      };
+      const { gridA, gridB, cols, rows } = generate(options);
+      renderToCanvas(tileCanvas, {
+        ...options,
+        colorA: options.layerA.color,
+        colorB: options.layerB.color,
+        gridA,
+        gridB,
+        cols,
+        rows,
+      });
+    }
+
+    function renderRepeat() {
+      const ctx = repeatCanvas.getContext("2d");
+      const cell = repeatCanvas.width / REPEATS;
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, repeatCanvas.width, repeatCanvas.height);
+      for (let y = 0; y < REPEATS; y++) {
+        for (let x = 0; x < REPEATS; x++) {
+          ctx.drawImage(tileCanvas, x * cell, y * cell, cell, cell);
+        }
+      }
+    }
+
+    function renderAll() {
+      renderTile();
+      renderRepeat();
+    }
+
+    symmetrySelect.addEventListener("change", renderAll);
+    document.getElementById("rerollBtn").addEventListener("click", () => {
+      tileSeed = Math.random().toString(36).slice(2);
+      renderAll();
+    });
+
+    function applyTheme(isLight) {
+      if (isLight) {
+        document.documentElement.setAttribute("data-theme", "light");
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+      themeToggleBtn.innerHTML = iconSvg(isLight ? "moon" : "sun");
+      themeToggleBtn.title = isLight ? "Switch to dark theme" : "Switch to light theme";
+      // The demo paints its own background color, so it needs a repaint to
+      // follow the theme rather than sitting at the other one's palette.
+      renderAll();
+    }
+
+    themeToggleBtn.addEventListener("click", () => {
+      const isLight = document.documentElement.getAttribute("data-theme") !== "light";
+      applyTheme(isLight);
+      try {
+        localStorage.setItem(THEME_KEY, isLight ? "light" : "dark");
+      } catch (err) {
+        // localStorage can be unavailable (private browsing, blocked); the
+        // toggle still works for this page load, just won't persist.
+      }
+    });
+
+    applyTheme(document.documentElement.getAttribute("data-theme") === "light");
+  </script>
+</body>
+</html>

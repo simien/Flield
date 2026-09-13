@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Same contract as the app and the guide: dark by default, light only
+       for a visitor who has toggled it, read from the shared flield-theme
+       key so the choice carries across pages without a flash. -->
+  <script>
+    try {
+      if (localStorage.getItem("flield-theme") === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    } catch (err) {
+      // localStorage can be unavailable (private browsing, blocked); dark stays the default.
+    }
+  </script>
+  <title>How to make a looping animated background for a website</title>
+  <meta name="description" content="Four kinds of motion that return to their first frame with no cut, which file format to use for a hero background, and why a small repeating tile usually beats a full-width video." />
+  <link rel="canonical" href="https://flield.com/animated-backgrounds/" />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="apple-touch-icon" sizes="192x192" href="../icon-192.png" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:url" content="https://flield.com/animated-backgrounds/" />
+  <meta property="og:site_name" content="Flield" />
+  <meta property="og:title" content="How to make a looping animated background for a website" />
+  <meta property="og:description" content="Four kinds of motion that return to their first frame with no cut, which file format to use for a hero background, and why a small repeating tile usually beats a full-width video." />
+  <meta property="og:image" content="https://flield.com/screenshot.png?v=5" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="900" />
+  <meta property="og:image:alt" content="A generated three-color composition in Flield" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="How to make a looping animated background for a website" />
+  <meta name="twitter:description" content="Four kinds of motion that return to their first frame with no cut, which file format to use for a hero background, and why a small repeating tile usually beats a full-width video." />
+  <meta name="twitter:image" content="https://flield.com/screenshot.png?v=5" />
+  <meta name="theme-color" content="#09090b" />
+
+  <!-- TechArticle, matching the guide and the other explainers, with the
+       same about/@id pointing at the app node so a crawler reads one
+       entity across the site rather than several unrelated things. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "@id": "https://flield.com/animated-backgrounds/#article",
+    "headline": "How to make a looping animated background for a website",
+    "description": "Four kinds of motion that return to their first frame with no cut, which file format to use for a hero background, and why a small repeating tile usually beats a full-width video.",
+    "url": "https://flield.com/animated-backgrounds/",
+    "mainEntityOfPage": "https://flield.com/animated-backgrounds/",
+    "about": { "@id": "https://flield.com/#app" },
+    "inLanguage": "en",
+    "image": "https://flield.com/screenshot.png?v=5",
+    "datePublished": "2026-09-13",
+    "dateModified": "2026-09-13",
+    "proficiencyLevel": "Beginner",
+    "author": {
+      "@type": "Person",
+      "@id": "https://simienap.com/#person",
+      "name": "Simien",
+      "url": "https://simienap.com",
+      "sameAs": ["https://github.com/simien"]
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="../guide.css?v=2" />
+  <style>
+    /* The four motions sit in a 2x2 rather than the shared .demo-canvases
+       pair, since they are four peers being compared rather than a
+       before/after. Moves into guide.css if a fourth page ever wants it. */
+    .motion-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+    }
+
+    @media (max-width: 520px) {
+      .motion-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="wordmark" href="../">Flield <span>Animated Backgrounds</span></a>
+      <div class="header-actions">
+        <a class="btn" href="../guide/">Guide</a>
+        <button type="button" class="btn btn-icon" id="themeToggleBtn" title="Switch to light theme"><svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>How to make a looping animated background</h1>
+    <p class="lede">A background that loops badly is worse than one that doesn't move. The cut is the thing people notice, and once seen it can't be unseen. Here are four ways to move a composition so the last frame runs into the first with nothing to see.</p>
+
+    <h2 id="motions">The four motions</h2>
+
+    <p>All four below are running live, in this page, on the same composition. Only the kind of movement differs. Each completes one full cycle and starts over, and the point is that you can't tell where.</p>
+
+    <div class="demo">
+      <div class="motion-grid">
+        <div class="demo-pane">
+          <p class="demo-label">Loop</p>
+          <canvas id="motion-circle" width="260" height="170"></canvas>
+        </div>
+        <div class="demo-pane">
+          <p class="demo-label">Drift</p>
+          <canvas id="motion-drift" width="260" height="170"></canvas>
+        </div>
+        <div class="demo-pane">
+          <p class="demo-label">Wind</p>
+          <canvas id="motion-wind" width="260" height="170"></canvas>
+        </div>
+        <div class="demo-pane">
+          <p class="demo-label">Pulse</p>
+          <canvas id="motion-pulse" width="260" height="170"></canvas>
+        </div>
+      </div>
+      <div class="demo-controls">
+        <button type="button" class="btn" id="playBtn">Pause</button>
+        <button type="button" class="btn" id="rerollBtn">Reroll</button>
+      </div>
+      <p class="demo-caption">Loop breathes around a closed path and returns where it started. Drift travels one way and wraps into itself. Wind travels and bends as it goes, like a gust crossing the frame. Pulse holds still and swells.</p>
+    </div>
+
+    <h2 id="why">Why these loop and a video clip usually doesn't</h2>
+
+    <p>The ordinary way to get a looping background is to film or render something, then trim until the ends roughly agree and hope a crossfade hides the rest. The seam is still there; it has been made blurry.</p>
+
+    <p>Nothing is trimmed here. The motion is a parameter, not a recording. Every frame is generated from a phase value between 0 and 1, and each kind of movement is built from something that is mathematically periodic in that phase: a point traveling a circle, a lattice that wraps at a fixed interval, a sine wave. When phase reaches 1 the inputs are identical to phase 0, so the frames are identical too. The loop isn't matched, it's guaranteed.</p>
+
+    <p>That is the same argument as <a href="../seamless-backgrounds/">the seamless tile</a>, one dimension over. There, mirroring makes the left edge equal the right. Here, periodicity makes the last frame equal the first.</p>
+
+    <h2 id="format">Which file format to use</h2>
+
+    <p>This is where most guides wave a hand, so here is the actual answer, including where this tool is the wrong one.</p>
+
+    <h3>First, consider not using a video at all</h3>
+
+    <p>If the background is a texture rather than a scene, the right file is a small <a href="../seamless-backgrounds/">seamless tile</a> that CSS repeats, not a full-width anything. A 512 by 512 animated tile covers a 4K hero at a fraction of the bytes, scales to any viewport for free, needs no <code>&lt;video&gt;</code> element, no autoplay policy, no poster frame, and no fallback. It is both the cheaper answer and the one with less to go wrong.</p>
+
+    <pre><code>.hero {
+  background-image: url("tile.gif");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}</code></pre>
+
+    <h3>When you do need one large moving image</h3>
+
+    <p>A composition that doesn't tile, or motion that has to cross the whole frame, needs a single large file. The honest comparison:</p>
+
+    <div class="table-scroll">
+      <table>
+        <tr>
+          <th>Format</th>
+          <th>Good for</th>
+          <th>The catch</th>
+        </tr>
+        <tr>
+          <td><strong>GIF</strong></td>
+          <td>Tiles, hover states, anything up to a few hundred pixels square</td>
+          <td>Compression is decades old, so it grows quickly with dimensions. Fine at 512, heavy at 1920.</td>
+        </tr>
+        <tr>
+          <td><strong>MP4</strong> (H.264)</td>
+          <td>Full-width hero backgrounds, where it plays everywhere including iOS</td>
+          <td>Built for photographic video. Flat color and hard edges are its worst case, so it needs a generous bitrate to avoid haze around edges.</td>
+        </tr>
+        <tr>
+          <td><strong>WebM</strong> (VP9)</td>
+          <td>Handles flat color and sharp edges better than H.264 at the same bitrate</td>
+          <td>Patchier support on Apple devices, which is exactly where a hero background most needs to work.</td>
+        </tr>
+      </table>
+    </div>
+
+    <p>One correction to the usual advice, which matters here. GIF is often dismissed for its 256-color palette, and for photographic content that is fair. This artwork uses three colors. The palette is not the constraint, and a three-color GIF compresses extremely well, because long runs of one color are exactly what its compression was designed for. GIF's real limit is dimensional: the file grows with area faster than a modern codec's does. Which is another way of saying that if you keep the image small and repeat it, GIF is not a compromise at all.</p>
+
+    <p>Flield exports animated GIF today. MP4 is <a href="#roadmap">the format under consideration</a>.</p>
+
+    <h3>Using a video background</h3>
+
+    <pre><code>&lt;video autoplay muted loop playsinline poster="first-frame.png"&gt;
+  &lt;source src="background.mp4" type="video/mp4"&gt;
+&lt;/video&gt;</code></pre>
+
+    <p>All four attributes are load-bearing. Without <code>muted</code> and <code>playsinline</code>, mobile browsers refuse to autoplay or take the video fullscreen. The <code>poster</code> covers the gap before the first frame decodes, and it is also what someone sees if their browser or their data saver declines to play video at all.</p>
+
+    <div class="note">
+      <p>Respect <code>prefers-reduced-motion</code>. A moving background is decoration, and for some people it is a genuine problem rather than a preference. Serve the poster frame instead, which the exports here make easy: a still PNG of the same composition is one more export from the same settings.</p>
+    </div>
+
+    <h2 id="roadmap">On adding MP4</h2>
+
+    <p>Flield runs entirely in the browser, with no server, no build step, and one vendored dependency. Any new export has to hold that line, which rules out the usual answer of shipping a WebAssembly build of FFmpeg: tens of megabytes to add one format is not a trade this tool should make.</p>
+
+    <p>The viable route is the browser's own <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API" target="_blank" rel="noopener">WebCodecs API</a>, which encodes frames natively, plus a small multiplexer to wrap them into a file. That keeps the addition to one more vendored script, roughly the footprint of the GIF encoder already here, and gives exact control over every frame, which matters because an imprecise frame duration is precisely what would break a loop that is otherwise guaranteed.</p>
+
+    <p>If you'd find that useful, <a href="https://github.com/simien/Flield/issues" target="_blank" rel="noopener">say so on the issue tracker</a>. It is the clearest signal for what gets built next.</p>
+
+    <h2 id="try">Try it</h2>
+
+    <p><a href="../">Open Flield</a> and pick a Motion in the General tab. It plays on the canvas immediately, which is exactly what an export will record. The <a href="../guide/">guide</a> covers the speed and frame controls, <a href="../flow-fields/">the flow field explainer</a> covers what is moving underneath, and <a href="../seamless-backgrounds/">the tiling page</a> covers making it repeat.</p>
+
+    <p class="meta">Flield is free for noncommercial use under the <a href="https://github.com/simien/Flield/blob/main/LICENSE.md" target="_blank" rel="noopener">PolyForm Noncommercial License</a>.</p>
+
+    <footer class="site-footer">
+      <a href="../">Open App</a>
+      <a href="../guide/">Guide</a>
+      <a href="../flow-fields/">Flow Fields</a>
+      <a href="../seamless-backgrounds/">Seamless Backgrounds</a>
+    </footer>
+  </main>
+
+  <script src="../generator.js?v=10"></script>
+  <script>
+    // Phosphor's own path data, the same two glyphs and the same
+    // flield-theme key the app and the guide use, so a choice made on any
+    // page carries to the others and looks identical there.
+    const ICONS = {
+      sun: "M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z",
+      moon: "M236.37,139.4a12,12,0,0,0-12-3A84.07,84.07,0,0,1,119.6,31.59a12,12,0,0,0-15-15A108.86,108.86,0,0,0,49.69,55.07,108,108,0,0,0,136,228a107.09,107.09,0,0,0,64.93-21.69,108.86,108.86,0,0,0,38.44-54.94A12,12,0,0,0,236.37,139.4Zm-49.88,47.74A84,84,0,0,1,68.86,69.51,84.93,84.93,0,0,1,92.27,48.29Q92,52.13,92,56A108.12,108.12,0,0,0,200,164q3.87,0,7.71-.27A84.79,84.79,0,0,1,186.49,187.14Z",
+    };
+
+    function iconSvg(name) {
+      return `<svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="${ICONS[name]}"/></svg>`;
+    }
+
+    const THEME_KEY = "flield-theme";
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const playBtn = document.getElementById("playBtn");
+
+    const MODES = ["circle", "drift", "wind", "pulse"];
+    const BLOCK = 5;
+    // One cycle per this many milliseconds, matching the app's own slowest
+    // comfortable reading of a loop rather than racing through it.
+    const CYCLE_MS = 6000;
+    // Regenerating four grids per frame is the expensive part, so the demos
+    // step at a fixed rate well below the display's, which reads as smooth
+    // for motion this slow and leaves the page responsive.
+    const FPS = 20;
+
+    let seed = "motion";
+    let playing = true;
+    let rafId = null;
+    let lastStep = 0;
+    let phase = 0;
+
+    function paletteFor() {
+      const styles = getComputedStyle(document.documentElement);
+      return {
+        bg: styles.getPropertyValue("--well").trim() || "#0f0f11",
+        a: "#38bdf8",
+        b: "#f472b6",
+      };
+    }
+
+    function layerFor(suffix, color, density, overrides) {
+      return Object.assign({
+        seed: seed + suffix,
+        color,
+        density,
+        fieldStrength: 0.5,
+        fieldScale: 110,
+        flowAngle: 25,
+        flowStretch: 4,
+        fieldOctaves: 2,
+        symmetry: "none",
+        smoothPasses: 1,
+      }, overrides);
+    }
+
+    function paintMode(mode, loopPhase) {
+      const canvas = document.getElementById("motion-" + mode);
+      if (!canvas) return;
+      const palette = paletteFor();
+      const options = {
+        width: canvas.width,
+        height: canvas.height,
+        blockSize: BLOCK,
+        bgColor: palette.bg,
+        layerA: layerFor("-a", palette.a, 0.4),
+        layerB: layerFor("-b", palette.b, 0.22, { fieldScale: 80, flowAngle: 100 }),
+        shapeMask: "none",
+        loopMode: mode,
+        loopPhase,
+      };
+      const { gridA, gridB, cols, rows } = generate(options);
+      renderToCanvas(canvas, {
+        ...options,
+        colorA: options.layerA.color,
+        colorB: options.layerB.color,
+        gridA,
+        gridB,
+        cols,
+        rows,
+      });
+    }
+
+    function paintAll(loopPhase) {
+      for (const mode of MODES) paintMode(mode, loopPhase);
+    }
+
+    function tick(now) {
+      rafId = requestAnimationFrame(tick);
+      if (now - lastStep < 1000 / FPS) return;
+      lastStep = now;
+      // Phase is taken from the clock rather than incremented, so a frame
+      // the browser skipped doesn't slow the cycle down.
+      phase = (now % CYCLE_MS) / CYCLE_MS;
+      paintAll(phase);
+    }
+
+    function start() {
+      if (rafId !== null) return;
+      playing = true;
+      playBtn.textContent = "Pause";
+      lastStep = 0;
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function stop() {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = null;
+      playing = false;
+      playBtn.textContent = "Play";
+    }
+
+    playBtn.addEventListener("click", () => (playing ? stop() : start()));
+
+    document.getElementById("rerollBtn").addEventListener("click", () => {
+      seed = Math.random().toString(36).slice(2);
+      paintAll(phase);
+    });
+
+    // A page of four moving canvases is exactly what this setting is for.
+    // One frame each, no animation, and the Play button still works for
+    // anyone who wants it anyway.
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    // Nothing renders while the tab is hidden; there is no reason to
+    // regenerate four grids a visitor can't see.
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        rafId = null;
+      } else if (playing && !reduceMotion.matches) {
+        lastStep = 0;
+        rafId = requestAnimationFrame(tick);
+      }
+    });
+
+    function applyTheme(isLight) {
+      if (isLight) {
+        document.documentElement.setAttribute("data-theme", "light");
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+      themeToggleBtn.innerHTML = iconSvg(isLight ? "moon" : "sun");
+      themeToggleBtn.title = isLight ? "Switch to dark theme" : "Switch to light theme";
+      // The demos paint their own background color, so a still page still
+      // needs one repaint to follow the theme.
+      paintAll(phase);
+    }
+
+    themeToggleBtn.addEventListener("click", () => {
+      const isLight = document.documentElement.getAttribute("data-theme") !== "light";
+      applyTheme(isLight);
+      try {
+        localStorage.setItem(THEME_KEY, isLight ? "light" : "dark");
+      } catch (err) {
+        // localStorage can be unavailable (private browsing, blocked); the
+        // toggle still works for this page load, just won't persist.
+      }
+    });
+
+    applyTheme(document.documentElement.getAttribute("data-theme") === "light");
+
+    if (reduceMotion.matches) {
+      playing = false;
+      playBtn.textContent = "Play";
+    } else {
+      start();
+    }
+  </script>
+</body>
+</html>

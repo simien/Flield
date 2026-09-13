@@ -4,6 +4,10 @@
 # Scratch space for local assets, drafts, and other files not meant for the repo
 local/
 
+# Byproduct of running .github/scripts/checks.py locally, which
+# CONTRIBUTING.md asks contributors to do
+__pycache__/
+
 # OS cruft
 .DS_Store
 Thumbs.db

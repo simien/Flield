@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Same contract as the app and the guide: dark by default, light only
+       for a visitor who has toggled it, read from the shared flield-theme
+       key so the choice carries across pages without a flash. -->
+  <script>
+    try {
+      if (localStorage.getItem("flield-theme") === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    } catch (err) {
+      // localStorage can be unavailable (private browsing, blocked); dark stays the default.
+    }
+  </script>
+  <title>What is a flow field? A visual explanation, with live examples</title>
+  <meta name="description" content="A flow field steers noise into directional streaks instead of static. What that means, why rotating and stretching the sampling space produces bands, and why the field biases density rather than gating it." />
+  <link rel="canonical" href="https://flield.com/flow-fields/" />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="apple-touch-icon" sizes="192x192" href="../icon-192.png" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:url" content="https://flield.com/flow-fields/" />
+  <meta property="og:site_name" content="Flield" />
+  <meta property="og:title" content="What is a flow field? A visual explanation, with live examples" />
+  <meta property="og:description" content="A flow field steers noise into directional streaks instead of static. What that means, why rotating and stretching the sampling space produces bands, and why the field biases density rather than gating it." />
+  <meta property="og:image" content="https://flield.com/screenshot.png?v=5" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="900" />
+  <meta property="og:image:alt" content="A generated three-color composition in Flield" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="What is a flow field? A visual explanation, with live examples" />
+  <meta name="twitter:description" content="A flow field steers noise into directional streaks instead of static. What that means, why rotating and stretching the sampling space produces bands, and why the field biases density rather than gating it." />
+  <meta name="twitter:image" content="https://flield.com/screenshot.png?v=5" />
+  <meta name="theme-color" content="#09090b" />
+
+  <!-- TechArticle, matching the guide's type, with the same about/@id
+       pointing at the app node so a crawler reads one entity across the
+       site's pages rather than several unrelated things. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "@id": "https://flield.com/flow-fields/#article",
+    "headline": "What is a flow field? A visual explanation, with live examples",
+    "description": "A flow field steers noise into directional streaks instead of static. What that means, why rotating and stretching the sampling space produces bands, and why the field biases density rather than gating it.",
+    "url": "https://flield.com/flow-fields/",
+    "mainEntityOfPage": "https://flield.com/flow-fields/",
+    "about": { "@id": "https://flield.com/#app" },
+    "inLanguage": "en",
+    "image": "https://flield.com/screenshot.png?v=5",
+    "datePublished": "2026-09-13",
+    "dateModified": "2026-09-13",
+    "proficiencyLevel": "Beginner",
+    "author": {
+      "@type": "Person",
+      "@id": "https://simienap.com/#person",
+      "name": "Simien",
+      "url": "https://simienap.com",
+      "sameAs": ["https://github.com/simien"]
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="../guide.css?v=2" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="wordmark" href="../">Flield <span>Flow Fields</span></a>
+      <div class="header-actions">
+        <a class="btn" href="../guide/">Guide</a>
+        <button type="button" class="btn btn-icon" id="themeToggleBtn" title="Switch to light theme"><svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>What is a flow field?</h1>
+    <p class="lede">A flow field is a grid of directional forces that steers noise into organic drifts instead of static. Everything on this page is generated live, in your browser, by the same code that runs <a href="../">Flield</a>.</p>
+
+    <h2 id="static">Static, and then not</h2>
+
+    <p>Start with the difference the field makes. Both panels below use the same seed, the same density, and the same colors. The only thing that changes is whether a flow field is steering the result.</p>
+
+    <div class="demo">
+      <div class="demo-canvases">
+        <div class="demo-pane">
+          <p class="demo-label">No field</p>
+          <canvas id="staticCanvas" width="320" height="240"></canvas>
+        </div>
+        <div class="demo-pane">
+          <p class="demo-label">With a field</p>
+          <canvas id="fieldCanvas" width="320" height="240"></canvas>
+        </div>
+      </div>
+      <div class="demo-controls">
+        <button type="button" class="btn" id="rerollBtn">Reroll both</button>
+      </div>
+      <p class="demo-caption">Left, every cell decides on its own and the result is evenly scattered. Right, a field biases those decisions, and the same randomness gathers into bands and thins into valleys.</p>
+    </div>
+
+    <h2 id="classic">The classic version, and this one</h2>
+
+    <p>In most generative art, a flow field is literally a grid of vectors. You sample noise at each point, turn the value into an angle, and release particles that steer by whatever angle they're standing on. The particles trace the field, and the drawing is the trails they leave.</p>
+
+    <p>Flield does something related but not identical, and the difference is worth stating because it's the reason the output looks like woven fabric rather than like hair.</p>
+
+    <p>There are no particles here, and no per-cell vectors. Instead the <em>sampling space itself</em> is rotated and stretched before the noise is read from it. Sample isotropic noise at plain grid coordinates and you get blobs with no preferred direction. Rotate the coordinates toward a heading and divide one axis by a stretch factor first, and the same noise function returns values that vary slowly along that heading and quickly across it. Blobs become streaks, pointing where you aimed them.</p>
+
+    <pre><code>function sampleFlowField(noise2D, x, y, { scale, angleRad, stretch, octaves }) {
+  const cos = Math.cos(angleRad);
+  const sin = Math.sin(angleRad);
+  const rx = x * cos + y * sin;
+  const ry = -x * sin + y * cos;
+  const nx = rx / stretch / scale;
+  const ny = ry / scale;
+  return fbm(noise2D, nx, ny, octaves); // -1..1
+}</code></pre>
+
+    <p>Four lines of arithmetic, and they're the whole trick. <code>rx</code> and <code>ry</code> are the point rotated into flow-aligned space. Dividing <code>rx</code> by <code>stretch</code> compresses the coordinate along the flow direction, which means the noise takes longer to change as you travel that way. Everything after is ordinary noise.</p>
+
+    <h2 id="see">Seeing the field itself</h2>
+
+    <p>The field is invisible in the finished artwork, so here it is directly. The left panel draws the raw value returned by that function at every point, dark for low and light for high. The right panel is the composition those values produce. Drag the sliders and watch them move together.</p>
+
+    <div class="demo">
+      <div class="demo-canvases">
+        <div class="demo-pane">
+          <p class="demo-label">The field</p>
+          <canvas id="heatCanvas" width="320" height="240"></canvas>
+        </div>
+        <div class="demo-pane">
+          <p class="demo-label">What it produces</p>
+          <canvas id="artCanvas" width="320" height="240"></canvas>
+        </div>
+      </div>
+      <div class="demo-controls">
+        <div class="demo-control">
+          <label for="angleRange">Direction</label>
+          <input type="range" id="angleRange" min="0" max="360" value="35" step="1" />
+          <span class="demo-value" id="angleValue">35&deg;</span>
+        </div>
+        <div class="demo-control">
+          <label for="stretchRange">Stretch</label>
+          <input type="range" id="stretchRange" min="1" max="8" value="4" step="0.1" />
+          <span class="demo-value" id="stretchValue">4.0&times;</span>
+        </div>
+      </div>
+      <p class="demo-caption">Direction rotates the sampling space. Stretch decides how far the noise travels before it changes, so a low value gives clouds and a high one gives long combed streaks.</p>
+    </div>
+
+    <h2 id="bias">Bias, not a gate</h2>
+
+    <p>There's one more decision in here that matters more than it looks, and it's a single line.</p>
+
+    <p>The obvious way to use a field is as a switch: if the value clears a threshold the cell fills, otherwise it doesn't. That works, and it produces hard-edged regions with a visible boundary between filled and empty, because every cell on one side of the threshold agrees with every other.</p>
+
+    <p>Instead, the field adjusts the <em>probability</em> that a cell fills, and the cell still rolls its own dice:</p>
+
+    <pre><code>let p = density;
+if (useField) {
+  const n = sampleFlowField(noise2D, x, y, { scale, angleRad, stretch, octaves });
+  p = Math.min(1, Math.max(0, density + field.strength * n));
+}
+grid[y][x] = rand() &lt; p;</code></pre>
+
+    <p>Now a cell in a dense region is merely <em>likely</em> to fill, and one in a sparse region is merely unlikely. Regions blend into each other through a gradient of probability instead of meeting at an edge, and the texture stays grainy everywhere rather than going solid where the field is strong. That is the difference between the two panels in the first demo, and it is one comparison operator.</p>
+
+    <h2 id="octaves">Layering the noise</h2>
+
+    <p>A single noise sample is smooth to the point of being bland. Summing several at doubling frequencies and halving amplitudes, conventionally called fractal Brownian motion, adds fine detail on top of the broad shape without disturbing it. That is the <code>octaves</code> argument, and two or three is usually enough here: the grid is coarse, so detail finer than a cell is wasted work.</p>
+
+    <p>The noise underneath is <a href="https://en.wikipedia.org/wiki/Ken_Perlin" target="_blank" rel="noopener">Ken Perlin</a>'s gradient noise, using the fade curve from his 2002 improved reference implementation, seeded so the same string always produces the same field.</p>
+
+    <h2 id="try">Try it, or read it</h2>
+
+    <p>Every control described here is in the app, on each layer's tab: Field Strength, Field Scale, Flow Angle, Flow Stretch, and Octaves. <a href="../">Open Flield</a> and drag them, or read the <a href="../guide/">guide</a> for the rest of the tool.</p>
+
+    <p>The implementation is one file, <a href="https://github.com/simien/Flield/blob/main/generator.js" target="_blank" rel="noopener"><code>generator.js</code></a>, with no dependencies and no build step. It has no knowledge of the interface, so it runs anywhere a canvas does, which is how the demos on this page work: the same functions, at a smaller size.</p>
+
+    <p class="meta">Flield is free for noncommercial use under the <a href="https://github.com/simien/Flield/blob/main/LICENSE.md" target="_blank" rel="noopener">PolyForm Noncommercial License</a>.</p>
+
+    <footer class="site-footer">
+      <a href="../">Open App</a>
+      <a href="../guide/">Guide</a>
+      <a href="https://github.com/simien/Flield" target="_blank" rel="noopener">GitHub.com</a>
+      <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP.com</a>
+    </footer>
+  </main>
+
+  <script src="../generator.js?v=10"></script>
+  <script>
+    // Phosphor's own path data, the same two glyphs and the same
+    // flield-theme key the app and the guide use, so a choice made on any
+    // page carries to the others and looks identical there.
+    const ICONS = {
+      sun: "M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z",
+      moon: "M236.37,139.4a12,12,0,0,0-12-3A84.07,84.07,0,0,1,119.6,31.59a12,12,0,0,0-15-15A108.86,108.86,0,0,0,49.69,55.07,108,108,0,0,0,136,228a107.09,107.09,0,0,0,64.93-21.69,108.86,108.86,0,0,0,38.44-54.94A12,12,0,0,0,236.37,139.4Zm-49.88,47.74A84,84,0,0,1,68.86,69.51,84.93,84.93,0,0,1,92.27,48.29Q92,52.13,92,56A108.12,108.12,0,0,0,200,164q3.87,0,7.71-.27A84.79,84.79,0,0,1,186.49,187.14Z",
+    };
+
+    function iconSvg(name) {
+      return `<svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="${ICONS[name]}"/></svg>`;
+    }
+
+    const THEME_KEY = "flield-theme";
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+
+    function applyTheme(isLight) {
+      if (isLight) {
+        document.documentElement.setAttribute("data-theme", "light");
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+      themeToggleBtn.innerHTML = iconSvg(isLight ? "moon" : "sun");
+      themeToggleBtn.title = isLight ? "Switch to dark theme" : "Switch to light theme";
+      // The demos paint their own background color, so they need a repaint
+      // to follow the theme rather than sitting at the other one's palette.
+      renderAll();
+    }
+
+    // One palette for every demo on the page, so the comparisons differ in
+    // the thing being compared and nothing else. Read from the stylesheet's
+    // own tokens where the background is concerned, so the canvases sit on
+    // the page rather than on a color that only matches one theme.
+    function paletteFor() {
+      const styles = getComputedStyle(document.documentElement);
+      return {
+        bg: styles.getPropertyValue("--well").trim() || "#0f0f11",
+        a: "#38bdf8",
+        b: "#f472b6",
+      };
+    }
+
+    const BLOCK = 4;
+
+    // A layer built from the page's shared palette, with only the fields
+    // each demo actually varies passed in.
+    function layer(seed, color, density, overrides) {
+      return Object.assign({
+        seed,
+        color,
+        density,
+        fieldStrength: 0,
+        fieldScale: 90,
+        flowAngle: 35,
+        flowStretch: 4,
+        fieldOctaves: 2,
+        symmetry: "none",
+        smoothPasses: 1,
+      }, overrides);
+    }
+
+    function paint(canvas, layerA, layerB) {
+      const palette = paletteFor();
+      const options = {
+        width: canvas.width,
+        height: canvas.height,
+        blockSize: BLOCK,
+        bgColor: palette.bg,
+        layerA,
+        layerB,
+        shapeMask: "none",
+      };
+      const { gridA, gridB, cols, rows } = generate(options);
+      renderToCanvas(canvas, {
+        ...options,
+        colorA: layerA.color,
+        colorB: layerB.color,
+        gridA,
+        gridB,
+        cols,
+        rows,
+      });
+    }
+
+    // Demo 1: identical inputs either side, field strength the only
+    // difference, so the comparison is honest.
+    const staticCanvas = document.getElementById("staticCanvas");
+    const fieldCanvas = document.getElementById("fieldCanvas");
+    let compareSeed = "flowfield";
+
+    function renderCompare() {
+      const palette = paletteFor();
+      const a = layer(compareSeed + "-a", palette.a, 0.42, { fieldStrength: 0 });
+      const b = layer(compareSeed + "-b", palette.b, 0.24, { fieldStrength: 0, fieldScale: 70, flowAngle: 120 });
+      paint(staticCanvas, a, b);
+      paint(
+        fieldCanvas,
+        Object.assign({}, a, { fieldStrength: 0.5 }),
+        Object.assign({}, b, { fieldStrength: 0.45 })
+      );
+    }
+
+    document.getElementById("rerollBtn").addEventListener("click", () => {
+      compareSeed = Math.random().toString(36).slice(2);
+      renderCompare();
+    });
+
+    // Demo 2: the field drawn directly, beside the art it produces. Both
+    // read the same angle and stretch, which is the point of the pairing.
+    const heatCanvas = document.getElementById("heatCanvas");
+    const artCanvas = document.getElementById("artCanvas");
+    const angleRange = document.getElementById("angleRange");
+    const stretchRange = document.getElementById("stretchRange");
+    const angleValue = document.getElementById("angleValue");
+    const stretchValue = document.getElementById("stretchValue");
+
+    const HEAT_SEED = "heatmap";
+    const HEAT_SCALE_PX = 90;
+    const heatNoise = makePerlin(HEAT_SEED);
+
+    function renderHeat() {
+      const angle = Number(angleRange.value);
+      const stretch = Number(stretchRange.value);
+      const ctx = heatCanvas.getContext("2d");
+      const cols = Math.floor(heatCanvas.width / BLOCK);
+      const rows = Math.floor(heatCanvas.height / BLOCK);
+      // fieldScale is expressed in canvas pixels in the UI, and sampled per
+      // cell here, so it converts the same way buildGrid does.
+      const scale = HEAT_SCALE_PX / BLOCK;
+      const angleRad = (angle * Math.PI) / 180;
+      const image = ctx.createImageData(cols, rows);
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const n = sampleFlowField(heatNoise, x, y, { scale, angleRad, stretch, octaves: 2 });
+          // The raw value clusters tightly around zero (see FIELD_GAIN in
+          // generator.js), so it gets the same gain here before mapping to
+          // a gray, or the whole image would be one flat mid-tone.
+          const v = Math.max(0, Math.min(1, 0.5 + n * 2));
+          const level = Math.round(v * 255);
+          const i = (y * cols + x) * 4;
+          image.data[i] = level;
+          image.data[i + 1] = level;
+          image.data[i + 2] = level;
+          image.data[i + 3] = 255;
+        }
+      }
+      // Painted at cell resolution then scaled up, the same way the artwork
+      // is, so the two panels line up cell for cell.
+      const buffer = document.createElement("canvas");
+      buffer.width = cols;
+      buffer.height = rows;
+      buffer.getContext("2d").putImageData(image, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, heatCanvas.width, heatCanvas.height);
+      ctx.drawImage(buffer, 0, 0, heatCanvas.width, heatCanvas.height);
+    }
+
+    function renderArt() {
+      const palette = paletteFor();
+      const angle = Number(angleRange.value);
+      const stretch = Number(stretchRange.value);
+      const a = layer(HEAT_SEED + "-a", palette.a, 0.4, {
+        fieldStrength: 0.5,
+        fieldScale: HEAT_SCALE_PX,
+        flowAngle: angle,
+        flowStretch: stretch,
+      });
+      const b = layer(HEAT_SEED + "-b", palette.b, 0.22, {
+        fieldStrength: 0.45,
+        fieldScale: HEAT_SCALE_PX,
+        flowAngle: angle,
+        flowStretch: stretch,
+      });
+      paint(artCanvas, a, b);
+    }
+
+    function renderPair() {
+      angleValue.textContent = `${angleRange.value}°`;
+      stretchValue.textContent = `${Number(stretchRange.value).toFixed(1)}×`;
+      renderHeat();
+      renderArt();
+    }
+
+    angleRange.addEventListener("input", renderPair);
+    stretchRange.addEventListener("input", renderPair);
+
+    function renderAll() {
+      renderCompare();
+      renderPair();
+    }
+
+    themeToggleBtn.addEventListener("click", () => {
+      const isLight = document.documentElement.getAttribute("data-theme") !== "light";
+      applyTheme(isLight);
+      try {
+        localStorage.setItem(THEME_KEY, isLight ? "light" : "dark");
+      } catch (err) {
+        // localStorage can be unavailable (private browsing, blocked); the
+        // toggle still works for this page load, just won't persist.
+      }
+    });
+
+    applyTheme(document.documentElement.getAttribute("data-theme") === "light");
+  </script>
+</body>
+</html>
