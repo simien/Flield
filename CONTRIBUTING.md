@@ -32,8 +32,8 @@ Open a [GitHub issue](https://github.com/simien/Flield/issues) with:
 
 - What you did, what you expected, what happened instead
 - Browser and OS
-- A screenshot or the shareable link (Copy Link in the sidebar) if the bug is
-  specific to a composition
+- A screenshot or the shareable link (Copy Link, in the sidebar or the export
+  panel on a phone) if the bug is specific to a composition
 
 ## Suggesting features
 

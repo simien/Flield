@@ -118,7 +118,7 @@
               <li><a href="#saving">Saving and sharing</a></li>
               <li><a href="#shortcuts">Keyboard shortcuts</a></li>
               <li><a href="#auto">Exploring with Auto-randomize</a></li>
-              <li><a href="#animated">The animated exports</a></li>
+              <li><a href="#animated">Motion and animated exports</a></li>
               <li><a href="#ranges">Palette and Density Range</a></li>
             </ul>
           </nav>
@@ -269,7 +269,7 @@
     <ol>
       <li>Press <span class="ui-ref"><svg class="ui-ref-icon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240.49,175.51a12,12,0,0,1,0,17l-24,24a12,12,0,0,1-17-17L203,196h-2.09a76.17,76.17,0,0,1-61.85-31.83L97.38,105.78A52.1,52.1,0,0,0,55.06,84H32a12,12,0,0,1,0-24H55.06a76.17,76.17,0,0,1,61.85,31.83l41.71,58.39A52.1,52.1,0,0,0,200.94,172H203l-3.52-3.51a12,12,0,0,1,17-17Zm-95.62-72.62a12,12,0,0,0,16.93-1.13A52,52,0,0,1,200.94,84H203l-3.52,3.51a12,12,0,0,0,17,17l24-24a12,12,0,0,0,0-17l-24-24a12,12,0,0,0-17,17L203,60h-2.09a76,76,0,0,0-57.2,26A12,12,0,0,0,144.87,102.89Zm-33.74,50.22a12,12,0,0,0-16.93,1.13A52,52,0,0,1,55.06,172H32a12,12,0,0,0,0,24H55.06a76,76,0,0,0,57.2-26A12,12,0,0,0,111.13,153.11Z"/></svg>Random</span> to reroll every unlocked field at once. Good for a first look, but left alone this just cycles through unrelated compositions. A roll is steered, not blind: the two layers are kept apart in hue and both are kept apart from the background in lightness, as far as each layer's Palette Range allows, so three random colors still read as three.</li>
       <li><strong>Lock down what you want to keep</strong>, and let the rest stay unlocked. For example: lock a layer's seed and symmetry, leave density and flow field unlocked.</li>
-      <li>Click the <span class="ui-ref"><svg class="ui-ref-icon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z"/></svg>Auto-randomize</span> button, the play arrow next to Random, to repeat that reroll on a timer, from every 0.5 seconds up to every 10.</li>
+      <li>Click the <span class="ui-ref"><svg class="ui-ref-icon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z"/></svg>Auto-randomize</span> button, the play arrow next to Random, to repeat that reroll on a timer, from every second up to every 10. The same interval is how long one motion cycle takes.</li>
     </ol>
     <p>What comes through is a run of variations that share the same underlying structure, small differences in fill and texture on a shape that stays recognizable. It reads less like random noise and more like a designer trying variations on one idea.</p>
 
@@ -304,7 +304,7 @@
     </div>
     <p><strong>GIF export is the same loop, captured.</strong> The step count option (3, 5, 8, 13) runs that same randomize sequence, frame by frame, at the Auto-randomize interval as the per-frame delay, the exact sequence Auto-randomize would generate rather than whatever the artboard happens to be showing at the moment.</p>
 
-    <h2 id="animated">The animated exports</h2>
+    <h2 id="animated">Motion and animated exports</h2>
     <p><strong>Motion</strong>, in the General tab, holds every setting and both seeds and animates the composition on screen so the last frame flows straight into the first, with no visible cut. There are four kinds beside <strong>None</strong>: <strong>Loop</strong>, <strong>Drift</strong>, <strong>Wind</strong>, and <strong>Pulse</strong>. Pick one and the canvas plays it straight away, which is also exactly what a GIF will record.</p>
 
     <!-- Each kind gets its own heading and its own example beside it,
@@ -370,7 +370,7 @@
     </div>
     <p>Picking any of them plays that kind on the canvas right away, at the export's own frame rate, so what you see is what the file will be. Pick a step count to put the still back.</p>
     <div class="note">
-      <p>Loop, Drift, and Wind need some field strength to have anything to move. All four make bigger files than a stepped GIF, since there are 38 frames per cycle instead of a handful; larger blocks bring it down.</p>
+      <p>Loop, Drift, and Wind need some field strength to have anything to move. All four make bigger files than stills, since a cycle is tens of frames instead of one per pass. A whole export is capped at 240 frames, so a long one loses smoothness rather than running away with the file size, and larger blocks bring it down further.</p>
     </div>
 
     <h2 id="ranges">Widening or narrowing with Palette Range and Density Range</h2>
