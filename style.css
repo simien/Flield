@@ -6,6 +6,21 @@
    the wrong theme). */
 :root {
   color-scheme: dark;
+  /* The fixed bottom bar's full footprint below the sheet breakpoint:
+     8px of padding either side of a touch target, its 1px top border,
+     and whatever the device reserves under it. Read by the sheet, the
+     artboard and the site footer, all of which stop short of it. Zero
+     while the bar is empty on wider layouts. */
+  --action-bar-h: 0px;
+  /* A split button's caret half. One value everywhere it appears, so
+     the GIF menu in a panel and the speed menu on the bar can't drift
+     to different widths; the touch tiers below resize it with the
+     control it's attached to. */
+  --caret-w: 30px;
+  /* The progress wash on a hold-to-confirm button. Tinted from the
+     primary so it reads as the action arriving, and kept translucent so
+     the label stays legible while it passes underneath. */
+  --hold-tint: color-mix(in srgb, var(--primary) 30%, transparent);
   /* Surfaces, darkest to lightest: --bg is the canvas surround and
      every sunken control (inputs, chips, lock buttons, the tab track);
      --well is the sidebar's scrollable tab body; --panel is the sidebar
@@ -112,7 +127,12 @@ body {
   background: var(--bg);
   color: var(--text);
   display: flex;
+  /* dvh, so the layout tracks the viewport a mobile browser actually
+     leaves once its URL bar is on screen; 100vh is the tallest it ever
+     gets, which put the footer underneath that bar. The vh line stays
+     as the fallback for anything without dvh. */
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -144,37 +164,32 @@ input[type="range"]:focus-visible {
      links sit on the same inset as the artwork's edges: sidebar, right
      edge, and bottom. The brand keeps its own 20px at the top. */
   --artboard-pad: 25px;
-  /* Chrome the artboard has to clear: the brand row at the top (20px
-     inset plus its 32px line) and the footer at the bottom (32px line
-     plus its inset), each followed by the artboard padding. The larger
-     of the two is applied to both ends, so the artwork centers on the
-     browser's full height rather than on whatever is left between them. */
-  --artboard-clear-top: calc(52px + var(--artboard-pad));
-  --artboard-clear-bottom: calc(32px + var(--artboard-pad) * 2);
-  --artboard-clear: max(var(--artboard-clear-top), var(--artboard-clear-bottom));
+  /* The footer's own footprint off the bottom edge: its 32px line plus
+     the inset under it. The artboard stops here rather than running
+     underneath, which is what lets it centre in the space it actually
+     occupies. Anything else pinned to that edge adds to it. */
+  --footer-strip: calc(32px + var(--artboard-pad));
+  /* Now just the artboard's own margin, top and bottom alike. It used
+     to carry the footer's height as well, on both ends, so that the
+     artwork stayed centred on the full window: the cost was a gap above
+     the artwork the size of a footer and a gap below it the size of a
+     margin, which read as the artwork sitting low. Dropped to a plain
+     inset here and set to a tighter one while a sheet is up. */
+  --artboard-clear: var(--artboard-pad);
 }
 
-/* The name sits centered over the artboard, out of the sidebar's way
-   (its top row is the exploration controls, which want the full
-   width). Still the page's h1, just placed where the eye lands after
-   the canvas rather than in the control panel. The 20px top inset and
-   32px line box match the sidebar header's own padding and its Random
-   button, so the name's text sits on the same line as the button's;
-   .site-footer mirrors the same 20px and 32px from the bottom edge. */
+/* The page's h1, first item in the footer strip. It takes the strip's
+   own size rather than one of its own, and carries its weight instead:
+   at this scale bold is enough to separate a name from the links beside
+   it, and one size across the strip is what makes it read as a single
+   line of chrome rather than two things that happen to be adjacent. */
 .brand {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 32px;
-  display: flex;
-  align-items: center;
+  flex-shrink: 0;
   margin: 0;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: inherit;
+  font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--text-muted);
-  z-index: 10;
 }
 
 .brand a {
@@ -213,19 +228,51 @@ input[type="range"]:focus-visible {
   overflow: hidden;
 }
 
+.sheet-handle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sheet-handle {
+    display: block;
+    position: relative;
+    flex-shrink: 0;
+    width: 100%;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 16px 16px 0 0;
+    background: var(--panel);
+    box-shadow: none;
+    /* The drag is handled in script; without this the browser claims
+       the gesture for a scroll before the first pointermove lands. */
+    touch-action: none;
+  }
+
+  .sheet-handle::before {
+    content: "";
+    position: absolute;
+    top: 9px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border-strong);
+  }
+}
+
+/* Hidden wherever it happens to be sitting; .action-bar below shows it
+   once script has moved it in there, which is the only place it appears
+   at all. That also covers the tick between parse and script, when it
+   is still a child of <body>. */
 .sidebar-toggle {
   display: none;
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  z-index: 30;
-  width: 40px;
-  height: 40px;
   padding: 0;
   align-items: center;
   justify-content: center;
   margin-top: 0;
-  transition: left 0.2s ease;
 }
 
 .sidebar-backdrop {
@@ -236,6 +283,158 @@ input[type="range"]:focus-visible {
   z-index: 24;
 }
 
+/* One setting, parked on top of the bar while the sheet is closed (see
+   showLastField in index.html, which moves the real field in here). It
+   shares the bar's inset so the two stack as one block of chrome, and
+   it sits under the sheet's z-index because the two are never up at the
+   same time. */
+.last-control {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--action-bar-h);
+  z-index: 24;
+  align-items: flex-end;
+  gap: var(--touch-gap);
+  padding: 12px var(--edge-pad);
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+
+.last-control:not([hidden]) {
+  display: flex;
+}
+
+.last-control-slot {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The field brought its sidebar spacing with it; in a one-row strip the
+   bottom margin would just be dead height. */
+.last-control-slot .field {
+  margin-bottom: 0;
+}
+
+/* The thumb bubble sits above the track, which in the sidebar means
+   over a label with room to spare above it. Here the strip is one row
+   tall and the label is the only thing up there, and it is already
+   showing the same live value at the end of the line. */
+.last-control-slot .slider-tooltip {
+  display: none;
+}
+
+.last-control .last-control-close {
+  flex-shrink: 0;
+  width: 32px;
+  margin-top: 0;
+}
+
+/* The exploration loop, plus the two buttons that choose which panel
+   the sheet shows. Parked at the bottom of the screen on narrow layouts
+   where the sidebar becomes that sheet (see syncActionBar() in
+   index.html, which moves the live controls in here). The sheet rises
+   off this bar and stops at its top edge, so Random stays one tap away
+   with a panel open and the way back out is always in the same place.
+   display:none on wider layouts, where all of this is in the sidebar. */
+.action-bar {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 26;
+  align-items: center;
+  gap: var(--touch-gap);
+  padding: 8px var(--edge-pad);
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+
+.action-bar:not([hidden]) {
+  display: flex;
+}
+
+/* Four fixed targets and Random taking the rest, so the primary action
+   is the widest thing on the bar here too. It keeps the fill and drops
+   the word: at 375px the row cannot seat both the label and an inset
+   the panels can share, and the fill is what marks it as primary. The
+   sidebar copy is untouched. */
+.action-bar .explore-row {
+  flex: 1;
+  min-width: 0;
+  gap: var(--touch-gap);
+  margin-bottom: 0;
+}
+
+.action-bar #randomizeBtn {
+  min-width: var(--touch-h);
+}
+
+.action-bar #randomizeBtn .btn-label {
+  display: none;
+}
+
+/* Two arrows crossing sideways: shuffle is the widest glyph in the row
+   and, at 10.8px against play's 12.7, the shortest. In a line of icons
+   the eye takes height for size, so at the shared 15px it read as the
+   smallest button on the bar while being the primary one. 18px puts its
+   height just past the others and gives the extra width Random carries
+   something to hold. Only while it stands alone; beside a word it goes
+   back to matching. */
+.action-bar #randomizeBtn i {
+  font-size: 18px;
+}
+
+/* Each panel's button wears Random's own fill while that panel is the
+   one showing, the way the tabs inside the sheet mark their own. It
+   reads better than flipping one of them to a close icon, which would
+   say nothing about the other panel being up.
+
+   The :hover half is not decoration: it has to outrank
+   button.secondary's hover rule, which has the same specificity and is
+   declared later. Touch browsers leave :hover stuck on whatever was
+   tapped last, so without it the button you just pressed is the one
+   that loses its fill. */
+.action-bar button.is-active,
+.action-bar button.is-active:hover:not(:disabled) {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-fg);
+}
+
+/* 44px here rather than the 32px these controls carry in the sidebar:
+   this is the one row meant to be hit with a thumb. The width reset
+   opts every one of them out of the full-width button default, which
+   in a flex row reads as "take everything, then shrink". */
+.action-bar button,
+.action-bar .split-btn-select {
+  height: var(--touch-h);
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+/* Only the buttons need this: it undoes `button { width: 100% }`, which
+   in a flex row reads as "take everything, then shrink". A select never
+   had that default, and auto would collapse the caret onto its own
+   background image instead of holding the token width. */
+.action-bar button {
+  width: auto;
+}
+
+.action-bar .icon-btn,
+.action-bar .explore-row .split-btn-main {
+  min-width: var(--touch-h);
+}
+
+/* In the bar the toggle is just another button in the row. */
+.action-bar .sidebar-toggle {
+  display: flex;
+  width: var(--touch-h);
+}
+
 /* Confirms an action whose effect isn't visible from wherever the user
    is looking, e.g. Lock All changes lock icons that may be sitting on
    a layer tab that isn't even the one currently open. Shown via
@@ -243,11 +442,19 @@ input[type="range"]:focus-visible {
    transition, and pointer-events stays off so it never blocks a click. */
 .toast {
   position: absolute;
-  left: 50%;
-  /* Shares the brand's spot on purpose: the toast is transient and sits
-     a layer above it, so it simply covers the name while it shows. */
+  /* Inset from both edges, not left:50%. An absolutely positioned box
+     with only a left offset gets shrink-to-fit against the space from
+     that offset to the container's edge, which is half the artboard:
+     anything longer than that wrapped early and looked clipped. Both
+     offsets plus auto margins give it the full width to size against
+     and still centre it. */
+  left: var(--artboard-pad);
+  right: var(--artboard-pad);
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
   top: 20px;
-  transform: translate(-50%, -8px);
+  transform: translateY(-8px);
   padding: 10px 16px;
   border-radius: var(--radius);
   background: var(--panel);
@@ -264,7 +471,7 @@ input[type="range"]:focus-visible {
 
 .toast.visible {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
 }
 
 /* First-visit "take the tour" nudge (see #tourChip in index.html).
@@ -272,13 +479,18 @@ input[type="range"]:focus-visible {
    fired in the meantime still shows on top. */
 .tour-chip {
   position: absolute;
-  left: 50%;
+  /* Same reasoning as .toast above: both offsets, so the pill can grow
+     to the artboard's width before it wraps. */
+  left: var(--artboard-pad);
+  right: var(--artboard-pad);
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
   top: 20px;
-  transform: translateX(-50%);
   align-items: center;
   gap: 12px;
   /* Room on both sides of the text, and the pill grows with its
-     content on desktop; below the drawer breakpoint it wraps inside
+     content on desktop; below the sheet breakpoint it wraps inside
      the artboard's inset instead. */
   padding: 6px 6px 6px 18px;
   border-radius: 999px;
@@ -287,7 +499,6 @@ input[type="range"]:focus-visible {
   color: var(--text-muted);
   font-size: 13px;
   white-space: nowrap;
-  max-width: calc(100% - 2 * var(--artboard-pad));
   box-shadow: var(--shadow-lg);
   z-index: 19;
   animation: tourChipIn 0.3s ease both;
@@ -298,8 +509,8 @@ input[type="range"]:focus-visible {
 }
 
 @keyframes tourChipIn {
-  from { opacity: 0; transform: translate(-50%, -6px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* The play offer is one line; the longer explanation lives in the
@@ -355,48 +566,98 @@ input[type="range"]:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .toast {
     transition: opacity 0.2s ease;
-    transform: translate(-50%, 0);
+    transform: translateY(0);
   }
 }
 
 /* Below this width there's no room for a permanent side-by-side layout,
-   so the sidebar becomes a full-height overlay drawer toggled by
-   .sidebar-toggle instead of always being on screen. */
+   so the sidebar becomes a sheet over the bottom of the screen, toggled
+   by .sidebar-toggle instead of always being on screen. */
 @media (max-width: 768px) {
-  .sidebar-toggle {
-    display: flex;
+  /* The touch tier. One height, one caret, one inset and one gap, read
+     by the bar and by both sheet panels, so the whole bottom assembly
+     lines up: a download button's left edge sits directly over Undo's.
+     Gap stays under the inset, the usual toolbar ratio, so controls
+     never crowd the screen edge harder than they crowd each other. */
+  :root {
+    --touch-h: 44px;
+    --caret-w: 36px;
+    --edge-pad: 16px;
+    --touch-gap: 12px;
+    --action-bar-h: calc(var(--touch-h) + 17px + env(safe-area-inset-bottom, 0px));
+    /* Capped in px as well as dvh so the sheet stops growing on a tall
+       phone and leaves the artwork the rest. At this height the canvas
+       clears the sheet whole on every phone down to a 568px viewport. */
+    --sheet-h: min(58dvh, 460px);
+    /* The second stop, for when the settings matter more than the view:
+       the sheet takes what it can and still leaves a 96px band of
+       artboard, so the artwork thins to a strip rather than vanishing. */
+    --sheet-h-tall: min(88dvh, calc(100dvh - var(--action-bar-h) - 96px));
   }
 
+  /* A sheet rising off the action bar, not a side drawer. A panel that
+     flew in from one edge covered the artwork it was editing, so every
+     slider was a guess; this leaves the canvas on screen above it and
+     .canvas-area shrinks to match, which is the whole point of the
+     shape. It also lands where the bar that opens it already is. */
   .controls {
     position: fixed;
-    top: 0;
+    top: auto;
     left: 0;
-    bottom: 0;
-    width: min(300px, 85vw);
-    height: auto;
+    right: 0;
+    bottom: var(--action-bar-h);
+    width: auto;
+    height: var(--sheet-h);
     z-index: 25;
-    transform: translateX(-100%);
+    border-right: none;
+    border-top: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    /* Its own height, so it parks out of sight behind the bar. */
+    transform: translateY(100%);
     transition: transform 0.2s ease;
-    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.35);
   }
 
   body.sidebar-open .controls {
-    transform: translateX(0);
+    transform: translateY(0);
   }
 
-  /* Slide the toggle (now acting as a close button) out to the right of
-     the open drawer instead of leaving it stacked on the drawer's own
-     title. */
-  body.sidebar-open .sidebar-toggle {
-    left: calc(min(300px, 85vw) + 12px);
+  body.sheet-tall .controls {
+    height: var(--sheet-h-tall);
   }
 
+  /* Nothing is being sent to the background here: the canvas above the
+     sheet is the thing being watched, so the backdrop keeps only its
+     job of closing the sheet when the artwork is tapped. */
   body.sidebar-open .sidebar-backdrop {
     display: block;
+    background: transparent;
   }
 
   .main-area {
-    --artboard-pad: 16px;
+    --artboard-pad: var(--edge-pad);
+  }
+
+  /* With the sheet up, the artwork gets the shortened area to itself:
+     the name would otherwise sit across the top of it, and the footer
+     is behind the sheet anyway. */
+  body.sidebar-open .main-area {
+    --artboard-clear: 12px;
+  }
+}
+
+/* A 320px screen is 44px short of seating the cluster at full size, so
+   everything gives a little rather than the bar overflowing. 40px is
+   still a usable target, and only the smallest phones ever see it. */
+/* A 320px screen can't seat the touch tier at full size, so the tier
+   itself steps down and every rule above follows. 40px is still a
+   usable target, and only the smallest phones ever see it. */
+@media (max-width: 359px) {
+  :root {
+    --touch-h: 40px;
+    --caret-w: 32px;
+    --edge-pad: 12px;
+    --touch-gap: 8px;
   }
 }
 
@@ -529,7 +790,7 @@ input[type="range"]:focus-visible {
 }
 
 .split-btn-select {
-  width: 30px;
+  width: var(--caret-w);
   height: 32px;
   flex-shrink: 0;
   margin-top: 0;
@@ -1074,7 +1335,7 @@ input[type="range"]:focus-visible {
   min-width: 0;
   text-align: center;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 11.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   text-transform: uppercase;
   white-space: nowrap;
@@ -1304,24 +1565,253 @@ button i {
 
 /* shadcn's "outline" variant: input fill and border, lifting on hover. */
 button.secondary {
-  background: var(--input);
+  /* background-color, not the shorthand: [data-hold] below paints its
+     progress into background-image, and the shorthand would wipe it out
+     on every hover. */
+  background-color: var(--input);
   color: var(--text);
   border: 1px solid var(--input-border);
 }
 
 button.secondary:hover:not(:disabled) {
-  background: var(--input-hover);
+  background-color: var(--input-hover);
+}
+
+/* Lock All, Unlock All and Undo arm on a hold rather than a press (see
+   HOLD_MS in index.html). The bar fills left to right for as long as
+   the button is held and snaps back the moment it is let go, because
+   only the .holding state carries a transition. */
+[data-hold] {
+  background-image: linear-gradient(var(--hold-tint), var(--hold-tint));
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 0% 100%;
+  /* A two second press is long enough for a touch device to offer to
+     select the label or open a callout over it. */
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+[data-hold].holding {
+  background-size: 100% 100%;
+  /* Set from HOLD_MS in index.html, which owns the duration. The
+     fallback only matters for the frame before that runs. */
+  transition: background-size var(--hold-duration, 1000ms) linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-hold].holding {
+    transition: none;
+  }
 }
 
 /* Fills the whole artboard side (the brand and footer paint over its
    padding), so centering within it is centering on the viewport. The
    canvas itself sits at this box's top-left corner and is centered by
    a transform (see #preview below), not by flex. */
+/* Ends at the top of the footer, not at the bottom of the window, so
+   the artwork centres between the top edge and that strip and the gap
+   above it matches the gap below. --action-bar-h is 0 above the sheet
+   breakpoint, so this one line covers both layouts. */
 .canvas-area {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--footer-strip) + var(--action-bar-h));
   padding: var(--artboard-clear) var(--artboard-pad);
   overflow: hidden;
+}
+
+/* The artboard ends at the bottom edge, and below the breakpoint that
+   edge belongs to the action bar, then to the sheet on top of it. This
+   is what keeps the artwork on screen while it's being edited. Kept
+   next to the rule it overrides rather than up in the sheet's own media
+   query, which comes earlier in the file than the inset it has to beat. */
+@media (max-width: 768px) {
+  .canvas-area {
+    /* Matches the sheet's own slide, so the artwork resizes with it
+       rather than snapping once it lands. */
+    transition: bottom 0.2s ease;
+  }
+
+  /* --sheet-actual is the sheet's measured height, published by the
+     observer in index.html. One rule then covers all three of its
+     sizes, including the export panel's, which is only as tall as the
+     handful of buttons on it. The var's fallback is the first stop, for
+     the frame before the observer's first callback. */
+  body.sidebar-open .canvas-area {
+    bottom: calc(var(--action-bar-h) + var(--sheet-actual, var(--sheet-h)));
+  }
+
+  body.has-last-control .canvas-area {
+    bottom: calc(
+      var(--footer-strip) + var(--action-bar-h) + var(--last-control-h, 0px)
+    );
+  }
+
+  /* The handle already supplies the gap above the first row. */
+  .controls-header {
+    padding-top: 4px;
+  }
+}
+
+/* On desktop the wrapper leaves no box of its own, so the footer's link
+   row lays its two buttons out exactly as it did before they were
+   grouped. Below the breakpoint the group becomes a real row, at the
+   end of the settings scroll (see syncActionBar in index.html). */
+.app-chrome {
+  display: contents;
+}
+
+/* Names the panel the export button switches to, the way "Settings"
+   names the other one. Only ever on screen as that panel. */
+.export-title {
+  display: none;
+  margin-top: 0;
+}
+
+/* The sheet shows one panel at a time, chosen from the bar. Deleting
+   the footer from the settings view is the point of the split: it was
+   121px of permanently pinned chrome above a scroll area that had 82px
+   left on a small phone. */
+@media (max-width: 768px) {
+  body.sheet-export .controls-header,
+  body.sheet-export .controls-body {
+    display: none;
+  }
+
+  body:not(.sheet-export) .controls-footer {
+    display: none;
+  }
+
+  /* A handful of buttons doesn't need the settings panel's height, so
+     the sheet shrinks to them and hands the difference back to the
+     artwork. It still can't outgrow the first stop. */
+  body.sheet-export .controls {
+    height: auto;
+    max-height: var(--sheet-h);
+  }
+
+  /* As a panel it owns the sheet, so it scrolls if it ever has to, and
+     it drops the divider it wore as a footer. */
+  body.sheet-export .controls-footer {
+    flex: 0 1 auto;
+    overflow-y: auto;
+    border-top: none;
+    background: var(--well);
+  }
+
+  /* This is a thumb surface now, not a corner of the sidebar, and it
+     shares the bar's inset and gap so the two read as one stack. */
+  body.sheet-export .controls-footer button,
+  body.sheet-export .controls-footer .split-btn-select {
+    height: var(--touch-h);
+  }
+
+  body.sheet-export .controls-footer .button-row,
+  body.sheet-export .controls-footer .footer-link-row {
+    gap: var(--touch-gap);
+  }
+
+  /* Three equal labels. Sizing each unit outright, rather than leaving
+     it to grow from a flex basis, because the split's inner row makes
+     the shared-remainder maths come out lopsided: the caret has to be
+     an addition to the group, not a bite out of the label beside it.
+     The split gets one unit plus the caret; the other two get a unit
+     each; three units and the caret and two gaps fill the row. */
+  body.sheet-export .controls-footer .button-row {
+    --export-unit: calc((100% - 2 * var(--touch-gap) - var(--caret-w)) / 3);
+  }
+
+  body.sheet-export .controls-footer .button-row > button {
+    flex: 0 0 var(--export-unit);
+  }
+
+  body.sheet-export .controls-footer .button-row > .split-btn {
+    flex: 0 0 calc(var(--export-unit) + var(--caret-w));
+  }
+
+  body.sheet-export .controls-footer .button-row > .split-btn > .split-btn-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Every panel takes the same side inset as the bar below it, so the
+     edges of the whole bottom assembly line up. */
+  .controls-header {
+    padding-left: var(--edge-pad);
+    padding-right: var(--edge-pad);
+  }
+
+  .controls-body {
+    padding: 16px var(--edge-pad) var(--edge-pad);
+  }
+
+  .controls-footer {
+    padding: var(--edge-pad);
+  }
+
+  .export-title {
+    display: block;
+  }
+
+  /* Tutorial and theme, once script has moved them to the end of the
+     settings scroll. They sit on their own line above the bottom fade,
+     off the pinned chrome they used to be part of. */
+  .app-chrome {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .app-chrome button {
+    width: auto;
+    margin-top: 0;
+  }
+}
+
+/* A phone held sideways gets the sidebar layout, because it is wider
+   than the sheet breakpoint, and then has no height to give it: at
+   812x375 the pinned header and footer take 286 of 375px and leave 89px
+   to scroll 570px of settings in. Rather than a third layout, the whole
+   sidebar becomes one scroll here with the exploration row stuck to the
+   top, so the settings and the export row both get the full column.
+   Keyed on height, so a desktop window dragged short gets it too. */
+@media (max-height: 520px) and (min-width: 769px) {
+  .controls {
+    overflow-y: auto;
+  }
+
+  .controls-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--panel);
+  }
+
+  .controls-body {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  /* They mark the edges of a scroll box that no longer scrolls. */
+  .scroll-fade {
+    display: none;
+  }
+}
+
+/* The sheet's slide and the artboard resize that tracks it are the same
+   gesture, so they sit out together. Both then land in their open or
+   closed position on the same frame the class changes. */
+@media (prefers-reduced-motion: reduce) {
+  .controls,
+  .canvas-area {
+    transition: none;
+  }
 }
 
 /* One quiet strip under the canvas: the shortcut legend on the left,
@@ -1335,7 +1825,6 @@ button.secondary:hover:not(:disabled) {
   margin-top: auto;
   position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 16px;
   height: 32px;
@@ -1377,6 +1866,13 @@ button.secondary:hover:not(:disabled) {
   gap: 14px;
 }
 
+/* Pinned to the right edge by an auto margin rather than by
+   space-between, so the strip keeps the same shape on the narrow layout
+   where the legend beside the name is hidden. */
+.site-footer-links {
+  margin-left: auto;
+}
+
 .site-footer-keys span {
   display: inline-flex;
   align-items: center;
@@ -1385,7 +1881,7 @@ button.secondary:hover:not(:disabled) {
 
 .site-footer kbd {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: inherit;
   line-height: 1;
   padding: 3px 5px;
   border: 1px solid var(--border);
@@ -1411,15 +1907,26 @@ button.secondary:hover:not(:disabled) {
   opacity: 0.7;
 }
 
+/* Same as the artboard above: the strip clears the action bar instead
+   of sitting under it. Placed after .site-footer's own margin-bottom
+   for the same source-order reason. */
+@media (max-width: 768px) {
+  .site-footer {
+    margin-bottom: calc(var(--artboard-pad) + var(--action-bar-h));
+  }
+
+  body.has-last-control .site-footer {
+    margin-bottom: calc(
+      var(--artboard-pad) + var(--action-bar-h) + var(--last-control-h, 0px)
+    );
+  }
+}
+
 /* No keyboard to bind on a phone or a touch-only screen; the links go
    back to centered on their own. */
 @media (max-width: 768px), (hover: none) {
   .site-footer-keys {
     display: none;
-  }
-
-  .site-footer {
-    justify-content: center;
   }
 }
 
@@ -1451,7 +1958,7 @@ button.secondary:hover:not(:disabled) {
 }
 
 .hint {
-  font-size: 11.5px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--text-muted);
   margin-top: 8px;
@@ -1473,17 +1980,22 @@ button.secondary:hover:not(:disabled) {
   margin-top: 0;
 }
 
-/* The GIF split keeps its natural width (label plus the 30px select);
-   PNG and SVG share whatever is left. */
+/* In the 260px sidebar there isn't room to give all three an equal
+   third, so the GIF split keeps its natural width and PNG and SVG share
+   what's left. The sheet's export panel is wide enough to do better and
+   overrides this. */
 .button-row > .split-btn {
   flex: 0 0 auto;
 }
 
-/* Three labeled buttons plus a select in one 260px row: the default
-   12px side padding is 4px too much per button to fit. */
-.controls-footer .button-row > button,
-.controls-footer .button-row .split-btn-main {
-  padding: 0 8px;
+/* Three labeled buttons plus a select in one 260px sidebar: the default
+   12px side padding is 4px too much per button to fit. The sheet's
+   export panel is wider than that and keeps the standard padding. */
+@media (min-width: 769px) {
+  .controls-footer .button-row > button,
+  .controls-footer .button-row .split-btn-main {
+    padding: 0 8px;
+  }
 }
 
 .footer-link-row {
@@ -1705,7 +2217,7 @@ button:disabled {
 
 .tutorial-step p {
   margin: 0;
-  font-size: 13.5px;
+  font-size: 13px;
   line-height: 1.6;
   color: var(--text-muted);
 }
