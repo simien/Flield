@@ -3,9 +3,11 @@
 [![checks](https://img.shields.io/github/actions/workflow/status/simien/Flield/checks.yml?branch=main&label=checks)](https://github.com/simien/Flield/actions/workflows/checks.yml)
 [![license](https://img.shields.io/badge/license-PolyForm%20Noncommercial-orange)](LICENSE.md)
 
-A browser-based generative pixel art tool. It builds three-color compositions,
-a background plus two artwork layers, from seeded flow fields and symmetry.
-The name is a contraction of "flow field," the mechanic it runs on.
+A browser-based generator for seamless looping backgrounds. It builds
+three-color pixel art, a background plus two artwork layers, from seeded flow
+fields and symmetry, then sets it moving in a cycle that runs back into its
+first frame with no cut. The name is a contraction of "flow field," the
+mechanic it runs on.
 
 ## Live demo
 
@@ -20,36 +22,17 @@ The name is a contraction of "flow field," the mechanic it runs on.
 
 ## Examples
 
-Three exported GIFs, each thirteen Auto-randomize passes at a two-second interval, showing three ways to use the locks.
+Four exported GIFs, one per motion, each a single 3-second cycle at half the
+app's own frame rate to keep the files small. Every setting and both seeds
+hold; only the phase moves, and the last frame runs back into the first with
+no cut.
 
-<!-- HTML rather than a markdown table so the three columns can be
-     given equal widths; a markdown table sizes them by caption length,
-     and the GIFs scale to whatever each column ends up with. -->
-<table>
-  <tr>
-    <th width="33%">Full random</th>
-    <th width="33%">Brand campaign</th>
-    <th width="33%">Kaleidoscope variations</th>
-  </tr>
-  <tr>
-    <td width="33%"><img src="examples/full-random.gif" width="100%" alt="Full random"></td>
-    <td width="33%"><img src="examples/brand-campaign.gif" width="100%" alt="Brand campaign"></td>
-    <td width="33%"><img src="examples/kaleidoscope-variations.gif" width="100%" alt="Kaleidoscope variations"></td>
-  </tr>
-  <tr>
-    <td width="33%">Only block size and shape mask locked; every other field rerolls each pass.</td>
-    <td width="33%">Fine diagonal streaks fading toward the bottom, colors and flow locked to a brand palette; only density and stretch drift, for a set of on-brand variations.</td>
-    <td width="33%">A chunky 8-way kaleidoscope with symmetry, block size, density, and flow locked; seeds and colors reroll each pass, so every frame is a new pattern in the same language.</td>
-  </tr>
-</table>
-
-Four more, one per motion, each a single 3-second cycle at half the app's own
-frame rate to keep the files small. Every setting and both seeds hold; only
-the phase moves, and the last frame runs back into the first with no cut.
-
-<!-- Two columns rather than the three above: four kinds split evenly, and
-     each clip renders about half again as large, which these need since the
-     motion is the whole point of them. -->
+<!-- HTML rather than a markdown table so the columns can be given equal
+     widths; a markdown table sizes them by caption length, and the GIFs
+     scale to whatever each column ends up with. Two columns here against
+     the three below: four kinds split evenly, and each clip renders about
+     half again as large, which these need since the motion is the whole
+     point of them. -->
 <table>
   <tr>
     <th width="50%">Loop</th>
@@ -77,12 +60,36 @@ the phase moves, and the last frame runs back into the first with no cut.
   </tr>
 </table>
 
+Three more, each thirteen Auto-randomize passes at a two-second interval,
+showing three ways to use the locks.
+
+<!-- Three equal columns, for the same reason as the table above: a
+     markdown table would size them by caption length instead. -->
+<table>
+  <tr>
+    <th width="33%">Full random</th>
+    <th width="33%">Brand campaign</th>
+    <th width="33%">Kaleidoscope variations</th>
+  </tr>
+  <tr>
+    <td width="33%"><img src="examples/full-random.gif" width="100%" alt="Full random"></td>
+    <td width="33%"><img src="examples/brand-campaign.gif" width="100%" alt="Brand campaign"></td>
+    <td width="33%"><img src="examples/kaleidoscope-variations.gif" width="100%" alt="Kaleidoscope variations"></td>
+  </tr>
+  <tr>
+    <td width="33%">Only block size and shape mask locked; every other field rerolls each pass.</td>
+    <td width="33%">Fine diagonal streaks fading toward the bottom, colors and flow locked to a brand palette; only density and stretch drift, for a set of on-brand variations.</td>
+    <td width="33%">A chunky 8-way kaleidoscope with symmetry, block size, density, and flow locked; seeds and colors reroll each pass, so every frame is a new pattern in the same language.</td>
+  </tr>
+</table>
+
 ## Purpose
 
-Built to generate images and placeholder graphics without reaching for stock
-photos or a design tool every time. Swap in a brand color palette, seed a
-batch of variations, and export the one that fits. The GIF export works well
-as a subtle animated background or hover state.
+Built to produce backgrounds and placeholder graphics without reaching for
+stock footage, an animator, or a design tool every time. Swap in a brand
+color palette, set a motion, and export a loop for a hero section or a hover
+state. Stills work the same way without the motion: seed a batch of
+variations and export the one that fits.
 
 `generator.js` is independent of the UI, so the noise field, symmetry, and
 grid logic can be reused elsewhere.
@@ -121,7 +128,7 @@ of the sidebar or the end of the settings panel on a phone.
 
 - PNG, SVG, or animated GIF, capped at 240 frames so a long export trades smoothness rather than size
 - An SVG carries a link back to its own composition, so a file found later reopens in the editor
-- Copy Link encodes the whole composition, locks included, into a URL
+- Copy Link packs the whole composition, locks and motion included, into a URL of about a hundred characters
 - Three browser save slots, each showing its three colors and when it was saved
 
 ### Interface
