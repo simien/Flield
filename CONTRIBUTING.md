@@ -48,7 +48,12 @@ so a clear problem statement makes it much easier to judge fit.
    at `/`, the guide at `/guide/`, and the 404 page at `/404.html`.
 3. Keep changes focused; unrelated formatting or refactors make a diff harder
    to review.
-4. Open a pull request describing what changed and why, and link any related
+4. Run `python3 .github/scripts/checks.py origin/main` before you open the PR.
+   It is the same script CI runs, needs nothing installed, and catches the
+   failures that still serve a working-looking page: a syntax error in the
+   inline script, a duplicate id, a stale `?v=` cache buster, and a change to
+   the shared-link format that would stop existing links opening.
+5. Open a pull request describing what changed and why, and link any related
    issue.
 
 Small fixes (typos, broken links, obvious bugs) can skip the issue and go

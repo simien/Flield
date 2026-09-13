@@ -82,6 +82,40 @@ the **speed** menu beside Play is how long a pass lasts, and the **GIF** menu
 is how many passes to record. A GIF export is capped at `GIF_FRAME_BUDGET`
 (240) frames; smoothness gives way before file size does.
 
+## A shared link is a bit stream, and CI guards it
+
+`?c=` is 79 characters of base64url over a packed bit stream: each value
+takes exactly the bits its range needs, with nothing between them. Two
+kinds of edit would break every link already shared, plus the URL inside
+every exported SVG, and neither shows up in the browser:
+
+- **A menu outgrowing its field.** A choice travels as its index, so
+  option 16 in a 4-bit field decodes as option 0. Shape mask, motion,
+  symmetry, auto-randomize speed and the shape-mask directions all work
+  this way.
+- **A slider widened past its width.** `fieldScale` gets 10 bits with an
+  offset of 8, holding 8-1031. Push its max past that and every value
+  after it in the stream shifts.
+
+Both are checked by `checks.py`, against the widths in `COMPACT_BITS` and
+`COMPACT_LAYER_NUMBERS`, so the build fails rather than the links. It also
+compares option order and field positions against the base branch and
+fails on anything but an append, which includes adding a lock: the lock
+ids expand to one bit each in a fixed order, and a new one lands in the
+middle of that order rather than the end.
+
+The escape hatch is `COMPACT_VERSION`. Bumping it says the break is
+deliberate, and both checks stand down: the decoder refuses a version it
+doesn't recognise, so old links stop opening rather than opening the
+wrong picture.
+
+Changing what a field *means* rather than where it sits is still
+`STATE_VERSION` and `upgradeState()`, as it was.
+
+Links from before the compact format arrive as `?state=`, base64'd JSON,
+and still open. Don't drop that path: it is what is written inside every
+SVG exported up to now.
+
 ## Preview
 
 Any static file server works; there is nothing to build.
