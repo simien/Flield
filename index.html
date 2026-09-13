@@ -202,7 +202,9 @@
        sheet is out of the way, so a value can be dialled in against the
        artwork at full size instead of through a 135px-wide preview. The
        real field moves in here and back rather than being mirrored, so
-       it keeps the listeners that make it work. -->
+       it keeps the listeners bound to it directly. The delegated ones do
+       not come with it, which is why this element repeats .controls's
+       input listener; see lastControl in the script. -->
   <div class="last-control" id="lastControl" hidden>
     <div class="last-control-slot" id="lastControlSlot"></div>
     <button type="button" class="secondary icon-btn last-control-close" id="lastControlClose" title="Hide this control" aria-label="Hide this control"><i class="ph ph-x"></i></button>
@@ -3003,6 +3005,14 @@
     // panel built from the template.
     const lastControl = document.getElementById("lastControl");
     const lastControlSlot = document.getElementById("lastControlSlot");
+
+    // The same delegation .controls has, repeated here because this strip
+    // is not inside it. Moving an element keeps the listeners bound to
+    // the element; it cannot keep the ones bound to an ancestor it no
+    // longer has, and the render listener is one of those. Without this
+    // a pinned field changes its own value and nothing else: no redraw,
+    // which is the one thing the strip exists to give you.
+    lastControl.addEventListener("input", scheduleRender);
     let lastTouchedField = null;
     let lastFieldHome = null;
 
