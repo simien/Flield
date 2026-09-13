@@ -851,7 +851,7 @@
          play": the composition stays still until they choose, and the
          prompt doubles as an introduction to the Play button. -->
     <div class="tour-chip play-offer" id="playOffer" hidden>
-      <span id="playOfferText" title="Locked fields hold, the rest reroll on a timer">Set up to auto-randomize every <span id="playOfferSpeed"></span></span>
+      <span id="playOfferText" title="Locked fields hold, the rest reroll on a timer">Set to play every <span id="playOfferSpeed"></span></span>
       <button type="button" id="playOfferStartBtn"><i class="ph ph-play"></i> Play it</button>
       <button type="button" id="playOfferDismissBtn" class="tour-chip-dismiss" title="Keep the still"><i class="ph ph-x"></i></button>
     </div>
@@ -2524,7 +2524,12 @@
     // (see loadStateFromURL). Playing from it rerolls at once, like the
     // Play button, since that is the author's variations they came for.
     const playOffer = document.getElementById("playOffer");
-    document.getElementById("playOfferStartBtn").addEventListener("click", () => startAutoplay());
+    document.getElementById("playOfferStartBtn").addEventListener("click", () => {
+      // Both halves of what the link offered: the motion it was made
+      // with, and the rerolls on top of it.
+      syncSeamlessPreview();
+      startAutoplay();
+    });
     document.getElementById("playOfferDismissBtn").addEventListener("click", () => {
       playOffer.hidden = true;
     });
@@ -3857,9 +3862,12 @@
         const data = upgradeState(compact ? decodeCompact(compact) : JSON.parse(atob(legacy)));
         applySnapshot(data);
         // A link copied with "Offers to play" chosen sets the recorded
-        // speed and shows the prompt; nothing moves until the recipient
-        // says so.
+        // speed and shows the prompt. Nothing moves until the recipient
+        // says so, which has to include the motion: applySnapshot has
+        // already started it by this point, and a canvas animating
+        // behind a button offering to start it reads as a broken button.
         if (data.autoplay) {
+          stopSeamlessPreview();
           const speedText = formatSpeed(currentIntervalMs());
           document.getElementById("playOfferSpeed").textContent = speedText;
           document.getElementById("playOfferText").title =
