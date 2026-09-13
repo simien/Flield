@@ -622,9 +622,22 @@ function rectsForGrid(grid, cols, rows, blockSize) {
   return rects;
 }
 
-function gridToSVG({ width, height, blockSize, bgColor, colorA, colorB, gridA, gridB, cols, rows }) {
+function escapeXmlText(value) {
+  return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// `source` is a URL that reopens this exact composition, handed in by the
+// caller rather than built here: this file knows nothing about the app or
+// where it is hosted, and that stays true. Left out entirely when the
+// caller doesn't pass one, so the markup is unchanged without it.
+function gridToSVG({ width, height, blockSize, bgColor, colorA, colorB, gridA, gridB, cols, rows, source }) {
+  const provenance = source
+    ? `<!-- Open this URL to load this composition back into the editor. -->` +
+      `<metadata>${escapeXmlText(source)}</metadata>`
+    : "";
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
+    provenance +
     `<rect width="${width}" height="${height}" fill="${bgColor}"/>` +
     `<g fill="${colorA}">${rectsForGrid(gridA, cols, rows, blockSize)}</g>` +
     `<g fill="${colorB}">${rectsForGrid(gridB, cols, rows, blockSize)}</g>` +
