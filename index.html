@@ -3255,11 +3255,267 @@
     // both layers) round-trips through readOptions()/applyGeneral()/
     // applyDefaults(), the same functions save-state slots already use,
     // just encoded into a URL instead of localStorage.
+    //
+    // A link is a bit stream rather than JSON. Every value the UI can
+    // hold is a colour, a menu choice, or a number on a known step and
+    // range, so each takes exactly the bits its range needs (hue 9,
+    // symmetry 3, octaves 2), written end to end with nothing in
+    // between, then base64url'd. That is 78 characters where base64'd
+    // JSON ran past a thousand, most of which went on spelling out
+    // "fieldStrength" and its neighbours twice.
+    //
+    // Two things are load-bearing here, and both fail silently:
+    //
+    //   - The order of the <option>s for shape mask, motion, symmetry
+    //     and auto-randomize speed, and of COMPACT_LOCK_IDS below. A
+    //     choice travels as its index, so appending to any of them is
+    //     free, and reordering one quietly repaints every link already
+    //     shared.
+    //   - Every width below. They are the format, not a tuning knob:
+    //     widening a slider past what its width holds needs a new
+    //     COMPACT_VERSION, or old links decode into the wrong fields
+    //     from that point on.
+    //
+    // Links shared as ?state= base64 JSON, including the one inside
+    // every SVG exported before this, still open. See loadStateFromURL.
+    const COMPACT_VERSION = 1;
+
+    // Each layer field that is a plain number: the bits it gets, what to
+    // subtract so its range starts at zero, and what to multiply by so a
+    // fractional step lands on a whole number. Field strength steps by
+    // 0.005, so x200 makes it 0-200 and eight bits; scale starts at 8,
+    // so the offset buys back the eight values below it.
+    const COMPACT_LAYER_NUMBERS = [
+      // key, bits, offset, scale
+      ["hueMin", 9, 0, 1],
+      ["hueMax", 9, 0, 1],
+      ["satMin", 7, 0, 1],
+      ["satMax", 7, 0, 1],
+      ["lightMin", 7, 0, 1],
+      ["lightMax", 7, 0, 1],
+      ["density", 7, 0, 100],
+      ["densityMin", 7, 0, 100],
+      ["densityMax", 7, 0, 100],
+      ["fieldStrength", 8, 0, 200],
+      ["fieldScale", 10, 8, 1],
+      ["flowAngle", 9, 0, 1],
+      ["flowStretch", 7, 10, 10],
+      ["fieldOctaves", 2, 1, 1],
+      ["smoothPasses", 3, 0, 1],
+    ];
+
+    // Every width outside the layer table, in one place so the format is
+    // readable at a glance and checks.py can read it too. A menu that
+    // outgrows its width doesn't error, it wraps: option 8 in a 3-bit
+    // field decodes as option 0. The link-format check fails the build
+    // before that can ship, and each choice here carries roughly double
+    // the room it needs today.
+    //
+    // size is width and height, the one pair with no maximum in the
+    // markup, so they are clamped to what their bits hold. A canvas a
+    // million pixels down one side runs out of memory long before it
+    // runs out of link.
+    const COMPACT_BITS = {
+      version: 4,
+      bgColor: 24,
+      size: 20,
+      blockSize: 7,
+      shapeMask: 4,
+      shapeMaskDirection: 3,
+      motion: 3,
+      autoSpeed: 4,
+      seedFlag: 1,
+      seedPacked: 42,
+      seedLength: 8,
+      byte: 8,
+      color: 24,
+      symmetry: 4,
+    };
+    const COMPACT_SIZE_MAX = 2 ** COMPACT_BITS.size - 1;
+
+    // A generated seed is eight base-36 characters, which packs into 42
+    // bits instead of the 64 the same text costs a byte at a time.
+    // Anything else (typed by hand, or a short one from an unlucky
+    // Math.random) goes the long way, behind the flag bit.
+    const COMPACT_SEED_PACKED = /^[0-9a-z]{8}$/;
+
+    // One bit each, in this order. Built rather than listed so the two
+    // layers cannot drift apart.
+    const COMPACT_LOCK_IDS = ["bgColor", "blockSize", "shapeMask"].concat(
+      ["layerA", "layerB"].flatMap((prefix) =>
+        ["seed", "color", "density", "fieldStrength", "fieldScale", "flowAngle",
+          "flowStretch", "fieldOctaves", "symmetry", "smoothPasses"]
+          .map((key) => `${prefix}-${key}`)
+      )
+    );
+
+    // Bits go in and out with arithmetic rather than << and >>, which
+    // look like the obvious tools and are not: JS bitwise operators
+    // truncate to 32 bits, and a seed packed as base 36 needs 42.
+    function bitWriter() {
+      const bits = [];
+      return {
+        add(value, width) {
+          for (let i = width - 1; i >= 0; i--) bits.push(Math.floor(value / 2 ** i) % 2);
+        },
+        finish() {
+          const bytes = new Uint8Array(Math.ceil(bits.length / 8));
+          bits.forEach((bit, i) => {
+            if (bit) bytes[i >> 3] |= 128 >> i % 8;
+          });
+          let binary = "";
+          bytes.forEach((byte) => (binary += String.fromCharCode(byte)));
+          return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+        },
+      };
+    }
+
+    function bitReader(encoded) {
+      const binary = atob(encoded.replace(/-/g, "+").replace(/_/g, "/"));
+      const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+      let at = 0;
+      return {
+        // Running out of bits means the link was cut short on its way
+        // here; the caller drops it rather than render half a picture.
+        read(width) {
+          if (at + width > bytes.length * 8) throw new Error("truncated link");
+          let value = 0;
+          for (let i = 0; i < width; i++, at++) value = value * 2 + ((bytes[at >> 3] >> (7 - (at % 8))) & 1);
+          return value;
+        },
+      };
+    }
+
+    // Read off the live <select> so there is only ever one copy of the
+    // option order. Both layers share one control template, so layerA's
+    // symmetry list is layerB's too.
+    const optionValues = (id) => [...document.getElementById(id).options].map((o) => o.value);
+    const optionIndex = (values, value) => Math.max(0, values.indexOf(value));
+    // An index this build doesn't have yet (a link from a newer Flield)
+    // falls back to the first option rather than throwing the link away.
+    const optionAt = (values, index) => values[index] || values[0];
+    const compactColor = (value) => "#" + value.toString(16).padStart(6, "0");
+
+    function addCompactSeed(out, seed) {
+      const packed = COMPACT_SEED_PACKED.test(seed);
+      out.add(packed ? 1 : 0, COMPACT_BITS.seedFlag);
+      if (packed) {
+        out.add(parseInt(seed, 36), COMPACT_BITS.seedPacked);
+        return;
+      }
+      const bytes = new TextEncoder().encode(seed).slice(0, 255);
+      out.add(bytes.length, COMPACT_BITS.seedLength);
+      bytes.forEach((byte) => out.add(byte, COMPACT_BITS.byte));
+    }
+
+    function readCompactSeed(input) {
+      // Base 36 drops leading zeros; the fixed eight-character width of
+      // the packed form is what puts them back.
+      if (input.read(COMPACT_BITS.seedFlag)) {
+        return input.read(COMPACT_BITS.seedPacked).toString(36).padStart(8, "0");
+      }
+      const bytes = new Uint8Array(input.read(COMPACT_BITS.seedLength));
+      for (let i = 0; i < bytes.length; i++) bytes[i] = input.read(COMPACT_BITS.byte);
+      return new TextDecoder().decode(bytes);
+    }
+
+    function addCompactLayer(out, layer) {
+      addCompactSeed(out, layer.seed);
+      out.add(parseInt(layer.color.slice(1), 16), COMPACT_BITS.color);
+      out.add(optionIndex(optionValues("layerA-symmetry"), layer.symmetry), COMPACT_BITS.symmetry);
+      COMPACT_LAYER_NUMBERS.forEach(([key, bits, offset, scale]) =>
+        out.add(Math.max(0, Math.round(layer[key] * scale) - offset), bits)
+      );
+    }
+
+    function readCompactLayer(input) {
+      const layer = {
+        seed: readCompactSeed(input),
+        color: compactColor(input.read(COMPACT_BITS.color)),
+        symmetry: optionAt(optionValues("layerA-symmetry"), input.read(COMPACT_BITS.symmetry)),
+      };
+      COMPACT_LAYER_NUMBERS.forEach(([key, bits, offset, scale]) => {
+        layer[key] = (input.read(bits) + offset) / scale;
+      });
+      return layer;
+    }
+
+    function encodeCompact(snapshot) {
+      const out = bitWriter();
+      const directions = SHAPE_MASK_DIRECTIONS[snapshot.shapeMask] || [];
+      out.add(COMPACT_VERSION, COMPACT_BITS.version);
+      out.add(parseInt(snapshot.bgColor.slice(1), 16), COMPACT_BITS.bgColor);
+      out.add(Math.min(COMPACT_SIZE_MAX, Math.max(0, snapshot.width)), COMPACT_BITS.size);
+      out.add(Math.min(COMPACT_SIZE_MAX, Math.max(0, snapshot.height)), COMPACT_BITS.size);
+      out.add(snapshot.blockSize, COMPACT_BITS.blockSize);
+      out.add(optionIndex(optionValues("shapeMask"), snapshot.shapeMask), COMPACT_BITS.shapeMask);
+      // Written even for the shapes that have no direction to point in:
+      // two bits cost nothing next to a decoder that has to know which
+      // shapes those are.
+      out.add(Math.max(0, directions.findIndex((d) => d.value === snapshot.shapeMaskDirection)), COMPACT_BITS.shapeMaskDirection);
+      out.add(optionIndex(optionValues("motion"), snapshot.motion || "none"), COMPACT_BITS.motion);
+      COMPACT_LOCK_IDS.forEach((id) => out.add((snapshot.locks || []).includes(id) ? 1 : 0, 1));
+      // Zero means a still link. Otherwise the speed's place in the
+      // menu, one higher, so the first entry can't read as "still".
+      out.add(snapshot.autoplay ? optionValues("autoSpeed").indexOf(String(snapshot.autoplay)) + 1 : 0, COMPACT_BITS.autoSpeed);
+      addCompactLayer(out, snapshot.layerA);
+      addCompactLayer(out, snapshot.layerB);
+      return out.finish();
+    }
+
+    function decodeCompact(encoded) {
+      const input = bitReader(encoded);
+      // A format this build doesn't know cannot be guessed at; the
+      // caller drops the link and opens a fresh composition instead.
+      if (input.read(COMPACT_BITS.version) !== COMPACT_VERSION) throw new Error("unknown link format");
+      const bgColor = compactColor(input.read(COMPACT_BITS.bgColor));
+      const width = input.read(COMPACT_BITS.size);
+      const height = input.read(COMPACT_BITS.size);
+      const blockSize = input.read(COMPACT_BITS.blockSize);
+      const shapeMask = optionAt(optionValues("shapeMask"), input.read(COMPACT_BITS.shapeMask));
+      const directions = SHAPE_MASK_DIRECTIONS[shapeMask] || [];
+      const direction = input.read(COMPACT_BITS.shapeMaskDirection);
+      const motion = optionAt(optionValues("motion"), input.read(COMPACT_BITS.motion));
+      // Spelled out as a loop, not a filter: every read moves the cursor,
+      // so the order these come off the stream is the whole game.
+      const locks = [];
+      COMPACT_LOCK_IDS.forEach((id) => {
+        if (input.read(1)) locks.push(id);
+      });
+      const speed = input.read(COMPACT_BITS.autoSpeed);
+      const layerA = readCompactLayer(input);
+      const layerB = readCompactLayer(input);
+      const speeds = optionValues("autoSpeed");
+      const data = {
+        // Version 1 carries what STATE_VERSION 2 means. A later bump
+        // takes the next COMPACT_VERSION and leaves this branch reading
+        // 2, so upgradeState() converts these links like any old one.
+        v: 2,
+        bgColor,
+        width,
+        height,
+        blockSize,
+        shapeMask,
+        shapeMaskDirection: directions.length ? (directions[direction] || directions[0]).value : "",
+        motion,
+        locks,
+        layerA,
+        layerB,
+      };
+      if (speed && speeds[speed - 1]) data.autoplay = parseInt(speeds[speed - 1], 10);
+      return data;
+    }
+
     function loadStateFromURL() {
-      const encoded = new URLSearchParams(location.search).get("state");
-      if (!encoded) return false;
+      const params = new URLSearchParams(location.search);
+      const compact = params.get("c");
+      // The base64'd JSON the compact format replaced. Links shared
+      // before it, and the source line inside every SVG exported before
+      // it, still arrive as ?state=, so they still open.
+      const legacy = params.get("state");
+      if (!compact && !legacy) return false;
       try {
-        const data = upgradeState(JSON.parse(atob(encoded)));
+        const data = upgradeState(compact ? decodeCompact(compact) : JSON.parse(atob(legacy)));
         applySnapshot(data);
         // A link copied with "Offers to play" chosen sets the recorded
         // speed and shows the prompt; nothing moves until the recipient
@@ -3281,7 +3537,7 @@
     }
 
     function stateUrl(snapshot) {
-      return `${location.origin}${location.pathname}?state=${btoa(JSON.stringify(snapshot))}`;
+      return `${location.origin}${location.pathname}?c=${encodeCompact(snapshot)}`;
     }
 
     // Encodes the current composition (and, per the menu, an autoplay
