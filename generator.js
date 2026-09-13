@@ -1122,8 +1122,20 @@ function maskKeepProbability(shape, direction, x, y, cols, rows) {
   return 1;
 }
 
-function applyShapeMask(grid, cols, rows, shape, seed, direction) {
-  if (!shape || shape === "none") return;
+// A layer's mask is a pure function of the shape, its direction, the grid
+// size and the layer's seed: nothing in it moves with the phase. It used
+// to be recomputed for every cell on every frame, and for the radial
+// shapes each cell allocated a corner list and took four square roots,
+// which doubled the cost of an animated frame. It is built once here as a
+// keep/drop byte per cell and reused. The random stream is read in the
+// same cell order as before, so a masked grid comes out bit-identical to
+// what the per-frame version drew. Same shape of cache as the field's: a
+// few entries cover both layers, the tutorial demos and the favicon.
+const SHAPE_MASK_CACHE_LIMIT = 6;
+const shapeMaskCache = new Map();
+
+function buildShapeMask(cols, rows, shape, seed, direction) {
+  const keep = new Uint8Array(cols * rows).fill(1);
   const rand = seededRandom(seed + "|mask");
 
   if (GRADIENT_SHAPE_MASKS.has(shape)) {
@@ -1131,11 +1143,11 @@ function applyShapeMask(grid, cols, rows, shape, seed, direction) {
       const row = y * cols;
       for (let x = 0; x < cols; x++) {
         if (rand() > maskKeepProbability(shape, direction, x, y, cols, rows)) {
-          grid[row + x] = 0;
+          keep[row + x] = 0;
         }
       }
     }
-    return;
+    return keep;
   }
 
   const inner = 1 - SHAPE_MASK_FEATHER;
@@ -1146,9 +1158,30 @@ function applyShapeMask(grid, cols, rows, shape, seed, direction) {
       const d = shapeDistance(shape, x, y, cols, rows);
       if (d <= inner) continue;
       if (d >= outer || rand() > 1 - (d - inner) / (outer - inner)) {
-        grid[row + x] = 0;
+        keep[row + x] = 0;
       }
     }
+  }
+  return keep;
+}
+
+function shapeMaskFor(cols, rows, shape, seed, direction) {
+  const key = `${cols}|${rows}|${shape}|${direction || ""}|${seed}`;
+  const cached = shapeMaskCache.get(key);
+  if (cached) return cached;
+  const keep = buildShapeMask(cols, rows, shape, seed, direction);
+  if (shapeMaskCache.size >= SHAPE_MASK_CACHE_LIMIT) {
+    shapeMaskCache.delete(shapeMaskCache.keys().next().value);
+  }
+  shapeMaskCache.set(key, keep);
+  return keep;
+}
+
+function applyShapeMask(grid, cols, rows, shape, seed, direction) {
+  if (!shape || shape === "none") return;
+  const keep = shapeMaskFor(cols, rows, shape, seed, direction);
+  for (let i = 0; i < grid.length; i++) {
+    if (!keep[i]) grid[i] = 0;
   }
 }
 
