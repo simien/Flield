@@ -496,10 +496,19 @@ tr:last-child td {
   margin-top: 64px;
   padding-top: 24px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 18px;
+  flex-direction: column;
+  gap: 14px;
   font-size: 13px;
   color: var(--text-subtle);
+}
+
+/* Two rows, the other pages above the site's own links. Someone who has
+   reached the bottom of a page is looking for the next one to read, and
+   in a single line those sat among GitHub and a personal site. */
+.site-footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
 }
 
 .site-footer a {
