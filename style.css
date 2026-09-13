@@ -164,11 +164,17 @@ input[type="range"]:focus-visible {
      links sit on the same inset as the artwork's edges: sidebar, right
      edge, and bottom. The brand keeps its own 20px at the top. */
   --artboard-pad: 25px;
+  /* The gap under the footer strip. It matches the sidebar's own bottom
+     padding rather than the artboard's inset, so the name and links line
+     up with the last row of buttons in the sidebar instead of floating
+     5px above it. The mobile block below hands it back to the artboard's
+     inset, where there is no sidebar to line up with. */
+  --footer-inset: 20px;
   /* The footer's own footprint off the bottom edge: its 32px line plus
      the inset under it. The artboard stops here rather than running
      underneath, which is what lets it centre in the space it actually
      occupies. Anything else pinned to that edge adds to it. */
-  --footer-strip: calc(32px + var(--artboard-pad));
+  --footer-strip: calc(32px + var(--footer-inset));
   /* Now just the artboard's own margin, top and bottom alike. It used
      to carry the footer's height as well, on both ends, so that the
      artwork stayed centred on the full window: the cost was a gap above
@@ -636,6 +642,7 @@ input[type="range"]:focus-visible {
 
   .main-area {
     --artboard-pad: var(--edge-pad);
+    --footer-inset: var(--edge-pad);
   }
 
   /* With the sheet up, the artwork gets the shortened area to itself:
@@ -1828,7 +1835,7 @@ button.secondary:hover:not(:disabled) {
   align-items: center;
   gap: 16px;
   height: 32px;
-  margin-bottom: var(--artboard-pad);
+  margin-bottom: var(--footer-inset);
   padding: 0 var(--artboard-pad);
   font-size: 11px;
   color: var(--text-subtle);
@@ -1912,12 +1919,12 @@ button.secondary:hover:not(:disabled) {
    for the same source-order reason. */
 @media (max-width: 768px) {
   .site-footer {
-    margin-bottom: calc(var(--artboard-pad) + var(--action-bar-h));
+    margin-bottom: calc(var(--footer-inset) + var(--action-bar-h));
   }
 
   body.has-last-control .site-footer {
     margin-bottom: calc(
-      var(--artboard-pad) + var(--action-bar-h) + var(--last-control-h, 0px)
+      var(--footer-inset) + var(--action-bar-h) + var(--last-control-h, 0px)
     );
   }
 }

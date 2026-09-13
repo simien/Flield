@@ -186,7 +186,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=93" />
+  <link rel="stylesheet" href="style.css?v=94" />
 </head>
 <body>
   <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show settings" aria-pressed="false"><i class="ph ph-list"></i></button>
@@ -499,7 +499,7 @@
         <button type="button" class="palette-preset-btn dimension-preset-btn" data-preset="web">Web</button>
         <button type="button" class="palette-preset-btn dimension-preset-btn" data-preset="tablet">Tablet</button>
         <button type="button" class="palette-preset-btn dimension-preset-btn" data-preset="mobile">Mobile</button>
-        <button type="button" class="palette-preset-btn dimension-preset-btn" data-preset="tile" title="A square canvas set up to tile with no visible seam: no shape mask, both layers on 4-way mirror">Tile</button>
+        <button type="button" class="palette-preset-btn dimension-preset-btn" data-preset="tile" title="Square canvas that repeats with no seam. Locks the shape mask and both symmetries">Tile</button>
       </div>
 
       <div class="field">
@@ -548,7 +548,7 @@
 
       <div class="field">
         <label for="motion">Motion</label>
-        <select id="motion" title="What the composition does when it moves. Anything but None plays on the canvas straight away, one cycle per the speed beside the play button, and is what a GIF records">
+        <select id="motion" title="How the composition moves. Plays on the canvas as soon as you pick one">
           <option value="none" selected>None (still)</option>
           <option value="circle">Loop</option>
           <option value="drift">Drift</option>
@@ -753,7 +753,7 @@
         <button id="downloadPng" class="secondary"><i class="ph ph-download-simple"></i> PNG</button>
         <button id="downloadSvg" class="secondary"><i class="ph ph-download-simple"></i> SVG</button>
         <div class="split-btn">
-          <button id="downloadGif" class="secondary split-btn-main" title="Download an animated GIF: steps replay Auto-randomize passes at the speed above; the rest animate the composition on screen and cycle back to their first frame with no cut"><i class="ph ph-download-simple"></i> GIF</button>
+          <button id="downloadGif" class="secondary split-btn-main" title="Download an animated GIF of what is on screen"><i class="ph ph-download-simple"></i> GIF</button>
           <!-- How many passes to record. A pass is one composition: with
                Motion set it is animated through one cycle, and with
                Auto-randomize running each pass rerolls before it. Motion
@@ -809,7 +809,7 @@
          play": the composition stays still until they choose, and the
          prompt doubles as an introduction to the Play button. -->
     <div class="tour-chip play-offer" id="playOffer" hidden>
-      <span id="playOfferText" title="Whoever shared this set up Auto-randomize: locked fields hold, the rest reroll every few seconds. The play button beside Random does the same anytime.">Set up to auto-randomize every <span id="playOfferSpeed"></span></span>
+      <span id="playOfferText" title="Locked fields hold, the rest reroll on a timer">Set up to auto-randomize every <span id="playOfferSpeed"></span></span>
       <button type="button" id="playOfferStartBtn"><i class="ph ph-play"></i> Play it</button>
       <button type="button" id="playOfferDismissBtn" class="tour-chip-dismiss" title="Keep the still"><i class="ph ph-x"></i></button>
     </div>
@@ -2235,12 +2235,14 @@
     const gifStepsSelect = document.getElementById("gifSteps");
     const linkModeSelect = document.getElementById("linkMode");
     const motionSelect = document.getElementById("motion");
-    const GIF_MENU_TITLE =
-      "How many passes the GIF records. A pass is one composition, held for the speed beside it; " +
-      "with Motion set it is animated through one cycle instead, and with Auto-randomize running each pass rerolls first. " +
-      "Motion on its own records a single looping cycle whatever this says. Larger blocks make a smaller file";
-    const SPEED_TITLE =
-      "How long one pass lasts: the gap between Auto-randomize rerolls, and the length of one Motion cycle";
+    // Short on purpose. A title is not the place to teach a feature, and
+    // it can't be: it never appears on a touch device at all, so anything
+    // load-bearing in here is invisible to half the people using this.
+    // The tour and the guide carry the explanations. What earns its place
+    // is the current value, which syncSelectTitle appends, because these
+    // selects render as a bare caret.
+    const GIF_MENU_TITLE = "How many passes the GIF records";
+    const SPEED_TITLE = "How long one pass lasts";
     syncSelectTitle(autoSpeedSelect, SPEED_TITLE);
     syncSelectTitle(gifStepsSelect, GIF_MENU_TITLE);
     syncSelectTitle(linkModeSelect, "What the link offers when opened");
@@ -3264,8 +3266,7 @@
           const speedText = autoSpeedSelect.options[autoSpeedSelect.selectedIndex].text;
           document.getElementById("playOfferSpeed").textContent = speedText;
           document.getElementById("playOfferText").title =
-            `Whoever shared this set up Auto-randomize: locked fields hold, the rest reroll every ${speedText}. ` +
-            "The play button beside Random does the same anytime.";
+            `Locked fields hold, the rest reroll every ${speedText}`;
           playOffer.hidden = false;
         }
         return true;
