@@ -175,12 +175,69 @@ change carries its speed as an index into that list, and it meant both
 durations at once. `checks.py` guards the constant the way it guarded
 the menu.
 
-## Four orthogonal controls drive animation
+## Ripple moves cells and density, not the field
+
+Loop, Drift and Wind move where the field is sampled. Pulse and Ripple
+leave the field alone, which is why both work with no field strength
+and why `buildGrid` reads the field at phase 0 for them: an identical
+field sampled every frame was most of a Pulse frame's cost before that.
+
+Ripple went through the field first and was invisible. A radial
+displacement of the sampling coordinates, at any amplitude short of
+mush, changes almost nothing a dither shows, because the dither stays
+put and only the shading under it shifts. A lateral wave and a zoom
+failed the same way. What reads is either changing how many cells fill
+(the crest's swell, as Pulse does) or moving the finished cells
+themselves (`rippleWarp`, which pulls each drawn cell along the
+water's slope, dither and all). Ripple does both, and the warp is what
+makes every texture move under it, traced ones included, so it needs
+no per-texture answer.
+
+Ripple is rain: several seeded drops, each born at its own moment and
+living one cycle, summed where the rings cross. Each is periodic on its
+own so the sum closes, but rings are in flight at phase 0, so Ripple's
+first frame is not the still, as Drift's is not. The rings are
+evaluated on a lattice `RIPPLE_STEP` cells apart and interpolated;
+evaluating every drop at every cell put a frame far over the 80ms
+budget. Both layers share A's drops, B at 70% of the swell and pull.
+
+## Tide is the one motion where the layers touch
+
+Every other motion builds a layer from its own settings alone. Tide
+reads the other layer too: `generate()` hands each `buildGrid` a
+`deform`, the other layer's normalised field gradient (`tidePush`,
+cached per composition, symmetry applied so it is the field the canvas
+shows), scaled by a raised-cosine gate, and `getFlowField` reads the
+field from the pushed coordinates. The hook is null for every other
+motion and every still, which is what keeps those bit-identical; a
+field read with a deform is never cached, since its phase is in the
+scale. A layer with no field strength has a flat field and pushes
+nothing, so the other layer holds still under it. The push is away
+from the other's ridges; toward was tried and gathers both layers onto
+the same lines.
+
+## Contours' edge is thin on purpose
+
+The line was a linear falloff across its whole width, and under any
+motion it sparkled at every speed: a line shifting a quarter of a cell
+per frame re-rolled the dither across its whole width, and the flips
+landed as scatter. Cells flipping per frame scale with speed either
+way, so the slider worked and looked dead. The edge is now dithered
+over `CONTOUR_FEATHER` of a level and no more, so the same shift moves
+the line. Don't widen it to soften the look without watching it move.
+
+## Six orthogonal controls drive animation
 
 Don't re-entangle them. **Motion** (General tab) is what a pass looks like,
-**Speed** beneath it is how long an animated pass lasts, **Reroll every** is
-how long a still one is held, and the **GIF** menu is how many passes to
-record. A GIF export is capped at `GIF_FRAME_BUDGET` (240) frames; smoothness
+**Speed** beneath it is how long an animated pass lasts, **Depth** is how
+far it goes (every kind but Drift, whose travel is its period and cannot
+change), **Direction** runs the phase backwards, **Reroll every** is how
+long a still one is held, and the **GIF** menu is how many passes to
+record. Depth is applied inside the generator as `options.depth`, a
+multiplier whose 1 leaves every constant's arithmetic exactly as it was,
+and Direction as `options.direction`, which maps the phase to one minus
+itself. Both are tail fields whose zero is the default, so a link from
+before them opens as it did. A GIF export is capped at `GIF_FRAME_BUDGET` (240) frames; smoothness
 gives way before file size does, and at the default settings that cap is not
 what binds, the per-pass smoothness is.
 
@@ -214,7 +271,8 @@ only, and every tail field's zero must mean "what this was before the
 field existed", because base64 pads the last byte with zeros and an old
 link's tail is read straight out of that padding. A tail that is all
 zeros is not written at all, though nothing leaves it empty today: the
-two durations are always written, so every new link is 82 characters.
+two durations are always written, so every new link is the same length
+(83 characters since depth and direction joined the tail).
 
 The escape hatch is `COMPACT_VERSION`. Bumping it says the break is
 deliberate, and both checks stand down: the decoder refuses a version it

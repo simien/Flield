@@ -218,7 +218,7 @@
           <tr><td><strong>Streaks</strong></td><td>The original. The field biases how likely each cell is to fill, so the noise combs into bands and valleys and reads as woven fabric.</td></tr>
           <tr><td><strong>Nebula</strong></td><td>The field is folded at zero first, so the curves it crosses there come out as bright filaments with dark voids either side. Cloudy rather than combed.</td></tr>
           <tr><td><strong>Marble</strong></td><td>Streaks, read through a second and coarser field that displaces where each cell samples, which folds the bands into each other the way poured stone does.</td></tr>
-          <tr><td><strong>Contours</strong></td><td>The field's level lines rather than its shading, so it reads as a topographic map. Concentric rings normally, and parallel ridges once Flow stretch is up. Wants a slow Speed under Motion: the lines are one cell thick, so a fast cycle reads as flicker rather than travel.</td></tr>
+          <tr><td><strong>Contours</strong></td><td>The field's level lines rather than its shading, so it reads as a topographic map. Concentric rings normally, and parallel ridges once Flow stretch is up. Each line has a crisp edge with a thin dithered rim, so under Motion the lines crawl rather than sparkle. A slow Speed still suits them, since every line is an edge.</td></tr>
           <tr><td><strong>Streamlines</strong></td><td>The classic construction the term usually means. The field becomes a heading at every cell. Particles are dropped on it and stepped along whatever direction they are standing on. What gets drawn is their trails.</td></tr>
           <tr><td><strong>Weave</strong></td><td>Streamlines traced twice, the second set a quarter turn across the first, so the strands cross into a mesh.</td></tr>
         </tbody>
@@ -227,17 +227,19 @@
     <p>Some sliders do a different job once the field is a heading rather than a shade. Those change name with the texture, so the panel always says which one you have.</p>
     <p>On <strong>Streamlines</strong> and <strong>Weave</strong>, <strong>Field strength</strong> becomes <strong>Curl</strong>. That is how far the noise swings a strand off the flow direction. <strong>Flow stretch</strong> becomes <strong>Trail length</strong>. <strong>Smoothing passes</strong> becomes <strong>Strand weight</strong>, because the usual smoothing rule erases a strand one cell wide. What it does instead is thicken it.</p>
     <p>On <strong>Contours</strong>, Field strength becomes <strong>Levels</strong>. That is how many lines get cut out of the field.</p>
-    <p>Base density keeps its name everywhere. It means the same thing in all six textures: the fraction of the canvas covered.</p>
+    <p>Base density keeps its name everywhere. It means the same thing in all six textures: the fraction of the canvas covered. That is measured before smoothing, which pushes a sparse layer sparser and a full one fuller.</p>
     <p>Everything downstream treats all six as ordinary cells. So any of them mirrors, kaleidoscopes, takes a shape mask and exports to PNG, SVG and GIF the same way. The two layers need not match either. Streamlines over streaks is a composition that streaks alone cannot make.</p>
-    <p>Motion reaches the two traced textures a little differently. Under <strong>Drift</strong> and <strong>Wind</strong>, their particles run along the field instead of the field sliding underneath them. Under <strong>Pulse</strong>, the trails lengthen and shorten instead of the density swinging. That breathes, rather than popping whole strands in and out.</p>
+    <p>Motion reaches the two traced textures a little differently. Under <strong>Drift</strong> and <strong>Wind</strong>, their particles run along the field instead of the field sliding underneath them. Under <strong>Pulse</strong>, the trails lengthen and shorten instead of the density swinging. That breathes, rather than popping whole strands in and out. Under <strong>Ripple</strong>, the rings bend the strands as they pass, the same way they bend everything else. Under <strong>Tide</strong>, the strands are swept along the other layer's ridges.</p>
     <p>Read <a href="../flow-fields/">what is a flow field?</a> for the arrow grid drawn out beside the strands it produces.</p>
 
-    <h3>Speed and interval</h3>
+    <h3>Speed, depth, direction, and interval</h3>
     <p>Two sliders in the General tab, on one scale that gives the fast end as much travel as the slow one. Both start at one second and run up to sixteen. <strong>Reroll every</strong> steps in doublings, because a reroll cadence is a choice between a few speeds rather than something to dial in.</p>
     <p><strong>Speed</strong> is how long a motion takes to come back round. It appears under Motion once you have picked one, since there is no cycle to time before that. <strong>Reroll every</strong>, under its own heading, is how long Auto-randomize waits before it rerolls.</p>
+    <p><strong>Depth</strong>, under Speed, is how far a motion goes, from a quarter of its usual reach to twice it. It scales Loop's circle, Wind's gust, Pulse's swing, Ripple's swell and pull, and Tide's push. Drift is the one it leaves alone. Drift travels exactly one period, which is what makes its loop close, so any other distance would break it.</p>
+    <p><strong>Direction</strong> runs the cycle forwards or backwards. Drift and Wind show it plainly, since reversed they travel against the flow direction without the still changing. Turning the layer's Flow direction round would change the picture, and this does not. Pulse and Tide look the same either way, Loop circles the other way round, and Ripple's rings shrink toward their drops.</p>
     <p>They are separate because they answer different questions. A composition that drifts slowly while rerolling quickly is a perfectly reasonable thing to want.</p>
     <p>An export has to reconcile them in the one case where both are running. There, a pass is a whole motion cycle rather than a reroll interval. The seam that makes a GIF loop is the cycle's own end, so cutting one short at the reroll would be the wrong trade. With Motion off there is no cycle, and a pass is one still held for the reroll interval.</p>
-    <p>Both travel in every shared link now. A link to a moving composition arrives at the speed it was made at, whether or not it offers to play.</p>
+    <p>All four travel in every shared link. A link to a moving composition arrives at the speed, depth, and direction it was made at, whether or not it offers to play.</p>
 
     <h3>Sliders</h3>
     <p>The click and drag target reaches well past the thin line you see, so grabbing a slider doesn't take a precise hit.</p>
@@ -359,7 +361,7 @@
       <p>Motion flashes the whole canvas. Pulse is the clearest case: it swings the covered area between roughly 39% and 81%, once a cycle, and on a high-contrast palette that is a large area changing brightness.</p>
       <p>The Speed slider therefore starts at one second, which is one of those a second. <a href="https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html" target="_blank" rel="noopener">WCAG 2.3.1</a> puts the limit at three. If flashing affects you, leave Motion off. If your system asks for reduced motion, a shared link carrying a motion will not start it on its own.</p>
     </div>
-    <p><strong>Motion</strong>, in the General tab, holds every setting and both seeds, then animates the composition on screen. The last frame flows straight into the first, with no visible cut. There are four kinds beside <strong>None</strong>: <strong>Loop</strong>, <strong>Drift</strong>, <strong>Wind</strong>, and <strong>Pulse</strong>. Pick one and the canvas plays it straight away, which is also exactly what a GIF will record.</p>
+    <p><strong>Motion</strong>, in the General tab, holds every setting and both seeds, then animates the composition on screen. The last frame flows straight into the first, with no visible cut. There are six kinds beside <strong>None</strong>: <strong>Loop</strong>, <strong>Drift</strong>, <strong>Wind</strong>, <strong>Pulse</strong>, <strong>Ripple</strong>, and <strong>Tide</strong>. Pick one and the canvas plays it straight away, which is also exactly what a GIF will record.</p>
 
     <!-- Each kind gets its own heading and its own example beside it,
          rather than four long bullets above a row of three clips: the point
@@ -376,6 +378,7 @@
 
     <h3>Drift</h3>
     <p>Flows the field one way along its flow direction, travelling exactly one period. So the pattern's density envelope repeats along that axis, at flow scale times stretch pixels.</p>
+    <p>Picking Drift or Wind repaints the composition once. The field they travel on repeats along the flow direction and the still does not, so their first frame is their own. Ripple's first frame already has rings in flight, so it repaints too. Loop, Pulse, and Tide open on the still itself.</p>
     <figure class="shot">
       <img src="../examples/drift.gif" width="1200" height="630" loading="lazy" decoding="async"
            alt="Drift: the pattern travels steadily across the canvas along its flow direction, repeating exactly at the end of one period." />
@@ -392,11 +395,30 @@
     </figure>
 
     <h3>Pulse</h3>
-    <p>Swings density with one sine wave, 40% of each layer's density either way, so the composition inflates and thins. Cells appear and vanish in a stable order, so it breathes rather than sparkles. It's the one kind that moves without any field strength.</p>
+    <p>Swings density with one sine wave, 40% of each layer's density either way, so the composition inflates and thins. Cells appear and vanish in a stable order, so it breathes rather than sparkles. It moves without any field strength, as Ripple does.</p>
     <figure class="shot">
       <img src="../examples/pulse.gif" width="1200" height="630" loading="lazy" decoding="async"
            alt="Pulse: the composition inflates and thins as density swings up and down, with cells appearing and vanishing in a stable order." />
           <figcaption>The streaks hold their position and only change weight, thickening and thinning together.</figcaption>
+    </figure>
+
+    <h3>Ripple</h3>
+    <p>Rain on the surface. A handful of drops land at seeded points, each at its own moment in the cycle and with its own weight, spacing, and reach. Every ring spreads, thins, and dies away before its drop falls again. Where rings cross they add, so two crests double and a crest over a trough cancels.</p>
+    <p>Each ring does two things. It swells the density along its crest, and it pulls the drawn cells the way water bends whatever is under it, so the picture bulges as a ring passes. Neither touches the field, so Ripple works with no field strength. The ring spacing follows the layer's <strong>Flow scale</strong>, so a fine field gets tight rings and a broad one gets wide swells.</p>
+    <p>Both layers ripple under the same drops. Layer B is pulled less than Layer A, as a deeper layer would be, so the two slide against each other where they overlap. On a tile each tile gets its own rain.</p>
+    <figure class="shot">
+      <img src="../examples/ripple.gif" width="1200" height="630" loading="lazy" decoding="async"
+           alt="Ripple: rings of denser cells spread from several points across the composition, thinning as they grow and crossing where they meet." />
+          <figcaption>Rings from seven drops cross the streaks, bending and swelling them as they pass, and the field beneath never moves.</figcaption>
+    </figure>
+
+    <h3>Tide</h3>
+    <p>The one kind in which the layers act on each other. Each layer's field is pushed along the ridges of the other layer's field, so Layer A's bands bend around Layer B's and Layer B's around Layer A's, into crossings that were not in the still. The push rises and settles once per cycle, so both ends of the cycle are the still.</p>
+    <p>The push is away from the other layer's ridges rather than toward them, which opens the gaps between the two rather than gathering both onto the same lines. Each layer is pushed by up to a little under half its own <strong>Flow scale</strong>. A layer with no field strength has nothing to push with, so the other layer holds still.</p>
+    <figure class="shot">
+      <img src="../examples/tide.gif" width="1200" height="630" loading="lazy" decoding="async"
+           alt="Tide: the two layers' bands bend around each other's ridges, press into crossings, and relax back to the still once per cycle." />
+          <figcaption>The blue bands and the pink ones press into each other and let go, each bent by the other's field.</figcaption>
     </figure>
 
     <p>Each kind is one cycle, and a cycle lasts as long as the <strong>Speed</strong> slider in the General tab says. Auto-randomize keeps its own interval, so the two can run at different rates.</p>
@@ -421,11 +443,19 @@
             <td><strong>Pulse</strong></td>
             <td>It swings the same way, at 70% of the depth.</td>
           </tr>
+          <tr>
+            <td><strong>Ripple</strong></td>
+            <td>It gets the same drops, at 70% of the swell and 70% of the pull, so it reads as the deeper layer.</td>
+          </tr>
+          <tr>
+            <td><strong>Tide</strong></td>
+            <td>It pushes A as hard as A pushes it, each by its own flow scale.</td>
+          </tr>
         </tbody>
       </table>
     </div>
     <p>Picking any of them plays that kind on the canvas right away, at the export's own frame rate. What you see is what the file will be. Pick a step count to put the still back.</p>
-    <p><a href="../animated-backgrounds/">How to make a looping animated background</a> covers the same four motions from the other side. Why they loop when a video clip does not, and which file format to reach for.</p>
+    <p><a href="../animated-backgrounds/">How to make a looping animated background</a> covers the same six motions from the other side. Why they loop when a video clip does not, and which file format to reach for.</p>
 
     <div class="note">
       <p>Loop, Drift, and Wind need some field strength to have anything to move. All four make bigger files than stills, since a cycle is tens of frames instead of one per pass. A whole export is capped at 240 frames. A long one loses smoothness rather than running away with the file size, and larger blocks bring it down further.</p>
