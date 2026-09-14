@@ -76,7 +76,7 @@
       "priceCurrency": "USD"
     },
     "featureList": [
-      "Loop, Drift, Wind, and Pulse animations that return to their first frame with no cut",
+      "Loop, Drift, Wind, Pulse, Ripple, and Tide animations that return to their first frame with no cut",
       "Animated GIF export, plus SVG and PNG for stills",
       "Two independently seeded layers over a background color, three colors in all",
       "Seeded flow fields with adjustable scale, strength, and stretch",
@@ -183,7 +183,7 @@
       {
         "@type": "HowToStep",
         "name": "Animate it",
-        "text": "Motion, in the General tab, moves the composition instead of replacing it: Loop, Drift, Wind, and Pulse each hold every setting and run one cycle that lands back on its first frame, with no cut. Pick one and the canvas plays it straight away. A cycle lasts as long as the Speed slider under it says, and a GIF records what you are watching."
+        "text": "Motion, in the General tab, moves the composition instead of replacing it: Loop, Drift, Wind, Pulse, Ripple, and Tide each hold every setting and run one cycle that lands back on its first frame, with no cut. Pick one and the canvas plays it straight away. A cycle lasts as long as the Speed slider under it says, and a GIF records what you are watching."
       }
     ]
   }
@@ -398,7 +398,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 13 of 13</p>
         <h3>Animate it</h3>
-        <p><span class="ui-ref">Motion</span>, in the General tab, moves the composition instead of replacing it. <span class="ui-ref">Loop</span>, <span class="ui-ref">Drift</span>, <span class="ui-ref">Wind</span>, and <span class="ui-ref">Pulse</span> each hold every setting and run one cycle that lands back on its first frame, with no cut. Pick one and the canvas plays it straight away; a cycle lasts as long as the <span class="ui-ref">Speed</span> slider under it says. Leave <span class="ui-ref">Auto-randomize</span> running as well and each pass rerolls before it animates. The GIF button records whatever you are watching.</p>
+        <p><span class="ui-ref">Motion</span>, in the General tab, moves the composition instead of replacing it. <span class="ui-ref">Loop</span>, <span class="ui-ref">Drift</span>, <span class="ui-ref">Wind</span>, <span class="ui-ref">Pulse</span>, <span class="ui-ref">Ripple</span>, and <span class="ui-ref">Tide</span> each hold every setting and run one cycle that lands back on its first frame, with no cut. Pick one and the canvas plays it straight away; a cycle lasts as long as the <span class="ui-ref">Speed</span> slider under it says. Leave <span class="ui-ref">Auto-randomize</span> running as well and each pass rerolls before it animates. The GIF button records whatever you are watching.</p>
       </div>
     </div>
 
@@ -568,6 +568,8 @@
           <option value="drift">Drift</option>
           <option value="wind">Wind</option>
           <option value="pulse">Pulse</option>
+          <option value="ripple">Ripple</option>
+          <option value="tide">Tide</option>
         </select>
       </div>
 
@@ -584,6 +586,25 @@
              large-area change in brightness, once a cycle. WCAG 2.3.1
              allows three of those a second. A one second cycle is one. -->
         <input type="range" id="speed" min="16" max="48" value="24" />
+      </div>
+
+      <!-- Depth scales how far every motion but Drift goes, and Direction
+           runs the cycle backwards, which Drift and Wind show plainly.
+           Both are revealed with the Speed slider, for the same reason.
+           Depth is a quarter-step index (4 is 1x) rather than a value,
+           so the link's tail can carry it in four bits. -->
+      <div class="field" id="depthField" hidden>
+        <label for="depth">Depth <span class="field-value" id="depthVal"></span></label>
+        <p class="hint">How far a motion goes. Drift is fixed.</p>
+        <input type="range" id="depth" min="1" max="8" value="4" />
+      </div>
+      <div class="field" id="directionField" hidden>
+        <label for="direction">Direction</label>
+        <p class="hint">Which way the cycle runs.</p>
+        <select id="direction">
+          <option value="forward" selected>Forward</option>
+          <option value="reverse">Reverse</option>
+        </select>
       </div>
 
       <h2 class="section-title">Auto-randomize</h2>
@@ -856,7 +877,7 @@
   </div>
 
   <div class="main-area">
-    <p class="sr-only">Flield is a free, browser-based generator for seamless animated backgrounds. It creates three-color pixel art compositions from seeded flow fields and symmetry, drawing each field one of six ways, from density-biased streaks to topographic contours to streamlines traced by particles running along it, sets them moving with Loop, Drift, Wind, or Pulse so a cycle returns to its first frame with no cut, and exports to animated GIF, SVG, or PNG. Locks hold the fields you like while the rest randomize. Runs entirely in the browser, no account or upload needed.</p>
+    <p class="sr-only">Flield is a free, browser-based generator for seamless animated backgrounds. It creates three-color pixel art compositions from seeded flow fields and symmetry, drawing each field one of six ways, from density-biased streaks to topographic contours to streamlines traced by particles running along it, sets them moving with Loop, Drift, Wind, Pulse, Ripple, or Tide so a cycle returns to its first frame with no cut, and exports to animated GIF, SVG, or PNG. Locks hold the fields you like while the rest randomize. Runs entirely in the browser, no account or upload needed.</p>
     <!-- The three explainers were two clicks from here, through the
          guide's footer, which is one more than a crawler gives a page
          it has not decided about yet. Out of the tab order, since a
@@ -925,7 +946,7 @@
     </script>
   </div>
 
-  <script src="generator.js?v=12"></script>
+  <script src="generator.js?v=13"></script>
   <script>
     // Inline replacements for the icons that used to come from the
     // Phosphor webfont (224KB for the ~19 glyphs this app actually uses).
@@ -1602,7 +1623,9 @@
         // showing the strength the slider happens to store. Anything
         // renamed to a unit it doesn't read in needs one of these, or
         // the label says one thing and the number beside it another.
-        fieldStrengthValue: (strength) => String(Math.max(1, Math.round(CONTOUR_LEVELS * strength))),
+        // Zero is no field at all, plain noise, so it counts zero; above
+        // that the generator floors the count at one.
+        fieldStrengthValue: (strength) => String(strength > 0 ? Math.max(1, Math.round(CONTOUR_LEVELS * strength)) : 0),
       }),
       streamlines: Object.assign({
         hint: "Particles traced along the field's headings.",
@@ -1692,10 +1715,12 @@
     // showLastField), it goes home first: hiding it there would leave an
     // empty strip with a close button and nothing in it.
     function updateMotionUI() {
-      const field = document.getElementById("speedField");
       const show = !!currentMotion();
-      if (!show && field.closest("#lastControl")) returnLastField();
-      field.hidden = !show;
+      ["speedField", "depthField", "directionField"].forEach((id) => {
+        const field = document.getElementById(id);
+        if (!show && field.closest("#lastControl")) returnLastField();
+        field.hidden = !show;
+      });
     }
 
     // Bumped whenever a saved field's meaning changes; upgradeState()
@@ -1732,6 +1757,16 @@
     const SPEED_MAX_STEP = 48;
     const speedInput = document.getElementById("speed");
     const intervalInput = document.getElementById("interval");
+    // Depth travels as a multiplier (0.25 to 2) and sits on the slider
+    // as quarters, so the default 1x is index 4.
+    const depthInput = document.getElementById("depth");
+    const directionSelect = document.getElementById("direction");
+    const DEPTH_STEPS_PER_UNIT = 4;
+    const DEPTH_DEFAULT_INDEX = parseInt(depthInput.defaultValue, 10);
+    const depthValue = (index) => index / DEPTH_STEPS_PER_UNIT;
+    const depthIndex = (value) =>
+      Math.min(parseInt(depthInput.max, 10), Math.max(parseInt(depthInput.min, 10), Math.round(value * DEPTH_STEPS_PER_UNIT)));
+    const formatDepth = (value) => String(value).replace(/\.?0+$/, "") + "\u00d7";
     const speedMs = (step) => Math.round(SPEED_BASE_MS * 2 ** (step / SPEED_PER_DOUBLING));
     const speedStep = (ms) =>
       Math.min(SPEED_MAX_STEP, Math.max(0, Math.round(Math.log2(ms / SPEED_BASE_MS) * SPEED_PER_DOUBLING)));
@@ -1744,6 +1779,8 @@
         v: STATE_VERSION,
         speed: speedMs(parseInt(speedInput.value, 10)),
         interval: speedMs(parseInt(intervalInput.value, 10)),
+        depth: depthValue(parseInt(depthInput.value, 10)),
+        direction: directionSelect.value,
         bgColor: document.getElementById("bgColor").value,
         width: clampSide(document.getElementById("width").value),
         height: clampSide(document.getElementById("height").value),
@@ -1870,6 +1907,7 @@
       document.getElementById("blockSizeVal").textContent = options.blockSize + "px";
       document.getElementById("speedVal").textContent = formatSpeed(options.speed);
       document.getElementById("intervalVal").textContent = formatSpeed(options.interval);
+      document.getElementById("depthVal").textContent = formatDepth(options.depth);
       updateLayerLabels("layerA", options.layerA);
       updateLayerLabels("layerB", options.layerB);
       updatePresetChips(options);
@@ -2015,7 +2053,7 @@
       return { kind, beats, rerolls, frames, delay: Math.round(cycleMs / frames) };
     }
 
-    const SEAMLESS_NAMES = { circle: "Loop", drift: "Drift", wind: "Wind", pulse: "Pulse" };
+    const SEAMLESS_NAMES = { circle: "Loop", drift: "Drift", wind: "Wind", pulse: "Pulse", ripple: "Ripple", tide: "Tide" };
 
     function stopSeamlessPreview(redraw = true) {
       if (!seamlessPreview.active) return;
@@ -2770,6 +2808,11 @@
         const step = parseInt(intervalInput.step, 10) || 1;
         intervalInput.value = Math.max(lo, Math.round(speedStep(values.interval) / step) * step);
       }
+      // Absent from every slot and link written before these existed,
+      // and what those meant is the default, so absent resets rather
+      // than leaving whatever was set.
+      depthInput.value = values.depth > 0 ? depthIndex(values.depth) : DEPTH_DEFAULT_INDEX;
+      directionSelect.value = values.direction === "reverse" ? "reverse" : "forward";
       document.getElementById("bgColor").value = values.bgColor;
       document.getElementById("width").value = clampSide(values.width);
       document.getElementById("height").value = clampSide(values.height);
@@ -3377,7 +3420,7 @@
     // turn, at the export's own frame count and rate. Enough field
     // strength for the three kinds that move the field to show, and
     // no mirror axes, since Drift and Wind read best as one-way travel.
-    const TUTORIAL_ANIMATE_KINDS = ["drift", "wind", "circle", "pulse"];
+    const TUTORIAL_ANIMATE_KINDS = ["drift", "wind", "circle", "pulse", "ripple", "tide"];
     const TUTORIAL_ANIMATE_OPTIONS = {
       width: tutorialAnimateCanvas.width,
       height: tutorialAnimateCanvas.height,
@@ -3700,6 +3743,10 @@
       ["lock:layerB-texture", 1],
       ["speed", COMPACT_BITS.speed],
       ["interval", COMPACT_BITS.speed],
+      // Zero is the default 1x, what every earlier link meant; any
+      // other depth is written as its slider index plus one.
+      ["depth", 4],
+      ["direction", 1],
     ];
 
     // Bits go in and out with arithmetic rather than << and >>, which
@@ -3837,9 +3884,13 @@
       const tail = COMPACT_TAIL_FIELDS.map(([key]) =>
         key === "speed" || key === "interval"
           ? speedStep(snapshot[key] || speedMs(parseInt(speedInput.defaultValue, 10))) + 1
-          : key.startsWith("lock:")
-            ? (snapshot.locks || []).includes(key.slice(5)) ? 1 : 0
-            : optionIndex(textures, snapshot[key.split("-")[0]].texture)
+          : key === "depth"
+            ? (snapshot.depth > 0 && depthIndex(snapshot.depth) !== DEPTH_DEFAULT_INDEX ? depthIndex(snapshot.depth) + 1 : 0)
+            : key === "direction"
+              ? (snapshot.direction === "reverse" ? 1 : 0)
+              : key.startsWith("lock:")
+                ? (snapshot.locks || []).includes(key.slice(5)) ? 1 : 0
+                : optionIndex(textures, snapshot[key.split("-")[0]].texture)
       );
       if (tail.some((value) => value)) {
         tail.forEach((value, i) => out.add(value, COMPACT_TAIL_FIELDS[i][1]));
@@ -3871,9 +3922,13 @@
       const layerB = readCompactLayer(input);
       const textures = optionValues("layerA-texture");
       const beats = {};
+      let depth = 0;
+      let motionDirection = "forward";
       COMPACT_TAIL_FIELDS.forEach(([key, bits]) => {
         const value = input.tail(bits);
         if (key === "speed" || key === "interval") beats[key] = value ? speedMs(value - 1) : 0;
+        else if (key === "depth") depth = value ? depthValue(value - 1) : 0;
+        else if (key === "direction") motionDirection = value ? "reverse" : "forward";
         else if (key.startsWith("lock:")) {
           if (value) locks.push(key.slice(5));
         } else {
@@ -3892,6 +3947,8 @@
         shapeMask,
         shapeMaskDirection: directions.length ? (directions[direction] || directions[0]).value : "",
         motion,
+        depth,
+        direction: motionDirection,
         locks,
         layerA,
         layerB,

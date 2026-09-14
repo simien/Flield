@@ -16,7 +16,7 @@
     }
   </script>
   <title>How to make a looping animated background for a website</title>
-  <meta name="description" content="Four kinds of motion that return to their first frame with no cut, when a seamless loop is worth it, and which file format a hero background wants." />
+  <meta name="description" content="Six kinds of motion that return to their first frame with no cut, when a seamless loop is worth it, and which file format a hero background wants." />
   <link rel="canonical" href="https://flield.com/animated-backgrounds/" />
   <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
   <link rel="apple-touch-icon" sizes="192x192" href="../icon-192.png" />
@@ -26,14 +26,14 @@
   <meta property="og:url" content="https://flield.com/animated-backgrounds/" />
   <meta property="og:site_name" content="Flield" />
   <meta property="og:title" content="How to make a looping animated background for a website" />
-  <meta property="og:description" content="Four kinds of motion that return to their first frame with no cut, when a seamless loop is worth it, and which file format a hero background wants." />
+  <meta property="og:description" content="Six kinds of motion that return to their first frame with no cut, when a seamless loop is worth it, and which file format a hero background wants." />
   <meta property="og:image" content="https://flield.com/screenshot.png?v=8" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="900" />
   <meta property="og:image:alt" content="A generated three-color composition in Flield" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="How to make a looping animated background for a website" />
-  <meta name="twitter:description" content="Four kinds of motion that return to their first frame with no cut, when a seamless loop is worth it, and which file format a hero background wants." />
+  <meta name="twitter:description" content="Six kinds of motion that return to their first frame with no cut, when a seamless loop is worth it, and which file format a hero background wants." />
   <meta name="twitter:image" content="https://flield.com/screenshot.png?v=8" />
   <meta name="theme-color" content="#09090b" />
 
@@ -46,7 +46,7 @@
     "@type": "TechArticle",
     "@id": "https://flield.com/animated-backgrounds/#article",
     "headline": "How to make a looping animated background for a website",
-    "description": "Four kinds of motion that return to their first frame with no cut, when a seamless loop is worth it, and which file format a hero background wants.",
+    "description": "Six kinds of motion that return to their first frame with no cut, when a seamless loop is worth it, and which file format a hero background wants.",
     "url": "https://flield.com/animated-backgrounds/",
     "mainEntityOfPage": "https://flield.com/animated-backgrounds/",
     "about": { "@id": "https://flield.com/#app" },
@@ -87,14 +87,21 @@
   </script>
   <link rel="stylesheet" href="../guide.css?v=4" />
   <style>
-    /* The four motions sit in a 2x2 rather than the shared .demo-canvases
-       pair, since they are four peers being compared rather than a
-       before/after. Moves into guide.css if a fourth page ever wants it. */
+    /* The six motions sit in a two-column grid rather than the shared
+       .demo-canvases pair, since they are peers being compared rather
+       than a before/after. Should the count go odd again, the last one
+       takes a full row; draw its canvas twice as wide then, so the
+       cells stay the same size. Moves into guide.css if a fourth page
+       ever wants it. */
     .motion-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1px;
       background: var(--border);
+    }
+
+    .motion-grid .demo-pane:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
     }
 
     @media (max-width: 520px) {
@@ -135,11 +142,11 @@
 
     <p>What follows assumes you want the repeat, because that is the case this tool was built for. If you do not, most of it still applies except the part about closing the cycle.</p>
 
-    <h2 id="motions">The four motions</h2>
+    <h2 id="motions">The six motions</h2>
 
-    <p>Loop, Drift, Wind and Pulse are Flield's names for four ways of moving a composition. The names are the app's own. The idea underneath, motion built from something periodic, is not.</p>
+    <p>Loop, Drift, Wind, Pulse, Ripple and Tide are Flield's names for six ways of moving a composition. The names are the app's own. The idea underneath, motion built from something periodic, is not.</p>
 
-    <p>All four below are running live, in this page, on the same composition. Only the kind of movement differs. Each completes one full cycle and starts over, and the point is that you can't tell where.</p>
+    <p>All six below are running live, in this page, on the same composition. Only the kind of movement differs. Each completes one full cycle and starts over, and the point is that you can't tell where.</p>
 
     <div class="demo">
       <div class="motion-grid">
@@ -159,12 +166,20 @@
           <p class="demo-label">Pulse</p>
           <canvas id="motion-pulse" width="260" height="170"></canvas>
         </div>
+        <div class="demo-pane">
+          <p class="demo-label">Ripple</p>
+          <canvas id="motion-ripple" width="260" height="170"></canvas>
+        </div>
+        <div class="demo-pane">
+          <p class="demo-label">Tide</p>
+          <canvas id="motion-tide" width="260" height="170"></canvas>
+        </div>
       </div>
       <div class="demo-controls">
         <button type="button" class="btn" id="playBtn">Pause</button>
         <button type="button" class="btn" id="rerollBtn">Reroll</button>
       </div>
-      <p class="demo-caption">Loop breathes around a closed path and returns where it started. Drift travels one way and wraps into itself. Wind travels and bends as it goes, like a gust crossing the frame. Pulse holds still and swells.</p>
+      <p class="demo-caption">Loop breathes around a closed path and returns where it started. Drift travels one way and wraps into itself. Wind travels and bends as it goes, like a gust crossing the frame. Pulse holds still and swells. Ripple drops rain on the surface and lets the rings cross. Tide bends each layer around the other's ridges and lets go.</p>
     </div>
 
     <h2 id="length">How long a cycle lasts</h2>
@@ -173,13 +188,15 @@
 
     <p>An export uses that same number. A GIF records whole cycles. Set four seconds and you get a four second file. Drop it into a page and let it repeat.</p>
 
+    <p>Two more controls sit beside it. <strong>Depth</strong> is how far the motion goes, from a quarter of its usual reach to twice it. <strong>Direction</strong> runs the cycle backwards, which is how Drift and Wind travel against the flow without the still changing.</p>
+
     <p>The slider starts at one second rather than lower. A cycle is one change of brightness across the whole frame, and one a second stays well under the three that <a href="https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html" target="_blank" rel="noopener">WCAG 2.3.1</a> allows. Worth keeping in mind for whatever you build with the file, too.</p>
 
     <p><strong>Reroll every</strong>, just below it, does something else. That slider says how often Auto-randomize throws the composition away and builds a new one. Speed says how fast the one you have moves. Most backgrounds want one of these and not the other, so they are two separate sliders.</p>
 
-    <p>What moves depends on the layer's <a href="../flow-fields/">texture</a> too. Four of the six shade the grid. For those, a motion moves the field and the pattern follows along.</p>
+    <p>What moves depends on the layer's <a href="../flow-fields/">texture</a> too. Four of the six shade the grid. For those, Loop, Drift and Wind move the field and the pattern follows along. Pulse and Ripple leave the field alone and swing the density over it. Tide bends each layer's field with the other layer's.</p>
 
-    <p><strong>Streamlines</strong> and <strong>Weave</strong> trace particles instead. Drift and Wind send the particles running along the field. Pulse grows and shrinks their trails. The cycle still closes. Each particle lives for exactly one cycle, then starts again from where it began.</p>
+    <p><strong>Streamlines</strong> and <strong>Weave</strong> trace particles instead. Drift and Wind send the particles running along the field. Pulse grows and shrinks their trails. Ripple bends them as its rings pass. Tide sweeps them along the other layer's ridges. The cycle still closes. Each particle lives for exactly one cycle, then starts again from where it began.</p>
 
     <h2 id="why">Why these close on their own</h2>
 
@@ -278,7 +295,7 @@
     </footer>
   </main>
 
-  <script src="../generator.js?v=12"></script>
+  <script src="../generator.js?v=13"></script>
   <script>
     // Phosphor's own path data, the same two glyphs and the same
     // flield-theme key the app and the guide use, so a choice made on any
@@ -296,12 +313,12 @@
     const themeToggleBtn = document.getElementById("themeToggleBtn");
     const playBtn = document.getElementById("playBtn");
 
-    const MODES = ["circle", "drift", "wind", "pulse"];
+    const MODES = ["circle", "drift", "wind", "pulse", "ripple", "tide"];
     const BLOCK = 2;
     // One cycle per this many milliseconds, matching the app's own slowest
     // comfortable reading of a loop rather than racing through it.
     const CYCLE_MS = 6000;
-    // Regenerating four grids per frame is the expensive part, so the demos
+    // Regenerating six grids per frame is the expensive part, so the demos
     // step at a fixed rate well below the display's, which reads as smooth
     // for motion this slow and leaves the page responsive.
     const FPS = 20;

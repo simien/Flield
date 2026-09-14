@@ -22,7 +22,7 @@ mechanic it runs on.
 
 ## Examples
 
-Four exported GIFs, one per motion, each a single 3-second cycle at half the
+Six exported GIFs, one per motion, each a single 3-second cycle at half the
 app's own frame rate to keep the files small. Every setting and both seeds
 hold; only the phase moves, and the last frame runs back into the first with
 no cut.
@@ -30,9 +30,8 @@ no cut.
 <!-- HTML rather than a markdown table so the columns can be given equal
      widths; a markdown table sizes them by caption length, and the GIFs
      scale to whatever each column ends up with. Two columns here against
-     the three below: four kinds split evenly, and each clip renders about
-     half again as large, which these need since the motion is the whole
-     point of them. -->
+     the three below: each clip renders about half again as large, which
+     these need since the motion is the whole point of them. -->
 <table>
   <tr>
     <th width="50%">Loop</th>
@@ -57,6 +56,18 @@ no cut.
   <tr>
     <td width="50%">The yellow and magenta streaks travel the way Drift's do, but a much broader gust bends the field as they go, rising and settling once across the cycle, so the fine wisps run ahead of the bands they belong to.</td>
     <td width="50%">Density swings on one sine wave, Layer B at 70% of the depth, so the streaks swell and thin without moving.</td>
+  </tr>
+  <tr>
+    <th width="50%">Ripple</th>
+    <th width="50%">Tide</th>
+  </tr>
+  <tr>
+    <td width="50%"><img src="examples/ripple.gif" width="100%" alt="Ripple"></td>
+    <td width="50%"><img src="examples/tide.gif" width="100%" alt="Tide"></td>
+  </tr>
+  <tr>
+    <td width="50%">Rain: seven drops land at their own moments, and each ring bends and swells what it crosses, thins as it spreads, and adds where it meets another, while the field beneath never moves.</td>
+    <td width="50%">Each layer's field is pushed along the other's ridges, rising and settling once per cycle, so the blue and pink bands bend around each other and let go.</td>
   </tr>
 </table>
 
@@ -121,9 +132,10 @@ of the sidebar or the end of the settings panel on a phone.
 
 ### Motion
 
-- Loop, Drift, Wind, or Pulse move a composition instead of replacing it, cycling back with no cut
+- Loop, Drift, Wind, Pulse, Ripple, or Tide move a composition instead of replacing it, cycling back with no cut
 - Plays on the canvas the moment you pick one, which is exactly what a GIF records
 - Separate sliders for how fast it moves and how often it rerolls, both from one second to sixteen, with the reroll stepping in doublings
+- Depth scales how far a motion goes, and Direction runs it backwards, so Drift and Wind can travel against the flow
 
 ### Exporting and sharing
 
@@ -153,7 +165,7 @@ rather than showing a screenshot of it:
   on why a 4-way mirror guarantees a tile repeats with no seam, and what
   breaks it.
 - [How to make a looping animated background](https://flield.com/animated-backgrounds/),
-  on the four motions, why they return to their first frame exactly, and
+  on the six motions, why they return to their first frame exactly, and
   which file format a hero background actually wants.
 
 ## Running locally
