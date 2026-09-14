@@ -179,7 +179,7 @@
         <button type="button" class="btn" id="playBtn">Pause</button>
         <button type="button" class="btn" id="rerollBtn">Reroll</button>
       </div>
-      <p class="demo-caption">Loop breathes around a closed path and returns where it started. Drift travels one way and wraps into itself. Wind travels and bends as it goes, like a gust crossing the frame. Pulse holds still and swells. Ripple drops rain on the surface and lets the rings cross. Tide bends each layer around the other's ridges and lets go.</p>
+      <p class="demo-caption">Loop breathes around a closed path and returns where it started, the two layers turning opposite ways. Drift travels one way and wraps into itself. Wind holds its ground while a gust bends it and fine detail streams through. Pulse holds still and swells. Ripple drops rain on the surface and lets the rings cross. Tide bends each layer around the other's ridges and lets go.</p>
     </div>
 
     <h2 id="length">How long a cycle lasts</h2>
@@ -188,7 +188,7 @@
 
     <p>An export uses that same number. A GIF records whole cycles. Set four seconds and you get a four second file. Drop it into a page and let it repeat.</p>
 
-    <p>Two more controls sit beside it. <strong>Depth</strong> is how far the motion goes, from a quarter of its usual reach to twice it. <strong>Direction</strong> runs the cycle backwards, which is how Drift and Wind travel against the flow without the still changing.</p>
+    <p>Three more controls sit beside it. <strong>Depth</strong> is how far the motion goes, from a quarter of its usual reach to twice it. <strong>Direction</strong> runs the cycle backwards, which is how Drift and Wind travel against the flow without the still changing. <strong>Collide</strong> makes the two layers push on each other while they move. And each layer tab has a Motion of its own, so one layer can loop while the other drifts.</p>
 
     <p>The slider starts at one second rather than lower. A cycle is one change of brightness across the whole frame, and one a second stays well under the three that <a href="https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html" target="_blank" rel="noopener">WCAG 2.3.1</a> allows. Worth keeping in mind for whatever you build with the file, too.</p>
 
@@ -295,7 +295,7 @@
     </footer>
   </main>
 
-  <script src="../generator.js?v=13"></script>
+  <script src="../generator.js?v=14"></script>
   <script>
     // Phosphor's own path data, the same two glyphs and the same
     // flield-theme key the app and the guide use, so a choice made on any
@@ -368,7 +368,7 @@
         loopMode: mode,
         loopPhase,
       };
-      const { gridA, gridB, cols, rows } = generate(options);
+      const { gridA, gridB, cols, rows, warp } = generate(options);
       renderToCanvas(canvas, {
         ...options,
         colorA: options.layerA.color,
@@ -377,6 +377,7 @@
         gridB,
         cols,
         rows,
+        warp,
       });
     }
 
