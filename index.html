@@ -606,6 +606,14 @@
           <option value="reverse">Reverse</option>
         </select>
       </div>
+      <!-- Collide makes the layers push on each other under whatever is
+           running, by a fraction of Tide's push. Tenths on the slider,
+           so the link's tail carries it in four bits with zero off. -->
+      <div class="field" id="collideField" hidden>
+        <label for="collide">Collide <span class="field-value" id="collideVal"></span></label>
+        <p class="hint">How hard the layers push on each other.</p>
+        <input type="range" id="collide" min="0" max="10" value="0" />
+      </div>
 
       <h2 class="section-title">Auto-randomize</h2>
 
@@ -760,6 +768,24 @@
           </select>
           <button type="button" class="lock-btn" data-for="texture" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
         </div>
+      </div>
+
+      <!-- A layer's own motion, or the General tab's. Not randomized and
+           not lockable: a roll changes what a composition is, not how
+           it plays. -->
+      <div class="field">
+        <label>Motion</label>
+        <p class="hint">Its own motion, until General changes.</p>
+        <select class="l-motion">
+          <option value="same" selected>Same as General</option>
+          <option value="none">None (still)</option>
+          <option value="circle">Loop</option>
+          <option value="drift">Drift</option>
+          <option value="wind">Wind</option>
+          <option value="pulse">Pulse</option>
+          <option value="ripple">Ripple</option>
+          <option value="tide">Tide</option>
+        </select>
       </div>
 
       <div class="field">
@@ -946,7 +972,7 @@
     </script>
   </div>
 
-  <script src="generator.js?v=13"></script>
+  <script src="generator.js?v=14"></script>
   <script>
     // Inline replacements for the icons that used to come from the
     // Phosphor webfont (224KB for the ~19 glyphs this app actually uses).
@@ -1531,6 +1557,9 @@
       // Absent from every slot and link written before the second
       // texture existed, which is exactly the one they were made with.
       document.getElementById(prefix + "-texture").value = values.texture || "streaks";
+      // Absent from every snapshot written before layers had their own
+      // motion, and those followed General, which is what "same" is.
+      document.getElementById(prefix + "-motion").value = values.motion || "same";
       document.getElementById(prefix + "-symmetry").value = values.symmetry;
       document.getElementById(prefix + "-smoothPasses").value = values.smoothPasses;
     }
@@ -1575,6 +1604,7 @@
         flowStretch: parseFloat(document.getElementById(prefix + "-flowStretch").value),
         fieldOctaves: parseInt(document.getElementById(prefix + "-fieldOctaves").value, 10),
         texture: document.getElementById(prefix + "-texture").value,
+        motion: document.getElementById(prefix + "-motion").value,
         symmetry: document.getElementById(prefix + "-symmetry").value,
         smoothPasses: parseInt(document.getElementById(prefix + "-smoothPasses").value, 10),
       };
@@ -1716,7 +1746,7 @@
     // empty strip with a close button and nothing in it.
     function updateMotionUI() {
       const show = !!currentMotion();
-      ["speedField", "depthField", "directionField"].forEach((id) => {
+      ["speedField", "depthField", "directionField", "collideField"].forEach((id) => {
         const field = document.getElementById(id);
         if (!show && field.closest("#lastControl")) returnLastField();
         field.hidden = !show;
@@ -1761,6 +1791,7 @@
     // as quarters, so the default 1x is index 4.
     const depthInput = document.getElementById("depth");
     const directionSelect = document.getElementById("direction");
+    const collideInput = document.getElementById("collide");
     const DEPTH_STEPS_PER_UNIT = 4;
     const DEPTH_DEFAULT_INDEX = parseInt(depthInput.defaultValue, 10);
     const depthValue = (index) => index / DEPTH_STEPS_PER_UNIT;
@@ -1781,6 +1812,7 @@
         interval: speedMs(parseInt(intervalInput.value, 10)),
         depth: depthValue(parseInt(depthInput.value, 10)),
         direction: directionSelect.value,
+        collide: parseInt(collideInput.value, 10) / 10,
         bgColor: document.getElementById("bgColor").value,
         width: clampSide(document.getElementById("width").value),
         height: clampSide(document.getElementById("height").value),
@@ -1908,6 +1940,7 @@
       document.getElementById("speedVal").textContent = formatSpeed(options.speed);
       document.getElementById("intervalVal").textContent = formatSpeed(options.interval);
       document.getElementById("depthVal").textContent = formatDepth(options.depth);
+      document.getElementById("collideVal").textContent = options.collide > 0 ? options.collide.toFixed(1) : "off";
       updateLayerLabels("layerA", options.layerA);
       updateLayerLabels("layerB", options.layerB);
       updatePresetChips(options);
@@ -1931,7 +1964,7 @@
         lastOptions = options;
         return;
       }
-      const { gridA, gridB, cols, rows } = generate(options);
+      const { gridA, gridB, cols, rows, warp } = generate(options);
       renderToCanvas(canvas, {
         width: options.width,
         height: options.height,
@@ -1943,6 +1976,7 @@
         gridB,
         cols,
         rows,
+        warp,
       });
       lastResult = { gridA, gridB, cols, rows };
       lastOptions = options;
@@ -2021,9 +2055,23 @@
       return Math.max(2, Math.min(Math.max(MIN_FRAMES_PER_BEAT, Math.min(smooth, affordable)), honored));
     }
 
-    function currentMotion() {
+    // The General tab's kind, or null for None. What generate() gets as
+    // loopMode; each layer's own Motion is resolved against it there.
+    function generalMotion() {
       const value = document.getElementById("motion").value;
       return value === "none" ? null : value;
+    }
+
+    // Whether anything is playing, and what to call it: the General
+    // kind, or failing that the first layer running a kind of its own.
+    function currentMotion() {
+      const general = generalMotion();
+      if (general) return general;
+      for (const prefix of ["layerA", "layerB"]) {
+        const own = document.getElementById(prefix + "-motion").value;
+        if (own !== "same" && own !== "none") return own;
+      }
+      return null;
     }
 
     // What a GIF would record right now, read off the controls that
@@ -2095,7 +2143,10 @@
         if (step !== lastStep) {
           lastStep = step;
           const phase = (elapsed % beat) / beat;
-          drawComposition(Object.assign(readOptions(), { loopMode: kind, loopPhase: phase }));
+          // The cycle count is for Ripple, whose drops land somewhere
+          // new each time they are reborn on the canvas; exports leave
+          // it out so their rain repeats and the loop closes.
+          drawComposition(Object.assign(readOptions(), { loopMode: generalMotion() || "none", loopPhase: phase, loopCycle: Math.floor(elapsed / beat) }));
         }
         seamlessPreview.frame = requestAnimationFrame(tick);
       };
@@ -2547,6 +2598,12 @@
     // Motion is the only one of the three that changes what's on screen
     // the moment it's set, so it's the one that says so.
     motionSelect.addEventListener("change", () => {
+      // General is the master: choosing a kind here puts both layers
+      // back to following it. A layer set to its own kind would
+      // otherwise keep it, and General would look dead for that layer.
+      ["layerA", "layerB"].forEach((prefix) => {
+        document.getElementById(prefix + "-motion").value = "same";
+      });
       // Also called from prepareRender, but that is a frame away behind
       // scheduleRender, and the select's own change is the moment the
       // Speed slider should be there or gone.
@@ -2556,6 +2613,23 @@
       const kind = currentMotion();
       if (kind) showToast(`Playing ${SEAMLESS_NAMES[kind]}`);
       else if (wasPreviewing) showToast("Motion off");
+    });
+
+    // A layer's own Motion starts or stops the preview the same way,
+    // and its toast names the layer and what it now does rather than
+    // whatever General happens to say.
+    ["layerA", "layerB"].forEach((prefix) => {
+      const select = document.getElementById(prefix + "-motion");
+      const name = prefix === "layerA" ? "Layer A" : "Layer B";
+      select.addEventListener("change", () => {
+        updateMotionUI();
+        const wasPreviewing = seamlessPreview.active;
+        syncSeamlessPreview();
+        const own = select.value;
+        if (own === "same") showToast(seamlessPreview.active ? `${name} follows General` : wasPreviewing ? "Motion off" : `${name} follows General`);
+        else if (own === "none") showToast(seamlessPreview.active ? `${name} holds still` : wasPreviewing ? "Motion off" : `${name} holds still`);
+        else showToast(`${name} plays ${SEAMLESS_NAMES[own]}`);
+      });
     });
 
     function stopAutoplay() {
@@ -2755,7 +2829,7 @@
             performRandomize(false);
             const options = readOptions();
             for (let i = 0; i < perPass; i++) {
-              drawComposition(Object.assign({}, options, { loopMode: kind, loopPhase: i / perPass }));
+              drawComposition(Object.assign({}, options, { loopMode: generalMotion() || "none", loopPhase: i / perPass }));
               gif.addFrame(canvas, { copy: true, delay });
             }
           }
@@ -2768,7 +2842,7 @@
           // back to the still afterwards.
           const options = readOptions();
           for (let i = 0; i < frames; i++) {
-            drawComposition(Object.assign({}, options, { loopMode: kind, loopPhase: i / frames }));
+            drawComposition(Object.assign({}, options, { loopMode: generalMotion() || "none", loopPhase: i / frames }));
             gif.addFrame(canvas, { copy: true, delay });
           }
           render();
@@ -2813,6 +2887,7 @@
       // than leaving whatever was set.
       depthInput.value = values.depth > 0 ? depthIndex(values.depth) : DEPTH_DEFAULT_INDEX;
       directionSelect.value = values.direction === "reverse" ? "reverse" : "forward";
+      collideInput.value = values.collide > 0 ? Math.min(10, Math.round(values.collide * 10)) : 0;
       document.getElementById("bgColor").value = values.bgColor;
       document.getElementById("width").value = clampSide(values.width);
       document.getElementById("height").value = clampSide(values.height);
@@ -3454,7 +3529,7 @@
 
     function renderTutorialAnimateFrame(kind, phase) {
       const options = Object.assign({}, TUTORIAL_ANIMATE_OPTIONS, { loopMode: kind, loopPhase: phase });
-      const { gridA, gridB, cols, rows } = generate(options);
+      const { gridA, gridB, cols, rows, warp } = generate(options);
       renderToCanvas(tutorialAnimateCanvas, {
         ...options,
         colorA: options.layerA.color,
@@ -3463,6 +3538,7 @@
         gridB,
         cols,
         rows,
+        warp,
       });
     }
 
@@ -3747,6 +3823,10 @@
       // other depth is written as its slider index plus one.
       ["depth", 4],
       ["direction", 1],
+      ["collide", 4],
+      // Index into the layer's Motion menu, whose first entry is "same".
+      ["layerA-motion", 4],
+      ["layerB-motion", 4],
     ];
 
     // Bits go in and out with arithmetic rather than << and >>, which
@@ -3888,6 +3968,10 @@
             ? (snapshot.depth > 0 && depthIndex(snapshot.depth) !== DEPTH_DEFAULT_INDEX ? depthIndex(snapshot.depth) + 1 : 0)
             : key === "direction"
               ? (snapshot.direction === "reverse" ? 1 : 0)
+              : key === "collide"
+                ? (snapshot.collide > 0 ? Math.min(10, Math.round(snapshot.collide * 10)) : 0)
+                : key.endsWith("-motion")
+                  ? optionIndex(optionValues("layerA-motion"), snapshot[key.split("-")[0]].motion || "same")
               : key.startsWith("lock:")
                 ? (snapshot.locks || []).includes(key.slice(5)) ? 1 : 0
                 : optionIndex(textures, snapshot[key.split("-")[0]].texture)
@@ -3924,12 +4008,16 @@
       const beats = {};
       let depth = 0;
       let motionDirection = "forward";
+      let collide = 0;
       COMPACT_TAIL_FIELDS.forEach(([key, bits]) => {
         const value = input.tail(bits);
         if (key === "speed" || key === "interval") beats[key] = value ? speedMs(value - 1) : 0;
         else if (key === "depth") depth = value ? depthValue(value - 1) : 0;
         else if (key === "direction") motionDirection = value ? "reverse" : "forward";
-        else if (key.startsWith("lock:")) {
+        else if (key === "collide") collide = value / 10;
+        else if (key.endsWith("-motion")) {
+          (key.startsWith("layerA") ? layerA : layerB).motion = optionAt(optionValues("layerA-motion"), value);
+        } else if (key.startsWith("lock:")) {
           if (value) locks.push(key.slice(5));
         } else {
           (key.startsWith("layerA") ? layerA : layerB).texture = optionAt(textures, value);
@@ -3949,6 +4037,7 @@
         motion,
         depth,
         direction: motionDirection,
+        collide,
         locks,
         layerA,
         layerB,

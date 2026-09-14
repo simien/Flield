@@ -29,9 +29,9 @@ no cut.
 
 <!-- HTML rather than a markdown table so the columns can be given equal
      widths; a markdown table sizes them by caption length, and the GIFs
-     scale to whatever each column ends up with. Two columns here against
-     the three below: each clip renders about half again as large, which
-     these need since the motion is the whole point of them. -->
+     scale to whatever each column ends up with. Two columns, so each
+     clip renders large, which these need since the motion is the whole
+     point of them. -->
 <table>
   <tr>
     <th width="50%">Loop</th>
@@ -42,8 +42,8 @@ no cut.
     <td width="50%"><img src="examples/drift.gif" width="100%" alt="Drift"></td>
   </tr>
   <tr>
-    <td width="50%">The flow field breathes around a small closed path and comes back where it started, so the stripes of this 8-way kaleidoscope sway in place.</td>
-    <td width="50%">The green bands slide one way along their flow direction and wrap into themselves, so they never jump; the sparse purple layer, with almost no field strength, holds still behind them.</td>
+    <td width="50%">Each layer's flow field breathes around a small closed path, the two turning opposite ways, so they sway against each other and come back where they started.</td>
+    <td width="50%">Orange bands slide one way and a cream nebula behind them slides the other, each along its own flow direction, and both wrap into themselves so they never jump.</td>
   </tr>
   <tr>
     <th width="50%">Wind</th>
@@ -54,8 +54,8 @@ no cut.
     <td width="50%"><img src="examples/pulse.gif" width="100%" alt="Pulse"></td>
   </tr>
   <tr>
-    <td width="50%">The yellow and magenta streaks travel the way Drift's do, but a much broader gust bends the field as they go, rising and settling once across the cycle, so the fine wisps run ahead of the bands they belong to.</td>
-    <td width="50%">Density swings on one sine wave, Layer B at 70% of the depth, so the streaks swell and thin without moving.</td>
+    <td width="50%">The broad streaks hold their ground while a much broader gust bends them, rising and settling once across the cycle, and their fine detail streams through along the flow.</td>
+    <td width="50%">Density swings on one sine wave, Layer B at 70% of the depth, so the contour lines swell and thin in weight and the streaks behind them breathe, without moving.</td>
   </tr>
   <tr>
     <th width="50%">Ripple</th>
@@ -66,31 +66,8 @@ no cut.
     <td width="50%"><img src="examples/tide.gif" width="100%" alt="Tide"></td>
   </tr>
   <tr>
-    <td width="50%">Rain: seven drops land at their own moments, and each ring bends and swells what it crosses, thins as it spreads, and adds where it meets another, while the field beneath never moves.</td>
-    <td width="50%">Each layer's field is pushed along the other's ridges, rising and settling once per cycle, so the blue and pink bands bend around each other and let go.</td>
-  </tr>
-</table>
-
-Three more, each thirteen Auto-randomize passes at a two-second interval,
-showing three ways to use the locks.
-
-<!-- Three equal columns, for the same reason as the table above: a
-     markdown table would size them by caption length instead. -->
-<table>
-  <tr>
-    <th width="33%">Full random</th>
-    <th width="33%">Brand campaign</th>
-    <th width="33%">Kaleidoscope variations</th>
-  </tr>
-  <tr>
-    <td width="33%"><img src="examples/full-random.gif" width="100%" alt="Full random"></td>
-    <td width="33%"><img src="examples/brand-campaign.gif" width="100%" alt="Brand campaign"></td>
-    <td width="33%"><img src="examples/kaleidoscope-variations.gif" width="100%" alt="Kaleidoscope variations"></td>
-  </tr>
-  <tr>
-    <td width="33%">Only block size and shape mask locked; every other field rerolls each pass.</td>
-    <td width="33%">Fine diagonal streaks fading toward the bottom, colors and flow locked to a brand palette; only density and stretch drift, for a set of on-brand variations.</td>
-    <td width="33%">A chunky 8-way kaleidoscope with symmetry, block size, density, and flow locked; seeds and colors reroll each pass, so every frame is a new pattern in the same language.</td>
+    <td width="50%">Rain on a marble: seven drops land at their own moments, and each ring bends and swells what it crosses, thins as it spreads, and adds where it meets another, while the field beneath never moves.</td>
+    <td width="50%">Each layer's field is pushed along the other's ridges, rising and settling once per cycle, so the strands are swept along the nebula behind them and the nebula bends around the strands.</td>
   </tr>
 </table>
 
@@ -136,6 +113,7 @@ of the sidebar or the end of the settings panel on a phone.
 - Plays on the canvas the moment you pick one, which is exactly what a GIF records
 - Separate sliders for how fast it moves and how often it rerolls, both from one second to sixteen, with the reroll stepping in doublings
 - Depth scales how far a motion goes, and Direction runs it backwards, so Drift and Wind can travel against the flow
+- Collide makes the layers push on each other under any motion, and each layer can run a motion of its own
 
 ### Exporting and sharing
 

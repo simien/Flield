@@ -163,32 +163,39 @@ const PULSE_DEPTH = 0.4;
 // way round, and Ripple's rings would shrink toward their drops.
 const MOTION_DEPTH_DEFAULT = 1;
 
-// Wind loops travel like Drift but bend as they go, the way smoke or
-// long grass moves rather than a printed sheet sliding past. Two things
-// do it. A second, coarser noise field (WIND_WARP_SCALE times the
-// field's own frequency) warps where the field is sampled, by up to
-// WIND_WARP noise units at the peak; its strength follows a raised
-// cosine of the phase, zero at both ends, so the cycle opens and closes
-// on Drift's own first frame and the bending rises and settles once
-// per cycle like a gust.
+// Wind is weather passing over a standing field, the way a gust moves
+// long grass without moving the ground. Two things do it. A second,
+// coarser noise field (WIND_WARP_SCALE times the field's own
+// frequency) warps where the field is sampled, by up to WIND_WARP
+// noise units at the peak; its strength follows a raised cosine of the
+// phase, zero at both ends, so the cycle opens and closes on the same
+// frame and the bending rises and settles once per cycle like a gust.
 // The warp's own sampling origin circles WIND_WARP_RADIUS once per
 // cycle too, so the bends travel rather than swell in place. And every
-// octave past the first travels WIND_PARALLAX periods per cycle instead
-// of one, so fine detail runs ahead of the mass. Each octave still
-// covers a whole number of its wrap periods, so the loop closes.
+// octave past the first travels WIND_PARALLAX periods per cycle along
+// the flow axis while the first holds still, so fine detail streams
+// through the mass rather than the whole field sliding as Drift's
+// does. Wind used to slide too, and at a glance was Drift with extra
+// bending; with the mass held, the two read as different things. Each
+// travelling octave covers a whole number of its wrap periods, so the
+// loop closes, and the first octave reads the plain lattice, so Wind's
+// first frame is closer to the still than Drift's.
 const WIND_WARP = 0.5;
 const WIND_WARP_SCALE = 0.5;
 const WIND_WARP_RADIUS = 0.35;
 const WIND_PARALLAX = 2;
 
-// Layer B moves with layer A, not against it, the way two depths of one
-// flow field would: in Loop it circles the same way but starts an
-// eighth of a turn further round, so the two currents never point
-// exactly alike; in Pulse and Ripple it swings the same way at this
-// fraction of A's depth, and in Ripple under A's own drops. In Drift its heading and speed are already its
-// own (its flow angle, and its flow scale times stretch per cycle).
+// Layer B moves with layer A in Pulse and Ripple, swinging the same way
+// at this fraction of A's depth, and in Ripple under A's own drops; in
+// Drift its heading and speed are already its own (its flow angle, and
+// its flow scale times stretch per cycle). In Loop and in Wind's gust
+// it circles the other way, from a point an eighth of a turn round, so
+// the two layers slide against each other once per cycle rather than
+// swaying as one. It circled the same way at first, and Loop read as a
+// single sway.
 const LAYER_B_PHASE_OFFSET = Math.PI / 4;
 const LAYER_B_DEPTH = 0.7;
+const LAYER_B_SPIN = -1;
 
 // Gradient table as two flat arrays, indexed by hash & 7; the same eight
 // directions makePerlin uses.
@@ -197,17 +204,22 @@ const GRAD_Y = new Float64Array([0, 0, 1, -1, 1, 1, -1, -1]);
 
 // `deform`, when given, moves where each cell reads the field before
 // anything else happens to the coordinates: cell (x, y) reads from
-// (x, y) plus `deform.scale` times the vector at `deform.pull[(y *
-// deform.cols + x) * 2]`, in cells. It is how Tide bends one layer's
-// field with the other's (see TIDE_PULL), and it is null for every
-// other motion and every still, which keeps those bit-identical.
+// (x, y) plus `deform.scale` times the vector the pull lattice holds
+// for it, in cells. The lattice is `deform.step` cells apart and
+// `deform.cols` wide, read nearest (see TIDE_STEP). It is how Tide and
+// Collide bend one layer's field with the other's (see TIDE_PULL), and
+// it is null for every other motion and every still, which keeps those
+// bit-identical.
 // `depth` scales how far Loop's circle and Wind's gust go (see
 // MOTION_DEPTH); 1 is exactly the arithmetic without it.
-function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octaves, phase, mode, phaseOffset, warp, deform, depth) {
+// `spin` is the direction Loop's circle and Wind's gust circle turn:
+// 1, or LAYER_B_SPIN for layer B.
+function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octaves, phase, mode, phaseOffset, warp, deform, depth, spin) {
   const drift = mode === "drift";
   const wind = mode === "wind";
   const reach = depth > 0 ? depth : 1;
-  const key = `${seed}|${fillCols}|${fillRows}|${scale}|${angleRad}|${stretch}|${octaves}|${phase || 0}|${mode || ""}|${phaseOffset || 0}|${warp || 0}|${deform ? deform.key + "@" + deform.scale : ""}|${reach}`;
+  const turnSign = spin || 1;
+  const key = `${seed}|${fillCols}|${fillRows}|${scale}|${angleRad}|${stretch}|${octaves}|${phase || 0}|${mode || ""}|${phaseOffset || 0}|${warp || 0}|${deform ? deform.key + "@" + deform.scale : ""}|${reach}|${turnSign}`;
   const cached = fieldCache.get(key);
   if (cached) return cached;
 
@@ -240,12 +252,12 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
   const looping = drift || wind || (mode === "circle" && phase > 0 && phase < 1);
   const start = phaseOffset || 0;
   const radius = LOOP_RADIUS * reach;
-  const offX = !looping || wind ? 0 : drift ? (phase || 0) * DRIFT_PERIOD : radius * (Math.cos(2 * Math.PI * phase + start) - Math.cos(start));
-  const offY = !looping || drift || wind ? 0 : radius * (Math.sin(2 * Math.PI * phase + start) - Math.sin(start));
+  const offX = !looping || wind ? 0 : drift ? (phase || 0) * DRIFT_PERIOD : radius * (Math.cos(2 * Math.PI * phase * turnSign + start) - Math.cos(start));
+  const offY = !looping || drift || wind ? 0 : radius * (Math.sin(2 * Math.PI * phase * turnSign + start) - Math.sin(start));
   // Wind's gust (see WIND_WARP): the warp's strength this frame, and
   // where on its circle the warp field is sampled from. Layer B enters
   // the circle at its own start, like Loop.
-  const turn = 2 * Math.PI * (phase || 0);
+  const turn = 2 * Math.PI * (phase || 0) * turnSign;
   // `warp` is the same displacement held at a constant amount instead of
   // rising and falling with the phase, which is what the marble texture
   // is (see MARBLE_WARP). A wind gust adds to it rather than replacing
@@ -253,8 +265,6 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
   const gust = (wind ? (WIND_WARP * reach) * (1 - Math.cos(turn)) / 2 : 0) + (warp || 0);
   const gustX = wind ? WIND_WARP_RADIUS * (Math.cos(turn + start) - Math.cos(start)) : 0;
   const gustY = wind ? WIND_WARP_RADIUS * (Math.sin(turn + start) - Math.sin(start)) : 0;
-  // Both Drift and Wind wrap the lattice along the flow axis.
-  const wraps = drift || wind;
   // One gradient-noise sample off the same table, for the warp only;
   // the octave loop below keeps its own inlined copy of this arithmetic.
   const sample = (sx, sy) => {
@@ -283,6 +293,7 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
 
   const pull = deform ? deform.pull : null;
   const pullCols = deform ? deform.cols : 0;
+  const pullStep = deform ? deform.step : 1;
   const pullScale = deform ? deform.scale : 0;
   const values = new Float64Array(fillRows * fillCols);
   for (let y = 0; y < fillRows; y++) {
@@ -293,7 +304,7 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
       let px = x;
       let py = y;
       if (pull) {
-        const k = (y * pullCols + x) * 2;
+        const k = (((y / pullStep) | 0) * pullCols + ((x / pullStep) | 0)) * 2;
         px += pull[k] * pullScale;
         py += pull[k + 1] * pullScale;
       }
@@ -323,18 +334,20 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
       let amp = 1;
       let freq = 1;
       for (let o = 0; o < octaves; o++) {
-        // Wind: the first octave travels one period per cycle, the rest
-        // WIND_PARALLAX of theirs.
-        const sx = wind ? (bx + (phase || 0) * DRIFT_PERIOD * (o === 0 ? 1 : WIND_PARALLAX)) * freq : bx * freq;
+        // Wind: the first octave holds still, the rest travel
+        // WIND_PARALLAX periods per cycle.
+        const sx = wind ? (bx + (phase || 0) * DRIFT_PERIOD * (o === 0 ? 0 : WIND_PARALLAX)) * freq : bx * freq;
         const sy = by * freq;
         const flx = Math.floor(sx);
         const fly = Math.floor(sy);
-        // Drift and wind wrap the lattice along the flow axis so the
-        // field is periodic there (see DRIFT_PERIOD); circle mode and
-        // stills use the plain 256-entry wrap.
+        // Drift wraps the lattice along the flow axis so the field is
+        // periodic there (see DRIFT_PERIOD), and Wind wraps the octaves
+        // that travel; a still octave, circle mode, and stills use the
+        // plain 256-entry wrap.
+        const wrapThis = drift || (wind && o > 0);
         const period = DRIFT_PERIOD * freq;
-        const xi = wraps ? (((flx % period) + period) % period) & 255 : flx & 255;
-        const xi1 = wraps ? (((flx + 1) % period + period) % period) & 255 : xi + 1;
+        const xi = wrapThis ? (((flx % period) + period) % period) & 255 : flx & 255;
+        const xi1 = wrapThis ? (((flx + 1) % period + period) % period) & 255 : xi + 1;
         const yi = fly & 255;
         const xf = sx - flx;
         const yf = sy - fly;
@@ -611,26 +624,35 @@ const WEAVE_CROSS = Math.PI / 2;
 // closes; with drops in flight at every moment, the first frame is a
 // frame of rain rather than the still, as Drift's is its own.
 //
-// A ring does two things to the layer under it. It swings density, the
-// way Pulse does, so cells fill where the crest is and thin in the
-// trough, which is the glint on the water. And it moves the finished
-// cells: each cell of the drawn layer is pulled from where the water's
+// Unlike every other motion, Ripple never touches the field or the
+// fill. It works on the finished layers, in two passes. The swell
+// (rippleSwell) grows each layer's shapes by a cell along a crest and
+// shrinks them along a trough, dithered, which is the glint on the
+// water. The pull is applied when the cells are painted (see
+// renderToCanvas): every pixel reads its cell from where the water's
 // slope would refract it, by up to RIPPLE_WARP of a ring spacing, so
-// the picture itself bulges and settles as a ring passes, dither and
-// all. Neither touches the field, which is never recomputed for it
-// (see buildGrid), and both work on every texture and with no field
-// strength at all. Moving the field instead was tried first and is all
-// but invisible in a dither: the dither stays put and only the shading
-// under it shifts.
+// block edges slide smoothly and the blocks themselves stretch and
+// squash as a ring passes rather than stepping a cell at a time.
+// Moving the field instead was tried first and is all but invisible in
+// a dither: the dither stays put and only the shading under it shifts.
+// So a layer ripples with no field strength at all, and every texture
+// ripples the same way.
 //
-// The ring spacing follows the layer's flow scale, so the one slider
-// sets both the field's grain and the wave's. Drops are placed in
-// canvas coordinates and shared by both layers (see generate), so the
-// two ripple as one surface, with B moved less than A, as a deeper
-// layer would be; where A slides over B the cells B shows through
-// change, so the layers act on each other. A mirrored layer sees the
-// drops through its mirrors, and a tile gets its own rain.
-const RIPPLE_DEPTH = 0.5;
+// The ring spacing follows layer A's flow scale, and both layers share
+// the one surface: B is swelled and pulled less than A, as a deeper
+// layer would be, so where A slides over B the cells B shows through
+// change and the layers act on each other. The rain falls on the
+// canvas as a whole, so a mirrored layer's rings are not mirrored, the
+// way rain does not respect a mirror.
+//
+// Where the drops land is seeded, so a link reopens to the same rain,
+// and an export repeats it every cycle, which is what closes its loop.
+// The live preview passes `cycle`, the count of cycles elapsed, and
+// then each drop lands somewhere new every time it is reborn. Its ring
+// is at zero at that moment, so the move is invisible, and the rain
+// stops looking like the same seven drops falling in the same seven
+// places.
+const RIPPLE_DEPTH = 0.9;
 const RIPPLE_WARP = 0.15;
 const RIPPLE_DROPS = 7;
 // A packet's half-width, in its ring spacing, and how many of those out
@@ -652,39 +674,35 @@ const RIPPLE_WEIGHT = [0.5, 1];
 const RIPPLE_SPACING = [0.7, 1.3];
 const RIPPLE_TRAVEL = [0.5, 1.2];
 
-// The rain at this phase, read a row of the unique region at a time:
-// `waveRow(y)` fills the drops' rings summed across that row into
-// `wave`, each a signed swing in -1..1 times its weight, times
-// `amplitude`; `shiftRow(y)` fills the slope's pull into `shiftX` and
-// `shiftY`, in cells. Two calls rather than one because the fill pass
-// wants only the first and the warp pass only the second. The rings are
-// evaluated once on the lattice (see RIPPLE_STEP) and each row is read
-// off it; the first version evaluated every drop at every cell and put
-// a 1200 by 630 frame far over its budget. Null when there is no
-// swing.
-function makeRipple(seed, cols, rows, fillCols, fillRows, isTile, spacing, phase, amplitude) {
-  if (!(amplitude > 0)) return null;
-  const rand = seededRandom(seed + "|ripple");
-  const span = (range) => range[0] + rand() * (range[1] - range[0]);
-  const areaCols = isTile ? fillCols : cols;
-  const areaRows = isTile ? fillRows : rows;
-  const half = Math.hypot(areaCols, areaRows) / 2;
+// The rain at this phase over the whole canvas, on the lattice: the
+// drops' rings summed, each a signed swing in -1..1 times its weight,
+// in `gWave`, and the slope's pull in cells in `gShiftX` and `gShiftY`.
+// `waveRow(y, out)` reads one row of the wave off the lattice at cell
+// resolution; the painter reads the pull at pixel resolution itself.
+// Null when no drop is falling.
+function makeRipple(seed, cols, rows, spacing, phase, cycle) {
+  const half = Math.hypot(cols, rows) / 2;
   const lambda = Math.max(1, spacing);
   const drops = [];
   for (let i = 0; i < RIPPLE_DROPS; i++) {
-    const x = rand() * areaCols;
-    const y = rand() * areaRows;
     // Births spread evenly with a little play, so the rain is steady
     // rather than a burst; each drop's ring lives one whole cycle.
-    const born = (i + rand() * 0.6) / RIPPLE_DROPS;
+    const born = (i + seededRandom(`${seed}|ripple|${i}`)() * 0.6) / RIPPLE_DROPS;
+    // Which of this drop's lives is playing: always the first for an
+    // export, and the one the preview's clock says otherwise.
+    const life = Number.isFinite(cycle) ? Math.floor(cycle + phase - born) : 0;
+    const rand = seededRandom(`${seed}|ripple|${i}|${life}`);
+    const span = (range) => range[0] + rand() * (range[1] - range[0]);
+    const x = rand() * cols;
+    const y = rand() * rows;
     const weight = span(RIPPLE_WEIGHT);
     const ringSpacing = lambda * span(RIPPLE_SPACING);
     const travel = half * span(RIPPLE_TRAVEL);
     const age = phase - born - Math.floor(phase - born);
     const front = age * travel;
     // Lands fast, then fades to exactly nothing as it dies, so the ring
-    // is continuous across its own rebirth.
-    const gate = amplitude * weight * (1 - Math.exp(-age / RIPPLE_RISE)) * (1 - age);
+    // is continuous across its own rebirth, wherever it is reborn.
+    const gate = weight * (1 - Math.exp(-age / RIPPLE_RISE)) * (1 - age);
     const sigma = RIPPLE_WIDTH * ringSpacing;
     const edge = RIPPLE_REACH * sigma;
     drops.push({ x, y, front, gate, sigma, edge, lambda: ringSpacing, near: Math.max(0, front - edge), far: front + edge });
@@ -692,8 +710,8 @@ function makeRipple(seed, cols, rows, fillCols, fillRows, isTile, spacing, phase
   // The lattice: every ring's spacing is at least lambda times the
   // smallest spread, so the step is cut to keep four samples per ring.
   const step = Math.max(1, Math.min(RIPPLE_STEP, Math.floor((lambda * RIPPLE_SPACING[0]) / 4)));
-  const gw = Math.floor((fillCols - 1) / step) + 2;
-  const gh = Math.floor((fillRows - 1) / step) + 2;
+  const gw = Math.floor(cols / step) + 2;
+  const gh = Math.floor(rows / step) + 2;
   const gWave = new Float64Array(gw * gh);
   const gShiftX = new Float64Array(gw * gh);
   const gShiftY = new Float64Array(gw * gh);
@@ -735,62 +753,61 @@ function makeRipple(seed, cols, rows, fillCols, fillRows, isTile, spacing, phase
       }
     }
   }
-  const wave = new Float64Array(fillCols);
-  const shiftX = new Float64Array(fillCols);
-  const shiftY = new Float64Array(fillCols);
-  // Bilinear read of one lattice plane along row y into `out`.
-  const readRow = (plane, out, y) => {
-    const gy = Math.floor(y / step);
-    const fy = y / step - gy;
-    const r0 = gy * gw;
-    const r1 = r0 + gw;
-    for (let x = 0; x < fillCols; x++) {
-      const gx = Math.floor(x / step);
-      const fx = x / step - gx;
-      const a = r0 + gx;
-      const b = r1 + gx;
-      const top = plane[a] + (plane[a + 1] - plane[a]) * fx;
-      const bottom = plane[b] + (plane[b + 1] - plane[b]) * fx;
-      out[x] = top + (bottom - top) * fy;
-    }
-  };
   return {
-    wave,
-    shiftX,
-    shiftY,
-    waveRow(y) {
-      readRow(gWave, wave, y);
-    },
-    shiftRow(y) {
-      readRow(gShiftX, shiftX, y);
-      readRow(gShiftY, shiftY, y);
+    step,
+    gw,
+    gh,
+    gWave,
+    gShiftX,
+    gShiftY,
+    // Bilinear read of the wave along cell row y into `out`.
+    waveRow(y, out) {
+      const gy = Math.min(gh - 2, Math.floor(y / step));
+      const fy = y / step - gy;
+      const r0 = gy * gw;
+      const r1 = r0 + gw;
+      for (let x = 0; x < cols; x++) {
+        const gx = Math.min(gw - 2, Math.floor(x / step));
+        const fx = x / step - gx;
+        const a = r0 + gx;
+        const b = r1 + gx;
+        const top = gWave[a] + (gWave[a + 1] - gWave[a]) * fx;
+        const bottom = gWave[b] + (gWave[b + 1] - gWave[b]) * fx;
+        out[x] = top + (bottom - top) * fy;
+      }
     },
   };
 }
 
-// Moves the drawn cells of the unique region by the rain's pull, each
-// cell taking the cell the water would show there. Nearest cell rather
-// than a blend, since a cell is filled or not; so the picture holds
-// still until a ring's pull passes half a cell, then steps, which in a
-// dithered grid reads as the whole band bulging.
-function rippleWarp(grid, cols, fillCols, fillRows, ripple) {
+// The swell: along a crest, every empty cell beside a filled one fills
+// with a chance that follows the crest, and along a trough every filled
+// cell beside an empty one empties the same way, so shapes grow and
+// shrink by a cell as the ring passes, on every texture alike. Reads
+// the layer as it was before the pass, so a change is one cell deep
+// whatever the cell order, and its own random stream, so the layer's
+// own dither is untouched.
+function rippleSwell(grid, cols, rows, rain, amplitude, seed) {
+  const rand = seededRandom(seed + "|swell");
   const src = grid.slice();
-  for (let y = 0; y < fillRows; y++) {
-    ripple.shiftRow(y);
-    const shiftX = ripple.shiftX;
-    const shiftY = ripple.shiftY;
+  const wave = new Float64Array(cols);
+  for (let y = 0; y < rows; y++) {
+    rain.waveRow(y, wave);
     const row = y * cols;
-    for (let x = 0; x < fillCols; x++) {
-      const sxf = shiftX[x];
-      const syf = shiftY[x];
-      if (sxf === 0 && syf === 0) continue;
-      let sx = Math.round(x - sxf);
-      let sy = Math.round(y - syf);
-      if (sx < 0) sx = 0;
-      else if (sx >= fillCols) sx = fillCols - 1;
-      if (sy < 0) sy = 0;
-      else if (sy >= fillRows) sy = fillRows - 1;
-      grid[row + x] = src[sy * cols + sx];
+    for (let x = 0; x < cols; x++) {
+      const w = wave[x] * amplitude * RIPPLE_DEPTH;
+      if (w === 0) continue;
+      const i = row + x;
+      if (w > 0) {
+        if (src[i]) continue;
+        const beside =
+          (x > 0 && src[i - 1]) || (x < cols - 1 && src[i + 1]) || (y > 0 && src[i - cols]) || (y < rows - 1 && src[i + cols]);
+        if (beside && rand() < w) grid[i] = 1;
+      } else {
+        if (!src[i]) continue;
+        const beside =
+          (x > 0 && !src[i - 1]) || (x < cols - 1 && !src[i + 1]) || (y > 0 && !src[i - cols]) || (y < rows - 1 && !src[i + cols]);
+        if (beside && rand() < -w) grid[i] = 0;
+      }
     }
   }
 }
@@ -814,18 +831,28 @@ function rippleWarp(grid, cols, fillCols, fillRows, ripple) {
 //
 // The other layer's gradient is normalised by its own typical size and
 // clamped, so a sharp ridge pushes no harder than TIDE_CLAMP times a
-// typical one and nothing tears. It depends on nothing that moves, so
-// it is built once per composition and scaled by the gate each frame.
+// typical one and nothing tears. Under Tide the pusher's field is the
+// still, so the push is built once per composition and cached; under
+// Collide (see generate) the pusher may be moving, and then the push is
+// rebuilt every frame, which is why it is sampled on a lattice
+// TIDE_STEP cells apart rather than at every cell. The push varies
+// over a flow scale, never over two cells, so the lattice misses
+// nothing, and a frame under Loop with Collide costs about what Loop
+// alone does.
 const TIDE_PULL = 0.45;
 const TIDE_CLAMP = 1.5;
+const TIDE_STEP = 2;
 const TIDE_CACHE_LIMIT = 4;
 const tideCache = new Map();
 
-// A layer's still field as the canvas shows it: sampled over its unique
-// region, then carried round by the same symmetry passes its cells
-// get. The mirror passes index any typed array, so they serve here as
-// they serve the grid.
-function fieldOnCanvas(layer, cols, rows, blockSize) {
+// A layer's field as the canvas shows it at a phase of a motion:
+// sampled over its unique region, then carried round by the same
+// symmetry passes its cells get. The mirror passes index any typed
+// array, so they serve here as they serve the grid. Sampled every
+// `step` cells, so `cols` and `rows` here are the lattice's; the noise
+// is read at the same coordinates a full sample would read at those
+// cells, since the sampling scale shrinks with the step.
+function fieldOnCanvas(layer, cols, rows, blockSize, step, phase, mode, phaseOffset, depth, spin) {
   const symmetry = layer.symmetry;
   const isTile = symmetry === "tile";
   const fillCols = isTile
@@ -840,7 +867,7 @@ function fieldOnCanvas(layer, cols, rows, blockSize) {
   const stretch = isParticleTexture(layer.texture) ? 1 : field.stretch;
   const warp = layer.texture === "marble" ? MARBLE_WARP : 0;
   const values = field.strength > 0
-    ? getFlowField(layer.seed, fillCols, fillRows, field.scale / blockSize, (field.angle * Math.PI) / 180, stretch, field.octaves, 0, null, 0, warp)
+    ? getFlowField(layer.seed, fillCols, fillRows, field.scale / blockSize / step, (field.angle * Math.PI) / 180, stretch, field.octaves, phase || 0, mode || null, phaseOffset || 0, warp, null, depth, spin)
     : null;
   const full = new Float64Array(cols * rows);
   if (!values) return full;
@@ -855,15 +882,21 @@ function fieldOnCanvas(layer, cols, rows, blockSize) {
   return full;
 }
 
-// The push a layer exerts on every cell of the canvas: its field's
-// gradient, normalised and clamped as above, two numbers a cell in
-// cells per unit of scale. Cached on everything it depends on.
-function tidePush(layer, cols, rows, blockSize) {
+// The push a layer exerts on the canvas: its field's gradient on the
+// TIDE_STEP lattice, normalised and clamped as above, two numbers a
+// lattice cell. `phase`, `mode`, `phaseOffset` and `depth` say where
+// in which motion the pusher's field is; a still push is cached on
+// everything it depends on, a moving one is rebuilt each frame.
+function tidePush(layer, canvasCols, canvasRows, blockSize, phase, mode, phaseOffset, depth, spin) {
   const field = layerOptionsToField(layer);
-  const key = `${layer.seed}|${cols}|${rows}|${blockSize}|${layer.symmetry}|${layer.texture}|${field.strength}|${field.scale}|${field.angle}|${field.stretch}|${field.octaves}`;
-  const cached = tideCache.get(key);
+  const step = TIDE_STEP;
+  const cols = Math.ceil(canvasCols / step);
+  const rows = Math.ceil(canvasRows / step);
+  const moving = !!mode && phase > 0;
+  const key = `${layer.seed}|${canvasCols}|${canvasRows}|${blockSize}|${layer.symmetry}|${layer.texture}|${field.strength}|${field.scale}|${field.angle}|${field.stretch}|${field.octaves}|${moving ? phase : 0}|${mode || ""}|${phaseOffset || 0}|${depth || 1}`;
+  const cached = moving ? null : tideCache.get(key);
   if (cached) return cached;
-  const values = fieldOnCanvas(layer, cols, rows, blockSize);
+  const values = fieldOnCanvas(layer, cols, rows, blockSize, step, phase, mode, phaseOffset, depth, spin);
   const pull = new Float64Array(cols * rows * 2);
   let total = 0;
   for (let y = 0; y < rows; y++) {
@@ -893,7 +926,8 @@ function tidePush(layer, cols, rows, blockSize) {
     pull[k] = gx;
     pull[k + 1] = gy;
   }
-  const push = { key, cols, pull };
+  const push = { key, cols, step, pull };
+  if (moving) return push;
   if (tideCache.size >= TIDE_CACHE_LIMIT) tideCache.delete(tideCache.keys().next().value);
   tideCache.set(key, push);
   return push;
@@ -1025,7 +1059,7 @@ function drawStreamlines(grid, cols, {
 // "kaleidoscope" composes all three: the unique quadrant gets a diagonal
 // mirror first, then that quadrant is mirrored out horizontally and
 // vertically, producing 8-way symmetry.
-function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, blockSize, phase, loopMode, phaseOffset, texture, trailScale, rippleDepth, rippleSeed, deform, depth }) {
+function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, blockSize, phase, loopMode, phaseOffset, texture, trailScale, deform, depth, spin }) {
   // mulberry32 inlined (see the function of that name above for the
   // readable form): the same state update and output arithmetic, so the
   // sequence is identical, minus a closure call per cell.
@@ -1053,9 +1087,6 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
   const fieldMode = !movesField || (streaming && loopMode === "drift") ? null : loopMode;
   const fieldPhase = fieldMode ? phase : 0;
   const hasField = field && field.strength > 0;
-  const ripple = loopMode === "ripple"
-    ? makeRipple(rippleSeed, cols, rows, fillCols, fillRows, isTile, field.scale / blockSize, phase, rippleDepth)
-    : null;
 
   if (streaming) {
     // field.scale is in canvas pixels, as below, and flow stretch is
@@ -1065,7 +1096,7 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
     const scaleCells = field.scale / blockSize;
     const angleRad = (field.angle * Math.PI) / 180;
     const values = field.strength > 0
-      ? getFlowField(seed, fillCols, fillRows, scaleCells, angleRad, 1, field.octaves, fieldPhase, fieldMode, phaseOffset, 0, deform, depth)
+      ? getFlowField(seed, fillCols, fillRows, scaleCells, angleRad, 1, field.octaves, fieldPhase, fieldMode, phaseOffset, 0, deform, depth, spin)
       : null;
     const countCells = Math.max(2, Math.round(field.stretch * scaleCells * STREAM_TRAIL));
     const woven = texture === "weave";
@@ -1101,7 +1132,7 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
     // NEBULA_PIVOT for the two profiles.
     const values = getFlowField(
       seed, fillCols, fillRows, field.scale / blockSize, (field.angle * Math.PI) / 180,
-      field.stretch, field.octaves, fieldPhase, fieldMode, phaseOffset, 0, deform, depth
+      field.stretch, field.octaves, fieldPhase, fieldMode, phaseOffset, 0, deform, depth, spin
     );
     // Never fewer than one level: below that the field's whole range
     // sits within reach of the zero line and the layer goes solid,
@@ -1110,12 +1141,10 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
     for (let y = 0; y < fillRows; y++) {
       const row = y * cols;
       const frow = y * fillCols;
-      const wave = ripple ? (ripple.waveRow(y), ripple.wave) : null;
       for (let x = 0; x < fillCols; x++) {
         const t = values[frow + x] * levels;
         const d = Math.abs(t - Math.round(t));
-        // Ripple swings the line weight, which is what density is here.
-        const half = (wave ? Math.min(1, Math.max(0, density * (1 + RIPPLE_DEPTH * wave[x]))) : density) / 2;
+        const half = density / 2;
         const p = Math.min(1, Math.max(0, (half + CONTOUR_FEATHER / 2 - d) / CONTOUR_FEATHER));
         rngState = (rngState + 0x6d2b79f5) | 0;
         let r = Math.imul(rngState ^ (rngState >>> 15), 1 | rngState);
@@ -1126,7 +1155,7 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
   } else if (texture === "nebula" && hasField) {
     const values = getFlowField(
       seed, fillCols, fillRows, field.scale / blockSize, (field.angle * Math.PI) / 180,
-      field.stretch, field.octaves, fieldPhase, fieldMode, phaseOffset, 0, deform, depth
+      field.stretch, field.octaves, fieldPhase, fieldMode, phaseOffset, 0, deform, depth, spin
     );
     const gain = field.strength * FIELD_GAIN * NEBULA_GAIN;
     let total = 0;
@@ -1135,12 +1164,9 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
     for (let y = 0; y < fillRows; y++) {
       const row = y * cols;
       const frow = y * fillCols;
-      const wave = ripple ? (ripple.waveRow(y), ripple.wave) : null;
       for (let x = 0; x < fillCols; x++) {
         const n = values[frow + x];
-        let bias = density + gain * (pivot - (n < 0 ? -n : n));
-        if (wave) bias += density * RIPPLE_DEPTH * wave[x];
-        const p = Math.min(1, Math.max(0, bias));
+        const p = Math.min(1, Math.max(0, density + gain * (pivot - (n < 0 ? -n : n))));
         rngState = (rngState + 0x6d2b79f5) | 0;
         let r = Math.imul(rngState ^ (rngState >>> 15), 1 | rngState);
         r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
@@ -1165,19 +1191,15 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
       phaseOffset,
       texture === "marble" ? MARBLE_WARP : 0,
       deform,
-      depth
+      depth,
+      spin
     );
     const gain = field.strength * FIELD_GAIN;
     for (let y = 0; y < fillRows; y++) {
       const row = y * cols;
       const frow = y * fillCols;
-      const wave = ripple ? (ripple.waveRow(y), ripple.wave) : null;
       for (let x = 0; x < fillCols; x++) {
-        // Without a ripple this is the arithmetic streaks has always
-        // done, in the same order, so its cells stay bit-identical.
-        let bias = density + gain * values[frow + x];
-        if (wave) bias += density * RIPPLE_DEPTH * wave[x];
-        const p = Math.min(1, Math.max(0, bias));
+        const p = Math.min(1, Math.max(0, density + gain * values[frow + x]));
         rngState = (rngState + 0x6d2b79f5) | 0;
         let r = Math.imul(rngState ^ (rngState >>> 15), 1 | rngState);
         r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
@@ -1187,13 +1209,11 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
   } else {
     for (let y = 0; y < fillRows; y++) {
       const row = y * cols;
-      const wave = ripple ? (ripple.waveRow(y), ripple.wave) : null;
       for (let x = 0; x < fillCols; x++) {
-        const p = wave ? Math.min(1, Math.max(0, density * (1 + RIPPLE_DEPTH * wave[x]))) : density;
         rngState = (rngState + 0x6d2b79f5) | 0;
         let r = Math.imul(rngState ^ (rngState >>> 15), 1 | rngState);
         r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
-        grid[row + x] = ((r ^ (r >>> 14)) >>> 0) / 4294967296 < p ? 1 : 0;
+        grid[row + x] = ((r ^ (r >>> 14)) >>> 0) / 4294967296 < density ? 1 : 0;
       }
     }
   }
@@ -1212,11 +1232,6 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
       next = tmp;
     }
   }
-
-  // After smoothing, so shapes move whole rather than being smoothed
-  // after they were bent, and before the mirrors, which then carry the
-  // bulge round with everything else.
-  if (ripple) rippleWarp(grid, cols, fillCols, fillRows, ripple);
 
   if (symmetry === "diagonal" || symmetry === "kaleidoscope") {
     mirrorDiagonal(grid, cols, fillCols, fillRows);
@@ -1262,12 +1277,24 @@ let scratchCanvas = null;
 // smoothing off, so each cell lands as a crisp blockSize square. Two
 // draw calls regardless of grid size, versus one fillRect per filled
 // cell before, which was most of a render's time at fine block sizes.
-function renderToCanvas(canvas, { width, height, blockSize, bgColor, colorA, colorB, gridA, gridB, cols, rows }) {
+//
+// `warp` is what generate() returns for a Ripple frame (see
+// RIPPLE_WARP): with it, every pixel is painted from the cell the
+// water's slope would show there, read at pixel rather than cell
+// resolution, so block edges slide and the blocks stretch. Callers
+// that build their own render options must pass it through, or a
+// Ripple frame paints with the swell and no pull.
+function renderToCanvas(canvas, { width, height, blockSize, bgColor, colorA, colorB, gridA, gridB, cols, rows, warp }) {
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, width, height);
+
+  if (warp) {
+    renderWarped(ctx, { blockSize, bgColor, colorA, colorB, gridA, gridB, cols, rows, warp });
+    return;
+  }
 
   if (!scratchCanvas) scratchCanvas = document.createElement("canvas");
   if (scratchCanvas.width !== cols || scratchCanvas.height !== rows) {
@@ -1287,6 +1314,64 @@ function renderToCanvas(canvas, { width, height, blockSize, bgColor, colorA, col
 
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(scratchCanvas, 0, 0, cols, rows, 0, 0, cols * blockSize, rows * blockSize);
+}
+
+// The Ripple painter: one 32-bit write per pixel of the composition,
+// each read from the cell under the refracted point. The pull is read
+// off the rain's lattice by bilinear interpolation at every pixel, so
+// it varies within a block, which is what lets a block stretch.
+function renderWarped(ctx, { blockSize, bgColor, colorA, colorB, gridA, gridB, cols, rows, warp }) {
+  const width = cols * blockSize;
+  const height = rows * blockSize;
+  const image = ctx.createImageData(width, height);
+  const pixels = new Uint32Array(image.data.buffer);
+  const bg = packColor(bgColor);
+  const a = packColor(colorA);
+  const b = packColor(colorB);
+  const { step, gw, gh, gShiftX, gShiftY } = warp.rain;
+  const pullA = warp.pullA;
+  const pullB = warp.pullB;
+  const maxX = cols - 1;
+  const maxY = rows - 1;
+  for (let py = 0; py < height; py++) {
+    const cy = (py + 0.5) / blockSize;
+    const gy = Math.min(gh - 2, Math.floor(cy / step));
+    const fy = cy / step - gy;
+    const r0 = gy * gw;
+    const r1 = r0 + gw;
+    const prow = py * width;
+    for (let px = 0; px < width; px++) {
+      const cx = (px + 0.5) / blockSize;
+      const gx = Math.min(gw - 2, Math.floor(cx / step));
+      const fx = cx / step - gx;
+      const i0 = r0 + gx;
+      const i1 = r1 + gx;
+      const topX = gShiftX[i0] + (gShiftX[i0 + 1] - gShiftX[i0]) * fx;
+      const botX = gShiftX[i1] + (gShiftX[i1 + 1] - gShiftX[i1]) * fx;
+      const sx = topX + (botX - topX) * fy;
+      const topY = gShiftY[i0] + (gShiftY[i0 + 1] - gShiftY[i0]) * fx;
+      const botY = gShiftY[i1] + (gShiftY[i1 + 1] - gShiftY[i1]) * fx;
+      const sy = topY + (botY - topY) * fy;
+      let ax = (cx - sx * pullA) | 0;
+      let ay = (cy - sy * pullA) | 0;
+      if (ax < 0) ax = 0;
+      else if (ax > maxX) ax = maxX;
+      if (ay < 0) ay = 0;
+      else if (ay > maxY) ay = maxY;
+      if (gridA[ay * cols + ax]) {
+        pixels[prow + px] = a;
+        continue;
+      }
+      let bx = (cx - sx * pullB) | 0;
+      let by = (cy - sy * pullB) | 0;
+      if (bx < 0) bx = 0;
+      else if (bx > maxX) bx = maxX;
+      if (by < 0) by = 0;
+      else if (by > maxY) by = maxY;
+      pixels[prow + px] = gridB[by * cols + bx] ? b : bg;
+    }
+  }
+  ctx.putImageData(image, 0, 0);
 }
 
 // Merges a grid's filled cells into rectangles instead of one <rect> per
@@ -1583,6 +1668,16 @@ function layerOptionsToField(layer) {
 // each layer's field with the other's; and a streamlines layer runs its
 // particles under drift and wind, so that one moves whether it has a
 // field to bend it or not.
+//
+// A layer's own `motion` overrides the kind for that layer: "same" (or
+// absent) follows `options.loopMode`, "none" holds it still, any kind
+// runs it. One phase and one cycle drive both layers whatever they
+// run. `options.collide` (0 to 1) makes the layers push on each other
+// under whatever they are running, by that fraction of Tide's push,
+// rising and settling once per cycle as Tide does; the pusher's field
+// is read as it is that frame, so under Loop, Drift, and Wind the two
+// flows bend each other as they move. Tide is Collide at full with
+// nothing else moving, and takes no more from the slider.
 function generate(options) {
   // Floor rather than ceil, so cols/rows * blockSize never exceeds the
   // canvas: a block that only partly fit would otherwise get clipped
@@ -1592,28 +1687,43 @@ function generate(options) {
   const cols = Math.max(1, Math.floor(options.width / options.blockSize));
   const rows = Math.max(1, Math.floor(options.height / options.blockSize));
 
-  const mode = options.loopMode;
+  const mode = options.loopMode === "none" ? undefined : options.loopMode;
   const forward = options.loopPhase || 0;
   const phase = options.direction === "reverse" && forward > 0 ? 1 - forward : forward;
   const reach = options.depth > 0 ? options.depth : MOTION_DEPTH_DEFAULT;
   const wave = Math.sin(2 * Math.PI * phase);
-  // Tide's gate: zero at both ends of the cycle, so null there and the
-  // still is exactly the still. Each layer is pushed by the other's
-  // field, by TIDE_PULL of its own flow scale at the peak.
-  const tideGate = mode === "tide" ? (1 - Math.cos(2 * Math.PI * phase)) / 2 : 0;
-  const tideDeform = (pushedBy, layer) => {
-    if (!(tideGate > 0)) return null;
-    const push = tidePush(pushedBy, cols, rows, options.blockSize);
-    return { key: push.key, cols: push.cols, pull: push.pull, scale: (tideGate * TIDE_PULL * reach * layer.fieldScale) / options.blockSize };
+  // Each layer's own kind, resolved (see the note above generate).
+  const modeFor = (layer) => (!layer.motion || layer.motion === "same" ? mode : layer.motion === "none" ? undefined : layer.motion);
+  const modeA = modeFor(options.layerA);
+  const modeB = modeFor(options.layerB);
+  const movesField = (m) => m === "circle" || m === "drift" || m === "wind";
+  // The push's gate: zero at both ends of the cycle, so null there and
+  // the still is exactly the still. Tide pushes at full; anything else
+  // that moves pushes by the Collide fraction. Each layer is pushed by
+  // the other's field as it is this frame, by TIDE_PULL of its own flow
+  // scale at the peak.
+  const collide = options.collide > 0 ? Math.min(1, options.collide) : 0;
+  const pushOf = (m) => (m === "tide" ? 1 : m ? collide : 0);
+  const gate = (1 - Math.cos(2 * Math.PI * phase)) / 2;
+  const tideDeform = (pushedBy, pushedByIsB, layer, layerMode) => {
+    const strength = pushOf(layerMode) * gate;
+    if (!(strength > 0)) return null;
+    // The pusher's field this frame: moving under Loop, Drift, and
+    // Wind, except that a traced layer under Drift steers by the still.
+    const pusherMode = modeFor(pushedBy);
+    const fieldMode = movesField(pusherMode) && !(isParticleTexture(pushedBy.texture) && pusherMode === "drift") ? pusherMode : null;
+    const push = tidePush(pushedBy, cols, rows, options.blockSize, fieldMode ? phase : 0, fieldMode, pushedByIsB ? LAYER_B_PHASE_OFFSET : 0, reach, pushedByIsB ? LAYER_B_SPIN : 1);
+    return { key: push.key, cols: push.cols, step: push.step, pull: push.pull, scale: (strength * TIDE_PULL * reach * layer.fieldScale) / options.blockSize };
   };
   // See LAYER_B_PHASE_OFFSET / LAYER_B_DEPTH: B moves with A, offset
   // and gentler, rather than in lockstep or against it.
   const buildLayer = (layer, isB) => {
     const depth = isB ? LAYER_B_DEPTH : 1;
+    const layerMode = isB ? modeB : modeA;
     const field = layerOptionsToField(layer);
     let density = layer.density;
     let trailScale = 1;
-    if (mode === "pulse") {
+    if (layerMode === "pulse") {
       // Pulse swells a streaks layer by swinging its density. On a
       // streamlines layer the same swing goes to trail length instead:
       // adding particles pops whole strands into existence, and growing
@@ -1631,21 +1741,32 @@ function generate(options) {
       field,
       blockSize: options.blockSize,
       phase,
-      loopMode: mode,
+      loopMode: layerMode,
       phaseOffset: isB ? LAYER_B_PHASE_OFFSET : 0,
       texture: layer.texture,
       trailScale,
-      // B's drops are A's, so the two layers ripple as one surface, at
-      // the same depth Pulse gives B.
-      rippleDepth: mode === "ripple" ? depth * reach : 0,
-      rippleSeed: options.layerA.seed,
-      deform: tideDeform(isB ? options.layerA : options.layerB, layer),
+      deform: tideDeform(isB ? options.layerA : options.layerB, !isB, layer, layerMode),
       depth: reach,
+      spin: isB ? LAYER_B_SPIN : 1,
     });
   };
 
   const gridA = buildLayer(options.layerA, false);
   const gridB = buildLayer(options.layerB, true);
+
+  // Ripple works on the finished layers (see RIPPLE_DEPTH): the swell
+  // here, and the pull when they are painted, through `warp`. The rain
+  // is one surface for both, keyed on A's seed and spaced by A's flow
+  // scale, with B at the depth Pulse gives it.
+  const rain = modeA === "ripple" || modeB === "ripple"
+    ? makeRipple(options.layerA.seed, cols, rows, options.layerA.fieldScale / options.blockSize, phase, options.loopCycle)
+    : null;
+  const pullA = modeA === "ripple" ? reach : 0;
+  const pullB = modeB === "ripple" ? reach * LAYER_B_DEPTH : 0;
+  if (rain) {
+    if (pullA) rippleSwell(gridA, cols, rows, rain, pullA, options.layerA.seed);
+    if (pullB) rippleSwell(gridB, cols, rows, rain, pullB, options.layerB.seed);
+  }
 
   applyShapeMask(gridA, cols, rows, options.shapeMask, options.layerA.seed, options.shapeMaskDirection);
   applyShapeMask(gridB, cols, rows, options.shapeMask, options.layerB.seed, options.shapeMaskDirection);
@@ -1654,5 +1775,9 @@ function generate(options) {
     if (gridA[i]) gridB[i] = 0;
   }
 
-  return { gridA, gridB, cols, rows };
+  // `warp` is null for everything but Ripple. renderToCanvas reads it;
+  // the SVG and any other consumer of the grids ignore it and get the
+  // unpulled cells, which is the layer as generated.
+  const warp = rain ? { rain, pullA, pullB } : null;
+  return { gridA, gridB, cols, rows, warp };
 }

@@ -175,7 +175,7 @@ change carries its speed as an index into that list, and it meant both
 durations at once. `checks.py` guards the constant the way it guarded
 the menu.
 
-## Ripple moves cells and density, not the field
+## Ripple is a post-pass and a painter, not a field motion
 
 Loop, Drift and Wind move where the field is sampled. Pulse and Ripple
 leave the field alone, which is why both work with no field strength
@@ -186,20 +186,31 @@ Ripple went through the field first and was invisible. A radial
 displacement of the sampling coordinates, at any amplitude short of
 mush, changes almost nothing a dither shows, because the dither stays
 put and only the shading under it shifts. A lateral wave and a zoom
-failed the same way. What reads is either changing how many cells fill
-(the crest's swell, as Pulse does) or moving the finished cells
-themselves (`rippleWarp`, which pulls each drawn cell along the
-water's slope, dither and all). Ripple does both, and the warp is what
-makes every texture move under it, traced ones included, so it needs
-no per-texture answer.
+failed the same way. What reads is changing the finished cells. Ripple
+does that in two places, neither of them `buildGrid`: `rippleSwell`
+grows and shrinks each finished layer's shapes by a cell along the
+rings, and `renderWarped` paints every pixel from the cell under the
+refracted point, at pixel resolution, so blocks stretch rather than
+step. A cell-level warp was tried between the two and stepped whole
+blocks, which is what the pixel painter replaced.
+
+Two things follow that a new consumer of `generate()` must know. It
+returns `warp` alongside the grids, null for every motion but Ripple,
+and `renderToCanvas` needs it passed through or a Ripple frame paints
+with the swell and no pull; every call site in the app and the
+explainers passes it. And the SVG exporter reads the grids only, which
+is right, because an SVG is a still.
 
 Ripple is rain: several seeded drops, each born at its own moment and
 living one cycle, summed where the rings cross. Each is periodic on its
 own so the sum closes, but rings are in flight at phase 0, so Ripple's
-first frame is not the still, as Drift's is not. The rings are
-evaluated on a lattice `RIPPLE_STEP` cells apart and interpolated;
-evaluating every drop at every cell put a frame far over the 80ms
-budget. Both layers share A's drops, B at 70% of the swell and pull.
+first frame is not the still, as Drift's is not. The preview passes
+`loopCycle`, and with it each drop lands somewhere new at every
+rebirth, when its ring is at zero; exports leave it out, so their rain
+repeats and the loop closes. The rings are evaluated on a lattice
+`RIPPLE_STEP` cells apart and interpolated; evaluating every drop at
+every cell put a frame far over the 80ms budget. Both layers share the
+one surface, B at 70% of the swell and pull.
 
 ## Tide is the one motion where the layers touch
 
@@ -225,6 +236,32 @@ landed as scatter. Cells flipping per frame scale with speed either
 way, so the slider worked and looked dead. The edge is now dithered
 over `CONTOUR_FEATHER` of a level and no more, so the same shift moves
 the line. Don't widen it to soften the look without watching it move.
+
+## Collide and per-layer motion
+
+Every motion is resolved per layer in `generate()`: a layer's `motion`
+of "same" follows `loopMode`, "none" holds it still, and a kind runs
+it, all on the one phase. Anything that reads "the" motion in the app
+must say which: `generalMotion()` is what `generate()` gets as
+`loopMode`, and `currentMotion()` is whether anything plays and what to
+call it, which a layer's own kind can answer when General is None.
+
+Collide is Tide's push under any motion: `tidePush` reads the pusher's
+field as it is that frame, on a lattice two cells apart, because under
+Loop, Drift, and Wind it is rebuilt every frame and a full-resolution
+gradient put a frame far over budget. Tide's own push is the still
+one, cached. Both go through the same `deform` hook.
+
+## Wind stands, Drift slides, and B circles the other way
+
+Wind's first octave holds still and only the finer octaves travel
+(`WIND_PARALLAX`), with the gust bending the lot; it used to slide
+like Drift with the gust on top, and the two were hard to tell apart.
+Under Loop, and in Wind's gust circle, layer B turns the opposite way
+(`LAYER_B_SPIN`), so the layers slide against each other; same-way
+circling read as one sway. Both are how a motion plays, not how a
+still looks, so links are untouched, but the Loop and Wind example
+clips were re-rendered for them.
 
 ## Six orthogonal controls drive animation
 
@@ -272,7 +309,8 @@ field existed", because base64 pads the last byte with zeros and an old
 link's tail is read straight out of that padding. A tail that is all
 zeros is not written at all, though nothing leaves it empty today: the
 two durations are always written, so every new link is the same length
-(83 characters since depth and direction joined the tail).
+(84 characters since depth, direction, collide, and the layers'
+own motions joined the tail).
 
 The escape hatch is `COMPACT_VERSION`. Bumping it says the break is
 deliberate, and both checks stand down: the decoder refuses a version it

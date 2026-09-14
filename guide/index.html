@@ -232,14 +232,16 @@
     <p>Motion reaches the two traced textures a little differently. Under <strong>Drift</strong> and <strong>Wind</strong>, their particles run along the field instead of the field sliding underneath them. Under <strong>Pulse</strong>, the trails lengthen and shorten instead of the density swinging. That breathes, rather than popping whole strands in and out. Under <strong>Ripple</strong>, the rings bend the strands as they pass, the same way they bend everything else. Under <strong>Tide</strong>, the strands are swept along the other layer's ridges.</p>
     <p>Read <a href="../flow-fields/">what is a flow field?</a> for the arrow grid drawn out beside the strands it produces.</p>
 
-    <h3>Speed, depth, direction, and interval</h3>
+    <h3>Speed, depth, direction, collide, and interval</h3>
     <p>Two sliders in the General tab, on one scale that gives the fast end as much travel as the slow one. Both start at one second and run up to sixteen. <strong>Reroll every</strong> steps in doublings, because a reroll cadence is a choice between a few speeds rather than something to dial in.</p>
     <p><strong>Speed</strong> is how long a motion takes to come back round. It appears under Motion once you have picked one, since there is no cycle to time before that. <strong>Reroll every</strong>, under its own heading, is how long Auto-randomize waits before it rerolls.</p>
     <p><strong>Depth</strong>, under Speed, is how far a motion goes, from a quarter of its usual reach to twice it. It scales Loop's circle, Wind's gust, Pulse's swing, Ripple's swell and pull, and Tide's push. Drift is the one it leaves alone. Drift travels exactly one period, which is what makes its loop close, so any other distance would break it.</p>
+    <p><strong>Collide</strong> makes the two layers push on each other under whatever is running. Each layer's field is bent along the ridges of the other layer's field as it is that frame, so under Loop, Drift, and Wind the two flows bend each other as they move. The slider is how hard, from off up to Tide's full push. It rises and settles once per cycle like Tide, so the still is untouched and the cycle still closes.</p>
+    <p>Each layer tab has a <strong>Motion</strong> of its own, set to follow the General tab unless you change it. Set one layer to Loop and the other to Pulse, or hold one still while the other drifts. Both run on the one Speed, and Collide reaches across them whatever each is doing. Choosing a Motion on the General tab puts both layers back to following it.</p>
     <p><strong>Direction</strong> runs the cycle forwards or backwards. Drift and Wind show it plainly, since reversed they travel against the flow direction without the still changing. Turning the layer's Flow direction round would change the picture, and this does not. Pulse and Tide look the same either way, Loop circles the other way round, and Ripple's rings shrink toward their drops.</p>
     <p>They are separate because they answer different questions. A composition that drifts slowly while rerolling quickly is a perfectly reasonable thing to want.</p>
     <p>An export has to reconcile them in the one case where both are running. There, a pass is a whole motion cycle rather than a reroll interval. The seam that makes a GIF loop is the cycle's own end, so cutting one short at the reroll would be the wrong trade. With Motion off there is no cycle, and a pass is one still held for the reroll interval.</p>
-    <p>All four travel in every shared link. A link to a moving composition arrives at the speed, depth, and direction it was made at, whether or not it offers to play.</p>
+    <p>All of these travel in every shared link. A link to a moving composition arrives at the speed, depth, direction, collide, and each layer's own motion it was made at, whether or not it offers to play.</p>
 
     <h3>Sliders</h3>
     <p>The click and drag target reaches well past the thin line you see, so grabbing a slider doesn't take a precise hit.</p>
@@ -324,32 +326,6 @@
     </ol>
     <p>What comes through is a run of variations that share the same underlying structure, small differences in fill and texture on a shape that stays recognizable. It reads less like random noise and more like a designer trying variations on one idea.</p>
 
-    <!-- The section describing the core workflow had no picture of it. These
-         three are that workflow run three ways, each a different answer to
-         step 2, so what changes between them is the lock set rather than the
-         settings. Lazy, like every clip below. -->
-    <p>Three examples, each a long run at a two-second interval. The only thing that differs between them is what was locked.</p>
-
-    <h3>Full random</h3>
-    <figure class="shot">
-      <img src="../examples/full-random.gif" width="1200" height="630" loading="lazy" decoding="async"
-           alt="Full random: every pass produces an unrelated composition, with colors, density, flow, and symmetry all changing at once." />
-      <figcaption>Only block size and shape mask locked. Every other field rerolls each pass.</figcaption>
-    </figure>
-
-    <h3>Brand campaign</h3>
-    <figure class="shot">
-      <img src="../examples/brand-campaign.gif" width="1200" height="630" loading="lazy" decoding="async"
-           alt="Brand campaign: fine diagonal streaks in a fixed palette, fading toward the bottom, where only the density and stretch shift between passes." />
-      <figcaption>Fine diagonal streaks fading toward the bottom, with colors and flow locked to a brand palette. Only density and stretch drift, giving a set of on-brand variations.</figcaption>
-    </figure>
-
-    <h3>Kaleidoscope variations</h3>
-    <figure class="shot">
-      <img src="../examples/kaleidoscope-variations.gif" width="1200" height="630" loading="lazy" decoding="async"
-           alt="Kaleidoscope variations: a chunky 8-way mirrored pattern that keeps its structure while its seeds and colors change each pass." />
-      <figcaption>A chunky 8-way kaleidoscope with symmetry, block size, density and flow locked. Seeds and colors reroll each pass, so every frame is a new pattern in the same language.</figcaption>
-    </figure>
     <div class="note">
       <p><strong>Took a wrong turn?</strong> <span class="ui-ref"><svg class="ui-ref-icon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M228,128a100,100,0,0,1-98.66,100H128a99.39,99.39,0,0,1-68.62-27.29,12,12,0,0,1,16.48-17.45,76,76,0,1,0-1.57-109c-.13.13-.25.25-.39.37L54.89,92H72a12,12,0,0,1,0,24H24a12,12,0,0,1-12-12V56a12,12,0,0,1,24,0V76.72L57.48,57.06A100,100,0,0,1,228,128Z"/></svg>Undo</span>, the arrow at the left of the Random row, steps back through recent randomize passes, most recent first. It grays out once there is nothing left to undo.</p>
     </div>
@@ -373,25 +349,25 @@
     <figure class="shot">
       <img src="../examples/loop.gif" width="1200" height="630" loading="lazy" decoding="async"
            alt="Loop: the composition's shapes grow, shrink, and slide in place as the flow field turns through one closed cycle." />
-          <figcaption>The stripes of this 8-way kaleidoscope sway in place and land back where they started.</figcaption>
+          <figcaption>The two layers sway against each other and land back where they started.</figcaption>
     </figure>
 
     <h3>Drift</h3>
     <p>Flows the field one way along its flow direction, travelling exactly one period. So the pattern's density envelope repeats along that axis, at flow scale times stretch pixels.</p>
-    <p>Picking Drift or Wind repaints the composition once. The field they travel on repeats along the flow direction and the still does not, so their first frame is their own. Ripple's first frame already has rings in flight, so it repaints too. Loop, Pulse, and Tide open on the still itself.</p>
+    <p>Picking Drift repaints the composition once. The field it travels on repeats along the flow direction and the still does not, so its first frame is its own. Wind repaints only its fine detail, for the same reason. Ripple's first frame already has rings in flight, so it repaints too. Loop, Pulse, and Tide open on the still itself.</p>
     <figure class="shot">
       <img src="../examples/drift.gif" width="1200" height="630" loading="lazy" decoding="async"
            alt="Drift: the pattern travels steadily across the canvas along its flow direction, repeating exactly at the end of one period." />
-          <figcaption>Green bands slide one way and wrap into themselves, so they never jump. The sparse purple layer behind them, with almost no field strength, holds still.</figcaption>
+          <figcaption>Orange bands slide one way and a cream nebula behind them slides the other, each along its own flow direction, and both wrap into themselves so they never jump.</figcaption>
     </figure>
 
     <h3>Wind</h3>
-    <p>Drift with weather. The field flows the same way and the same distance. A second, much broader noise field bends where it is sampled, rising and settling once per cycle like a gust.</p>
-    <p>Fine detail travels twice as far as the broad shapes, so wisps run ahead of the streaks they belong to. The gust starts and ends at nothing, so the cycle opens on Drift's first frame and the bending rises and settles once through it.</p>
+    <p>Weather passing over a standing field. The broad shapes hold their ground while a second, much broader noise field bends where they are sampled, rising and settling once per cycle like a gust, and the fine detail streams through them along the flow direction.</p>
+    <p>Wind used to slide the whole field the way Drift does, with the gust on top, and at a glance the two were the same thing. Now Drift is the field moving and Wind is the weather moving over it. The gust starts and ends at nothing, so the cycle opens and closes on the same frame.</p>
     <figure class="shot">
       <img src="../examples/wind.gif" width="1200" height="630" loading="lazy" decoding="async"
-           alt="Wind: the pattern travels along its flow direction as a broad gust bends it, rising and settling once across the cycle, with fine wisps running ahead of the wider streaks." />
-          <figcaption>Yellow and magenta streaks over a teal ground, bending as the gust passes through them.</figcaption>
+           alt="Wind: the broad streaks hold still while a gust bends them once across the cycle and fine wisps stream through them along the flow direction." />
+          <figcaption>The streaks hold their ground as the gust bends them and their fine detail streams through.</figcaption>
     </figure>
 
     <h3>Pulse</h3>
@@ -399,17 +375,18 @@
     <figure class="shot">
       <img src="../examples/pulse.gif" width="1200" height="630" loading="lazy" decoding="async"
            alt="Pulse: the composition inflates and thins as density swings up and down, with cells appearing and vanishing in a stable order." />
-          <figcaption>The streaks hold their position and only change weight, thickening and thinning together.</figcaption>
+          <figcaption>The mint contour lines swell and thin in weight while the grey streaks behind them breathe more gently, and nothing moves.</figcaption>
     </figure>
 
     <h3>Ripple</h3>
     <p>Rain on the surface. A handful of drops land at seeded points, each at its own moment in the cycle and with its own weight, spacing, and reach. Every ring spreads, thins, and dies away before its drop falls again. Where rings cross they add, so two crests double and a crest over a trough cancels.</p>
-    <p>Each ring does two things. It swells the density along its crest, and it pulls the drawn cells the way water bends whatever is under it, so the picture bulges as a ring passes. Neither touches the field, so Ripple works with no field strength. The ring spacing follows the layer's <strong>Flow scale</strong>, so a fine field gets tight rings and a broad one gets wide swells.</p>
-    <p>Both layers ripple under the same drops. Layer B is pulled less than Layer A, as a deeper layer would be, so the two slide against each other where they overlap. On a tile each tile gets its own rain.</p>
+    <p>Each ring does two things. It swells the shapes along its crest and thins them in its trough. And it pulls the picture the way water bends whatever is under it, stretching and squashing the blocks themselves as it passes rather than stepping them a cell at a time. Neither touches the field, so Ripple works with no field strength. The ring spacing follows Layer A's <strong>Flow scale</strong>, so a fine field gets tight rings and a broad one gets wide swells.</p>
+    <p>Both layers ripple under the same drops. Layer B is pulled less than Layer A, as a deeper layer would be, so the two slide against each other where they overlap. The rain falls on the canvas as a whole, so a mirrored layer's rings are not mirrored, the way rain does not respect a mirror.</p>
+    <p>On the canvas each drop lands somewhere new every time it falls. An export has to come back round, so in a GIF the same drops fall in the same places every cycle, and a link reopens to the same rain.</p>
     <figure class="shot">
       <img src="../examples/ripple.gif" width="1200" height="630" loading="lazy" decoding="async"
            alt="Ripple: rings of denser cells spread from several points across the composition, thinning as they grow and crossing where they meet." />
-          <figcaption>Rings from seven drops cross the streaks, bending and swelling them as they pass, and the field beneath never moves.</figcaption>
+          <figcaption>Rings from seven drops cross a lilac marble and the coral streaks under it, bending and swelling both as they pass, and the field beneath never moves.</figcaption>
     </figure>
 
     <h3>Tide</h3>
@@ -418,7 +395,7 @@
     <figure class="shot">
       <img src="../examples/tide.gif" width="1200" height="630" loading="lazy" decoding="async"
            alt="Tide: the two layers' bands bend around each other's ridges, press into crossings, and relax back to the still once per cycle." />
-          <figcaption>The blue bands and the pink ones press into each other and let go, each bent by the other's field.</figcaption>
+          <figcaption>Lime strands are swept along the ridges of the sky-blue nebula behind them, and the nebula bends around the strands, then both let go.</figcaption>
     </figure>
 
     <p>Each kind is one cycle, and a cycle lasts as long as the <strong>Speed</strong> slider in the General tab says. Auto-randomize keeps its own interval, so the two can run at different rates.</p>
@@ -432,12 +409,12 @@
         </thead>
         <tbody>
           <tr>
-            <td><strong>Drift</strong>&nbsp;and&nbsp;<strong>Wind</strong></td>
-            <td>Its heading is its own flow direction, and its speed follows its own flow scale and stretch. Wind's gust bends it from a point an eighth of a turn round, as in Loop.</td>
+            <td><strong>Drift</strong></td>
+            <td>Its heading is its own flow direction, and its speed follows its own flow scale and stretch.</td>
           </tr>
           <tr>
-            <td><strong>Loop</strong></td>
-            <td>It circles the same way, from a point an eighth of a turn further round.</td>
+            <td><strong>Loop</strong>&nbsp;and&nbsp;<strong>Wind</strong></td>
+            <td>Its circle, and Wind's gust, turn the other way, from a point an eighth of a turn round, so the two layers slide against each other once per cycle rather than swaying as one.</td>
           </tr>
           <tr>
             <td><strong>Pulse</strong></td>
