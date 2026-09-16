@@ -178,7 +178,7 @@
       {
         "@type": "HowToStep",
         "name": "Export a PNG, SVG, or GIF",
-        "text": "PNG and SVG save the still. A GIF records however many passes you ask for: with Motion off, that is the sequence Auto-randomize would generate, one still per pass, each held for the Reroll every interval. A whole export is capped at 240 frames, so a long one trades smoothness rather than size."
+        "text": "PNG and SVG save the still. A GIF starts from what is on screen and records one pass by default. Ask for more and the passes after the first are the sequence Auto-randomize would generate, each held for the Reroll every interval. A whole export is capped at 240 frames, and at a lower count on a large canvas, so a long one trades smoothness rather than size."
       },
       {
         "@type": "HowToStep",
@@ -382,7 +382,7 @@
         </div>
         <p class="tutorial-eyebrow">Step 12 of 13</p>
         <h3>Export PNG, SVG, or GIF</h3>
-        <p>PNG and SVG save the still. A GIF records however many passes you ask for: with <span class="ui-ref">Motion</span> off, that is the sequence <span class="ui-ref">Auto-randomize</span> would generate, one still per pass, each held for the <span class="ui-ref">Reroll every</span> interval. A whole export is capped at 240 frames, so a long one trades smoothness rather than size.</p>
+        <p>PNG and SVG save the still. A GIF starts from what is on screen and records one pass by default. Ask for more and the passes after the first are the sequence <span class="ui-ref">Auto-randomize</span> would generate, each held for the <span class="ui-ref">Reroll every</span> interval. A whole export is capped at 240 frames, and at a lower count on a large canvas, so a long one trades smoothness rather than size.</p>
       </div>
 
       <!-- A second live canvas (see startTutorialAnimate): one cycle of
@@ -584,8 +584,15 @@
         <!-- Starts at one second. Pulse swings the whole canvas between
              39% and 81% covered, which on a high-contrast palette is a
              large-area change in brightness, once a cycle. WCAG 2.3.1
-             allows three of those a second. A one second cycle is one. -->
-        <input type="range" id="speed" min="16" max="48" value="24" />
+             allows three of those a second. A one second cycle is one.
+
+             Opens at three, not the two it used to, which is the length
+             every example clip in examples/ was rendered at: two reads
+             as hurried on Loop and Wind, where a whole turn of the
+             field goes by before the eye has followed it round. The
+             ladder is eight steps to a doubling, so three seconds
+             exactly is not a stop and 3.1s is the nearest one. -->
+        <input type="range" id="speed" min="16" max="48" value="29" />
       </div>
 
       <!-- Depth scales how far every motion but Drift goes, and Direction
@@ -867,14 +874,28 @@
           <button id="downloadGif" class="secondary split-btn-main" title="Download an animated GIF of what is on screen"><i class="ph ph-download-simple"></i> GIF</button>
           <!-- How many passes to record. A pass is one composition: with
                Motion set it is animated through one cycle, and with
-               Auto-randomize running each pass rerolls before it. Motion
-               on its own has nothing to advance between passes, so it
-               records a single looping cycle whatever this says. -->
+               Auto-randomize running each pass after the first rerolls
+               before it. Motion on its own has nothing to advance
+               between passes, so it records a single looping cycle
+               whatever this says.
+
+               One by default, because this menu is behind a caret and
+               the GIF button beside it is not. Someone who presses GIF
+               without opening the menu should get the composition they
+               are looking at, not five they have never seen.
+
+               It stops at three. Five and eight were here, and under
+               Motion they are what took an export to 1.9GB of retained
+               frames on the Web preset: the budget now trims that, but
+               what it trims is the frames within each pass, so both
+               settings bought more passes by making every one of them
+               too coarse to read as motion. They cost nothing with
+               Motion off, where a pass is a single still, which is the
+               only place they worked and not reason enough to keep a
+               setting that breaks the other one. -->
           <select id="gifSteps" class="split-btn-select" title="GIF length">
-            <option value="1">1 pass</option>
+            <option value="1" selected>1 pass</option>
             <option value="3">3 passes</option>
-            <option value="5" selected>5 passes</option>
-            <option value="8">8 passes</option>
           </select>
         </div>
       </div>
@@ -2023,19 +2044,35 @@
     // exports, which is the right thing to trade: a ten second cycle is
     // slow motion, where a low frame rate reads fine.
     const GIF_FRAME_BUDGET = 240;
+    // Counting frames cannot see the other half of the cost. gif.js
+    // holds every frame as raw RGBA until the encode finishes, so a
+    // frame is width x height x 4 bytes and an export retains all of
+    // them at once, before the encoder has allocated anything of its
+    // own. Measured on the default 1200x630 canvas that is 2.9MB a
+    // frame, so the 240 above is 700MB; on the Web preset's 1920x1080
+    // it is 7.9MB a frame and 1.9GB, which is past what a phone's tab
+    // survives and enough to hang a desktop one. Canvas size is a free
+    // text field, so there is no size this can assume. Whichever of the
+    // two budgets binds first wins, and MIN_FRAMES_PER_BEAT still
+    // overrides both rather than let a pass stop reading as motion.
+    const GIF_BYTES_BUDGET = 200 * 1024 * 1024;
     // Below this a beat stops reading as motion at all, so the budget is
-    // allowed to be exceeded rather than go under it. Only reachable
-    // past twenty beats, which the menu doesn't offer; it's a floor, not
-    // an operating point.
+    // allowed to be exceeded rather than go under it. The frame budget
+    // alone only reached it past twenty beats, which the menu has never
+    // offered; the byte budget reaches it on a hand-typed canvas around
+    // 4K, where one frame is 33MB and twelve of them are 380MB. Still a
+    // floor rather than an operating point, and the one place an export
+    // can go over budget.
     const MIN_FRAMES_PER_BEAT = 12;
 
     // A GIF frame delay is written in hundredths of a second, and
     // browsers replace anything under two of them with a tenth, so a
     // beat is never cut into more frames than it has 20ms slices for.
-    // The Speed slider's fastest beat is 250ms, which buys the twelve
-    // frames above with a millisecond to spare, so this never binds
-    // today. It is here so that lowering SPEED_BASE_MS shortens the GIF
-    // rather than silently changing the speed it plays back at.
+    // The Speed slider's fastest beat is a second, which buys fifty
+    // frames against the twelve above, so this never binds today. It is
+    // here so that lowering SPEED_BASE_MS, or the slider's floor back
+    // under it, shortens the GIF rather than silently changing the
+    // speed it plays back at.
     const MIN_GIF_DELAY_MS = 20;
 
     function currentCycleMs() {
@@ -2050,7 +2087,8 @@
     // cadence until the budget can't afford it, then as many as it can.
     function beatFrames(beats, beatMs) {
       const smooth = Math.round(beatMs / CYCLE_FRAME_MS);
-      const affordable = Math.floor(GIF_FRAME_BUDGET / beats);
+      const budget = Math.min(GIF_FRAME_BUDGET, Math.floor(GIF_BYTES_BUDGET / (canvas.width * canvas.height * 4)));
+      const affordable = Math.floor(budget / beats);
       const honored = Math.floor(beatMs / MIN_GIF_DELAY_MS);
       return Math.max(2, Math.min(Math.max(MIN_FRAMES_PER_BEAT, Math.min(smooth, affordable)), honored));
     }
@@ -2760,11 +2798,12 @@
       return gifLibPromise;
     }
 
-    // Builds an animated GIF by calling performRandomize() once per step
-    // (so it respects the same field locks as manual randomizing) and
-    // capturing the canvas after each. Per-frame delay reuses the
-    // Speed slider above rather than a separate setting, so total GIF
-    // length = speed x steps.
+    // Builds an animated GIF from the composition on screen, then one
+    // performRandomize() per pass after the first (so extra passes
+    // respect the same field locks as manual randomizing), capturing
+    // the canvas after each. Per-frame delay reuses the Speed slider
+    // above rather than a separate setting, so total GIF length =
+    // speed x passes.
     const downloadGifBtn = document.getElementById("downloadGif");
 
     downloadGifBtn.addEventListener("click", async () => {
@@ -2821,12 +2860,17 @@
           // One Auto-randomize pass per segment, each held for the beat
           // menu's interval and animated through exactly one cycle of the
           // kind in that time, then a cut to the next pass, the way the
-          // live preview looks with Auto-randomize running. The passes
-          // are a single entry on the undo stack, not one per pass.
+          // live preview looks with Auto-randomize running. The first
+          // pass is the composition on screen, since that is what
+          // Auto-randomize is showing at the moment the button is
+          // pressed and it rerolls at the end of an interval, not the
+          // start. The rerolls are a single entry on the undo stack,
+          // not one per pass, and a lone pass makes no entry at all
+          // because it changes nothing.
           const perPass = plan.frames;
-          recordUndoState();
+          if (plan.beats > 1) recordUndoState();
           for (let pass = 0; pass < plan.beats; pass++) {
-            performRandomize(false);
+            if (pass) performRandomize(false);
             const options = readOptions();
             for (let i = 0; i < perPass; i++) {
               drawComposition(Object.assign({}, options, { loopMode: generalMotion() || "none", loopPhase: i / perPass }));
@@ -2847,11 +2891,14 @@
           }
           render();
         } else {
-          // Same again: the whole stepped run is one entry, so undoing
-          // after an export lands on the composition you exported from.
-          recordUndoState();
+          // Same again: the still on screen is the first frame and the
+          // rerolls after it share one undo entry, so undoing after an
+          // export lands on the composition you exported from. A lone
+          // pass is that composition and nothing else, so it makes no
+          // entry at all.
+          if (plan.beats > 1) recordUndoState();
           for (let i = 0; i < plan.beats; i++) {
-            performRandomize(false);
+            if (i) performRandomize(false);
             gif.addFrame(canvas, { copy: true, delay });
           }
         }

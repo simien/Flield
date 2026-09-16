@@ -329,7 +329,7 @@
     <div class="note">
       <p><strong>Took a wrong turn?</strong> <span class="ui-ref"><svg class="ui-ref-icon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M228,128a100,100,0,0,1-98.66,100H128a99.39,99.39,0,0,1-68.62-27.29,12,12,0,0,1,16.48-17.45,76,76,0,1,0-1.57-109c-.13.13-.25.25-.39.37L54.89,92H72a12,12,0,0,1,0,24H24a12,12,0,0,1-12-12V56a12,12,0,0,1,24,0V76.72L57.48,57.06A100,100,0,0,1,228,128Z"/></svg>Undo</span>, the arrow at the left of the Random row, steps back through recent randomize passes, most recent first. It grays out once there is nothing left to undo.</p>
     </div>
-    <p><strong>GIF export is the same loop, captured.</strong> The step count option (1, 3, 5, 8) runs that same randomize sequence, frame by frame. Each frame is held for the Auto-randomize interval. You get the exact sequence Auto-randomize would generate, rather than whatever the artboard happens to be showing.</p>
+    <p><strong>GIF export is the same loop, captured.</strong> The pass count option (1 or 3) starts from the composition on the artboard. From there it runs that same randomize sequence, frame by frame. Each frame is held for the Auto-randomize interval. The menu opens at one pass, so pressing GIF without touching it saves what you are looking at.</p>
 
     <h2 id="animated">Motion and animated exports</h2>
 
@@ -399,7 +399,7 @@
     </figure>
 
     <p>Each kind is one cycle, and a cycle lasts as long as the <strong>Speed</strong> slider in the General tab says. Auto-randomize keeps its own interval, so the two can run at different rates.</p>
-    <p>Leave <span class="ui-ref">Auto-randomize</span> running as well and the two combine: every pass rerolls, animates through one full cycle, then cuts to the next. The GIF length menu says how many passes to record.</p>
+    <p>Leave <span class="ui-ref">Auto-randomize</span> running as well and the two combine. The first pass animates the composition on screen through one full cycle. Every pass after that rerolls first, then does the same. The GIF length menu says how many passes to record. It opens at one.</p>
     <p>Motion on its own has nothing to advance between passes, so it records one looping cycle whatever the length&nbsp;says.</p>
     <p>Layer B moves with Layer A rather than in lockstep, like two depths of one flow field:</p>
     <div class="table-scroll">
@@ -435,7 +435,7 @@
     <p><a href="../animated-backgrounds/">How to make a looping animated background</a> covers the same six motions from the other side. Why they loop when a video clip does not, and which file format to reach for.</p>
 
     <div class="note">
-      <p>Loop, Drift, and Wind need some field strength to have anything to move. All four make bigger files than stills, since a cycle is tens of frames instead of one per pass. A whole export is capped at 240 frames. A long one loses smoothness rather than running away with the file size, and larger blocks bring it down further.</p>
+      <p>Loop, Drift, and Wind need some field strength to have anything to move. All four make bigger files than stills, since a cycle is tens of frames instead of one per pass. A whole export is capped at 240 frames, and at a lower count on a large canvas, because every frame is held in memory until the encode finishes. A long one loses smoothness rather than running away with the file size, and larger blocks bring it down further.</p>
     </div>
 
     <h2 id="ranges">Widening or narrowing with Palette Range and Density Range</h2>
