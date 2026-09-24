@@ -6,10 +6,10 @@ site proves it may submit URLs by serving a key file from its root, and
 the key is public by design: the file is the proof, not a secret.
 
 The deploy pipeline is a push to main, so this runs from CI after one.
-Cloudflare's build takes a minute or two, so the script waits for the key
-file to come back from the live site before submitting, and then a short
-grace period on top so the build that carried this push has most likely
-finished. It is a heuristic: nothing in the deploy exposes a version to
+Cloudflare's build has taken six minutes from push to live, so the script
+waits up to fifteen for the key file to come back from the live site
+before submitting, and then a short grace period on top so the build that
+carried this push has most likely finished. It is a heuristic: nothing in the deploy exposes a version to
 poll for. Getting it wrong costs nothing but an early recrawl.
 
 Usage:
@@ -42,7 +42,7 @@ PAGES = {
     "/animated-backgrounds/": {"animated-backgrounds/index.html"},
 }
 
-DEPLOY_WAIT_S = 300
+DEPLOY_WAIT_S = 900
 DEPLOY_GRACE_S = 90
 
 
