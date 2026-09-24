@@ -1,0 +1,38 @@
+# Tell Bing and the other IndexNow engines which pages a push to main
+# changed, so they recrawl now rather than on their own schedule. The
+# logic lives in .github/scripts/indexnow.py; this file only works out
+# the list of changed files and hands it over. Nothing is installed.
+name: indexnow
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - style.css
+      - generator.js
+      - guide/index.html
+      - guide.css
+      - flow-fields/index.html
+      - seamless-backgrounds/index.html
+      - animated-backgrounds/index.html
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Submit changed pages
+        # github.event.before is the commit main was at before this push,
+        # so the diff covers every commit the push carried. It is all
+        # zeros on a first push and may be missing after a force push;
+        # with no file list the script submits every page.
+        run: |
+          CHANGED=""
+          if git cat-file -e "${{ github.event.before }}^{commit}" 2>/dev/null; then
+            CHANGED=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}")
+          fi
+          python3 .github/scripts/indexnow.py $CHANGED

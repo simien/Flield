@@ -444,6 +444,51 @@ def check_link_compat(base, current):
     notes.append("link compat: every field still where old links expect it")
 
 
+# 8. IndexNow ------------------------------------------------------------
+# A push to main tells IndexNow which pages changed (indexnow.yml and
+# indexnow.py). Three things have to agree and nothing else ties them
+# together: the key file at the root must carry the key the script sends,
+# every page the script can submit must be one the sitemap lists, and the
+# workflow must trigger on exactly the files the script attributes to a
+# page. A mismatch is silent: Bing is told about a page that does not
+# exist, or a page changes and nothing is sent.
+def check_indexnow():
+    sys.path.insert(0, str(ROOT / ".github" / "scripts"))
+    import indexnow
+
+    key_file = ROOT / f"{indexnow.KEY}.txt"
+    if not key_file.exists():
+        fail("indexnow", f"key file {key_file.name} is missing from the repo root")
+    elif key_file.read_text(encoding="utf-8").strip() != indexnow.KEY:
+        fail("indexnow", f"{key_file.name} does not contain the key indexnow.py sends")
+
+    locs = set(re.findall(r"<loc>https://flield\.com(/[^<]*)</loc>", read("sitemap.xml")))
+    for path in indexnow.PAGES:
+        if path not in locs:
+            fail("indexnow", f"{path} can be submitted but is not in sitemap.xml")
+
+    owned = set()
+    for files in indexnow.PAGES.values():
+        for rel in files:
+            owned.add(rel)
+            if not (ROOT / rel).exists():
+                fail("indexnow", f"{rel} is in the PAGES table but not in the repo")
+
+    workflow = read(".github/workflows/indexnow.yml")
+    block = re.search(r"paths:\n((?:\s+- .*\n)+)", workflow)
+    triggers = set(re.findall(r"- (\S+)", block.group(1))) if block else set()
+    for rel in sorted(owned - triggers):
+        fail("indexnow", f"{rel} is in the PAGES table but not in the workflow's paths")
+    for rel in sorted(triggers - owned):
+        fail("indexnow", f"{rel} triggers the workflow but no page claims it")
+
+    if not any(f.startswith("indexnow") for f in failures):
+        notes.append(
+            f"indexnow: key file at root, {len(indexnow.PAGES)} pages in the sitemap, "
+            f"{len(owned)} files agree with the workflow"
+        )
+
+
 def main():
     base = sys.argv[1] if len(sys.argv) > 1 else None
     check_inline_js()
@@ -452,6 +497,7 @@ def main():
     check_anchors()
     check_cache_bust(base)
     check_link_compat(base, check_link_format())
+    check_indexnow()
 
     for n in notes:
         print(f"  ok  {n}")

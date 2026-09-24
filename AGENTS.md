@@ -332,7 +332,34 @@ what keeps Pages from running Jekyll over the files, so it stays. Anything
 Cloudflare-only (`_headers`, the 404 routing in `wrangler.jsonc`) is
 simply absent on the Pages copy; that is accepted, not a bug to fix.
 
-## Preview
+A push to main that touches a page also runs `indexnow.yml`, which tells
+Bing and the other IndexNow engines which pages changed so they recrawl
+now. The key file at the repo root (32 hex characters, `.txt`) is the
+site's proof it may submit; it is public by design and must keep serving
+from the root, so don't move it or add it to `.assetsignore`. Which files
+count as which page is the `PAGES` table in
+`.github/scripts/indexnow.py`; a new page needs a row there and a line in
+the workflow's `paths`.
+
+## Some of the site lives in accounts, not in the repo
+
+Nothing here reproduces it, so don't reach for code when one of these is
+the cause, and don't undo one by accident:
+
+- **Cloudflare.** A redirect rule sends `www.flield.com` to the bare
+  domain (301, query string kept, so a shared `?c=` link survives), a
+  placeholder `www` A record exists only so that rule can fire, and
+  Always Use HTTPS is on for the zone. `_headers` never sees an http
+  request because of that.
+- **Email.** Cloudflare Email Routing receives `hello@flield.com`; Resend
+  sends as it, signed with the `resend._domainkey` DKIM record. DMARC is
+  `p=reject`. Any new sender has to sign for flield.com or its mail is
+  refused; a plain Gmail "send as" would be.
+- **Search.** Google Search Console and Bing Webmaster Tools are both
+  verified by DNS records, not by a file or tag in the repo, and both have
+  `/sitemap.xml` submitted. A new page only needs the sitemap entry and
+  the IndexNow table above.
+
 
 Any static file server works; there is nothing to build.
 
