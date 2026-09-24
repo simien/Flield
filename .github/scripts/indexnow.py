@@ -30,6 +30,10 @@ HOST = "flield.com"
 KEY = "bd26fbe3c33d856468a3f59caa78f297"
 KEY_URL = f"https://{HOST}/{KEY}.txt"
 ENDPOINT = "https://api.indexnow.org/indexnow"
+# Cloudflare's browser integrity check answers Python's default user agent
+# with a 403 (error 1010), so the key file never came back and the first
+# run gave up. A named agent is let through.
+USER_AGENT = f"flield-indexnow/1 (+https://{HOST}/)"
 
 # Which page a file's change is visible on. Assets shared by every page
 # are attributed to the home page, which is the one that matters for
@@ -57,7 +61,8 @@ def wait_for_key_file():
     deadline = time.time() + DEPLOY_WAIT_S
     while time.time() < deadline:
         try:
-            with urllib.request.urlopen(KEY_URL, timeout=15) as res:
+            req = urllib.request.Request(KEY_URL, headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(req, timeout=15) as res:
                 if res.status == 200 and res.read().decode().strip() == KEY:
                     return True
         except (urllib.error.URLError, OSError):
@@ -75,7 +80,10 @@ def submit(paths):
     }).encode()
     req = urllib.request.Request(
         ENDPOINT, data=body, method="POST",
-        headers={"Content-Type": "application/json; charset=utf-8"},
+        headers={
+            "Content-Type": "application/json; charset=utf-8",
+            "User-Agent": USER_AGENT,
+        },
     )
     try:
         with urllib.request.urlopen(req, timeout=30) as res:
