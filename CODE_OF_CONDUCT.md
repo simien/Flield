@@ -52,8 +52,8 @@ when an individual is officially representing the community in public spaces.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the maintainer by opening a [GitHub issue](https://github.com/simien/Flield/issues)
-or, for reports that shouldn't be public, through the contact listed on
-[flield.com](https://flield.com/). All complaints will be reviewed and
+or, for reports that shouldn't be public, by email to
+[hello@flield.com](mailto:hello@flield.com). All complaints will be reviewed and
 investigated promptly and fairly.
 
 All maintainers are obligated to respect the privacy and security of the

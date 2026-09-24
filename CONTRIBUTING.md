@@ -52,6 +52,11 @@ so a clear problem statement makes it much easier to judge fit.
 3. Keep changes focused; unrelated formatting or refactors make a diff harder
    to review.
 4. Run `python3 .github/scripts/checks.py origin/main` before you open the PR.
+   A change to a page also needs its `lastmod` in `sitemap.xml` moved to
+   the date of the change, and a new page needs a sitemap entry, a row in
+   the `PAGES` table in `.github/scripts/indexnow.py`, and a line in
+   `.github/workflows/indexnow.yml`. The checks fail on any of these
+   missing.
    It is the same script CI runs, needs nothing installed, and catches the
    failures that still serve a working-looking page: a syntax error in the
    inline script, a duplicate id, a stale `?v=` cache buster, and a change to

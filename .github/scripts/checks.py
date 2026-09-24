@@ -489,6 +489,45 @@ def check_indexnow():
         )
 
 
+# 9. Sitemap dates --------------------------------------------------------
+# lastmod is what tells a search engine a page is worth fetching again.
+# It was two changes behind on two pages and nothing noticed: the page
+# ships, the date does not. Each page's lastmod must be no earlier than
+# the last commit that touched it. Locally that commit is the previous
+# one, so this passes before you commit; CI runs after, so it catches a
+# page that shipped without its date.
+SITEMAP_PAGES = {
+    "/": "index.html",
+    "/guide/": "guide/index.html",
+    "/flow-fields/": "flow-fields/index.html",
+    "/seamless-backgrounds/": "seamless-backgrounds/index.html",
+    "/animated-backgrounds/": "animated-backgrounds/index.html",
+}
+
+
+def check_sitemap_dates():
+    sitemap = read("sitemap.xml")
+    entries = dict(re.findall(
+        r"<loc>https://flield\.com(/[^<]*)</loc>\s*<lastmod>(\d{4}-\d{2}-\d{2})</lastmod>",
+        sitemap,
+    ))
+    stale = []
+    for path, rel in SITEMAP_PAGES.items():
+        lastmod = entries.get(path)
+        if not lastmod:
+            fail("sitemap dates", f"{path} has no lastmod in sitemap.xml")
+            continue
+        changed = subprocess.run(
+            ["git", "log", "-1", "--format=%cs", "--", rel],
+            cwd=ROOT, text=True, capture_output=True,
+        ).stdout.strip()
+        if changed and lastmod < changed:
+            fail("sitemap dates", f"{path} changed {changed} but lastmod says {lastmod}")
+            stale.append(path)
+    if not stale and not any(f.startswith("sitemap dates") for f in failures):
+        notes.append(f"sitemap dates: lastmod is current for all {len(SITEMAP_PAGES)} pages")
+
+
 def main():
     base = sys.argv[1] if len(sys.argv) > 1 else None
     check_inline_js()
@@ -498,6 +537,7 @@ def main():
     check_cache_bust(base)
     check_link_compat(base, check_link_format())
     check_indexnow()
+    check_sitemap_dates()
 
     for n in notes:
         print(f"  ok  {n}")

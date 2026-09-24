@@ -11,9 +11,8 @@ issues against are:
 ## Reporting a vulnerability
 
 Please **do not** open a public GitHub issue for a security report. Instead,
-report it privately through a [GitHub private security advisory](https://github.com/simien/Flield/security/advisories/new),
-or through the contact on [simienap.com](https://simienap.com), which the
-site footer links to.
+report it privately through a [GitHub private security advisory](https://github.com/simien/Flield/security/advisories/new)
+or by email to [hello@flield.com](mailto:hello@flield.com).
 
 Include:
 
