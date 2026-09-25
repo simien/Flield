@@ -193,7 +193,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=106" />
+  <link rel="stylesheet" href="style.css?v=107" />
   <!-- generator.js is requested at the end of the body, which is where
        it has to run, but the preload scanner only finds it once that
        end of a 200KB document has arrived. This starts the fetch
@@ -3294,10 +3294,22 @@
       lastTouchedField = null;
     });
 
-    new ResizeObserver(() => {
+    // The border-box height a ResizeObserver already measured, so the
+    // callback reads nothing from layout. Falls back to offsetHeight
+    // where borderBoxSize is missing (Safari before 15.4).
+    function observedHeight(entry) {
+      const box = entry.borderBoxSize && entry.borderBoxSize[0];
+      return box ? box.blockSize : entry.target.offsetHeight;
+    }
+
+    // Both observers below take the height from the entry rather than
+    // reading offsetHeight: they fire in one batch, the first one's
+    // write to the root invalidates every style, and a read in the
+    // second then forces a layout of the whole document.
+    new ResizeObserver(([entry]) => {
       document.documentElement.style.setProperty(
         "--last-control-h",
-        `${lastControl.offsetHeight}px`
+        `${observedHeight(entry)}px`
       );
     }).observe(lastControl);
 
@@ -3433,8 +3445,8 @@
     // stylesheet, but the export panel's is whatever its buttons come
     // to. Publishing the measured height keeps .canvas-area's one rule
     // correct for all three instead of naming each of them.
-    new ResizeObserver(() => {
-      document.documentElement.style.setProperty("--sheet-actual", `${controls.offsetHeight}px`);
+    new ResizeObserver(([entry]) => {
+      document.documentElement.style.setProperty("--sheet-actual", `${observedHeight(entry)}px`);
     }).observe(controls);
 
     // Tutorial modal: a "?" button opens a short guide, one step at a

@@ -2160,7 +2160,9 @@ button.secondary:hover:not(:disabled) {
   flex: 1;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
-  color: var(--text-subtle);
+  /* Muted rather than subtle for the same reason as the site footer:
+     at 11px this is small text, and subtle on the well is 4:1. */
+  color: var(--text-muted);
 }
 
 /* The three colors a slot holds (background, Layer A, Layer B), so one
