@@ -193,7 +193,13 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=105" />
+  <link rel="stylesheet" href="style.css?v=106" />
+  <!-- generator.js is requested at the end of the body, which is where
+       it has to run, but the preload scanner only finds it once that
+       end of a 200KB document has arrived. This starts the fetch
+       alongside the stylesheet instead. Same ?v= as the tag below, and
+       CI holds the two together. -->
+  <link rel="preload" href="generator.js?v=14" as="script" />
 </head>
 <body>
   <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show settings" aria-pressed="false"><i class="ph ph-list"></i></button>
@@ -923,7 +929,7 @@
     </div>
   </div>
 
-  <div class="main-area">
+  <main class="main-area">
     <p class="sr-only">Flield is a free, browser-based generator for seamless animated backgrounds. It creates three-color pixel art compositions from seeded flow fields and symmetry, drawing each field one of six ways, from density-biased streaks to topographic contours to streamlines traced by particles running along it, sets them moving with Loop, Drift, Wind, Pulse, Ripple, or Tide so a cycle returns to its first frame with no cut, and exports to animated GIF, SVG, or PNG. Locks hold the fields you like while the rest randomize. Runs entirely in the browser, no account or upload needed.</p>
     <!-- The three explainers were two clicks from here, through the
          guide's footer, which is one more than a crawler gives a page
@@ -974,11 +980,11 @@
              the long-form docs, and the guide's own footer is what leads
              on to the three explainer pages. -->
         <a href="./guide/">Guide</a>
-        <span>&middot;</span>
+        <span aria-hidden="true">&middot;</span>
         <a href="https://github.com/simien/Flield" target="_blank" rel="noopener">GitHub</a>
-        <span>&middot;</span>
+        <span aria-hidden="true">&middot;</span>
         <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP</a>
-        <span>&middot;</span>
+        <span aria-hidden="true">&middot;</span>
         <span>&copy; <span id="footerYear"></span></span>
       </div>
     </footer>
@@ -991,7 +997,7 @@
       document.getElementById("undoKeyLabel").textContent = UNDO_SHORTCUT;
       document.getElementById("footerYear").textContent = new Date().getFullYear();
     </script>
-  </div>
+  </main>
 
   <script src="generator.js?v=14"></script>
   <script>
@@ -4195,15 +4201,22 @@
       // its own dimensions through loadStateFromURL above, size is not
       // in RANDOMIZABLE_FIELDS, and the preset chip lights itself off
       // the values (see updatePresetChips), so nothing else needs to
-      // know this happened.
-      if (narrowLayout.matches && window.innerHeight > window.innerWidth) {
+      // know this happened. Read as a media query rather than from
+      // innerHeight and innerWidth: those force a layout of the whole
+      // document at this point, after everything above has changed
+      // it, and the browser lays it all out again for the first paint.
+      if (narrowLayout.matches && window.matchMedia("(orientation: portrait)").matches) {
         document.getElementById("width").value = DIMENSION_PRESETS.mobile.width;
         document.getElementById("height").value = DIMENSION_PRESETS.mobile.height;
       }
       performRandomize(false);
     }
     generateRandomFavicon();
-    updateScrollFade();
+    // After the first paint rather than now: the fades read the tab
+    // body's scroll geometry, and reading it here forces a layout of the
+    // document that the first frame then repeats. Two frames on, that
+    // layout has happened and the read is free.
+    requestAnimationFrame(() => requestAnimationFrame(updateScrollFade));
     // A beat after first paint, so the composition lands before the
     // nudge does.
     // Re-checked inside the timer: opening the tour from "?" within that

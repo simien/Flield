@@ -1898,7 +1898,10 @@ button.secondary:hover:not(:disabled) {
   margin-bottom: var(--footer-inset);
   padding: 0 var(--artboard-pad);
   font-size: 11px;
-  color: var(--text-subtle);
+  /* --text-muted, not --text-subtle: at 11px this is small text, and
+     subtle on the dark ground is 4.1:1, under the 4.5:1 small text
+     needs. Muted is 7.7:1 there and 4.46:1 on the light ground. */
+  color: var(--text-muted);
   transition: color 0.15s ease;
 }
 
@@ -1970,7 +1973,11 @@ button.secondary:hover:not(:disabled) {
   text-decoration: underline;
 }
 
-.site-footer-links span {
+/* The dot separators are the only thing here dimmed below the links.
+   The year is not: it is text, and 70% of muted on the dark ground
+   falls back under the small-text contrast floor. The separators are
+   marked aria-hidden in the markup, so the dimming is decorative. */
+.site-footer-links span[aria-hidden] {
   opacity: 0.7;
 }
 
