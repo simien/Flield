@@ -137,6 +137,16 @@ body {
   background: var(--muted);
 }
 
+/* A select wearing .btn takes --input, which is translucent white, and
+   Windows paints the popup list from that: composited over a light
+   popup base it lands on white under near-white text, and the list
+   reads as blank until an entry is highlighted. Same fix as the app's
+   selects in style.css. */
+.btn option {
+  background-color: var(--panel);
+  color: var(--text);
+}
+
 .btn-primary {
   background: var(--primary);
   border-color: var(--primary);

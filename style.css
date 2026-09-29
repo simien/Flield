@@ -1155,6 +1155,20 @@ input[type="range"]:focus-visible {
   background-size: 15px;
 }
 
+/* Windows draws a select's popup list from the control's own computed
+   background-color, and --input is translucent white. Over a light
+   popup base it composites to white, and --text on it is near-white,
+   so the list reads as blank until the highlight passes over an entry.
+   Chrome and Edge escape that only because they honour color-scheme on
+   the popup; Firefox and builds older than it paint the author color
+   and don't. The options therefore carry an opaque fill of their own.
+   macOS draws the list natively and ignores both, so it is unchanged. */
+.field select option,
+.split-btn-select option {
+  background-color: var(--panel);
+  color: var(--text);
+}
+
 /* The input's own box is the actual click/drag target, so it's sized
    well past the 4px track drawn inside it (see the track/thumb rules
    below) rather than matching it. Browsers center a shorter track
