@@ -91,6 +91,28 @@ unguarded hover style sits latched on a phone until the next tap elsewhere.
 Any hover rule that changes a control's fill belongs inside
 `@media (hover: hover)`.
 
+## Sharing is gated on the pointer, not on the API
+
+`navigator.share` exists on desktop Chromium and desktop Safari, so a
+feature-detect alone sends Brave, Chrome and Safari on macOS into the OS
+share sheet. That sheet offers Mail, Messages, Notes and Reminders and no
+clipboard entry, which leaves no way to get the link out of a button that
+otherwise says Copy Link. The test is
+`navigator.share && matchMedia("(pointer: coarse)")`, and the markup
+comment beside the button says so too, because the label it describes is
+written from the script.
+
+The failure is quiet in both directions: a desktop visitor gets a sheet
+that cannot do the one thing they pressed for, and a `share()` that
+rejects for any reason other than a cancelled sheet leaves the button
+doing nothing at all. Only `AbortError` returns early; everything else
+falls through to the clipboard.
+
+The browser pane cannot verify the clipboard half of this.
+`navigator.clipboard.writeText` throws `NotAllowedError` there because the
+pane's document is never focused, so the copy path can be read but not
+run. Press the button in a real browser before believing it.
+
 ## The inline script has one scope
 
 `index.html` holds a single long inline script. Two consequences:

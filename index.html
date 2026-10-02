@@ -911,10 +911,11 @@
           <button id="themeToggleBtn" class="secondary icon-btn" title="Switch to light theme"><i class="ph ph-sun"></i></button>
         </div>
         <div class="split-btn">
-          <!-- Label and icon swap to "Share" wherever the OS share sheet
-               is available (see the feature-detect below); the id, the
-               menu beside it, and the link it hands off all stay the
-               same either way. -->
+          <!-- Label and icon swap to "Share" on a touch device, where
+               the OS sheet is the better hand-off (see the pointer test
+               below; desktop browsers expose the API too and must not
+               take that branch). The id, the menu beside it, and the
+               link it hands off all stay the same either way. -->
           <button id="copyLinkBtn" class="secondary split-btn-main" title="Copy a link to this exact composition, locks included"><i class="ph ph-link"></i> Copy Link</button>
           <!-- Whether the copied link opens as a plain still or also
                offers the recipient Auto-randomize at the current speed
