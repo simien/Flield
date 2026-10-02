@@ -4164,26 +4164,23 @@
 
     const copyLinkBtn = document.getElementById("copyLinkBtn");
 
-    // Wherever the OS share sheet exists (Messages, AirDrop, most mobile
-    // and some desktop browsers), the button hands the link straight to
-    // it instead of the clipboard; the label and icon change to match so
-    // it's never a hidden feature riding along under an unrelated label.
-    const canShare = !!navigator.share;
+    // On a touch device the OS share sheet is the better hand-off
+    // (Messages, AirDrop, whatever else is installed), so the button
+    // gives it the link instead of the clipboard, and the label and icon
+    // change to match rather than hiding the swap under Copy Link.
+    //
+    // Gated on the pointer, not on the API: desktop Chromium (Brave and
+    // Chrome on macOS) exposes navigator.share too, and the sheet it
+    // opens there offers Mail, Messages, Notes and Reminders but no
+    // clipboard, which is the one thing someone pressing a button
+    // labelled Copy Link was after.
+    const canShare = !!navigator.share && window.matchMedia("(pointer: coarse)").matches;
     if (canShare) {
       copyLinkBtn.innerHTML = iconTag("share-network") + " Share";
       copyLinkBtn.title = "Share this exact composition, locks included";
     }
 
-    copyLinkBtn.addEventListener("click", async () => {
-      const { url, autoplay } = buildShareLink();
-      if (canShare) {
-        try {
-          await navigator.share({ title: "Flield", text: "A composition I made with Flield:", url });
-        } catch (err) {
-          // AbortError on a cancelled share sheet is normal, not a failure.
-        }
-        return;
-      }
+    async function copyShareLink(url, autoplay) {
       try {
         await navigator.clipboard.writeText(url);
         showToast(autoplay ? "Link copied, plays on open" : "Link copied");
@@ -4194,6 +4191,23 @@
           // Dialogs are unavailable in some environments; nothing more to do.
         }
       }
+    }
+
+    copyLinkBtn.addEventListener("click", async () => {
+      const { url, autoplay } = buildShareLink();
+      if (canShare) {
+        try {
+          await navigator.share({ title: "Flield", text: "A composition I made with Flield:", url });
+          return;
+        } catch (err) {
+          // A cancelled sheet is normal and wants nothing after it. Any
+          // other failure (a browser that refuses the call, a sheet that
+          // never opens) would leave the button doing nothing at all, so
+          // the clipboard below still gets the link.
+          if (err && err.name === "AbortError") return;
+        }
+      }
+      copyShareLink(url, autoplay);
     });
 
     if (!loadStateFromURL()) {
