@@ -31,10 +31,21 @@ jobs:
         # commit the push carried at once. That SHA is all zeros on a
         # branch's first push and may be gone after a force push, so it
         # is only used when the clone actually has it.
+        #
+        # The base is fetched at full depth, not --depth=1. A shallow
+        # fetch writes .git/shallow and grafts the branch one commit
+        # deep, and because the base shares its history with this one
+        # that truncates the whole clone: git log -- <file> then reports
+        # the graft point rather than the commit that last touched the
+        # file, which is what the sitemap-dates check reads. It failed
+        # on every page at once the first time a pull request ran after
+        # that check was added, naming today's date for files nobody had
+        # touched. fetch-depth: 0 above already pays for the history, so
+        # there is nothing to save here.
         run: |
           BASE=""
           if [ -n "${{ github.base_ref }}" ]; then
-            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            git fetch --no-tags origin "${{ github.base_ref }}"
             BASE="origin/${{ github.base_ref }}"
           elif git cat-file -e "${{ github.event.before }}^{commit}" 2>/dev/null; then
             BASE="${{ github.event.before }}"
