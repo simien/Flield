@@ -596,13 +596,23 @@
              large-area change in brightness, once a cycle. WCAG 2.3.1
              allows three of those a second. A one second cycle is one.
 
-             Opens at three, not the two it used to, which is the length
-             every example clip in examples/ was rendered at: two reads
-             as hurried on Loop and Wind, where a whole turn of the
-             field goes by before the eye has followed it round. The
-             ladder is eight steps to a doubling, so three seconds
-             exactly is not a stop and 3.1s is the nearest one. -->
-        <input type="range" id="speed" min="16" max="48" value="29" />
+             Opens at thirteen and a half, well up from the three it
+             used to and the two the example clips in examples/ were
+             rendered at. A background is looked past rather than at,
+             and at three seconds a whole turn of the field goes by
+             inside a glance, which reads as something demanding
+             attention rather than something behind the work. Slow
+             enough and the canvas is never seen to move, only to have
+             moved. The ladder is eight steps to a doubling, so step 46
+             is 13454ms, which the panel rounds to 13.5s.
+
+             This is long enough to matter to a GIF. One pass is 168
+             frames at the 80ms the preview draws at, and the byte
+             budget below affords 69 on the default canvas, so an
+             export is slow motion at about 5fps. That reads fine at
+             this cycle length and is what GIF_FRAME_BUDGET's comment
+             anticipates; it is not a sign the budget is wrong. -->
+        <input type="range" id="speed" min="16" max="48" value="46" />
       </div>
 
       <!-- Depth scales how far every motion but Drift goes, and Direction
@@ -647,8 +657,14 @@
              Both sliders start at a second now: Speed because of the
              flash rate (see its own comment), this one because you
              cannot read a composition thrown away four times a second
-             either. Stepped is the difference between them. -->
-        <input type="range" id="interval" min="16" max="48" step="8" value="24" />
+             either. Stepped is the difference between them.
+
+             Opens at four, not the two it used to. Two seconds is
+             about as long as it takes to notice what a composition is
+             doing, so rerolling on it means never seeing one settle;
+             four gives each one a beat to be looked at before the next
+             replaces it. Step 32 is exactly 4000ms. -->
+        <input type="range" id="interval" min="16" max="48" step="8" value="32" />
       </div>
 
       <h2 class="section-title">Saved states</h2>
@@ -896,7 +912,7 @@
 
                It stops at three. Five and eight were here, and under
                Motion they are what took an export to 1.9GB of retained
-               frames on the Web preset: the budget now trims that, but
+               frames at 1080p: the budget now trims that, but
                what it trims is the frames within each pass, so both
                settings bought more passes by making every one of them
                too coarse to read as motion. They cost nothing with
@@ -2060,7 +2076,7 @@
     // frame is width x height x 4 bytes and an export retains all of
     // them at once, before the encoder has allocated anything of its
     // own. Measured on the default 1200x630 canvas that is 2.9MB a
-    // frame, so the 240 above is 700MB; on the Web preset's 1920x1080
+    // frame, so the 240 above is 700MB; on a hand-typed 1920x1080
     // it is 7.9MB a frame and 1.9GB, which is past what a phone's tab
     // survives and enough to hang a desktop one. Canvas size is a free
     // text field, so there is no size this can assume. Whichever of the
@@ -2390,9 +2406,15 @@
       render();
     }
 
-    // Web and Tablet are real, recognizable resolutions (1080p; iPad
-    // portrait) that also happen to divide evenly by most of the block
-    // size range. Mobile's old 375x812 (iPhone X) was both a narrower,
+    // Web is the 1200x630 the document already opens at, so the chip is
+    // lit on arrival rather than offering a size nothing starts on. It
+    // is a wide canvas to work from, not a screen to fill: the
+    // width field is free text, so anyone wanting 1080p or wider types
+    // it, and nobody wanting a card-sized background has to shrink one.
+    // Tablet is a real, recognizable resolution (iPad portrait). Both
+    // divide evenly by most of the block size range.
+    //
+    // Mobile's old 375x812 (iPhone X) was both a narrower,
     // dated reference and the one preset that couldn't tile evenly at
     // any block size: 375 is odd, so no even block size divides it, and
     // 812 only shares factors with a handful of block sizes (2, 4, 7,
@@ -2409,7 +2431,7 @@
     // so Tile forces it off. 512 is a nice round, highly divisible size
     // for a texture swatch, not a specific device or screen to match.
     const DIMENSION_PRESETS = {
-      web: { width: 1920, height: 1080 },
+      web: { width: 1200, height: 630 },
       tablet: { width: 768, height: 1024 },
       mobile: { width: 400, height: 800 },
       tile: { width: 512, height: 512, shapeMask: "none", symmetry: "quad" },
@@ -2444,7 +2466,7 @@
 
     // Lights a preset chip while the current values still match it,
     // derived from state rather than from the click: Web is lit however
-    // the size came to be 1920x1080, Tile only while the size is square
+    // the size came to be 1200x630, Tile only while the size is square
     // with no mask and both layers on 4-way mirror, and a palette chip
     // only while all six of its ranges still hold. Nudge anything and
     // the chip goes quiet on its own.
