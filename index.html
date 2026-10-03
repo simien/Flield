@@ -193,7 +193,7 @@
        files (not the vendored third-party ones, which are pinned and
        don't change). Bump it whenever style.css or generator.js changes,
        or a returning visitor's cached copy silently goes stale. -->
-  <link rel="stylesheet" href="style.css?v=108" />
+  <link rel="stylesheet" href="style.css?v=109" />
   <!-- generator.js is requested at the end of the body, which is where
        it has to run, but the preload scanner only finds it once that
        end of a 200KB document has arrived. This starts the fetch
@@ -560,14 +560,18 @@
            as a heading, and it is one of the four controls that drive
            animation (see AGENTS.md) rather than a canvas setting. Second
            in the tab, not first: size, colors and mask come before how
-           it moves, a still is the default, and the flash warning below
-           should not be the first line a new visitor reads. -->
+           it moves, a still is the default, and the flash warning here
+           should not be the first line a new visitor reads.
+
+           The warning is a sentence in the description rather than a
+           paragraph of its own: the section was four lines tall before
+           a single control, and a notice that takes that much room gets
+           read past as chrome. -->
       <h2 class="section-title">Animation</h2>
 
       <div class="field">
         <label for="motion">Motion</label>
-        <p class="hint">Plays on the canvas as soon as you pick one.</p>
-      <p class="hint hint-warn">Motion flashes the whole canvas. Skip it if flashing affects you.</p>
+        <p class="hint">Plays as soon as you pick one. Skip it if flashing affects you.</p>
         <select id="motion">
           <option value="none" selected>None (still)</option>
           <option value="circle">Loop</option>

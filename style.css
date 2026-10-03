@@ -2065,37 +2065,6 @@ button.secondary:hover:not(:disabled) {
   margin-bottom: var(--space-2);
 }
 
-/* Two descriptions are one block, not two. */
-.field .hint + .hint {
-  margin-top: calc(var(--space-1) - var(--space-2));
-}
-
-/* One hint carries a health warning rather than an explanation. It reads
-   in the same colour as the description above it, because a notice that
-   shouts gets taken for chrome and read past. A hanging marker carries
-   the difference instead, the way a footnote does. */
-.hint-warn {
-  padding-left: 13px;
-  text-indent: -13px;
-}
-
-/* An asterisk is drawn small and parked up near the ascender, so at the
-   text's own size it reads as a footnote mark rather than as part of the
-   line. 1.54em makes its ink exactly the x-height of the 12px text, and
-   the negative vertical-align drops it from its own baseline onto the
-   text's, so it fills the same band the lowercase letters do. The zero
-   line-height keeps the bigger glyph from opening the line box up.
-   5px plus the glyph's advance is the 13px the hang is indented by, so
-   a second line starts under the first word rather than under the mark. */
-.hint-warn::before {
-  content: "*";
-  font-size: 1.54em;
-  line-height: 0;
-  vertical-align: -0.356em;
-  padding-right: 5px;
-  color: var(--text);
-}
-
 /* Not in the strip above the bar on a phone: that row exists to put one
    control within reach of the artwork, and a paragraph in it costs a
    line of the picture for something already read in the sheet. */
