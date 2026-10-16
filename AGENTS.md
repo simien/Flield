@@ -65,6 +65,41 @@ The same trap with a different shape: `#playBtn.playing` is an ID selector at
 (1,1,0) and outranks `button.secondary:hover` at (0,3,1). Filled states that
 need a hover must say so explicitly.
 
+## The two themes swap a pair of greys, and contrast does not swap with them
+
+`--text-muted` and `--text-subtle` traded values between the themes,
+Zinc 500 one way and Zinc 400 the other. It reads as symmetry and is
+not: the same grey measures very differently against near-black and
+near-white. On the document pages that left body text at 4.40:1 in
+light, under AA's 4.5, and the quieter roles (`.meta`, figcaptions, the
+footer, the header's page name) at 4.12:1 in dark and 2.33:1 in light.
+
+`style.css` had already found this and written it down beside
+`.section-title`: no single grey fixes it, because the two themes want
+it moved in opposite directions. Its answer there was to reach for
+`--text` instead, which body copy cannot do. So each theme names its own
+pair now rather than trading one, landing near 7:1 for body text and 5:1
+for the quiet roles. Both new values sit off the Zinc ramp because no
+step on it lands in range for the theme that needs it.
+
+That makes those two tokens the one place `guide.css` deliberately
+differs from the `style.css` block it otherwise copies, and its own
+comment says so. Don't close the gap by copying the app's greys back
+over. The app puts muted text on a `--panel` that is pure white in
+light; a document page puts it on `--bg` at `#f4f4f5`, and that
+difference is the whole margin. The app measures 4.83:1 and 6.91:1 as it
+stands and wants nothing.
+
+Two ways a measurement lies here:
+
+- **Against `--bg`, not `--panel`.** In dark, `--panel` is lighter than
+  the page, so text on a panel has less contrast rather than more. The
+  tightest reading on the site lives there: 4.65:1 on `.demo-value`.
+- **Composite an alpha background first.** The inline `code` chip sits
+  on `rgba(255, 255, 255, 0.05)`. Read that literally and it measures
+  2.56:1, which is a bug in the measurement, not a finding. Composited
+  over the page behind it, 7.10:1.
+
 ## The guide's scroll spy reads two numbers that must agree
 
 A heading parks at its own `scroll-margin-top` after an anchor jump, and the
