@@ -31,6 +31,24 @@ a stale stylesheet; a bump on four pages and not the fifth is how `404.html`
 served an older `guide.css` than the guide did; a needless bump throws away
 every visitor's cache for nothing. CI checks all three.
 
+## A new motion or texture leaves counts behind in the prose
+
+Ripple and Tide took the motion count from four to six, and eight places
+went on saying four: the animated-backgrounds lede and two of its own
+comments, the guide's "all four", a comment in `index.html`, `USAGE.md`
+twice (once in prose and once listing them as "Loop, Drift, Wind, and
+Pulse"), and this file, which said a shared link is 82 characters in one
+paragraph and 84 thirty lines below. The tutorial had drifted a
+different way, telling the reader to pick a step count to stop a motion
+when the menu's option is None.
+
+Not one of them shows up in the browser or in `checks.py`, because every
+one is prose. After adding or removing a kind, grep the repo for the old
+number as a word, and for the kinds listed out by name, and read every
+hit rather than trusting it. The same goes for a length: measure it
+against the running app (`encodeCompact` returns 84 today) rather than
+copying a number out of a neighbouring paragraph.
+
 ## style.css: later wins at equal specificity
 
 The file is long and the mobile `@media (max-width: 768px)` block sits
@@ -74,6 +92,22 @@ rather than counting; two strings tuned by eye both regressed here. Two
 lines are allowed if the second is about half full, but one line is the
 version that survives a change of width, so prefer it. `tieLastWords`
 still guards the wrap.
+
+259px is not the only budget. A hint inside Palette Range or Density
+Range gets 237px, because the collapsible panel indents it, and
+measuring one of those against 259 passes a string that wraps. That is
+how both came to sit on two lines with the second barely a third full.
+Leave real slack either way: a string that fits on this machine can
+still overflow in the stack's last entry, a generic `sans-serif`, so
+measure a deliberately wide face too before calling one done.
+
+Most hints are not on screen at load, so sweeping what is visible finds
+three of thirteen. The rest need the Layer tab switched, the two range
+panels expanded, and a Motion picked, since Speed, Depth, Direction and
+Collide are revealed by that choice. The per-texture hint is swapped by
+the texture select's `input` handler rather than `change`: dispatch only
+`change` and the old string stays on screen, which reads as a bug and
+is not one.
 
 ## `text-wrap: pretty` does not prevent widows here
 
@@ -353,6 +387,13 @@ repo's GitHub Pages site is live behind it as a fallback. `.nojekyll` is
 what keeps Pages from running Jekyll over the files, so it stays. Anything
 Cloudflare-only (`_headers`, the 404 routing in `wrangler.jsonc`) is
 simply absent on the Pages copy; that is accepted, not a bug to fix.
+
+A push reaches flield.com in about 45 seconds. For a minute or so after
+that, the edge can still hand back the previous HTML on a plain request,
+with `cf-cache-status: HIT`, while the same URL with a cache-busting
+query returns the new copy. Two pages reporting an old `?v=` right after
+a deploy is that, not a deploy that half landed; check with a throwaway
+query before concluding anything, and they catch up on their own.
 
 A push to main that touches a page also runs `indexnow.yml`, which tells
 Bing and the other IndexNow engines which pages changed so they recrawl
