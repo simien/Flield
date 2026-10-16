@@ -4,7 +4,8 @@
    token block below, copied from style.css's :root so the pages read
    as one site. Only the tokens this page actually uses are copied, which
    keeps the drift surface small; if a value changes there, change it here
-   too. Same rule as the app: dark is the default regardless of the
+   too, with one deliberate exception noted on the greys below. Same rule
+   as the app: dark is the default regardless of the
    system setting, and light applies only when the toggle has written
    data-theme="light" (see the blocking script in this page's head, which
    reads the same flield-theme key the app writes). */
@@ -18,8 +19,19 @@
   --border-strong: rgba(255, 255, 255, 0.18);
   --input: rgba(255, 255, 255, 0.05);
   --text: #fafafa;
-  --text-muted: #a1a1aa;
-  --text-subtle: #71717a;
+  /* The two greys are the one place this block deliberately departs from
+     style.css, and they are set per theme rather than swapped between the
+     two. A document page puts muted text on --bg; the app puts it on a
+     --panel that is pure white in light, which buys contrast this file
+     does not get. Against #f4f4f5, style.css's pair measures 4.40:1 and
+     2.33:1, both under AA. Swapping one ramp between the themes cannot
+     fix it, because each theme wants the grey moved the opposite way
+     (style.css says the same, beside .section-title). So each theme names
+     its own, off the Zinc ramp where it has to be, landing both on about
+     7:1 for body text and 5:1 for the quieter roles. Re-measure against
+     --bg, not --panel, if either moves. */
+  --text-muted: #a1a1aa;   /* 7.76:1 on --bg */
+  --text-subtle: #82828b;  /* 5.22:1 on --bg */
   --primary: #e4e4e7;
   --radius-sm: 8px;
   --radius: 10px;
@@ -39,8 +51,8 @@
   --border-strong: #d4d4d8;
   --input: #ffffff;
   --text: #09090b;
-  --text-muted: #71717a;
-  --text-subtle: #a1a1aa;
+  --text-muted: #52525b;   /* 7.03:1 on --bg */
+  --text-subtle: #68686f;  /* 5.03:1 on --bg */
   --primary: #18181b;
 }
 
