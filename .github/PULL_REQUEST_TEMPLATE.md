@@ -15,3 +15,4 @@
 - [ ] No new build step, package manager, framework, or CDN dependency introduced
 - [ ] `generator.js` still has no dependency on the UI, if touched
 - [ ] Tested locally in at least one browser
+- [ ] `python3 .github/scripts/checks.py origin/main` passes

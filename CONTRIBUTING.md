@@ -19,7 +19,7 @@ to merge.
 - **The site is six pages**: the app (`index.html` + `style.css`), the guide
   (`guide/index.html`), three explainers (`flow-fields/`, `seamless-backgrounds/`,
   `animated-backgrounds/`), and `404.html`. Every page but the app shares
-  `guide.css`; the app does not, because `style.css` gives `body` a fixed,
+  `guide.css`. The app does not, because `style.css` gives `body` a fixed,
   non-scrolling viewport that a document page can't use. `guide.css` copies the
   handful of design tokens it needs from `style.css`, so a token changed in one
   needs changing in the other.
@@ -49,18 +49,21 @@ so a clear problem statement makes it much easier to judge fit.
    at `/`, the guide at `/guide/`, the explainers at `/flow-fields/`,
    `/seamless-backgrounds/` and `/animated-backgrounds/`, and the 404 page at
    `/404.html`.
-3. Keep changes focused; unrelated formatting or refactors make a diff harder
+3. Keep changes focused. Unrelated formatting or refactors make a diff harder
    to review.
 4. Run `python3 .github/scripts/checks.py origin/main` before you open the PR.
-   A change to a page also needs its `lastmod` in `sitemap.xml` moved to
-   the date of the change, and a new page needs a sitemap entry, a row in
-   the `PAGES` table in `.github/scripts/indexnow.py`, and a line in
-   `.github/workflows/indexnow.yml`. The checks fail on any of these
-   missing.
-   It is the same script CI runs, needs nothing installed, and catches the
+   It is the same script CI runs and needs nothing installed. It catches the
    failures that still serve a working-looking page: a syntax error in the
    inline script, a duplicate id, a stale `?v=` cache buster, and a change to
    the shared-link format that would stop existing links opening.
+
+   It also fails if a page changed without its paperwork:
+
+   - A changed page needs its `lastmod` in `sitemap.xml` moved to the date
+     of the change.
+   - A new page needs a sitemap entry, a row in the `PAGES` table in
+     `.github/scripts/indexnow.py`, and a line in
+     `.github/workflows/indexnow.yml`.
 5. Open a pull request describing what changed and why, and link any related
    issue.
 

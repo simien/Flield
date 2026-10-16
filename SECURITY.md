@@ -21,8 +21,8 @@ Include:
 - The browser and OS you tested on
 
 You should get an initial response within a few days. Once a fix is
-available, it will ship as a normal update to the live site at
-[flield.com](https://flield.com/); there are no versioned releases to
+available, it ships as a normal update to the live site at
+[flield.com](https://flield.com/). There are no versioned releases to
 backport to.
 
 ## Supported versions

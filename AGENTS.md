@@ -302,7 +302,7 @@ what binds, the per-pass smoothness is.
 
 ## A shared link is a bit stream, and CI guards it
 
-`?c=` is 82 characters of base64url over a packed bit stream: each value
+`?c=` is 84 characters of base64url over a packed bit stream: each value
 takes exactly the bits its range needs, with nothing between them. Two
 kinds of edit would break every link already shared, plus the URL inside
 every exported SVG, and neither shows up in the browser:
@@ -331,8 +331,8 @@ field existed", because base64 pads the last byte with zeros and an old
 link's tail is read straight out of that padding. A tail that is all
 zeros is not written at all, though nothing leaves it empty today: the
 two durations are always written, so every new link is the same length
-(84 characters since depth, direction, collide, and the layers'
-own motions joined the tail).
+(it grew to 84 when depth, direction, collide, and the layers' own
+motions joined the tail).
 
 The escape hatch is `COMPACT_VERSION`. Bumping it says the break is
 deliberate, and both checks stand down: the decoder refuses a version it
