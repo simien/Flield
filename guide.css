@@ -210,7 +210,7 @@ h3 {
   margin: 34px 0 10px;
 }
 
-p, li, td {
+p, li, td, dd {
   color: var(--text-muted);
   /* Keeps a line's last word from being left alone on a line of its own.
      Ignored by browsers that don't support it, which just wrap as before. */
@@ -250,6 +250,28 @@ ul, ol {
 
 li {
   margin-bottom: 8px;
+}
+
+/* A term and what it means, for the pairs that a table dresses up too much
+   and a paragraph buries. No indent on the description: at this measure the
+   bold term is enough to separate the two, and a hanging indent only costs
+   line length. */
+dl {
+  margin: 0 0 20px;
+}
+
+dt {
+  color: var(--text);
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+dt:first-child {
+  margin-top: 0;
+}
+
+dd {
+  margin: 4px 0 0;
 }
 
 /* Contents popover. The header's .wrap is the positioning context, so the

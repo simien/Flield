@@ -53,7 +53,7 @@
     "inLanguage": "en",
     "image": "https://flield.com/screenshot.png?v=8",
     "datePublished": "2026-09-13",
-    "dateModified": "2026-09-13",
+    "dateModified": "2026-10-15",
     "proficiencyLevel": "Beginner",
     "author": {
       "@type": "Person",
@@ -85,7 +85,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="../guide.css?v=5" />
+  <link rel="stylesheet" href="../guide.css?v=6" />
   <style>
     /* The six motions sit in a two-column grid rather than the shared
        .demo-canvases pair, since they are peers being compared rather
@@ -122,31 +122,52 @@
 
   <main class="wrap">
     <h1>How to make a looping animated background</h1>
-    <p class="lede">Not every moving background has to loop. Plenty run once, or play long enough that nobody reaches the end. But if yours does repeat, the cut is the part people notice. This page is about four ways to move a composition so the last frame runs into the first with nothing to see.</p>
+    <p class="lede">Not every moving background has to loop. Plenty run once, or play long enough that nobody reaches the end. But if yours does repeat, the cut is the part people notice. This page is about six ways to move a composition so the last frame runs into the first with nothing to see.</p>
 
-    <h2 id="definition">The short definition</h2>
+    <h2 id="definition">What makes a loop seamless</h2>
 
     <p>A loop is seamless when the last frame and the first frame are the same. Play it on repeat and there is no moment where the picture jumps.</p>
 
-    <p>Getting there with footage means trimming until the two ends nearly agree, then hiding the rest. Getting there with generated motion means building the movement out of something that comes back round on its own. A circle. A wave. Anything that repeats.</p>
+    <p>Two ways to get there:</p>
 
-    <p>The second kind cannot have a seam, because the last frame is not merely close to the first. It is computed from the same inputs.</p>
+    <dl>
+      <dt>With footage</dt>
+      <dd>Trim until the two ends nearly agree, then hide the rest.</dd>
+      <dt>With generated motion</dt>
+      <dd>Build the movement out of something that comes back round on its own. A circle. A wave. Anything that repeats.</dd>
+    </dl>
 
-    <p>This page is about the second route, shown with <a href="../">Flield</a>, a seamless background generator that runs in the browser. Every panel below is drawn live by the same code the app uses. Where a name is Flield's own rather than the general term, it says so.</p>
+    <p>The second kind cannot have a seam. The last frame is not merely close to the first. It is computed from the same inputs.</p>
+
+    <p>This page takes the second route, using <a href="../">Flield</a>, a seamless background generator that runs in the browser. Every panel below is drawn live by the same code the app uses. Where a name is Flield's own rather than the general term, it says so.</p>
 
     <h2 id="whether">When a loop is worth it</h2>
 
-    <p>It earns its keep when a background repeats often and stays on screen. A hero section someone scrolls past slowly. A card sitting in a list. A texture behind a form. A cut every few seconds in the corner of the eye is the kind of thing people feel before they can name.</p>
+    <p>A loop earns its keep when a background repeats often and stays on screen:</p>
 
-    <p>It matters less than you might think in other places. A short intro that plays once and stops has no seam to hide. Motion tied to scrolling never repeats on its own clock. A long ambient clip may loop so rarely that a soft crossfade is a perfectly good answer, and video gives you photographic detail that this tool cannot.</p>
+    <ul>
+      <li>A hero section someone scrolls past slowly.</li>
+      <li>A card sitting in a list.</li>
+      <li>A texture behind a form.</li>
+    </ul>
 
-    <p>What follows assumes you want the repeat, because that is the case this tool was built for. If you do not, most of it still applies except the part about closing the cycle.</p>
+    <p>A cut every few seconds in the corner of the eye is the kind of thing people feel before they can name it.</p>
+
+    <p>It matters less than you might think in other places:</p>
+
+    <ul>
+      <li>A short intro that plays once and stops has no seam to hide.</li>
+      <li>Motion tied to scrolling never repeats on its own clock.</li>
+      <li>A long ambient clip may loop so rarely that a soft crossfade is a perfectly good answer. Video also gives you photographic detail that this tool cannot.</li>
+    </ul>
+
+    <p>The rest of this page assumes you want the repeat, which is the case this tool was built for. If you do not, most of it still applies apart from closing the cycle.</p>
 
     <h2 id="motions">The six motions</h2>
 
-    <p>Loop, Drift, Wind, Pulse, Ripple and Tide are Flield's names for six ways of moving a composition. The names are the app's own. The idea underneath, motion built from something periodic, is not.</p>
+    <p>Loop, Drift, Wind, Pulse, Ripple and Tide are Flield's names for six ways of moving a composition. The idea underneath, motion built from something periodic, is not the app's own.</p>
 
-    <p>All six below are running live, in this page, on the same composition. Only the kind of movement differs. Each completes one full cycle and starts over, and the point is that you can't tell where.</p>
+    <p>All six below are running live on the same composition. Only the kind of movement differs.</p>
 
     <div class="demo">
       <div class="motion-grid">
@@ -179,30 +200,69 @@
         <button type="button" class="btn" id="playBtn">Pause</button>
         <button type="button" class="btn" id="rerollBtn">Reroll</button>
       </div>
-      <p class="demo-caption">Loop breathes around a closed path and returns where it started, the two layers turning opposite ways. Drift travels one way and wraps into itself. Wind holds its ground while a gust bends it and fine detail streams through. Pulse holds still and swells. Ripple drops rain on the surface and lets the rings cross. Tide bends each layer around the other's ridges and lets go.</p>
+      <p class="demo-caption">Each panel runs one full cycle and starts again. The point is that you cannot tell where.</p>
     </div>
+
+    <dl>
+      <dt>Loop</dt>
+      <dd>Breathes around a closed path and returns where it started, the two layers turning opposite ways.</dd>
+      <dt>Drift</dt>
+      <dd>Travels one way and wraps into itself.</dd>
+      <dt>Wind</dt>
+      <dd>Holds its ground while a gust bends it and fine detail streams through.</dd>
+      <dt>Pulse</dt>
+      <dd>Holds still and swells.</dd>
+      <dt>Ripple</dt>
+      <dd>Drops rain on the surface and lets the rings cross.</dd>
+      <dt>Tide</dt>
+      <dd>Bends each layer around the other layer's ridges, then lets go.</dd>
+    </dl>
 
     <h2 id="length">How long a cycle lasts</h2>
 
     <p>A loop needs a length as well as a shape. Pick a Motion and a <strong>Speed</strong> slider appears under it. It sets how long one cycle runs, from one second up to sixteen.</p>
 
-    <p>An export uses that same number. A GIF records whole cycles. Set four seconds and you get a four second file. Drop it into a page and let it repeat.</p>
+    <p>An export uses that same number. A GIF records whole cycles, so four seconds gives a four second file.</p>
 
-    <p>Three more controls sit beside it. <strong>Depth</strong> is how far the motion goes, from a quarter of its usual reach to twice it. <strong>Direction</strong> runs the cycle backwards, which is how Drift and Wind travel against the flow without the still changing. <strong>Collide</strong> makes the two layers push on each other while they move. And each layer tab has a Motion of its own, so one layer can loop while the other drifts.</p>
+    <h3>Depth, Direction, Collide and Reroll every</h3>
 
-    <p>The slider starts at one second rather than lower. A cycle is one change of brightness across the whole frame, and one a second stays well under the three that <a href="https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html" target="_blank" rel="noopener">WCAG 2.3.1</a> allows. Worth keeping in mind for whatever you build with the file, too.</p>
+    <dl>
+      <dt>Depth</dt>
+      <dd>How far the motion goes, from a quarter of its usual reach to twice it.</dd>
+      <dt>Direction</dt>
+      <dd>Runs the cycle backwards. It is how Drift and Wind travel against the flow without the still changing.</dd>
+      <dt>Collide</dt>
+      <dd>Makes the two layers push on each other while they move.</dd>
+      <dt>Reroll every</dt>
+      <dd>How often Auto-randomize throws the composition away and builds a new one. Speed says how fast the one you have moves. Most backgrounds want one of these and not the other, so they are two separate sliders.</dd>
+    </dl>
 
-    <p><strong>Reroll every</strong>, just below it, does something else. That slider says how often Auto-randomize throws the composition away and builds a new one. Speed says how fast the one you have moves. Most backgrounds want one of these and not the other, so they are two separate sliders.</p>
+    <p>Each layer tab also has a Motion of its own, so one layer can loop while the other drifts.</p>
 
-    <p>What moves depends on the layer's <a href="../flow-fields/">texture</a> too. Four of the six shade the grid. For those, Loop, Drift and Wind move the field and the pattern follows along. Pulse and Ripple leave the field alone and swing the density over it. Tide bends each layer's field with the other layer's.</p>
+    <div class="note">
+      <p>The Speed slider starts at one second rather than lower. A cycle is one change of brightness across the whole frame, and one a second stays well under the three that <a href="https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html" target="_blank" rel="noopener">WCAG 2.3.1</a> allows. Worth keeping in mind for whatever you build with the file, too.</p>
+    </div>
 
-    <p><strong>Streamlines</strong> and <strong>Weave</strong> trace particles instead. Drift and Wind send the particles running along the field. Pulse grows and shrinks their trails. Ripple bends them as its rings pass. Tide sweeps them along the other layer's ridges. The cycle still closes. Each particle lives for exactly one cycle, then starts again from where it began.</p>
+    <h3>What moves in each texture</h3>
 
-    <h2 id="why">Why these close on their own</h2>
+    <p>That depends on the layer's <a href="../flow-fields/">texture</a>.</p>
+
+    <dl>
+      <dt>The four shaded textures</dt>
+      <dd>Loop, Drift and Wind move the field, and the pattern follows along. Pulse and Ripple leave the field alone and swing the density over it. Tide bends each layer's field with the other layer's.</dd>
+      <dt>Streamlines and Weave</dt>
+      <dd>These two trace particles. Drift and Wind send the particles running along the field. Pulse grows and shrinks their trails. Ripple bends them as its rings pass. Tide sweeps them along the other layer's ridges.</dd>
+    </dl>
+
+    <p>The cycle closes either way. Each particle lives for exactly one cycle, then starts again from where it began.</p>
+
+    <h2 id="why">Why generated motion loops without a cut</h2>
 
     <p>The usual way to loop a recording is to trim until the ends nearly agree, then crossfade over what is left. That works, and for a lot of footage it is the only option. The seam does not go away though. It gets softened.</p>
 
-    <p>Nothing is trimmed here. The motion is a parameter, not a recording. Every frame comes from a phase value between 0 and 1. Each kind of movement is built from something that repeats over that phase. A point traveling a circle. A lattice that wraps at a fixed interval. A sine wave. When phase reaches 1 the inputs are identical to phase 0, so the frames are identical too. The loop isn't matched, it's guaranteed.</p>
+    <p>Nothing is trimmed here. The motion is a parameter, not a recording. Every frame comes from a phase value between 0 and 1, and each kind of movement is built from something that repeats over that phase. A point travelling a circle. A lattice that wraps at a fixed interval. A sine wave.</p>
+
+    <p>When phase reaches 1 the inputs are identical to phase 0, so the frames are identical too. The loop is not matched. It is guaranteed.</p>
 
     <p>That is the same argument as <a href="../seamless-backgrounds/">the seamless tile</a>, one dimension over. There, mirroring makes the left edge equal the right. Here, periodicity makes the last frame equal the first.</p>
 
@@ -249,7 +309,9 @@
       </table>
     </div>
 
-    <p>One correction to the usual advice, which matters here. GIF is often dismissed for its 256-color palette, and for photographic content that is fair. This artwork uses three colors. The palette is not the constraint, and a three-color GIF compresses extremely well, because long runs of one color are exactly what its compression was designed for. GIF's real limit is dimensional: the file grows with area faster than a modern codec's does. Which is another way of saying that if you keep the image small and repeat it, GIF is not a compromise at all.</p>
+    <p>One correction to the usual advice. GIF is often dismissed for its 256-color palette, and for photographic content that is fair. This artwork uses three colors, so the palette is not the constraint. A three-color GIF compresses extremely well, because long runs of one color are what its compression was built for.</p>
+
+    <p>GIF's real limit is dimensional. The file grows with area faster than a modern codec's does. So if you keep the image small and repeat it, GIF is not a compromise at all.</p>
 
     <p>Flield exports animated GIF today. MP4 is <a href="#roadmap">the format under consideration</a>.</p>
 
@@ -265,11 +327,15 @@
       <p>Respect <code>prefers-reduced-motion</code>. A moving background is decoration, and for some people it is a genuine problem rather than a preference. Flield honours it too: a link carrying a motion opens still rather than playing itself. Serve the poster frame instead, which the exports here make easy: a still PNG of the same composition is one more export from the same settings.</p>
     </div>
 
-    <h2 id="roadmap">On adding MP4</h2>
+    <h2 id="roadmap">Why there is no MP4 export yet</h2>
 
-    <p>Flield runs entirely in the browser, with no server, no build step, and one vendored dependency. Any new export has to hold that line. That rules out the usual answer, which is to ship a WebAssembly build of FFmpeg. Tens of megabytes for one more format is not a trade this tool should make.</p>
+    <p>Flield runs entirely in the browser, with no server, no build step, and one vendored dependency. Any new export has to hold that line.</p>
 
-    <p>The viable route is the browser's own <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API" target="_blank" rel="noopener">WebCodecs API</a>, which encodes frames natively, plus a small multiplexer to wrap them into a file. That keeps the addition to one more vendored script, about the size of the GIF encoder already here. It also gives exact control over every frame. That control matters. A frame duration that is even slightly off is the one thing that would break a loop which is otherwise guaranteed.</p>
+    <p>That rules out the usual answer, which is to ship a WebAssembly build of FFmpeg. Tens of megabytes for one more format is not a trade this tool should make.</p>
+
+    <p>The viable route is the browser's own <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API" target="_blank" rel="noopener">WebCodecs API</a>. It encodes frames natively, and a small multiplexer wraps them into a file. That keeps the addition to one more vendored script, about the size of the GIF encoder already here.</p>
+
+    <p>It also gives exact control over every frame. A frame duration that is even slightly off is the one thing that would break a loop which is otherwise guaranteed.</p>
 
     <p>If you'd find that useful, <a href="https://github.com/simien/Flield/issues" target="_blank" rel="noopener">say so on the issue tracker</a>. It is the clearest signal for what gets built next.</p>
 
@@ -417,13 +483,13 @@
       paintAll(phase);
     });
 
-    // A page of four moving canvases is exactly what this setting is for.
+    // A page of six moving canvases is exactly what this setting is for.
     // One frame each, no animation, and the Play button still works for
     // anyone who wants it anyway.
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     // Nothing renders while the tab is hidden; there is no reason to
-    // regenerate four grids a visitor can't see.
+    // regenerate six grids a visitor can't see.
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
         if (rafId !== null) cancelAnimationFrame(rafId);

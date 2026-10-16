@@ -53,7 +53,7 @@
     "inLanguage": "en",
     "image": "https://flield.com/screenshot.png?v=8",
     "datePublished": "2026-09-13",
-    "dateModified": "2026-09-13",
+    "dateModified": "2026-10-15",
     "proficiencyLevel": "Beginner",
     "author": {
       "@type": "Person",
@@ -85,7 +85,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="../guide.css?v=5" />
+  <link rel="stylesheet" href="../guide.css?v=6" />
 </head>
 <body>
   <header class="site-header">
@@ -102,19 +102,26 @@
     <h1>What is a flow field?</h1>
     <p class="lede">A flow field is a grid of directions. Every point on it says which way to go. Give it to a drawing and the randomness stops scattering and starts flowing.</p>
 
-    <h2 id="definition">The short definition</h2>
+    <h2 id="definition">What a flow field is made of</h2>
 
     <p>Take a patch of space and put a number at every point. Turn each number into an angle. You now have a field of arrows, and anything you drop on it has somewhere to go.</p>
 
-    <p>The numbers almost always come from a noise function, usually Perlin or simplex. Noise gives you values that drift smoothly rather than jump about. Neighbouring arrows end up pointing nearly the same way, so the field reads as a current rather than a mess.</p>
+    <p>Two choices make the field what it is.</p>
 
-    <p>What you do with the field is a separate choice. Most generative art releases particles onto it and draws their trails. You can also read the numbers as brightness, as a height, as a nudge on some other decision. The field is just the numbers. The picture is what you make of them.</p>
+    <dl>
+      <dt>Where the numbers come from</dt>
+      <dd>Almost always a noise function, usually Perlin or simplex. Noise gives values that drift smoothly rather than jump about. Neighbouring arrows end up pointing nearly the same way, so the field reads as a current rather than a mess.</dd>
+      <dt>What you do with them</dt>
+      <dd>A separate decision. Most generative art releases particles onto the field and draws their trails. You can also read the numbers as brightness, as a height, or as a nudge on some other choice.</dd>
+    </dl>
+
+    <p>The field is just the numbers. The picture is what you make of them.</p>
 
     <p>The rest of this page shows that idea working, using <a href="../">Flield</a>, a seamless background generator that runs in the browser. Every panel below is drawn live by the same code the app uses. Where a name is Flield's own rather than the general term, it says so.</p>
 
-    <h2 id="static">Static, and then not</h2>
+    <h2 id="static">The same composition, with and without a field</h2>
 
-    <p>Start with the difference a field makes. Both panels below use the same seed, the same density, and the same colors. The only thing that changes is whether a flow field is steering the result.</p>
+    <p>Both panels below use the same seed, the same density and the same colors. The only difference is whether a field is steering the result.</p>
 
     <div class="demo">
       <div class="demo-canvases">
@@ -135,11 +142,11 @@
 
     <h2 id="classic">Six ways to draw one field</h2>
 
-    <p>In most generative art, a flow field is literally a grid of vectors. You sample noise at each point, turn the value into an angle, and release particles that steer by whatever angle they're standing on. The particles trace the field, and the drawing is the trails they leave.</p>
+    <p>In most generative art, a flow field is a grid of vectors. You sample noise at each point, turn the value into an angle, and release particles that steer by whatever angle they are standing on. The particles trace the field, and the drawing is the trails they leave.</p>
 
-    <p>A field is a set of numbers. Tracing particles through it is one thing you can do with those numbers. Flield does that, and five other things.</p>
+    <p>That is one thing to do with a set of numbers. Flield does it, and five others.</p>
 
-    <p>The six names below are Flield's, not the field's. No one else calls them this. They are worth a look anyway, because each one is a different answer to the same question: you have the numbers, so what do you draw?</p>
+    <p class="meta">The six names below are Flield's, not the field's. They are worth a look anyway, because each is a different answer to one question: you have the numbers, so what do you draw?</p>
 
     <div class="table-scroll">
       <table>
@@ -157,9 +164,9 @@
       </table>
     </div>
 
-    <p>Two of them are worth explaining in full. They are the two furthest apart, and they are below. The rest are variations on one or the other.</p>
+    <p>The two furthest apart are explained in full below. The rest are variations on one or the other.</p>
 
-    <h2 id="streamlines">Streamlines: the vectors, traced</h2>
+    <h2 id="streamlines">Streamlines: particles traced along the field</h2>
 
     <p>This is the classic construction. The left panel below is the field itself. One arrow per patch of grid, each pointing where a particle standing there would go.</p>
 
@@ -193,15 +200,25 @@
 
     <p>Two details do most of the work here.</p>
 
-    <p>The first is that each particle lives for exactly one animation cycle. Then it starts again from its own fixed point. That is what lets an animated flow field close on itself, rather than cut between two frames.</p>
-
-    <p>The second is that a young trail wraps onto the far end of its own path. So the amount of strand on screen never dips.</p>
+    <ul>
+      <li><strong>Each particle lives exactly one animation cycle.</strong> Then it starts again from its own fixed point. That is what lets an animated flow field close on itself rather than cut between two frames.</li>
+      <li><strong>A young trail wraps onto the far end of its own path.</strong> So the amount of strand on screen never dips.</li>
+    </ul>
 
     <p>The trails land in the same grid of cells as everything else in the tool. That is how they end up mirrored, kaleidoscoped, masked to a circle and exported as SVG.</p>
 
-    <h2 id="streaks">Streaks: the field as a bias</h2>
+    <h2 id="streaks">Streaks: noise stretched into bands</h2>
 
-    <p>Streaks never builds a vector at all, and it is why the tool's default output looks like woven fabric rather than like hair. Here the <em>sampling space itself</em> is rotated and stretched before the noise is read from it. Sample isotropic noise at plain grid coordinates and you get blobs with no preferred direction. Rotate the coordinates toward a heading first, and divide one axis by a stretch factor. The same noise function now returns values that vary slowly along that heading and quickly across it. Blobs become streaks, pointing where you aimed them.</p>
+    <p>Streaks never builds a vector at all. That is why the tool's default output looks like woven fabric rather than like hair. What gets rotated and stretched here is the <em>sampling space itself</em>, before any noise is read from it.</p>
+
+    <p>Sample isotropic noise at plain grid coordinates and you get blobs with no preferred direction. So do two things to the coordinates first:</p>
+
+    <ol>
+      <li><strong>Rotate</strong> them toward a heading.</li>
+      <li><strong>Divide one axis</strong> by a stretch factor.</li>
+    </ol>
+
+    <p>The same noise function now returns values that vary slowly along that heading and quickly across it. Blobs become streaks, pointing where you aimed them.</p>
 
     <pre><code>function sampleFlowField(noise2D, x, y, { scale, angleRad, stretch, octaves }) {
   const cos = Math.cos(angleRad);
@@ -213,9 +230,9 @@
   return fbm(noise2D, nx, ny, octaves); // -1..1
 }</code></pre>
 
-    <p>Four lines of arithmetic, and they're the whole trick. <code>rx</code> and <code>ry</code> are the point rotated into flow-aligned space. Dividing <code>rx</code> by <code>stretch</code> compresses the coordinate along the flow direction, which means the noise takes longer to change as you travel that way. Everything after is ordinary noise.</p>
+    <p>Four lines of arithmetic, and they are the whole trick. <code>rx</code> and <code>ry</code> are the point rotated into flow-aligned space. Dividing <code>rx</code> by <code>stretch</code> compresses the coordinate along the flow direction, so the noise takes longer to change as you travel that way. Everything after that is ordinary noise.</p>
 
-    <h2 id="see">Seeing the field itself</h2>
+    <h2 id="see">The field drawn beside what it produces</h2>
 
     <p>The field is invisible in the finished artwork, so here it is directly. The left panel draws the raw value returned by that function at every point, dark for low and light for high. The right panel is the composition those values produce. Drag the sliders and watch them move together.</p>
 
@@ -245,11 +262,11 @@
       <p class="demo-caption">Direction rotates the sampling space. Stretch decides how far the noise travels before it changes, so a low value gives clouds and a high one gives long combed streaks.</p>
     </div>
 
-    <h2 id="bias">Bias, not a gate</h2>
+    <h2 id="bias">Why the field nudges instead of switching</h2>
 
-    <p>There's one more decision in here that matters more than it looks, and it's a single line.</p>
+    <p>One more decision matters more than it looks, and it is a single line.</p>
 
-    <p>The obvious way to use a field is as a switch: if the value clears a threshold the cell fills, otherwise it doesn't. That works, and it produces hard-edged regions with a visible boundary between filled and empty, because every cell on one side of the threshold agrees with every other.</p>
+    <p>The obvious way to use a field is as a switch. If the value clears a threshold the cell fills, and otherwise it does not. That works, and it produces hard-edged regions with a visible boundary between filled and empty. Every cell on one side of the threshold agrees with every other.</p>
 
     <p>Instead, the field adjusts the <em>probability</em> that a cell fills, and the cell still rolls its own dice:</p>
 
@@ -260,25 +277,41 @@ if (useField) {
 }
 grid[y][x] = rand() &lt; p;</code></pre>
 
-    <p>Now a cell in a dense region is merely <em>likely</em> to fill, and one in a sparse region is merely unlikely. Regions blend into each other through a gradient of probability, instead of meeting at an edge. The texture stays grainy everywhere, rather than going solid where the field is strong. That is the difference between the two panels in the first demo, and it is one comparison operator.</p>
+    <p>Now a cell in a dense region is merely <em>likely</em> to fill, and one in a sparse region is merely unlikely. Regions blend into each other through a gradient of probability rather than meeting at an edge. The texture stays grainy everywhere instead of going solid where the field is strong.</p>
 
-    <h2 id="octaves">Layering the noise</h2>
+    <p>That is the difference between the two panels in the first demo. It is one comparison operator.</p>
 
-    <p>A single noise sample is smooth to the point of being bland. Summing several at doubling frequencies and halving amplitudes, conventionally called fractal Brownian motion, adds fine detail on top of the broad shape without disturbing it. That is the <code>octaves</code> argument, and two or three is usually enough here: the grid is coarse, so detail finer than a cell is wasted work.</p>
+    <h2 id="octaves">Octaves: layering the noise</h2>
+
+    <p>A single noise sample is smooth to the point of being bland. Sum several of them at doubling frequencies and halving amplitudes and you get fine detail on top of the broad shape, without disturbing the shape. The convention is called fractal Brownian motion.</p>
+
+    <p>That is the <code>octaves</code> argument. Two or three is usually enough here, because the grid is coarse and detail finer than a cell is wasted work.</p>
 
     <p>The noise underneath is <a href="https://en.wikipedia.org/wiki/Ken_Perlin" target="_blank" rel="noopener">Ken Perlin</a>'s gradient noise, using the fade curve from his 2002 improved reference implementation, seeded so the same string always produces the same field.</p>
 
     <h2 id="try">Try it</h2>
 
-    <p>Every control on this page is in the app, on each layer's tab, under Flow field. Texture picks which of the six you are drawing. Field Strength, Flow Scale, Flow Direction, Flow Stretch and Turbulence steer all six.</p>
+    <p>Every control on this page is in the app, on each layer's tab, under Flow field. <strong>Texture</strong> picks which of the six you are drawing. Field Strength, Flow Scale, Flow Direction, Flow Stretch and Turbulence steer all six.</p>
 
-    <p>Some of them change name as you switch, because the job changes. On Streamlines and Weave, strength becomes Curl, stretch becomes Trail length and the smoothing passes become Strand weight. On Contours, strength becomes Levels, because what it buys there is a count of lines.</p>
+    <p>Some of them change name as you switch, because the job changes.</p>
 
-    <p><a href="../">Open Flield</a>, free with no signup, and drag them, or read the <a href="../guide/">guide</a> for the rest of the tool.</p>
+    <dl>
+      <dt>On Streamlines and Weave</dt>
+      <dd>Field strength becomes <strong>Curl</strong>, which is how far the noise swings a strand off the flow direction. Flow stretch becomes <strong>Trail length</strong>. Smoothing passes becomes <strong>Strand weight</strong>.</dd>
+      <dt>On Contours</dt>
+      <dd>Field strength becomes <strong>Levels</strong>, because what it buys there is a count of lines.</dd>
+    </dl>
 
-    <p>Two pages take the field further. <a href="../animated-backgrounds/">Looping animated backgrounds</a> sets it moving and closes the loop with no cut. <a href="../seamless-backgrounds/">Seamless tiling backgrounds</a> mirrors it into a tile that repeats with no seam.</p>
+    <p><a href="../">Open Flield</a>, free with no signup, and drag them. The <a href="../guide/">guide</a> covers the rest of the tool.</p>
 
-    <p>The implementation is one file, <a href="https://github.com/simien/Flield/blob/main/generator.js" target="_blank" rel="noopener"><code>generator.js</code></a>, with no dependencies and no build step. It knows nothing about the interface, so it runs anywhere a canvas does. That is how the demos on this page work. The same functions, at a smaller size.</p>
+    <h3>Read next</h3>
+
+    <ul>
+      <li><a href="../animated-backgrounds/">Looping animated backgrounds</a> sets the field moving and closes the loop with no cut.</li>
+      <li><a href="../seamless-backgrounds/">Seamless tiling backgrounds</a> mirrors it into a tile that repeats with no seam.</li>
+    </ul>
+
+    <p>The implementation is one file, <a href="https://github.com/simien/Flield/blob/main/generator.js" target="_blank" rel="noopener"><code>generator.js</code></a>, with no dependencies and no build step. It knows nothing about the interface, so it runs anywhere a canvas does. That is how the demos on this page work: the same functions, at a smaller size.</p>
 
     <p class="meta">Flield is free for noncommercial use under the <a href="https://github.com/simien/Flield/blob/main/LICENSE.md" target="_blank" rel="noopener">PolyForm Noncommercial License</a>.</p>
 

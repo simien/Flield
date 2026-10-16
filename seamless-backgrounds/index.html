@@ -53,7 +53,7 @@
     "inLanguage": "en",
     "image": "https://flield.com/screenshot.png?v=8",
     "datePublished": "2026-09-13",
-    "dateModified": "2026-09-13",
+    "dateModified": "2026-10-15",
     "proficiencyLevel": "Beginner",
     "author": {
       "@type": "Person",
@@ -85,7 +85,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="../guide.css?v=5" />
+  <link rel="stylesheet" href="../guide.css?v=6" />
 </head>
 <body>
   <header class="site-header">
@@ -102,21 +102,28 @@
     <h1>How to make a seamless tiling background</h1>
     <p class="lede">A tile is seamless when its left edge matches its right and its top matches its bottom. Lay it out in a grid and the joins disappear.</p>
 
-    <h2 id="definition">The short definition</h2>
+    <h2 id="definition">Where a visible seam comes from</h2>
 
-    <p>A repeating background is one small image drawn over and over. The browser butts each copy against the next. Wherever two copies meet, the right edge of one lands beside the left edge of the other.</p>
+    <p>A repeating background is one small image drawn over and over. The browser butts each copy against the next, so the right edge of one lands beside the left edge of the next.</p>
 
-    <p>If those two edges do not match, you see a line. Repeat it across a page and the lines form a grid. That is what everyone means by a visible seam, and the eye is unreasonably good at spotting it.</p>
+    <p>If those two edges do not match, you see a line. Repeat the image across a page and the lines form a grid. That grid is the visible seam, and the eye is unreasonably good at spotting it.</p>
 
-    <p>There are two ways out. You can take an image you already have and edit its edges until they agree, which is what offset-and-clone does in an image editor. Or you can generate the image so its edges agree from the start, and never have an edge to fix.</p>
+    <p>Two ways out:</p>
 
-    <p>This page is about the second route, shown with <a href="../">Flield</a>, a seamless background generator that runs in the browser. Both panels below are drawn live by the same code the app uses. Where a name is Flield's own rather than the general term, it says so.</p>
+    <ul>
+      <li><strong>Repair the edges.</strong> Edit an image you already have until its edges agree. Offset-and-clone in an image editor does this.</li>
+      <li><strong>Never make an edge.</strong> Generate the image so its edges agree from the start.</li>
+    </ul>
 
-    <h2 id="proof">The seam, and its absence</h2>
+    <p>This page takes the second route, using <a href="../">Flield</a>, a seamless background generator that runs in the browser. Both panels below are drawn live by the same code the app uses. Where a name is Flield's own rather than the general term, it says so.</p>
 
-    <p>Below, the left panel is a single tile and the right panel is that same tile repeated nine times. Switch the symmetry and watch the grid on the right. With a 4-way mirror the repeat is invisible. Without one, every boundary announces itself.</p>
+    <h2 id="proof">The same tile, with and without a mirror</h2>
 
-    <p>4-way mirror is Flield's name for the setting. Mirroring a tile so it repeats is an old idea and goes by other names elsewhere.</p>
+    <p>The left panel below is one tile. The right is that tile repeated nine times. Switch the symmetry and watch the grid on the right.</p>
+
+    <p>With a 4-way mirror the repeat is invisible. Without one, every boundary announces itself.</p>
+
+    <p class="meta"><strong>4-way mirror</strong> is Flield's name for the setting. Mirroring a tile so it repeats is an old idea and goes by other names elsewhere.</p>
 
     <div class="demo">
       <div class="demo-canvases">
@@ -140,47 +147,78 @@
         </div>
         <button type="button" class="btn" id="rerollBtn">Reroll</button>
       </div>
-      <p class="demo-caption">Horizontal mirror is the instructive middle case: the vertical seams vanish because left now equals right, but the horizontal ones remain, because nothing has made top equal bottom.</p>
+      <p class="demo-caption">Horizontal mirror is the middle case: the vertical seams vanish because left now equals right, but the horizontal ones remain, because nothing has made top equal bottom.</p>
     </div>
 
     <h2 id="why">Why mirroring works</h2>
 
-    <p>The usual way to make a texture tile is to generate something, notice the seam, then fix it. You offset the image by half its width and height. Then you clone and blur until the cross in the middle stops showing. It works, it is tedious, and it degrades the texture exactly where you touch it.</p>
+    <p>The usual way to make a texture tile is to generate something, notice the seam, then repair it. You offset the image by half its width and height. Then you clone and blur until the cross in the middle stops showing. It works. It is also tedious, and it degrades the texture where you touch it.</p>
 
-    <p>Mirroring makes the seam impossible instead of repairing it. Generate only the top-left quadrant, then mirror it across the vertical axis and the horizontal one. The last column is now a copy of the first, and the last row is a copy of the first. When two copies sit side by side, the pixels meeting at the boundary are identical by construction, so there is nothing to blend. The pattern reads as continuous because, across that edge, it is.</p>
+    <p>Mirroring makes the seam impossible instead. Three steps:</p>
 
-    <p>That is the whole mechanism, and it is why the middle option in the demo above only half works. Mirroring across one axis buys you seamlessness along one pair of edges. You need both.</p>
+    <ol>
+      <li>Generate only the <strong>top-left quadrant</strong>.</li>
+      <li>Mirror it across the <strong>vertical axis</strong>. The last column is now a copy of the first.</li>
+      <li>Mirror that across the <strong>horizontal axis</strong>. The last row is now a copy of the first.</li>
+    </ol>
+
+    <p>Set two copies side by side and the pixels meeting at the boundary are identical by construction. Nothing to blend. The pattern reads as continuous because across that edge it is.</p>
+
+    <p>That is also why the middle option in the demo only half works. Mirroring across one axis buys seamlessness along one pair of edges. You need both.</p>
 
     <div class="note">
-      <p>The cost is symmetry you can see. A mirrored tile is a mirrored tile, and at large sizes the eye finds the axis. It matters less than you would expect for a background texture at small scale. For a repeating pattern it does not matter at all, because the symmetry reads as part of the design.</p>
+      <p><strong>The cost is symmetry you can see.</strong> A mirrored tile is a mirrored tile, and at large sizes the eye finds the axis. It matters less than you would expect for a background texture at small scale. For a repeating pattern it does not matter at all, because the symmetry reads as part of the design.</p>
     </div>
 
     <h2 id="preset">What the Tile preset does</h2>
 
-    <p><strong>Tile</strong> is a Flield control, a dimension preset that sets all of this at once. It squares the canvas at 512 by 512, puts both layers on a 4-way mirror and turns the shape mask off. Then it locks the last two, so a randomize pass cannot undo them while you explore.</p>
+    <p><strong>Tile</strong> is a Flield dimension preset. It sets all of this at once:</p>
 
-    <p>The shape mask has to go because it breaks the edge equality the mirror just established. A centered circle, a vignette or a corner fade sits relative to the canvas. It is not generated as part of the pattern, so it does not repeat. Tile a vignette and you get a grid of dark blotches. Anything that treats the canvas as a frame rather than as a swatch is incompatible with tiling, and the preset resolves that by removing it.</p>
+    <ul>
+      <li>Squares the canvas at <strong>512 by 512</strong>.</li>
+      <li>Puts both layers on a <strong>4-way mirror</strong>.</li>
+      <li>Turns the <strong>shape mask off</strong>.</li>
+      <li><strong>Locks</strong> the last two, so a randomize pass cannot undo them while you explore.</li>
+    </ul>
 
-    <p>512 is not a device size. It is a round, highly divisible number for a texture swatch, which means common block sizes divide it evenly and no partial cell is left at an edge. A partial cell at the edge would reintroduce the seam by a different route.</p>
+    <h3>Why the shape mask has to go</h3>
+
+    <p>A mask breaks the edge equality the mirror just established. A centered circle, a vignette or a corner fade sits relative to the canvas. It is not generated as part of the pattern, so it does not repeat. Tile a vignette and you get a grid of dark blotches.</p>
+
+    <p>Anything that treats the canvas as a frame rather than as a swatch is incompatible with tiling. The preset resolves that by removing it.</p>
+
+    <h3>Why 512 pixels</h3>
+
+    <p>512 is not a device size. It is a round, highly divisible number for a texture swatch. Common block sizes divide it evenly, so no partial cell is left at an edge. A partial cell at the edge would bring the seam back by another route.</p>
 
     <h2 id="naming">Two different things both called Tile</h2>
 
     <p>Worth separating, because the names collide.</p>
 
-    <ul>
-      <li><strong>The Tile dimension preset</strong>, described above, makes the whole canvas into one swatch that repeats cleanly when you tile it yourself, in CSS or in a design tool.</li>
-      <li><strong>Tile symmetry</strong>, in each layer's symmetry menu, is a pattern mode: it generates one small region and repeats it three by three <em>inside</em> the canvas. The result is a grid you can see, contained in a single image.</li>
-    </ul>
+    <dl>
+      <dt>The Tile dimension preset</dt>
+      <dd>Described above. It makes the whole canvas into one swatch, and that swatch repeats cleanly when you tile it yourself in CSS or in a design tool.</dd>
+      <dt>Tile symmetry</dt>
+      <dd>A pattern mode, in each layer's symmetry menu. It generates one small region and repeats it three by three <em>inside</em> the canvas. The result is a grid you can see, held in a single image.</dd>
+    </dl>
 
-    <p>The preset is for producing a texture to repeat elsewhere. The symmetry mode is for making a repeated grid the visible subject. They are unrelated, and using the symmetry mode does not make your canvas tileable.</p>
+    <p>The preset is for producing a texture to repeat elsewhere. The symmetry mode is for making a repeated grid the visible subject. They are unrelated. Using the symmetry mode does not make your canvas tileable.</p>
 
-    <h2 id="colors">Doing it in your own colors</h2>
+    <h2 id="colors">Using your own brand colors</h2>
 
-    <p>This is where generating beats converting. Every other seamless-texture tool starts from an image you supply. So the palette is whatever the source photograph happened to contain, and matching a brand means editing toward it afterward.</p>
+    <p>This is where generating beats converting. Every other seamless-texture tool starts from an image you supply, so the palette is whatever the source photograph contained. Matching a brand means editing toward it afterward.</p>
 
-    <p>There is no source image here. The three colors are parameters, so a brand palette goes in directly and every tile that comes out is already correct. Set the hue, saturation and lightness ranges under <span class="ui-ref">Palette Range</span>. Lock the colors and let everything else reroll. You get an endless run of different tiles that are all on-brand, instead of one tile you have to recolor afterwards.</p>
+    <p>There is no source image here. The three colors are parameters, so a brand palette goes in directly and every tile comes out already correct.</p>
 
-    <h2 id="use">Using the result</h2>
+    <ol>
+      <li>Set the hue, saturation and lightness ranges under <span class="ui-ref">Palette Range</span>.</li>
+      <li>Lock the colors.</li>
+      <li>Let everything else reroll.</li>
+    </ol>
+
+    <p>The result is an endless run of different tiles, all on-brand, rather than one tile you have to recolor.</p>
+
+    <h2 id="use">Using the tile on a page</h2>
 
     <p>Export a PNG or an SVG at the Tile preset, then repeat it the ordinary way:</p>
 
@@ -192,11 +230,17 @@
   background-size: 256px 256px;
 }</code></pre>
 
-    <p>SVG is usually the better export for this. The output is rectangles rather than pixels, so it scales to any size without softening. The files stay small too, because the format stores the shapes instead of every cell.</p>
+    <h3>Export SVG rather than PNG</h3>
 
-    <p>A tile can also move. The mirroring holds while a <a href="../flow-fields/">flow field</a> animates underneath it. So a tiled background can drift or breathe and the repeat still never shows. The <a href="../guide/">guide</a> covers that under Motion, and <a href="../animated-backgrounds/">looping animated backgrounds</a> covers how the loop closes.</p>
+    <p>The output is rectangles rather than pixels, so it scales to any size without softening. The files stay small too, because the format stores shapes instead of every cell.</p>
 
-    <p>The texture inside a tile is yours to pick as well. Each layer draws its field one of six ways. Soft bands, cloudy filaments, marbled swirls, contour lines, fine strands or a woven mesh. They all tile the same way, so the seam is safe whichever you choose. <a href="../flow-fields/">The flow field explainer</a> shows all six.</p>
+    <h3>A tile can also move</h3>
+
+    <p>The mirroring holds while a <a href="../flow-fields/">flow field</a> animates underneath it. A tiled background can drift or breathe and the repeat still never shows. The <a href="../guide/">guide</a> covers that under Motion. <a href="../animated-backgrounds/">Looping animated backgrounds</a> covers how the loop closes.</p>
+
+    <h3>Any of the six textures still tiles</h3>
+
+    <p>Each layer draws its field one of six ways: soft bands, cloudy filaments, marbled swirls, contour lines, fine strands or a woven mesh. The seam is safe whichever you pick. <a href="../flow-fields/">The flow field explainer</a> shows all six.</p>
 
     <h2 id="try">Try it</h2>
 
