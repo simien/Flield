@@ -65,17 +65,17 @@ The same trap with a different shape: `#playBtn.playing` is an ID selector at
 (1,1,0) and outranks `button.secondary:hover` at (0,3,1). Filled states that
 need a hover must say so explicitly.
 
-## The two themes swap a pair of greys, and contrast does not swap with them
+## The two themes swap a pair of grays, and contrast does not swap with them
 
 `--text-muted` and `--text-subtle` traded values between the themes,
 Zinc 500 one way and Zinc 400 the other. It reads as symmetry and is
-not: the same grey measures very differently against near-black and
+not: the same gray measures very differently against near-black and
 near-white. On the document pages that left body text at 4.40:1 in
 light, under AA's 4.5, and the quieter roles (`.meta`, figcaptions, the
 footer, the header's page name) at 4.12:1 in dark and 2.33:1 in light.
 
 `style.css` had already found this and written it down beside
-`.section-title`: no single grey fixes it, because the two themes want
+`.section-title`: no single gray fixes it, because the two themes want
 it moved in opposite directions. Its answer there was to reach for
 `--text` instead, which body copy cannot do. So each theme names its own
 pair now rather than trading one, landing near 7:1 for body text and 5:1
@@ -84,7 +84,7 @@ step on it lands in range for the theme that needs it.
 
 That makes those two tokens the one place `guide.css` deliberately
 differs from the `style.css` block it otherwise copies, and its own
-comment says so. Don't close the gap by copying the app's greys back
+comment says so. Don't close the gap by copying the app's grays back
 over. The app puts muted text on a `--panel` that is pure white in
 light; a document page puts it on `--bg` at `#f4f4f5`, and that
 difference is the whole margin. The app measures 4.83:1 and 6.91:1 as it
@@ -405,7 +405,7 @@ motions joined the tail).
 
 The escape hatch is `COMPACT_VERSION`. Bumping it says the break is
 deliberate, and both checks stand down: the decoder refuses a version it
-doesn't recognise, so old links stop opening rather than opening the
+doesn't recognize, so old links stop opening rather than opening the
 wrong picture.
 
 Changing what a field *means* rather than where it sits is still

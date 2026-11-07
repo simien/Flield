@@ -2795,7 +2795,7 @@
         cols: lastResult.cols,
         rows: lastResult.rows,
         // Provenance, not a watermark: nothing is drawn, and an SVG that
-        // gets optimised on its way somewhere loses it without harm. What
+        // gets optimized on its way somewhere loses it without harm. What
         // it buys is a file you can reopen a year later. Always the plain
         // still link, whatever the share menu is set to.
         source: stateUrl(snapshotForSharing()),
@@ -3277,7 +3277,7 @@
     // Everything that reaches here is the user reaching for a control:
     // randomize passes and snapshot loads assign to .value directly and
     // never dispatch, and the one place this file does dispatch is the
-    // colour popover relaying a drag to its native input, which is a
+    // color popover relaying a drag to its native input, which is a
     // real interaction and should count. Hence no isTrusted test, which
     // would have thrown that one case away.
     function rememberTouchedField(e) {
@@ -3788,7 +3788,7 @@
     // just encoded into a URL instead of localStorage.
     //
     // A link is a bit stream rather than JSON. Every value the UI can
-    // hold is a colour, a menu choice, or a number on a known step and
+    // hold is a color, a menu choice, or a number on a known step and
     // range, so each takes exactly the bits its range needs (hue 9,
     // symmetry 3, octaves 2), written end to end with nothing in
     // between, then base64url'd. That is 78 characters where base64'd

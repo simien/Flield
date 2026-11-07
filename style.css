@@ -195,12 +195,12 @@ input[type="range"]:focus-visible {
   --footer-inset: 20px;
   /* The footer's own footprint off the bottom edge: its 32px line plus
      the inset under it. The artboard stops here rather than running
-     underneath, which is what lets it centre in the space it actually
+     underneath, which is what lets it center in the space it actually
      occupies. Anything else pinned to that edge adds to it. */
   --footer-strip: calc(32px + var(--footer-inset));
   /* Now just the artboard's own margin, top and bottom alike. It used
      to carry the footer's height as well, on both ends, so that the
-     artwork stayed centred on the full window: the cost was a gap above
+     artwork stayed centered on the full window: the cost was a gap above
      the artwork the size of a footer and a gap below it the size of a
      margin, which read as the artwork sitting low. Dropped to a plain
      inset here and set to a tighter one while a sheet is up. */
@@ -475,7 +475,7 @@ input[type="range"]:focus-visible {
      that offset to the container's edge, which is half the artboard:
      anything longer than that wrapped early and looked clipped. Both
      offsets plus auto margins give it the full width to size against
-     and still centre it. */
+     and still center it. */
   left: var(--artboard-pad);
   right: var(--artboard-pad);
   width: fit-content;
@@ -962,7 +962,7 @@ input[type="range"]:focus-visible {
      while, which inverted the hierarchy, a section reading quieter than
      the fields inside it. Going the other way instead, to
      --text-subtle, measures 3.7:1 and 2.4:1, both under AA, and no
-     single grey fixes that because the two themes want it moved in
+     single gray fixes that because the two themes want it moved in
      opposite directions. */
   color: var(--text);
   /* Further from what came before than from what it heads. */
@@ -1088,7 +1088,7 @@ input[type="range"]:focus-visible {
   margin-bottom: var(--space-2);
   /* Between the section title above and the description below, which is
      where a setting's name belongs. The description could not be dimmed
-     to open that gap: on the light panel the muted grey it uses already
+     to open that gap: on the light panel the muted gray it uses already
      measures 4.5:1, with nothing under it that still reads. Lifting
      this instead opens the same gap and gains contrast rather than
      spending it. */
@@ -1692,7 +1692,7 @@ button.secondary:hover:not(:disabled) {
    canvas itself sits at this box's top-left corner and is centered by
    a transform (see #preview below), not by flex. */
 /* Ends at the top of the footer, not at the bottom of the window, so
-   the artwork centres between the top edge and that strip and the gap
+   the artwork centers between the top edge and that strip and the gap
    above it matches the gap below. --action-bar-h is 0 above the sheet
    breakpoint, so this one line covers both layouts. */
 .canvas-area {
