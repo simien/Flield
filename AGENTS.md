@@ -31,6 +31,13 @@ a stale stylesheet; a bump on four pages and not the fifth is how `404.html`
 served an older `guide.css` than the guide did; a needless bump throws away
 every visitor's cache for nothing. CI checks all three.
 
+A missed bump that already reached main is fixed by a follow-up commit
+that bumps the number alone. CI allows it because the file changed after
+its current number was set (`stale_on_base` in `checks.py`). Don't amend
+and force-push to main to fix one. The same follow-up must move
+`sitemap.xml`'s `lastmod` for every page it touches, including pages
+whose only change is the new `?v=`.
+
 ## A new motion or texture leaves counts behind in the prose
 
 Ripple and Tide took the motion count from four to six, and eight places

@@ -137,6 +137,31 @@ def asset_versions(text_for):
     return found
 
 
+def stale_on_base(asset, files, was, base):
+    """True when the asset changed on base after its ?v=was was first set.
+
+    A push that changed a file without bumping it fails here, but once it is
+    on main the follow-up that bumps it changes no asset file, so it would
+    read as a needless bump and fail too. Only a force-push could pass, which
+    is the wrong fix. The first commit to request ?v=was is where that number
+    was set; numbers only rise, so the earliest is the right one. If the asset
+    changed after it, the bump was owed and this push pays it.
+    """
+    name = r"screenshot[^?\"' ]*" if asset == "screenshot" else re.escape(asset)
+    set_at = subprocess.run(
+        ["git", "log", "--reverse", "--format=%H", "-G", rf"{name}\?v={was}\b",
+         base, "--", *VERSIONED],
+        cwd=ROOT, text=True, capture_output=True,
+    ).stdout.split()
+    if not set_at:
+        return False
+    since = subprocess.run(
+        ["git", "diff", "--name-only", f"{set_at[0]}..{base}", "--", *sorted(files)],
+        cwd=ROOT, text=True, capture_output=True,
+    ).stdout.split()
+    return bool(since)
+
+
 def check_cache_bust(base):
     now = asset_versions(read)
     # Needs no base: one file, one number, wherever it is requested from.
@@ -191,6 +216,8 @@ def check_cache_bust(base):
                 fail("cache bust", f"{asset} changed but its ?v= is still {is_now}")
             else:
                 notes.append(f"cache bust: {asset} {was} -> {is_now}")
+        elif was != is_now and stale_on_base(asset, files, was, base):
+            notes.append(f"cache bust: {asset} {was} -> {is_now}, catching up a missed bump")
         elif was != is_now:
             fail(
                 "cache bust",
