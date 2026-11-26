@@ -3488,7 +3488,21 @@
       );
     }
 
+    // A closed sheet is only translated out of sight, so without this
+    // Tab walks every control in it below the bar. The tour makes the
+    // whole page inert while it is up and hands the sheet back here when
+    // it closes, so a breakpoint crossed under the tour still settles.
+    function syncSheetInert() {
+      const closedSheet = narrowLayout.matches && !document.body.classList.contains("sidebar-open");
+      controls.inert = closedSheet || !document.getElementById("tutorialModal").hidden;
+    }
+
     function setSidebarOpen(open) {
+      // Closing from inside the sheet would leave focus on a control that
+      // is about to go inert, or out on the strip; the button for the
+      // panel that was up takes it instead.
+      const panel = sheetShowing();
+      const focusInside = !open && controls.contains(document.activeElement);
       document.body.classList.toggle("sidebar-open", open);
       if (!open) document.body.classList.remove("sheet-tall");
       // The held control and the sheet are never up together: the sheet
@@ -3497,6 +3511,8 @@
       if (open) returnLastField();
       else showLastField();
       syncSheetButtons();
+      syncSheetInert();
+      if (focusInside && narrowLayout.matches) (panel === "export" ? barExportBtn : sidebarToggle).focus();
     }
 
     // Tapping a panel's own button while it's up closes the sheet;
@@ -3654,7 +3670,11 @@
     }).observe(lastControl);
 
     syncActionBar();
-    narrowLayout.addEventListener("change", syncActionBar);
+    syncSheetInert();
+    narrowLayout.addEventListener("change", () => {
+      syncActionBar();
+      syncSheetInert();
+    });
 
     // Drag the handle, the gesture the shape already promises. The sheet
     // opens at the height that keeps the whole canvas on screen; drag up
@@ -4065,6 +4085,7 @@
       tutorialNextBtnWide.hidden = true;
       tutorialInerted.forEach((el) => { el.inert = false; });
       tutorialInerted = [];
+      syncSheetInert();
       stopTutorialDemo();
       stopTutorialAnimate();
       // Back to whatever opened it. The tour chip hides itself on the way
