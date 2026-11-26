@@ -218,6 +218,12 @@ delegation if an element can gain or lose its trigger attribute at runtime
 (the hold-to-confirm guard does this, because a save button gains `data-hold`
 only once its slot is occupied).
 
+The other half of the trap is anything that finds fields by where they
+sit. A field out on the strip is not inside its tab panel, so
+`#tab-layerA .lock-btn` comes up one short while it is there, which is
+how a tab came to say "11 of 10 fields locked". Count and look up by id
+(`btn.dataset.targetId`), which travels with the element.
+
 CI checks for duplicate ids, which is the failure this pattern risks.
 
 ## Six textures share one field and five controls

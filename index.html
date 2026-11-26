@@ -1167,16 +1167,22 @@
     // this, Lock All on the General tab left no visible trace that
     // Layer A and B had changed too). General's lock ids are bare
     // ("bgColor"); a layer's are prefixed ("layerA-seed").
+    //
+    // A tab's total is counted the same way as its locked fields, from
+    // the ids, not from what its panel holds at the moment. On a phone a
+    // field pinned to the strip above the bar has left its panel, and a
+    // total counted there came up one short: "11 of 10 fields locked",
+    // and a padlock that never filled in.
     function updateLockCounts() {
+      const tabOf = (id) => (id.startsWith("layerA-") ? "layerA" : id.startsWith("layerB-") ? "layerB" : "general");
       const counts = { general: 0, layerA: 0, layerB: 0 };
-      lockedFields.forEach((id) => {
-        const tab = id.startsWith("layerA-") ? "layerA" : id.startsWith("layerB-") ? "layerB" : "general";
-        counts[tab] += 1;
-      });
+      const totals = { general: 0, layerA: 0, layerB: 0 };
+      lockedFields.forEach((id) => { counts[tabOf(id)] += 1; });
+      document.querySelectorAll(".lock-btn").forEach((btn) => { totals[tabOf(btn.dataset.targetId || "")] += 1; });
       document.querySelectorAll(".tab-btn").forEach((btn) => {
         const tab = btn.dataset.tab;
         const n = counts[tab] || 0;
-        const total = document.querySelectorAll(`#tab-${tab} .lock-btn`).length;
+        const total = totals[tab] || 0;
         // A single glyph rather than a number, which didn't fit beside
         // "Layer A" in an 80px segment: outline padlock when some of
         // the tab's fields are locked, solid when all of them are. The
