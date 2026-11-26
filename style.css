@@ -984,6 +984,10 @@ input[type="range"]:focus-visible {
 
 .section-title::after {
   content: "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░";
+  /* Decoration, so its alt text is empty: without it each heading's
+     accessible name carried all 140 glyphs. A browser that doesn't know
+     the "/ alt" form drops this second declaration and keeps the first. */
+  content: "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░" / "";
   flex: 1;
   overflow: hidden;
   color: var(--border-strong);
