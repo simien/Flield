@@ -95,8 +95,12 @@ differs from the `style.css` block it otherwise copies, and its own
 comment says so. Don't close the gap by copying the app's grays back
 over. The app puts muted text on a `--panel` that is pure white in
 light; a document page puts it on `--bg` at `#f4f4f5`, and that
-difference is the whole margin. The app measures 4.83:1 and 6.91:1 as it
-stands and wants nothing.
+difference is the whole margin. The app measures 4.83:1 and 6.91:1 on
+its panels and wants nothing there. Two of its roles sit on the page
+ground instead, the inactive tabs and the footer, and measured 4.40:1
+in light; those read `--text-on-bg`, which is `--text-muted` in dark and
+the guide's quiet gray in light. Anything new set on `--bg` rather than
+a panel wants the same token.
 
 Two ways a measurement lies here:
 

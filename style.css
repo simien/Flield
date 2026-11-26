@@ -72,6 +72,10 @@
   --text-heading: #d4d4d8;
   --text-muted: #a1a1aa;
   --text-subtle: #71717a;
+  /* Muted text set straight on the page ground (--bg, or the tab
+     track's --muted, the same gray in light) rather than on a panel.
+     The same as --text-muted in dark; light names its own below. */
+  --text-on-bg: var(--text-muted);
   /* Primary is the foreground inverted onto the surface (white on dark,
      near-black on light), the way a neutral shadcn theme does it, so
      the one primary action, a locked field, an active segment, all read
@@ -118,6 +122,10 @@
   --text-heading: #3f3f46;
   --text-muted: #71717a;
   --text-subtle: #a1a1aa;
+  /* Muted on #f4f4f5 is 4.40:1, under the 4.5 small text needs, where
+     on the white panel it is 4.83. This is the guide's quiet gray, the
+     same fix for the same ground: 5.03:1. */
+  --text-on-bg: #68686f;
   --primary: #18181b;
   --primary-fg: #fafafa;
   --ring: #a1a1aa;
@@ -218,7 +226,8 @@ input[type="range"]:focus-visible {
   font-size: inherit;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--text-muted);
+  /* It opens the footer strip, on the page ground like the rest of it. */
+  color: var(--text-on-bg);
 }
 
 .brand a {
@@ -892,7 +901,7 @@ input[type="range"]:focus-visible {
      grows a second row. */
   white-space: nowrap;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--text-on-bg);
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   font-size: 12px;
@@ -1938,10 +1947,11 @@ button.secondary:hover:not(:disabled) {
   margin-bottom: var(--footer-inset);
   padding: 0 var(--artboard-pad);
   font-size: 11px;
-  /* --text-muted, not --text-subtle: at 11px this is small text, and
-     subtle on the dark ground is 4.1:1, under the 4.5:1 small text
-     needs. Muted is 7.7:1 there and 4.46:1 on the light ground. */
-  color: var(--text-muted);
+  /* Muted, not subtle: at 11px this is small text, and subtle on the
+     dark ground is 4.1:1, under the 4.5:1 small text needs. Muted is
+     7.76:1 there but 4.40:1 on the light ground, which is what
+     --text-on-bg is for: 5.03:1 in light. */
+  color: var(--text-on-bg);
   transition: color 0.15s ease;
 }
 
