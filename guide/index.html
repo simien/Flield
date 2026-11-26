@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Above the theme script below, which sets it for the light theme;
+       each page's applyTheme keeps it in step with the toggle. -->
+  <meta name="theme-color" content="#09090b" />
   <!-- Same contract as the app's head script: dark is the default, and
        light applies only for a visitor who has toggled it there before,
        read from the same flield-theme key so a theme choice carries
@@ -11,6 +14,7 @@
     try {
       if (localStorage.getItem("flield-theme") === "light") {
         document.documentElement.setAttribute("data-theme", "light");
+        document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f4f4f5");
       }
     } catch (err) {
       // localStorage can be unavailable (private browsing, blocked); dark stays the default.
@@ -36,7 +40,6 @@
   <meta name="twitter:title" content="Flield Guide: looping motion, tiling, and locks" />
   <meta name="twitter:description" content="How to steer Flield: set a motion that loops with no cut, tile without a visible seam, lock the fields you want to keep, and narrow a palette or density range." />
   <meta name="twitter:image" content="https://flield.com/screenshot.png?v=8" />
-  <meta name="theme-color" content="#09090b" />
 
   <!-- TechArticle rather than HowTo: this page documents the tool as a
        whole, and it's one of the types Google still supports, where HowTo
@@ -567,6 +570,8 @@
       } else {
         document.documentElement.removeAttribute("data-theme");
       }
+      // The browser chrome follows the page ground: --bg in each theme.
+      document.querySelector('meta[name="theme-color"]').setAttribute("content", isLight ? "#f4f4f5" : "#09090b");
       themeToggleBtn.innerHTML = iconSvg(isLight ? "moon" : "sun");
       themeToggleBtn.title = isLight ? "Switch to dark theme" : "Switch to light theme";
     }

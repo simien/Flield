@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <!-- Above the theme script below, which sets it for the light theme;
+       each page's applyTheme keeps it in step with the toggle. -->
+  <meta name="theme-color" content="#09090b" />
   <!-- Dark is the default theme regardless of the system's own setting;
        this only ever adds data-theme="light" for a visitor who's
        explicitly toggled it before, and runs before the stylesheet
@@ -11,6 +14,7 @@
     try {
       if (localStorage.getItem("flield-theme") === "light") {
         document.documentElement.setAttribute("data-theme", "light");
+        document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f4f4f5");
       }
     } catch (err) {
       // localStorage can be unavailable (private browsing, blocked); dark stays the default.
@@ -55,7 +59,6 @@
   <meta name="twitter:description" content="Generate seamless animated backgrounds in your brand colors. Seeded three-color pixel art from flow fields and symmetry, looping with no cut. GIF, SVG, PNG." />
   <meta name="twitter:image" content="https://flield.com/screenshot.png?v=8" />
   <meta name="twitter:image:alt" content="A generated three-color composition in Flield" />
-  <meta name="theme-color" content="#09090b" />
 
   <script type="application/ld+json">
   {
@@ -1107,6 +1110,8 @@
       } else {
         document.documentElement.removeAttribute("data-theme");
       }
+      // The browser chrome follows the page ground: --bg in each theme.
+      document.querySelector('meta[name="theme-color"]').setAttribute("content", isLight ? "#f4f4f5" : "#09090b");
       themeToggleBtn.innerHTML = iconTag(isLight ? "moon" : "sun");
       themeToggleBtn.title = isLight ? "Switch to dark theme" : "Switch to light theme";
     }

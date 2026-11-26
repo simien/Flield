@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Above the theme script below, which sets it for the light theme;
+       each page's applyTheme keeps it in step with the toggle. -->
+  <meta name="theme-color" content="#09090b" />
   <!-- Same contract as the app and the guide: dark by default, light only
        for a visitor who has toggled it, read from the shared flield-theme
        key so the choice carries across pages without a flash. -->
@@ -10,6 +13,7 @@
     try {
       if (localStorage.getItem("flield-theme") === "light") {
         document.documentElement.setAttribute("data-theme", "light");
+        document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f4f4f5");
       }
     } catch (err) {
       // localStorage can be unavailable (private browsing, blocked); dark stays the default.
@@ -35,7 +39,6 @@
   <meta name="twitter:title" content="What is a flow field? A visual explanation, with live examples" />
   <meta name="twitter:description" content="A flow field is a grid of directions. What the field is, where the numbers come from, and six different things you can draw from them, with live demos." />
   <meta name="twitter:image" content="https://flield.com/screenshot.png?v=8" />
-  <meta name="theme-color" content="#09090b" />
 
   <!-- TechArticle, matching the guide's type, with the same about/@id
        pointing at the app node so a crawler reads one entity across the
@@ -355,6 +358,8 @@ grid[y][x] = rand() &lt; p;</code></pre>
       } else {
         document.documentElement.removeAttribute("data-theme");
       }
+      // The browser chrome follows the page ground: --bg in each theme.
+      document.querySelector('meta[name="theme-color"]').setAttribute("content", isLight ? "#f4f4f5" : "#09090b");
       themeToggleBtn.innerHTML = iconSvg(isLight ? "moon" : "sun");
       themeToggleBtn.title = isLight ? "Switch to dark theme" : "Switch to light theme";
       // The demos paint their own background color, so they need a repaint

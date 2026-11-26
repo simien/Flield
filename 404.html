@@ -3,12 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Above the theme script below, which sets it for the light theme;
+       each page's applyTheme keeps it in step with the toggle. -->
+  <meta name="theme-color" content="#09090b" />
   <!-- Same contract as every other page: dark by default, light only
        for a visitor who has toggled it before. -->
   <script>
     try {
       if (localStorage.getItem("flield-theme") === "light") {
         document.documentElement.setAttribute("data-theme", "light");
+        document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f4f4f5");
       }
     } catch (err) {
       // localStorage can be unavailable (private browsing, blocked); dark stays the default.
@@ -19,7 +23,6 @@
        served for. There is deliberately no canonical here either: this
        page stands in for many URLs rather than being one of its own. -->
   <meta name="robots" content="noindex, follow" />
-  <meta name="theme-color" content="#09090b" />
   <!-- Root-relative throughout, not "../": this one file answers for any
        path that misses, at any depth. -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
