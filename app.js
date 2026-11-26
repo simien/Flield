@@ -1767,6 +1767,10 @@
     // Save-state slots: each stores snapshotForSharing(), the same
     // snapshot a link carries (canvas settings, both layers, the lock set
     // and the motion), in localStorage so slots survive a page reload.
+    // The prefix is a name from before the project's first commit (the
+    // other keys say flield-), and it stays: every slot anyone has saved
+    // is stored under it, so a rename alone would empty them all. A new
+    // name needs a one-time copy of the three old keys on load first.
     const PRESET_KEY_PREFIX = "featuregen-preset-";
 
     // Every slot read and write goes through here. With site data
