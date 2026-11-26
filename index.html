@@ -194,7 +194,7 @@
        returning visitor's cached copy silently goes stale. The third,
        gif-writer.js, is asked for by the script on the first GIF export
        (see loadGifWriter) and carries its number there. -->
-  <link rel="stylesheet" href="style.css?v=119" />
+  <link rel="stylesheet" href="style.css?v=120" />
   <!-- generator.js is requested at the end of the body, which is where
        it has to run, but the preload scanner only finds it once that
        end of a 200KB document has arrived. This starts the fetch
@@ -956,6 +956,11 @@
           </select>
         </div>
       </div>
+      <!-- The two menus above show only a caret, and a tooltip never
+           appears on a touch device, so their values are written out
+           here. Hidden from screen readers, which announce each
+           select's value already. -->
+      <p class="hint export-summary" id="exportSummary" aria-hidden="true"></p>
     </div>
   </div>
 
@@ -2944,6 +2949,15 @@
     syncSelectTitle(linkModeSelect, "What the link offers when opened");
     linkModeSelect.addEventListener("change", () => syncSelectTitle(linkModeSelect, "What the link offers when opened"));
     gifStepsSelect.addEventListener("change", () => syncSelectTitle(gifStepsSelect, GIF_MENU_TITLE));
+    // The titles reach a mouse only; this line reaches a phone too.
+    const exportSummary = document.getElementById("exportSummary");
+    const chosen = (select) => select.options[select.selectedIndex].text;
+    function syncExportSummary() {
+      exportSummary.textContent = `GIF: ${chosen(gifStepsSelect)}. Link: ${chosen(linkModeSelect).toLowerCase()}.`;
+    }
+    syncExportSummary();
+    linkModeSelect.addEventListener("change", syncExportSummary);
+    gifStepsSelect.addEventListener("change", syncExportSummary);
 
     // Motion is the only one of the three that changes what's on screen
     // the moment it's set, so it's the one that says so.

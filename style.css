@@ -2151,6 +2151,12 @@ button.secondary {
   margin-bottom: 12px;
 }
 
+/* The export menus' values, written out under the buttons. The footer
+   ends here, so no margin below. */
+.export-summary {
+  margin-bottom: 0;
+}
+
 /* A description belongs to the setting above it, so it sits between the
    title and the control rather than below the whole thing, where it read
    as a caption on the control before it and a preamble to the next one
