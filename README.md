@@ -116,7 +116,7 @@ walkthrough is built into the app, behind the **?** button.
 
 ### Exporting and sharing
 
-- PNG, SVG, or animated GIF, capped at 240 frames so a long export trades smoothness rather than size
+- PNG, SVG, or animated GIF of up to 240 frames, fewer on a larger canvas, so a long export trades smoothness rather than size
 - An SVG carries a link back to its own composition, so a file found later reopens in the editor
 - Copy Link packs the whole composition, locks and motion included, into a URL of about a hundred characters
 - Three browser save slots, each showing its three colors and when it was saved
@@ -128,7 +128,7 @@ walkthrough is built into the app, behind the **?** button.
 - Keyboard shortcuts for the exploration loop: `R`, `Space`, `Cmd/Ctrl+Z`
 - Dark by default, light on a toggle, remembered across visits
 - A favicon regenerated on each load in the same three colors as the canvas
-- No dependencies: no library, no CDN, no build step, and it keeps working offline
+- No dependencies: no library, no build step, and it keeps working offline. The one outside request is Cloudflare's analytics beacon, which nothing in the app waits on
 
 ## Further reading
 
@@ -197,4 +197,31 @@ a paid product or service needs a separate commercial license, so open a
 **The images you make with it are yours.** Use them anywhere, commercially
 included, with no attribution required. The license covers this repository's
 source code, not the artwork the tool produces.
+
+**The icons** are path data from [Phosphor Icons](https://github.com/phosphor-icons/core),
+inlined in the pages' scripts, under Phosphor's MIT license:
+
+```text
+MIT License
+
+Copyright (c) 2023 Phosphor Icons
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
 
