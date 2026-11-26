@@ -2942,14 +2942,34 @@
     // started: a motion held still (for reduced motion, behind the play
     // offer, on a canvas too slow to play) was being set going by the
     // export, which nobody asked of a download button.
+    //
+    // Every file leaves through saveBlob. The address is given back a
+    // second later, not on the next line: the click only starts the
+    // download, and a browser that has not opened the blob yet finds
+    // it gone.
+    function saveBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = url;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    // toBlob, not toDataURL: a data URL is the whole file as base64 in
+    // a string, built while the page waits, and at the largest canvas
+    // that is tens of megabytes in an href. The blob is encoded off the
+    // main thread. The preview is picked up once the file is in hand,
+    // so nothing draws over the still while it is being read.
     document.getElementById("downloadPng").addEventListener("click", () => {
       const wasPreviewing = seamlessPreview.active;
       stopSeamlessPreview();
-      const link = document.createElement("a");
-      link.download = `${lastOptions.layerA.seed}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-      if (wasPreviewing) syncSeamlessPreview();
+      const filename = `${lastOptions.layerA.seed}.png`;
+      canvas.toBlob((blob) => {
+        if (blob) saveBlob(blob, filename);
+        else showToast("Couldn't make the PNG");
+        if (wasPreviewing) syncSeamlessPreview();
+      }, "image/png");
     });
 
     document.getElementById("downloadSvg").addEventListener("click", () => {
@@ -2972,14 +2992,8 @@
         // still link, whatever the share menu is set to.
         source: stateUrl(snapshotForSharing()),
       });
-      const blob = new Blob([svg], { type: "image/svg+xml" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.download = `${lastOptions.layerA.seed}.svg`;
-      link.href = url;
-      link.click();
+      saveBlob(new Blob([svg], { type: "image/svg+xml" }), `${lastOptions.layerA.seed}.svg`);
       if (wasPreviewing) syncSeamlessPreview();
-      URL.revokeObjectURL(url);
     });
 
     // The GIF encoder is only needed by the export below, which most
@@ -3024,14 +3038,7 @@
     const stillExportBtns = [document.getElementById("downloadPng"), document.getElementById("downloadSvg")];
 
     function saveGif(writer, name) {
-      const url = URL.createObjectURL(new Blob(writer.finish(), { type: "image/gif" }));
-      const link = document.createElement("a");
-      link.download = `${name}.gif`;
-      link.href = url;
-      link.click();
-      // Not on the next line: the click only starts the download, and a
-      // browser that has not opened the blob yet finds it gone.
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      saveBlob(new Blob(writer.finish(), { type: "image/gif" }), `${name}.gif`);
     }
 
     downloadGifBtn.addEventListener("click", async () => {
