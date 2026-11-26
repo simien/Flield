@@ -21,8 +21,8 @@ to merge.
   node, which it can only do while nothing in it touches the DOM. The same
   goes for `gif-writer.js`, the GIF encoder: it takes pixel arrays and
   returns bytes, and `checks.py` reads its output back with a second decoder.
-- **The site is six pages**: the app (`index.html`, `core.js`, `app.js` and
-  `style.css`), the guide (`guide/index.html`), three explainers
+- **The site is six pages**: the app (`index.html`, `style.css`, and the
+  scripts `checks.py` lists as `SCRIPTS`), the guide (`guide/index.html`), three explainers
   (`flow-fields/`, `seamless-backgrounds/`, `animated-backgrounds/`), and
   `404.html`. Every page but the app shares
   `guide.css`. The app does not, because `style.css` gives `body` a fixed,

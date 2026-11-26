@@ -12,7 +12,10 @@ on:
       - style.css
       - generator.js
       - core.js
+      - hold.js
       - app.js
+      - picker.js
+      - tutorial.js
       - guide/index.html
       - guide.css
       - flow-fields/index.html

@@ -46,10 +46,12 @@ def read(rel):
 # A SyntaxError anywhere in the inline script kills the whole file, and the
 # page still serves 200 with a dead UI. This has happened: a second `const
 # controlsBody` took the entire app down with nothing but a console line.
-# The app's script moved out to core.js and app.js, where the same
-# SyntaxError does the same damage, so both are parsed alongside the inline
+# The app's script moved out to files of its own (SCRIPTS), where the same
+# SyntaxError does the same damage, so they are parsed alongside the inline
 # blocks.
-SCRIPTS = ["core.js", "app.js"]
+# The app's own scripts, in the order index.html loads them. Every list
+# below that needs them reads this one.
+SCRIPTS = ["core.js", "hold.js", "app.js", "picker.js", "tutorial.js"]
 
 
 def check_inline_js():
@@ -123,25 +125,28 @@ def check_anchors():
 
 # 5. Cache busting -------------------------------------------------------
 # Every page asks for the project's own evolving files with a ?v= query:
-# style.css, generator.js, core.js and app.js from the app, guide.css and generator.js from
-# the document pages, and the screenshot from all of them plus the README.
-# gif-writer.js is asked for by app.js rather than by markup, on the first
-# GIF export, and is held to the same rule, so app.js is read for numbers
-# as the pages are.
+# style.css, generator.js and the SCRIPTS from the app, guide.css and
+# generator.js from the document pages, and the screenshot from all of them
+# plus the README. gif-writer.js is asked for by app.js rather than by
+# markup, on the first GIF export, and is held to the same rule, so the
+# SCRIPTS are read for numbers as the pages are.
 # Forgetting to bump is invisible locally and serves a returning visitor a
 # stale copy; bumping one page and not another is how 404.html served an
 # older guide.css than the guide did; bumping without a change throws away
 # every visitor's cache for nothing. All three are caught here.
-ASSET_REF = re.compile(r"\b(style\.css|generator\.js|core\.js|app\.js|gif-writer\.js|guide\.css|screenshot(?:-\d+)?\.(?:png|webp))\?v=(\d+)")
-VERSIONED = PAGES + ["app.js", "README.md"]
+ASSET_REF = re.compile(
+    r"\b(style\.css|generator\.js|"
+    + "|".join(re.escape(rel) for rel in SCRIPTS)
+    + r"|gif-writer\.js|guide\.css|screenshot(?:-\d+)?\.(?:png|webp))\?v=(\d+)"
+)
+VERSIONED = PAGES + SCRIPTS + ["README.md"]
 # The files behind each versioned name. The screenshot's png and its webp
 # copies are cut from one capture and share one number, so they count as
 # one asset.
 ASSET_FILES = {
     "style.css": {"style.css"},
     "generator.js": {"generator.js"},
-    "core.js": {"core.js"},
-    "app.js": {"app.js"},
+    **{rel: {rel} for rel in SCRIPTS},
     "gif-writer.js": {"gif-writer.js"},
     "guide.css": {"guide.css"},
     "screenshot": {"screenshot.png", "screenshot.webp", "screenshot-800.webp"},

@@ -21,8 +21,8 @@ after committing, not before.
 ## Cache busting is load-bearing
 
 Every page requests the project's own evolving files with a `?v=N` query:
-`style.css`, `generator.js`, `core.js` and `app.js` from the app,
-`guide.css` from the guide, the explainers and `404.html`, `generator.js`
+`style.css`, `generator.js` and the app's own scripts (`SCRIPTS` in
+`checks.py`) from the app, `guide.css` from the guide, the explainers and `404.html`, `generator.js`
 again from the explainers, `gif-writer.js` from `app.js` on the first GIF
 export (the number is in `loadGifWriter`, not in the markup), and `screenshot.png` (with its two
 `.webp` copies, on one number) from every page plus the README. Bump the
@@ -205,8 +205,15 @@ cuts and the color conversions, as one `FlieldCore` object that `app.js`
 destructures at its top. Like `generator.js` it stands alone, so node runs
 it: `.github/scripts/core.test.js` does, from `checks.py`. Where a piece
 needs the page (a menu's option order, a slider's bounds, the canvas size),
-`app.js` reads it and passes it in; see `linkPage`. Two consequences of the
-one scope:
+`app.js` reads it and passes it in; see `linkPage`. Three widgets were
+carved out the same way, verbatim: `hold.js` (hold-to-confirm) loads ahead
+of `app.js` because it needs nothing from it, and `picker.js` (the color
+picker) and `tutorial.js` (the tour) load after it because they start by
+calling into it. A name one file reads while it loads must be declared in
+a file loaded earlier; that is why `colorFormat`, which the first render
+reads, lives in `app.js` though the picker sets it. `SCRIPTS` in
+`checks.py` lists the files in load order. Two consequences of the one
+scope:
 
 - **Declare a `const` above its first *caller*, not just its first use.**
   `syncActionBar()` runs during init and reaches into the sheet and the bar,
@@ -214,7 +221,8 @@ one scope:
   `ReferenceError` at load and takes the whole app down.
 - **A duplicate declaration is fatal.** A second `const controlsBody` threw a
   `SyntaxError` that killed every listener on the page while it still served
-  200. CI parses `core.js`, `app.js` and each inline block to catch this.
+  200. CI parses every file in `SCRIPTS` and each inline block to catch
+  this.
 
 ## A layer value is a row in LAYER_FIELDS
 
