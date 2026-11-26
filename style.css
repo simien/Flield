@@ -1426,6 +1426,15 @@ input[type="range"]:focus-visible {
   touch-action: none;
 }
 
+/* Both are sliders from the keyboard (see colorKeySteps), so both take
+   the same ring as every other control. */
+.color-sl-square:focus-visible,
+.color-hue-strip:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+
 .color-sl-square canvas {
   display: block;
   width: 100%;
@@ -1543,6 +1552,12 @@ input[type="range"]:focus-visible {
   font-variant-numeric: tabular-nums;
   text-transform: uppercase;
   outline: none;
+}
+
+/* The fields sit borderless in the well, so focus is drawn on the well
+   itself rather than on a box the field doesn't have. */
+.color-value-row:has(input:focus-visible) {
+  box-shadow: inset 0 0 0 2px var(--ring);
 }
 
 .color-channel {
