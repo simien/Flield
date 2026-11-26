@@ -1,6 +1,6 @@
 # Bring Flield's new typography and logo to flield.com
 
-Status: in flight
+Status: done 2026-11-26
 
 The identity chosen on 25 November 2026 lives in `local/Brand` (reference:
 `local/Brand/SAP-FLIELDBRAND-Reference-v1.2.md`). This plan brings two parts of it to the site:
@@ -54,4 +54,19 @@ Decided by the owner on 26 November 2026 (#2140).
       `ux-u1-u7.js` pass; `csp-probe.js` finds no violation and both fonts report `loaded` under
       the policy. A14 caught two tables overflowing at 390px in the wider face; header cells now
       wrap on phones, in a rule placed after the base one (source order). Looked at in both themes.
-- [ ] Commit per part; push after asking; confirm flield.com serves the new files.
+- [x] Commit per part (`19b64f7` favicon, `437748f` lockup, `9b47b01` type); reviewed by the owner on
+      a local server; pushed at `464b9fc`, remote head verified. flield.com served the guide at
+      `guide.css?v=14` with the lockup, the app at `style.css?v=126` and both fonts byte for byte
+      60 seconds later, the fonts as `font/woff2` with the year-long cache.
+
+## Where the plan was wrong
+
+- It planned Silkscreen for the app's field labels. Seen at its smallest whole-pixel size, they
+  wrapped and lost the hierarchy under the section titles; they stay in the sans.
+- It planned a 180px touch icon. `icon-192.png` already does that job and the comment in
+  `index.html` says why, so no new file.
+- It expected the type change to touch nothing outside type. The wider monospace pushed two
+  tables past a phone column, which only the accessibility suite caught, and the first fix sat
+  above the rule it overrode: the source-order trap `AGENTS.md` describes.
+- It assumed `fonttools` would run from the shell's `python3`. That is pyenv's 3.12; the MacPorts
+  install is `/opt/local/bin/python3.14`.
