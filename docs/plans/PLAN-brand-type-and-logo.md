@@ -33,9 +33,12 @@ Decided by the owner on 26 November 2026 (#2140).
       `prepareRender()`, redrawing only when a color changes. Verified: `core.test.js` holds
       `favicon.svg` to `brandMarkCells(16)` and fails on one changed cell; on the live page the
       icon read back has 0 of 256 wrong cells before and after Random, under the real CSP too.
-- [ ] Lockup: an SVG of the mark tile and the logotype, drawn from pixels so it needs no font,
-      in place of the text "Flield" in `index.html`'s strip and the document headers, keeping the
-      accessible name ("Flield") and the `sr-only` subtitle.
+- [x] Lockup: inline SVG, 76 by 16, in the app's strip and all five document headers (404
+      included), accessible name kept in an `sr-only` span. The brand leaves the small header
+      lockup's gap undefined; this one uses the 16 cell mark at one pixel a cell, the logotype at
+      two pixels per font pixel 3 down (10px caps, whole pixels at 1x), and a 6px gap. The
+      logotype is `currentColor`; the mark keeps its dark tile. Looked at in both themes at 1280
+      and 390.
 - [ ] Fonts: Silkscreen Regular and Geist Mono at weight 500 as Latin-subset WOFF2 in `fonts/`,
       with their OFL files, `@font-face` with `font-display: swap`, and a year-long cache in
       `_headers` under versioned names. Needs `py314-fonttools` (MacPorts).

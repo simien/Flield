@@ -246,9 +246,16 @@ input[type="range"]:focus-visible {
   color: var(--text-on-bg);
 }
 
+/* The lockup, inline SVG at whole pixels; its logotype is currentColor,
+   so the hover below still lifts it. */
 .brand a {
+  display: block;
   color: inherit;
   text-decoration: none;
+}
+
+.brand .lockup {
+  display: block;
 }
 
 @media (hover: hover) {
