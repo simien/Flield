@@ -23,11 +23,11 @@
   <title>Flield: Seamless Animated Background Generator</title>
   <meta name="description" content="Generate seamless animated backgrounds in your brand colors. Seeded three-color pixel art from flow fields and symmetry, looping with no cut. GIF, SVG, PNG." />
   <link rel="canonical" href="https://flield.com/" />
-  <!-- Stays the only rel="icon": generateRandomFavicon() rewrites this
-       element's href on load, and a second one would compete with it for
-       the tab icon. -->
+  <!-- Stays the only rel="icon": drawBrandFavicon() in app.js rewrites
+       this element's href with the brand mark in the composition's colors,
+       and a second one would compete with it for the tab icon. -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <!-- icon-192.png is favicon.svg rendered at 6x, so it stays pixel-exact;
+  <!-- icon-192.png is favicon.svg rendered at 12x, so it stays pixel-exact;
        regenerate it alongside favicon.svg if that ever changes. It covers
        two jobs the SVG can't: iOS home-screen saves, which ignore SVG and
        otherwise fall back to a screenshot of the page, and Google's favicon
@@ -1033,9 +1033,9 @@
   </main>
 
   <script src="generator.js?v=16"></script>
-  <script src="core.js?v=1"></script>
+  <script src="core.js?v=2"></script>
   <script src="hold.js?v=1"></script>
-  <script src="app.js?v=1"></script>
+  <script src="app.js?v=2"></script>
   <script src="picker.js?v=1"></script>
   <script src="tutorial.js?v=1"></script>
   <!-- Cloudflare Web Analytics: manual snippet, since flield.com is served

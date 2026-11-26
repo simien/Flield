@@ -7,6 +7,7 @@
       clamp, speedMs, speedStep, formatSpeed, depthValue, formatDepth,
       CYCLE_FRAME_MS, PREVIEW_FRAMES_PER_CYCLE, PREVIEW_MIN_FRAME_MS, beatFrames, frameDelay, framePhase,
       hslToRgb, rgbToHex, hslToHex, hueDistance, hexToHsl, formatColorValue, SHAPE_MASK_DIRECTIONS,
+      brandMarkCells,
     } = FlieldCore;
 
     // Inline replacements for the icons that used to come from the
@@ -791,6 +792,7 @@
       updateShapeMaskDirectionUI();
       updateMotionUI();
       const options = readOptions();
+      drawBrandFavicon(options.bgColor, options.layerA.color, options.layerB.color);
       document.getElementById("blockSizeVal").textContent = options.blockSize + "px";
       document.getElementById("speedVal").textContent = formatSpeed(options.speed);
       document.getElementById("intervalVal").textContent = formatSpeed(options.interval);
@@ -1953,7 +1955,8 @@
     }
     initSliderTooltips();
 
-    // Renders a fresh favicon on every page load using the same
+    // Uncalled since 26 November 2026; drawBrandFavicon below took its
+    // place. It rendered a fresh favicon on every page load using the same
     // generate()/renderToCanvas() pipeline as the main artwork, just at a
     // tiny size with its own random layer parameters, but the same three
     // colors as the main artwork, so the browser-tab icon reads as a
@@ -2004,6 +2007,35 @@
       });
 
       document.querySelector('link[rel="icon"]').href = faviconCanvas.toDataURL("image/png");
+    }
+
+    // The tab icon since the brand landed (26 November 2026): the brand
+    // mark's shape in the composition's own three colors, so the shape
+    // says Flield and the colors say which piece. generateRandomFavicon
+    // above is kept, uncalled, for when the miniature comes back. Every
+    // render passes through here, so it draws only when a color changes.
+    // Its state hangs on the function rather than a const, because the
+    // first render runs during init and a function declaration is hoisted
+    // where a const is not.
+    function drawBrandFavicon(bgColor, colorA, colorB) {
+      const key = bgColor + colorA + colorB;
+      if (drawBrandFavicon.key === key) return;
+      drawBrandFavicon.key = key;
+      const cellsAcross = 16;
+      const scale = 4;
+      const cells = drawBrandFavicon.cells || (drawBrandFavicon.cells = brandMarkCells(cellsAcross));
+      const iconCanvas = document.createElement("canvas");
+      iconCanvas.width = iconCanvas.height = cellsAcross * scale;
+      const ctx = iconCanvas.getContext("2d");
+      const fills = [bgColor, colorA, colorB];
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, iconCanvas.width, iconCanvas.height);
+      for (let i = 0; i < cells.length; i++) {
+        if (!cells[i]) continue;
+        ctx.fillStyle = fills[cells[i]];
+        ctx.fillRect((i % cellsAcross) * scale, Math.floor(i / cellsAcross) * scale, scale, scale);
+      }
+      document.querySelector('link[rel="icon"]').href = iconCanvas.toDataURL("image/png");
     }
 
     // Below the layout's mobile breakpoint, the sidebar becomes a
@@ -2478,7 +2510,6 @@
       }
       performRandomize(false);
     }
-    generateRandomFavicon();
     // After the first paint rather than now: the fades read the tab
     // body's scroll geometry, and reading it here forces a layout of the
     // document that the first frame then repeats. Two frames on, that

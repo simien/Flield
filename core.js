@@ -616,8 +616,32 @@ const FlieldCore = (() => {
     return data;
   }
 
+  // The brand mark ("B8 Turn", chosen 25 November 2026): a wave with a
+  // field dissolving away from it on each side through a 4 by 4 ordered
+  // dither. Field B reads the threshold from the rotated cell, which is
+  // what gives the mark exact point symmetry. Returns n by n codes, row
+  // by row: 0 ground, 1 field A, 2 field B. favicon.svg is this at 16
+  // cells in the brand colors, and core.test.js holds the two equal.
+  const MARK_BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+  function brandMarkCells(n) {
+    const cells = new Uint8Array(n * n);
+    const threshold = (x, y) => (MARK_BAYER[(y % 4) * 4 + (x % 4)] + 0.5) / 16;
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
+        const u = (x + 0.5) / n;
+        const d = (y + 0.5) / n - (0.5 + 0.16 * Math.sin(2 * Math.PI * (u - 0.5)));
+        const above = -d - 0.06;
+        const below = d - 0.06;
+        if (above > 0 && 1.05 - above / 0.42 > threshold(x, y)) cells[y * n + x] = 1;
+        else if (below > 0 && 1.05 - below / 0.42 > threshold(n - 1 - x, n - 1 - y)) cells[y * n + x] = 2;
+      }
+    }
+    return cells;
+  }
+
   return {
     clamp,
+    brandMarkCells,
     SPEED_BASE_MS, SPEED_PER_DOUBLING, SPEED_MAX_STEP, speedMs, speedStep, formatSpeed,
     DEPTH_STEPS_PER_UNIT, depthValue, depthIndex, formatDepth,
     CYCLE_FRAME_MS, PREVIEW_FRAMES_PER_CYCLE, PREVIEW_MIN_FRAME_MS,

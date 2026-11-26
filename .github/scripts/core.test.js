@@ -337,6 +337,31 @@ if (C.formatColorValue("#ff8000", "rgb") !== "rgb(255, 128, 0)") fail("formatCol
 if (C.formatColorValue("#ff8000", "hsl") !== "hsl(30, 100%, 50%)") fail("formatColorValue hsl");
 if (C.hueDistance(350, 10) !== 20) fail("hueDistance does not wrap at 360");
 
+// --- The brand mark ------------------------------------------------------
+// favicon.svg and the app's tab icon are one shape: the file is drawn in
+// the brand colors, the app paints brandMarkCells in the composition's.
+// Read the file's cells back and hold them to the function, so neither
+// can be redrawn without the other.
+{
+  const svg = fs.readFileSync(path.join(ROOT, "favicon.svg"), "utf8");
+  const fileCells = new Uint8Array(256);
+  const codes = { "#d9f25a": 1, "#1fa97a": 2 };
+  for (const m of svg.matchAll(/<path fill="(#[0-9a-f]{6})" d="([^"]+)"/gi)) {
+    for (const r of m[2].matchAll(/M(\d+) (\d+)h(\d+)v(\d+)/g)) {
+      const [x, y, w, h] = r.slice(1).map(Number);
+      for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) fileCells[(y + j) * 16 + x + i] = codes[m[1].toLowerCase()];
+    }
+  }
+  const mark = C.brandMarkCells(16);
+  const differ = mark.reduce((n, c, i) => n + (c !== fileCells[i]), 0);
+  if (differ) fail(`favicon.svg differs from brandMarkCells(16) in ${differ} of 256 cells`);
+  const marked = mark.reduce((n, c) => n + (c > 0), 0);
+  if (marked < 64) fail(`brandMarkCells(16) fills only ${marked} cells`);
+  for (let i = 0; i < 256; i++) {
+    if (mark[i] && mark[255 - i] !== 3 - mark[i]) { fail("brandMarkCells(16) lost its point symmetry"); break; }
+  }
+}
+
 if (failures.length) {
   for (const f of failures.slice(0, 12)) console.error(f);
   process.exit(1);
