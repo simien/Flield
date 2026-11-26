@@ -319,7 +319,7 @@ input[type="range"]:focus-visible {
   z-index: 24;
   align-items: flex-end;
   gap: var(--touch-gap);
-  padding: 12px var(--edge-pad);
+  padding: var(--space-3) var(--edge-pad);
   background: var(--panel);
   border-top: 1px solid var(--border);
 }
@@ -368,8 +368,8 @@ input[type="range"]:focus-visible {
   z-index: 26;
   align-items: center;
   gap: var(--touch-gap);
-  padding: 8px var(--edge-pad);
-  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-2) var(--edge-pad);
+  padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
   background: var(--panel);
   border-top: 1px solid var(--border);
 }
@@ -477,7 +477,7 @@ input[type="range"]:focus-visible {
   width: fit-content;
   max-width: 100%;
   margin: 0 auto;
-  top: 20px;
+  top: var(--space-4);
   transform: translateY(-8px);
   padding: 10px 16px;
   border-radius: var(--radius);
@@ -510,9 +510,9 @@ input[type="range"]:focus-visible {
   width: fit-content;
   max-width: 100%;
   margin: 0 auto;
-  top: 20px;
+  top: var(--space-4);
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   /* Room on both sides of the text, and the pill grows with its
      content on desktop; below the sheet breakpoint it wraps inside
      the artboard's inset instead. */
@@ -540,7 +540,7 @@ input[type="range"]:focus-visible {
 /* The play offer is one line; the longer explanation lives in the
    text's tooltip. A dotted underline marks that there is one. */
 .tour-chip > span:first-child {
-  padding-right: 4px;
+  padding-right: var(--space-1);
 }
 
 .tour-chip.play-offer > span {
@@ -553,7 +553,7 @@ input[type="range"]:focus-visible {
 .tour-chip button {
   width: auto;
   height: 26px;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
   border-radius: 999px;
   font-size: 12px;
   flex-shrink: 0;
@@ -586,7 +586,7 @@ input[type="range"]:focus-visible {
 
 .controls-header {
   flex-shrink: 0;
-  padding: 20px 20px 0;
+  padding: var(--space-4) var(--space-4) 0;
   /* Full sidebar width, same as .controls-footer's own border-top. */
   border-bottom: 1px solid var(--border);
 }
@@ -594,7 +594,7 @@ input[type="range"]:focus-visible {
 .controls-body {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 20px 20px;
+  padding: 16px var(--space-4) var(--space-4);
   background: var(--well);
 }
 
@@ -650,7 +650,7 @@ input[type="range"]:focus-visible {
 
 .controls-footer {
   flex-shrink: 0;
-  padding: 20px;
+  padding: var(--space-4);
   border-top: 1px solid var(--border);
 }
 
@@ -660,7 +660,7 @@ input[type="range"]:focus-visible {
 .explore-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   /* Same spacing as .button-row below it keeps to the tabs, so the
      three header rows read as evenly stacked rather than paired. */
   margin-bottom: 16px;
@@ -777,7 +777,7 @@ input[type="range"]:focus-visible {
   flex: 1;
   height: 26px;
   padding: 0 2px;
-  gap: 4px;
+  gap: var(--space-1);
   /* The label plus its lock count (see .tab-count below) has to stay on
      one line even at "Layer A" + a two-digit count, or the whole track
      grows a second row. */
@@ -904,7 +904,7 @@ input[type="range"]:focus-visible {
 .palette-toggle {
   width: 100%;
   height: 32px;
-  padding: 0 8px 0 10px;
+  padding: 0 var(--space-2) 0 10px;
   border: none;
   border-radius: 0;
   color: var(--text);
@@ -929,7 +929,7 @@ input[type="range"]:focus-visible {
 }
 
 .palette-content {
-  padding: 12px 10px;
+  padding: var(--space-3) 10px;
   border-top: 1px solid var(--border);
 }
 
@@ -1213,7 +1213,7 @@ input[type="range"]:focus-visible {
 .field-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .field-row input,
@@ -1311,7 +1311,7 @@ input[type="range"]:focus-visible {
   left: 0;
   width: 220px;
   z-index: 50;
-  padding: 12px;
+  padding: var(--space-3);
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1391,7 +1391,7 @@ input[type="range"]:focus-visible {
 
 .color-format-tabs {
   display: flex;
-  gap: 4px;
+  gap: var(--space-1);
   margin-top: 10px;
 }
 
@@ -1429,8 +1429,8 @@ input[type="range"]:focus-visible {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 8px -12px -12px;
-  padding: 10px 12px 12px;
+  margin: var(--space-2) -12px -12px;
+  padding: 10px var(--space-3) var(--space-3);
   border-top: 1px solid var(--border);
   background: var(--well-deep);
 }
@@ -1470,7 +1470,7 @@ input[type="range"]:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: var(--space-1);
   font-size: 11px;
   color: var(--text-muted);
 }
@@ -1558,7 +1558,7 @@ button {
    any class rule (.icon-btn's padding, a row's width: auto) wins. */
 button:where(.secondary, #randomizeBtn, #tourChipOpenBtn, #playOfferStartBtn) {
   width: 100%;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
 }
 
 button:where(#randomizeBtn, #tourChipOpenBtn, #playOfferStartBtn) {
@@ -1849,8 +1849,8 @@ button.secondary {
   font-size: 12px;
   line-height: 1.5;
   color: var(--text-muted);
-  margin-top: 8px;
-  margin-bottom: 12px;
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 /* A description belongs to the setting above it, so it sits between the
@@ -1874,7 +1874,7 @@ button.secondary {
 
 .button-row {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   margin-bottom: 16px;
 }
 
@@ -1900,13 +1900,13 @@ button.secondary {
 @media (min-width: 769px) {
   .controls-footer .button-row > button,
   .controls-footer .button-row .split-btn-main {
-    padding: 0 8px;
+    padding: 0 var(--space-2);
   }
 }
 
 .footer-link-row {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .footer-link-row .split-btn {
@@ -1927,8 +1927,8 @@ button.secondary {
 .preset-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 .preset-label {
@@ -2077,7 +2077,7 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px 14px 20px;
+  padding: 14px 16px 14px var(--space-4);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -2100,7 +2100,7 @@ button:disabled {
   flex: 1;
   min-height: 332px;
   overflow-y: auto;
-  padding: 20px 24px 28px;
+  padding: var(--space-4) 24px 28px;
 }
 
 .tutorial-step {
@@ -2112,7 +2112,7 @@ button:disabled {
 }
 
 .tutorial-step .tutorial-eyebrow {
-  margin: 4px 0 14px;
+  margin: var(--space-1) 0 14px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -2151,7 +2151,7 @@ button:disabled {
 .tutorial-modal-footer {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   padding: 10px 16px 16px;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
@@ -2328,7 +2328,7 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
   justify-content: center;
   gap: 14px;
   overflow: hidden;
-  padding: 0 20px;
+  padding: 0 var(--space-4);
 }
 
 /* --- Step 1: Intro. A grid of short strokes, each rotated to its own
@@ -2337,7 +2337,7 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
 .mini-flow-field {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 28px 20px;
+  gap: 28px var(--space-4);
 }
 
 .mini-flow-line {
@@ -2366,7 +2366,7 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
 .mini-tab {
   font-size: 11px;
   font-weight: 500;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
   height: 26px;
   display: flex;
   align-items: center;
@@ -2478,7 +2478,7 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
 .mini-slider-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
 }
 
@@ -2518,7 +2518,7 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
 .mini-range-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
 }
 
@@ -2559,7 +2559,7 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
 
 /* --- Step 7: Locking. The lock fills solid on a loop. --- */
 .tutorial-demo-lock {
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .mini-lock-btn {
@@ -2623,7 +2623,7 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: var(--space-2) 14px;
   border-radius: 6px;
   background: var(--accent);
   color: var(--primary-fg);
@@ -2652,7 +2652,7 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
 .tutorial-demo-kind {
   flex-shrink: 0;
   min-width: 44px;
-  padding: 4px 10px;
+  padding: var(--space-1) 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--panel);
@@ -2668,7 +2668,7 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
 .mini-explore-controls {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
@@ -2744,7 +2744,7 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
 
 .mini-saved-badge {
   font-size: 11px;
-  padding: 4px 10px;
+  padding: var(--space-1) 10px;
   border-radius: 12px;
   background: var(--accent);
   color: var(--primary-fg);
@@ -2932,7 +2932,7 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
 
   /* The handle already supplies the gap above the first row. */
   .controls-header {
-    padding-top: 4px;
+    padding-top: var(--space-1);
   }
 
   /* The sheet shows one panel at a time, chosen from the bar. Deleting
@@ -3024,8 +3024,8 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
      off the pinned chrome they used to be part of. */
   .app-chrome {
     display: flex;
-    gap: 8px;
-    margin-top: 20px;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
     padding-top: 16px;
     border-top: 1px solid var(--border);
   }
@@ -3072,7 +3072,7 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
   }
 
   .tutorial-modal-body {
-    padding: 16px 16px 4px;
+    padding: 16px 16px var(--space-1);
   }
 
   .tutorial-demo {

@@ -75,6 +75,13 @@ side: a base rule added *after* that block outranks it, so new base rules
 go above it. If a CSS change appears to do nothing, check source order
 before anything else.
 
+A margin, padding, gap or offset that equals a step of the `--space`
+scale (4, 8, 12, 20 and 32px) is written as that token. Values between
+the steps (16px, 10px, 6px and the rest) stay raw on purpose: moving one
+to its nearest step moves the layout, and a new step is a token name,
+which waits on how Flield joins Swatch. Convert with the computed-style
+dumps in `local/Harness` proving nothing moved.
+
 The same trap with a different shape: `#playBtn.playing` is an ID selector at
 (1,1,0) and outranks `button.secondary:hover` at (0,3,1). Filled states that
 need a hover must say so explicitly.
