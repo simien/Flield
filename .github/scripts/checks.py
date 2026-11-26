@@ -12,6 +12,8 @@ stylistic, so it can't fail on taste. If a check ever starts crying wolf,
 delete it. A check nobody trusts is worse than no check.
 """
 
+import base64
+import hashlib
 import json
 import re
 import subprocess
@@ -635,6 +637,42 @@ def check_gif_writer():
     notes.append(f"gif writer: {proc.stdout.strip()}")
 
 
+# 11. Script hashes ------------------------------------------------------
+# The policy in _headers runs an inline script only if its sha256 is
+# listed there, so an injected one does not run. The cost is that every
+# edit to an inline script changes its hash, and a script whose hash is
+# missing is blocked: the page serves 200 with a dead UI, the failure
+# check 1 exists for. Every inline script on every page must be listed,
+# and nothing else may be, so an old hash does not linger as an allowance.
+# JSON-LD is data and never runs, so it needs none.
+INLINE_SCRIPT = re.compile(
+    r"<script(?![^>]*\bsrc=)(?![^>]*application/ld\+json)[^>]*>(.*?)</script>", re.S
+)
+
+
+def check_script_hashes():
+    want = {}
+    for page in PAGES:
+        for i, code in enumerate(INLINE_SCRIPT.findall(read(page))):
+            digest = base64.b64encode(hashlib.sha256(code.encode("utf-8")).digest()).decode()
+            want.setdefault(f"'sha256-{digest}'", []).append(f"{page} block {i + 1}")
+    policy = re.search(r"Content-Security-Policy: (.*)", read("_headers"))
+    script_src = re.search(r"script-src ([^;]*)", policy.group(1)) if policy else None
+    if not script_src:
+        fail("script hashes", "no script-src in _headers")
+        return
+    listed = set(re.findall(r"'sha256-[A-Za-z0-9+/=]+'", script_src.group(1)))
+    if "'unsafe-inline'" in script_src.group(1):
+        fail("script hashes", "script-src allows 'unsafe-inline'; list hashes instead")
+    for digest, where in sorted(want.items()):
+        if digest not in listed:
+            fail("script hashes", f"{', '.join(where)} is not in _headers; add {digest} to script-src")
+    for digest in sorted(listed - set(want)):
+        fail("script hashes", f"{digest} in _headers matches no inline script; remove it")
+    if not any(f.startswith("script hashes") for f in failures):
+        notes.append(f"script hashes: {len(want)} inline script(s), each listed in _headers")
+
+
 def main():
     base = sys.argv[1] if len(sys.argv) > 1 else None
     check_inline_js()
@@ -646,6 +684,7 @@ def main():
     check_indexnow()
     check_sitemap_dates()
     check_gif_writer()
+    check_script_hashes()
 
     for n in notes:
         print(f"  ok  {n}")

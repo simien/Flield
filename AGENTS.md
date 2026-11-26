@@ -513,6 +513,16 @@ count as which page is the `PAGES` table in
 `.github/scripts/indexnow.py`; a new page needs a row there and a line in
 the workflow's `paths`.
 
+## Editing an inline script changes the policy
+
+`_headers` allows each inline script by its sha256, not by
+`'unsafe-inline'`, so a change of one character to the app's script, a
+document page's script or the theme script every page shares changes
+its hash, and the browser refuses the old one: the page serves 200 with
+nothing running. `checks.py` names the hash to add and the stale one to
+drop, and the deploy runs `checks.py`, so a missed update stops the
+deploy rather than the site. Copy the hash it prints into `script-src`.
+
 ## Some of the site lives in accounts, not in the repo
 
 Nothing here reproduces it, so don't reach for code when one of these is

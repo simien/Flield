@@ -8,19 +8,25 @@
 # then posts to cloudflareinsights.com. Both hosts are allowed below; drop
 # them if analytics is ever turned off.
 #
-# script-src carries 'unsafe-inline' because the app is one long inline
-# script and the document pages each have one too. A nonce would need a
-# server to mint it, and there is none. What the policy still buys is that
-# no script from any other host runs, no page can be re-based, nothing
-# embeds a plugin, and no form posts anywhere. img-src allows data: for
-# the favicon the app redraws on every load and blob: for the exported
-# frames. There is no worker-src: the GIF encoder that ran in a worker
-# was replaced by one that runs in the page.
+# script-src names each inline script by its sha256 rather than allowing
+# 'unsafe-inline', so a script injected into a page does not run. A nonce
+# would need a server to mint it, and there is none. Editing an inline
+# script changes its hash, and a script whose hash is missing is blocked;
+# checks.py lists the hash to add, and the deploy runs checks.py, so a
+# missed one stops the deploy rather than the app. The policy also keeps
+# out scripts from any other host, re-basing, plugins, forms posting
+# elsewhere, and framing by any page at all. img-src allows data: for the
+# favicon the app redraws on every load. Exports leave through a blob:
+# download link, which img-src does not govern, and there is no worker.
+#
+# Strict-Transport-Security has no includeSubDomains: the zone's other
+# names are mail records, and a year on the bare domain is what is needed.
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://cloudflareinsights.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-0cC3Gi4VbKZCR3eAloxFtNorKxsnGUZN7ihRbLnWTHw=' 'sha256-0l9ZtnxUWr2ypAnk7hAzG42Prmc6V1O7dMfLKkl4rnU=' 'sha256-74mdc7Sa2zx27/iW9E7+8DbEqwB0/BaPIQBwqd6Kn7Q=' 'sha256-KoGlDju2KTLRCUPxGD1pAYM4mTggRbgf8xrxxeyywAU=' 'sha256-KrhJJ6Z9XI/81G3LPX88QtYqklAEC3TCbLOYX83LABY=' 'sha256-gVFisLFekc1PCu42fsgaZTsoQp/avJqC3WxDf9oEMaA=' 'sha256-nmGncG2FQWZq059I5HFWzZI1awe7VyWFLkahS43Kpp4=' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  Strict-Transport-Security: max-age=31536000
 
 # The files index.html and the document pages request with a ?v= query.
 # Their cache is busted by the number, which CI makes sure moves whenever
