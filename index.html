@@ -2705,10 +2705,18 @@
     undoBtn.addEventListener("click", () => {
       const previous = undoHistory.pop();
       if (!previous) return;
+      const hadMotion = !!currentMotion();
       applyGeneral(previous);
       applyDefaults("layerA", previous.layerA);
       applyDefaults("layerB", previous.layerB);
       render();
+      // A layer's own Motion is part of what comes back, so a step can
+      // take the last motion away or bring one in, and the preview has
+      // to follow: left alone it went on redrawing a still twelve times
+      // a second, or sat frozen under a Speed slider. Only when that
+      // changed, though. A step that leaves the motion as it was must
+      // not restart the cycle, or start one that is being held still.
+      if (!!currentMotion() !== hadMotion) syncSeamlessPreview();
       updateUndoButton();
       showToast("Stepped back");
     });
