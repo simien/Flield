@@ -1689,7 +1689,16 @@ function generate(options) {
 
   const mode = options.loopMode === "none" ? undefined : options.loopMode;
   const forward = options.loopPhase || 0;
-  const phase = options.direction === "reverse" && forward > 0 ? 1 - forward : forward;
+  const reverse = options.direction === "reverse";
+  const phase = reverse && forward > 0 ? 1 - forward : forward;
+  // The preview's cycle count, for Ripple's rebirths, read on the same
+  // clock as the phase: in reverse time runs from cycle + forward back
+  // to -(cycle + forward), which is cycle -cycle - 1 at phase
+  // 1 - forward. Passing the count unchanged gave every drop a new life
+  // as its old one was still dying, and all of them jumped once a cycle.
+  const loopCycle = reverse && Number.isFinite(options.loopCycle)
+    ? -options.loopCycle - (forward > 0 ? 1 : 0)
+    : options.loopCycle;
   const reach = options.depth > 0 ? options.depth : MOTION_DEPTH_DEFAULT;
   const wave = Math.sin(2 * Math.PI * phase);
   // Each layer's own kind, resolved (see the note above generate).
@@ -1759,7 +1768,7 @@ function generate(options) {
   // is one surface for both, keyed on A's seed and spaced by A's flow
   // scale, with B at the depth Pulse gives it.
   const rain = modeA === "ripple" || modeB === "ripple"
-    ? makeRipple(options.layerA.seed, cols, rows, options.layerA.fieldScale / options.blockSize, phase, options.loopCycle)
+    ? makeRipple(options.layerA.seed, cols, rows, options.layerA.fieldScale / options.blockSize, phase, loopCycle)
     : null;
   const pullA = modeA === "ripple" ? reach : 0;
   const pullB = modeB === "ripple" ? reach * LAYER_B_DEPTH : 0;
