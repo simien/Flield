@@ -295,8 +295,6 @@ input[type="range"]:focus-visible {
     flex-shrink: 0;
     width: 100%;
     height: 24px;
-    margin: 0;
-    padding: 0;
     border: 0;
     border-radius: 16px 16px 0 0;
     background: var(--panel);
@@ -326,9 +324,6 @@ input[type="range"]:focus-visible {
 .sidebar-toggle {
   display: none;
   padding: 0;
-  align-items: center;
-  justify-content: center;
-  margin-top: 0;
 }
 
 .sidebar-backdrop {
@@ -384,7 +379,6 @@ input[type="range"]:focus-visible {
 .last-control .last-control-close {
   flex-shrink: 0;
   width: 32px;
-  margin-top: 0;
 }
 
 /* The exploration loop, plus the two buttons that choose which panel
@@ -466,8 +460,9 @@ input[type="range"]:focus-visible {
 
 /* 44px here rather than the 32px these controls carry in the sidebar:
    this is the one row meant to be hit with a thumb. The width reset
-   opts every one of them out of the full-width button default, which
-   in a flex row reads as "take everything, then shrink". */
+   opts every one of them out of the full width that Random and
+   .secondary take, which in a flex row reads as "take everything, then
+   shrink". */
 .action-bar button,
 .action-bar .split-btn-select {
   height: var(--touch-h);
@@ -595,7 +590,6 @@ input[type="range"]:focus-visible {
 .tour-chip button {
   width: auto;
   height: 26px;
-  margin-top: 0;
   padding: 0 12px;
   border-radius: 999px;
   font-size: 12px;
@@ -604,10 +598,7 @@ input[type="range"]:focus-visible {
 
 .tour-chip-dismiss {
   min-width: 26px;
-  padding: 0;
-  background: transparent;
   color: var(--text-subtle);
-  border-color: transparent;
 }
 
 @media (hover: hover) {
@@ -808,7 +799,6 @@ input[type="range"]:focus-visible {
 .explore-row .split-btn button {
   width: auto;
   flex-shrink: 0;
-  margin-top: 0;
 }
 
 .explore-row #randomizeBtn {
@@ -836,7 +826,6 @@ input[type="range"]:focus-visible {
 
 .split-btn button {
   width: auto;
-  margin-top: 0;
 }
 
 .split-btn-main {
@@ -915,21 +904,15 @@ input[type="range"]:focus-visible {
 
 .tab-btn {
   flex: 1;
-  width: auto;
   height: 26px;
-  margin-top: 0;
   padding: 0 2px;
   gap: 4px;
   /* The label plus its lock count (see .tab-count below) has to stay on
      one line even at "Layer A" + a two-digit count, or the whole track
      grows a second row. */
   white-space: nowrap;
-  background: transparent;
   color: var(--text-on-bg);
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
   font-size: 12px;
-  font-weight: 500;
   transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease,
     border-color 0.15s ease;
 }
@@ -1050,18 +1033,13 @@ input[type="range"]:focus-visible {
 .palette-toggle {
   width: 100%;
   height: 32px;
-  margin-top: 0;
   padding: 0 8px 0 10px;
-  background: transparent;
   border: none;
   border-radius: 0;
   color: var(--text);
   font-size: 12px;
-  font-weight: 500;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  cursor: pointer;
 }
 
 @media (hover: hover) {
@@ -1096,10 +1074,8 @@ input[type="range"]:focus-visible {
 }
 
 .preset-chip-row button {
-  width: auto;
   flex: 0 0 auto;
   height: 26px;
-  margin-top: 0;
   padding: 0 10px;
   font-size: 11px;
   background: var(--input);
@@ -1379,13 +1355,9 @@ input[type="range"]:focus-visible {
   flex-shrink: 0;
   width: 32px;
   height: 32px;
-  padding: 0;
-  margin-top: 0;
   background: var(--input);
   color: var(--lock-idle);
   border: 1px solid var(--input-border);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-xs);
 }
 
 @media (hover: hover) {
@@ -1427,15 +1399,11 @@ input[type="range"]:focus-visible {
 .color-swatch {
   width: 100%;
   height: 32px;
-  margin-top: 0;
   padding: 2px;
   display: flex;
-  align-items: center;
   border: 1px solid var(--input-border);
-  border-radius: var(--radius-sm);
   background: var(--input);
   color: var(--text);
-  box-shadow: var(--shadow-xs);
   transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
@@ -1558,10 +1526,7 @@ input[type="range"]:focus-visible {
 
 .color-format-btn {
   flex: 1;
-  width: auto;
   height: 24px;
-  margin-top: 0;
-  padding: 0;
   font-size: 11px;
   background: var(--input);
   color: var(--text-muted);
@@ -1687,16 +1652,19 @@ input[type="range"] {
   -webkit-touch-callout: none;
 }
 
+/* What every button shares. It used to be the primary style, full width
+   with a 6px top margin, and 35 rules undid it: no button kept the
+   margin and three kept the fill. The fill and the sizing now sit with
+   the looks that want them, the filled buttons and button.secondary below. */
 button {
   touch-action: manipulation;
-  width: 100%;
   height: 32px;
-  padding: 0 12px;
-  margin-top: 6px;
+  padding: 0;
+  margin: 0;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  background: var(--primary);
-  color: var(--primary-fg);
+  background: transparent;
+  color: inherit;
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -1711,9 +1679,22 @@ button {
     color 0.15s ease, opacity 0.15s ease, transform 0.08s ease;
 }
 
-/* The bare default above is the primary style, and Random is the only
-   button that uses it; every other button opts into .secondary or its
-   own flat treatment and carries its own hover. */
+/* The filled action: Random, and the two answers the tour chips offer.
+   Named by id rather than a class because Random's markup line carries
+   a title the writing audit flags, so it is not edited for this. */
+/* Those three and the outline look fill their row with room either side
+   of the label. :where keeps both rules at the bare button's weight, so
+   any class rule (.icon-btn's padding, a row's width: auto) wins. */
+button:where(.secondary, #randomizeBtn, #tourChipOpenBtn, #playOfferStartBtn) {
+  width: 100%;
+  padding: 0 12px;
+}
+
+button:where(#randomizeBtn, #tourChipOpenBtn, #playOfferStartBtn) {
+  background: var(--primary);
+  color: var(--primary-fg);
+}
+
 /* Everything wearing the primary fill dims by the same amount on hover.
    Play carries that fill while it's running, but its own rule is an id
    selector and outranked button.secondary's hover, so it was the one
@@ -1944,7 +1925,6 @@ button.secondary {
 
   .app-chrome button {
     width: auto;
-    margin-top: 0;
   }
 }
 
@@ -2182,7 +2162,6 @@ button.secondary {
      past the row's padding; the export row's three buttons otherwise
      overflow the sidebar by a few pixels. */
   min-width: 0;
-  margin-top: 0;
 }
 
 /* In the 260px sidebar there isn't room to give all three an equal
@@ -2216,13 +2195,11 @@ button.secondary {
 .footer-link-row #copyLinkBtn {
   flex: 1;
   min-width: 0;
-  margin-top: 0;
 }
 
 .footer-link-row .icon-btn {
   width: auto;
   flex: 0 0 auto;
-  margin-top: 0;
 }
 
 .preset-row {
@@ -2286,13 +2263,9 @@ button.secondary {
   flex-shrink: 0;
   width: 30px;
   height: 30px;
-  padding: 0;
-  margin-top: 0;
   background: var(--input);
   color: var(--text);
   border: 1px solid var(--input-border);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-xs);
 }
 
 @media (hover: hover) {
@@ -2394,7 +2367,6 @@ button:disabled {
 
 .tutorial-modal-header button {
   width: auto;
-  margin-top: 0;
 }
 
 /* Reserves room for the tallest step (see the 900px+ override below,
@@ -2465,7 +2437,6 @@ button:disabled {
 
 .tutorial-nav-arrow {
   width: auto;
-  margin-top: 0;
   flex-shrink: 0;
 }
 
@@ -2537,7 +2508,6 @@ button:disabled {
     margin-top: -28px;
     width: 56px;
     height: 56px;
-    padding: 0;
     border-radius: 50%;
     background: var(--panel);
     box-shadow: var(--shadow-lg);
@@ -2597,14 +2567,9 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
 
 .tutorial-dot {
   display: flex;
-  align-items: center;
-  justify-content: center;
   width: 12px;
   height: 24px;
-  padding: 0;
-  margin: 0;
   border: none;
-  background: transparent;
   box-shadow: none;
   transition: width 0.2s ease;
 }
