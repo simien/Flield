@@ -32,14 +32,14 @@
   <meta property="og:site_name" content="Flield" />
   <meta property="og:title" content="Flield Guide: looping motion, tiling, and locks" />
   <meta property="og:description" content="How to steer Flield: set a motion that loops with no cut, tile without a visible seam, lock the fields you want to keep, and narrow a palette or density range." />
-  <meta property="og:image" content="https://flield.com/screenshot.png?v=8" />
+  <meta property="og:image" content="https://flield.com/screenshot.png?v=9" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="900" />
   <meta property="og:image:alt" content="A generated three-color composition in Flield" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Flield Guide: looping motion, tiling, and locks" />
   <meta name="twitter:description" content="How to steer Flield: set a motion that loops with no cut, tile without a visible seam, lock the fields you want to keep, and narrow a palette or density range." />
-  <meta name="twitter:image" content="https://flield.com/screenshot.png?v=8" />
+  <meta name="twitter:image" content="https://flield.com/screenshot.png?v=9" />
 
   <!-- TechArticle rather than HowTo: this page documents the tool as a
        whole, and it's one of the types Google still supports, where HowTo
@@ -58,7 +58,7 @@
     "mainEntityOfPage": "https://flield.com/guide/",
     "about": { "@id": "https://flield.com/#app" },
     "inLanguage": "en",
-    "image": "https://flield.com/screenshot.png?v=8",
+    "image": "https://flield.com/screenshot.png?v=9",
     "datePublished": "2026-09-12",
     "dateModified": "2026-11-26",
     "proficiencyLevel": "Beginner",
@@ -151,7 +151,7 @@
            the hard pixel edges this tool exists to make. The PNG stays as
            the fallback and as the og:image, which scrapers handle better.
            Two widths. The column is 640px at most, so a 2x phone wants
-           about 700 device pixels and the 800px copy covers it at 126KB;
+           about 700 device pixels and the 800px copy covers it at 58KB;
            the full 1200px copy is for a 2x laptop or a 3x phone. Both are
            cut from screenshot.png with a box filter (a point filter
            breaks the UI text, and anything smoother turns the flat pixel
@@ -162,10 +162,10 @@
              cwebp -lossless -z 9 screenshot.png -o screenshot.webp -->
       <picture>
         <source type="image/webp"
-                srcset="../screenshot-800.webp?v=8 800w, ../screenshot.webp?v=8 1200w"
+                srcset="../screenshot-800.webp?v=9 800w, ../screenshot.webp?v=9 1200w"
                 sizes="(max-width: 680px) 100vw, 640px" />
-        <img src="../screenshot.png?v=8" width="1200" height="900" fetchpriority="high"
-             alt="The Flield interface: the settings sidebar on the left showing a layer's Flow field controls with its Texture set to Contours, and the composition those settings produce filling the canvas on the right." />
+        <img src="../screenshot.png?v=9" width="1200" height="900" fetchpriority="high"
+             alt="The Flield interface: the settings sidebar on the left showing a layer's Flow field controls with its Texture set to Streamlines, and the composition those settings produce on the canvas on the right, lime streamlines over green nebula on a near-black ground." />
       </picture>
       <figcaption>The sidebar holds every control. The canvas shows the result as you change them.</figcaption>
     </figure>
