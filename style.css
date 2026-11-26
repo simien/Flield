@@ -248,8 +248,10 @@ input[type="range"]:focus-visible {
   text-decoration: none;
 }
 
-.brand a:hover {
-  color: var(--text);
+@media (hover: hover) {
+  .brand a:hover {
+    color: var(--text);
+  }
 }
 
 /* Content that should reach screen readers and search crawlers without
@@ -449,6 +451,9 @@ input[type="range"]:focus-visible {
    declared later. Touch browsers leave :hover stuck on whatever was
    tapped last, so without it the button you just pressed is the one
    that loses its fill. */
+/* Not behind (hover: hover): the hover half only restates the active
+   fill so the general hover below cannot beat it, so latched on a touch
+   screen it changes nothing. */
 .action-bar button.is-active,
 .action-bar button.is-active:hover:not(:disabled) {
   background: var(--primary);
@@ -602,9 +607,11 @@ input[type="range"]:focus-visible {
   border-color: transparent;
 }
 
-.tour-chip-dismiss:hover {
-  background: var(--muted);
-  color: var(--text);
+@media (hover: hover) {
+  .tour-chip-dismiss:hover {
+    background: var(--muted);
+    color: var(--text);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -879,8 +886,10 @@ input[type="range"]:focus-visible {
   outline: none;
 }
 
-.split-btn-select:hover {
-  background-color: var(--input-hover);
+@media (hover: hover) {
+  .split-btn-select:hover {
+    background-color: var(--input-hover);
+  }
 }
 
 #playBtn.playing {
@@ -930,8 +939,10 @@ input[type="range"]:focus-visible {
   box-shadow: var(--shadow-xs);
 }
 
-.tab-btn:hover:not(.active) {
-  color: var(--text);
+@media (hover: hover) {
+  .tab-btn:hover:not(.active) {
+    color: var(--text);
+  }
 }
 
 /* Per-tab lock indicator (see updateLockCounts in index.html): one
@@ -1051,8 +1062,10 @@ input[type="range"]:focus-visible {
   cursor: pointer;
 }
 
-.palette-toggle:hover {
-  background: var(--muted);
+@media (hover: hover) {
+  .palette-toggle:hover {
+    background: var(--muted);
+  }
 }
 
 .palette-toggle i {
@@ -1098,8 +1111,10 @@ input[type="range"]:focus-visible {
   text-align: center;
 }
 
-.preset-chip-row button:hover {
-  background: var(--input-hover);
+@media (hover: hover) {
+  .preset-chip-row button:hover {
+    background: var(--input-hover);
+  }
 }
 
 /* A chip whose values the composition currently matches (see
@@ -1158,8 +1173,10 @@ input[type="range"]:focus-visible {
     box-shadow 0.15s ease;
 }
 
-.field select:hover {
-  background-color: var(--input-hover);
+@media (hover: hover) {
+  .field select:hover {
+    background-color: var(--input-hover);
+  }
 }
 
 /* Width/Height: the native spinner arrows are too small to hit at this
@@ -1248,9 +1265,16 @@ input[type="range"]:focus-visible {
   transition: box-shadow 0.15s ease;
 }
 
-.field input[type="range"]:hover::-webkit-slider-thumb,
 .field input[type="range"]:focus-visible::-webkit-slider-thumb {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+
+/* The same ring on hover, apart from focus so a touch drag does not leave
+   it latched on the thumb. */
+@media (hover: hover) {
+  .field input[type="range"]:hover::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ring) 50%, transparent);
+  }
 }
 
 .field input[type="range"]::-moz-range-track {
@@ -1276,9 +1300,16 @@ input[type="range"]:focus-visible {
   transition: box-shadow 0.15s ease;
 }
 
-.field input[type="range"]:hover::-moz-range-thumb,
 .field input[type="range"]:focus-visible::-moz-range-thumb {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+
+/* The same ring on hover, apart from focus so a touch drag does not leave
+   it latched on the thumb. */
+@media (hover: hover) {
+  .field input[type="range"]:hover::-moz-range-thumb {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ring) 50%, transparent);
+  }
 }
 
 :root[data-theme="light"] .field select,
@@ -1355,9 +1386,11 @@ input[type="range"]:focus-visible {
   box-shadow: var(--shadow-xs);
 }
 
-.lock-btn:hover:not(.locked) {
-  background: var(--input-hover);
-  color: var(--text);
+@media (hover: hover) {
+  .lock-btn:hover:not(.locked) {
+    background: var(--input-hover);
+    color: var(--text);
+  }
 }
 
 /* Locked is a state, not an action, and a layer tab shows ten of these
@@ -1404,8 +1437,10 @@ input[type="range"]:focus-visible {
   transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
-.color-swatch:hover {
-  background: var(--input-hover);
+@media (hover: hover) {
+  .color-swatch:hover {
+    background: var(--input-hover);
+  }
 }
 
 .color-swatch-fill {
@@ -1531,9 +1566,11 @@ input[type="range"]:focus-visible {
   border: 1px solid var(--input-border);
 }
 
-.color-format-btn:hover:not(.active) {
-  background: var(--input-hover);
-  color: var(--text);
+@media (hover: hover) {
+  .color-format-btn:hover:not(.active) {
+    background: var(--input-hover);
+    color: var(--text);
+  }
 }
 
 .color-format-btn.active {
@@ -1709,8 +1746,10 @@ button.secondary {
   border: 1px solid var(--input-border);
 }
 
-button.secondary:hover:not(:disabled) {
-  background-color: var(--input-hover);
+@media (hover: hover) {
+  button.secondary:hover:not(:disabled) {
+    background-color: var(--input-hover);
+  }
 }
 
 /* Lock All, Unlock All and Undo arm on a hold rather than a press (see
@@ -1970,8 +2009,10 @@ button.secondary:hover:not(:disabled) {
   transition: color 0.15s ease;
 }
 
-.site-footer:hover {
-  color: var(--text);
+@media (hover: hover) {
+  .site-footer:hover {
+    color: var(--text);
+  }
 }
 
 /* The footer animates its color once; its descendants must not add
@@ -2025,8 +2066,10 @@ button.secondary:hover:not(:disabled) {
   color: inherit;
 }
 
-.site-footer:hover kbd {
-  border-color: var(--border-strong);
+@media (hover: hover) {
+  .site-footer:hover kbd {
+    border-color: var(--border-strong);
+  }
 }
 
 .site-footer a {
@@ -2219,9 +2262,11 @@ button.secondary:hover:not(:disabled) {
 
 /* The stronger border on hover keeps a dark band from dissolving into
    the well behind it once the square is at full strength. */
-.preset-row:hover .preset-swatches {
-  opacity: 1;
-  border-color: var(--border-strong);
+@media (hover: hover) {
+  .preset-row:hover .preset-swatches {
+    opacity: 1;
+    border-color: var(--border-strong);
+  }
 }
 
 .preset-swatches:empty {
@@ -2246,8 +2291,10 @@ button.secondary:hover:not(:disabled) {
   box-shadow: var(--shadow-xs);
 }
 
-.preset-btn:hover:not(:disabled) {
-  background: var(--input-hover);
+@media (hover: hover) {
+  .preset-btn:hover:not(:disabled) {
+    background: var(--input-hover);
+  }
 }
 
 .preset-btn:disabled {
@@ -2516,11 +2563,13 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
     box-shadow 0.15s ease, transform 0.15s ease;
 }
 
-.tutorial-modal button.secondary:hover:not(:disabled),
-button.secondary.tutorial-nav-arrow-wide:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--panel) 90%, var(--text));
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .tutorial-modal button.secondary:hover:not(:disabled),
+  button.secondary.tutorial-nav-arrow-wide:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--panel) 90%, var(--text));
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

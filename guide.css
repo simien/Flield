@@ -145,8 +145,10 @@ body {
   white-space: nowrap;
 }
 
-.btn:hover {
-  background: var(--muted);
+@media (hover: hover) {
+  .btn:hover {
+    background: var(--muted);
+  }
 }
 
 /* A select wearing .btn takes --input, which is translucent white, and
@@ -165,9 +167,11 @@ body {
   color: var(--bg);
 }
 
-.btn-primary:hover {
-  opacity: 0.9;
-  background: var(--primary);
+@media (hover: hover) {
+  .btn-primary:hover {
+    opacity: 0.9;
+    background: var(--primary);
+  }
 }
 
 h1, h2, h3 {
@@ -340,9 +344,11 @@ dd {
   text-decoration: none;
 }
 
-.nav-toc-menu a:hover {
-  background: var(--muted);
-  color: var(--text);
+@media (hover: hover) {
+  .nav-toc-menu a:hover {
+    background: var(--muted);
+    color: var(--text);
+  }
 }
 
 /* Filled in by the scroll spy, so the menu says where you are as well as
@@ -581,8 +587,10 @@ tr:last-child td {
   color: var(--text-subtle);
 }
 
-.site-footer a:hover {
-  color: var(--text);
+@media (hover: hover) {
+  .site-footer a:hover {
+    color: var(--text);
+  }
 }
 
 /* Matches the app: keep the keyboard ring consistent across every page. */
