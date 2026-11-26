@@ -4185,8 +4185,15 @@
         read,
         // The same, for the tail, where running out is not damage but a
         // link written before the field existed. See COMPACT_TAIL_FIELDS.
+        // Running out ends the tail: the cursor goes to the end, so the
+        // bits a field was too wide for are not handed to the next,
+        // narrower one as if they were its own.
         tail(width) {
-          return at + width > bytes.length * 8 ? 0 : read(width);
+          if (at + width > bytes.length * 8) {
+            at = bytes.length * 8;
+            return 0;
+          }
+          return read(width);
         },
       };
     }
