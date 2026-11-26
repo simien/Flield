@@ -1916,7 +1916,39 @@
       return snapshot;
     }
 
-    function applySnapshot(data) {
+    // What a link or a slot hands over is only as whole as whoever
+    // wrote it, and the controls take whatever they are given: a missing
+    // layer threw halfway through, after the size and the background
+    // had already been applied, and a menu handed a value it does not
+    // list was left showing nothing. So the gaps are filled before any
+    // control is touched. A missing or malformed layer is the default
+    // one, a menu value this build does not have is that menu's
+    // default, and a color or a number that is not one is the control's
+    // own. Something that is not a composition at all throws, which the
+    // caller reports, with the page still as it was.
+    function normalizeSnapshot(data) {
+      const isObject = (value) => !!value && typeof value === "object" && !Array.isArray(value);
+      if (!isObject(data)) throw new Error("not a composition");
+      const el = (id) => document.getElementById(id);
+      const listed = (id, value, fallback) => ([...el(id).options].some((o) => o.value === value) ? value : fallback);
+      const out = Object.assign({}, data);
+      if (!/^#[0-9a-f]{6}$/i.test(out.bgColor)) out.bgColor = el("bgColor").defaultValue;
+      ["width", "height", "blockSize"].forEach((key) => {
+        if (!Number.isFinite(parseFloat(out[key]))) out[key] = el(key).defaultValue;
+      });
+      out.shapeMask = listed("shapeMask", out.shapeMask, "none");
+      ["layerA", "layerB"].forEach((prefix) => {
+        const layer = Object.assign({}, defaults[prefix], isObject(data[prefix]) ? data[prefix] : null);
+        layer.symmetry = listed(prefix + "-symmetry", layer.symmetry, defaults[prefix].symmetry);
+        layer.texture = listed(prefix + "-texture", layer.texture, "streaks");
+        layer.motion = listed(prefix + "-motion", layer.motion, "same");
+        out[prefix] = layer;
+      });
+      return out;
+    }
+
+    function applySnapshot(snapshot) {
+      const data = normalizeSnapshot(snapshot);
       applyGeneral(data);
       applyDefaults("layerA", data.layerA);
       applyDefaults("layerB", data.layerB);
@@ -4336,6 +4368,10 @@
         }
         return true;
       } catch (err) {
+        // A link that cannot be read used to fall through to a random
+        // composition without a word, which reads as the link having
+        // worked and being someone's odd taste.
+        showToast("Couldn't open that link");
         return false;
       }
     }
