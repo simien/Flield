@@ -2162,6 +2162,25 @@
     // when the slider moved, and landing after a Random it painted the
     // old picture over the new one. A PNG or SVG saved then was the
     // stale picture carrying the new one's link.
+    // A page opened from a link keeps that link in the address bar, and
+    // it used to stay there after every edit, so a reload or a copy
+    // from the bar brought back the picture the link was opened with.
+    // Once a link is applied, the bar follows the composition instead.
+    // A plain visit is left alone: its address carries no picture.
+    let addressCarriesLink = false;
+    let addressTimer = 0;
+    function syncAddressBar() {
+      if (!addressCarriesLink) return;
+      clearTimeout(addressTimer);
+      addressTimer = setTimeout(() => {
+        try {
+          history.replaceState(history.state, "", stateUrl(snapshotForSharing()));
+        } catch (err) {
+          // A sandboxed frame can refuse; the bar is a convenience.
+        }
+      }, 400);
+    }
+
     function render() {
       if (renderFrame) {
         cancelAnimationFrame(renderFrame);
@@ -2183,6 +2202,7 @@
     }
 
     function prepareRender() {
+      syncAddressBar();
       updateShapeMaskDirectionUI();
       updateMotionUI();
       const options = readOptions();
@@ -4661,6 +4681,7 @@
             `Locked fields hold, the rest reroll every ${speedText}`;
           playOffer.hidden = false;
         }
+        addressCarriesLink = true;
         return true;
       } catch (err) {
         // A link that cannot be read used to fall through to a random
