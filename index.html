@@ -1817,6 +1817,24 @@
     // inputs' max as well, so the field says what the canvas does.
     const MAX_SIDE_PX = 8192;
     const clampSide = (value) => Math.min(MAX_SIDE_PX, Math.max(16, parseInt(value, 10) || 100));
+    // The side cap alone still let a link ask for 8192 by 8192, four
+    // times this many pixels, and at block size 2 with a motion that is
+    // four to seven seconds a frame, back to back: a frozen tab from a
+    // link. So the area is capped too, at a 4096 square's worth. A
+    // canvas over it is scaled down with its shape kept, both sides
+    // rounded down so the result is under the cap and clamping it again
+    // changes nothing. An 8192 by 2048 banner and a 5K background fit.
+    const MAX_AREA_PX = 4096 * 4096;
+    function clampSize(width, height) {
+      let w = clampSide(width);
+      let h = clampSide(height);
+      if (w * h > MAX_AREA_PX) {
+        const scale = Math.sqrt(MAX_AREA_PX / (w * h));
+        w = Math.max(16, Math.floor(w * scale));
+        h = Math.max(16, Math.floor(h * scale));
+      }
+      return [w, h];
+    }
 
     // Two durations on one scale: how long a motion cycle lasts, and how
     // long Auto-randomize waits before rerolling. They were one number
@@ -1856,6 +1874,7 @@
     const formatSpeed = (ms) => (ms / 1000).toFixed(ms < 1000 ? 2 : 1) + "s";
 
     function readOptions() {
+      const [width, height] = clampSize(document.getElementById("width").value, document.getElementById("height").value);
       return {
         v: STATE_VERSION,
         speed: speedMs(parseInt(speedInput.value, 10)),
@@ -1864,8 +1883,8 @@
         direction: directionSelect.value,
         collide: parseInt(collideInput.value, 10) / 10,
         bgColor: document.getElementById("bgColor").value,
-        width: clampSide(document.getElementById("width").value),
-        height: clampSide(document.getElementById("height").value),
+        width,
+        height,
         blockSize: parseInt(document.getElementById("blockSize").value, 10),
         shapeMask: document.getElementById("shapeMask").value,
         shapeMaskDirection: document.getElementById("shapeMaskDirection").value,
@@ -2039,12 +2058,19 @@
     }
 
     document.querySelector(".controls").addEventListener("input", scheduleRender);
-    // A typed size past the cap already renders at the cap (readOptions
-    // clamps it); snapping the field on change keeps it from saying
-    // 10000 over a canvas that is 8192.
+    // A typed size past a cap already renders at the cap (readOptions
+    // clamps it); snapping the fields on change keeps them from saying
+    // 10000 over a canvas that is 8192. Both fields, because a size
+    // over the area cap brings the other side down with it.
+    function snapSizeFields(width, height) {
+      const [w, h] = clampSize(width, height);
+      document.getElementById("width").value = w;
+      document.getElementById("height").value = h;
+    }
     ["width", "height"].forEach((id) => {
-      const el = document.getElementById(id);
-      el.addEventListener("change", () => { el.value = clampSide(el.value); });
+      document.getElementById(id).addEventListener("change", () => {
+        snapSizeFields(document.getElementById("width").value, document.getElementById("height").value);
+      });
     });
 
     // Live preview of a motion: choosing anything but None in the
@@ -2073,6 +2099,14 @@
     // cadence at a two second beat, so nothing at or above that changes.
     const PREVIEW_FRAMES_PER_CYCLE = 25;
     const PREVIEW_MIN_FRAME_MS = 16;
+    // How long the first frame of a motion nobody picked on this visit
+    // (a link's, a slot's) may take before the motion is held still
+    // instead. The preview drops frames rather than slowing down, so a
+    // frame this long means the tab does nothing but draw, back to
+    // back. Half a second is well past what reads as motion and leaves
+    // a slow phone room to play a default-size Ripple, which measures
+    // about 100ms on a desktop.
+    const AUTO_HOLD_FRAME_MS = 500;
     // Frames in one cycle of the tutorial's animated demo, which runs on
     // its own small canvas at a fixed size rather than off the beat.
     const CYCLE_FRAMES = 38;
@@ -2259,12 +2293,24 @@
         const cadence = Math.max(PREVIEW_MIN_FRAME_MS, Math.min(CYCLE_FRAME_MS, beat / PREVIEW_FRAMES_PER_CYCLE));
         const step = Math.floor(elapsed / cadence);
         if (step !== lastStep) {
+          const first = lastStep === -1;
           lastStep = step;
           const phase = (elapsed % beat) / beat;
+          const drawStart = performance.now();
           // The cycle count is for Ripple, whose drops land somewhere
           // new each time they are reborn on the canvas; exports leave
           // it out so their rain repeats and the loop closes.
           drawComposition(Object.assign(readOptions(), { loopMode: generalMotion() || "none", loopPhase: phase, loopCycle: Math.floor(elapsed / beat) }));
+          // A link can carry a canvas this machine cannot animate. The
+          // first frame says so, and the still goes back in place of a
+          // tab that only draws. The Motion menu keeps what the link
+          // set, as it does under reduced motion, and picking a motion
+          // by hand still plays whatever the frame costs.
+          if (auto && first && performance.now() - drawStart > AUTO_HOLD_FRAME_MS) {
+            stopSeamlessPreview();
+            showToast("Motion held, this canvas is slow to play");
+            return;
+          }
         }
         seamlessPreview.frame = requestAnimationFrame(tick);
       };
@@ -3069,8 +3115,7 @@
       directionSelect.value = values.direction === "reverse" ? "reverse" : "forward";
       collideInput.value = values.collide > 0 ? Math.min(10, Math.round(values.collide * 10)) : 0;
       document.getElementById("bgColor").value = values.bgColor;
-      document.getElementById("width").value = clampSide(values.width);
-      document.getElementById("height").value = clampSide(values.height);
+      snapSizeFields(values.width, values.height);
       document.getElementById("blockSize").value = values.blockSize;
       document.getElementById("shapeMask").value = values.shapeMask || "none";
       // Rebuild the direction options for the restored shape now, rather

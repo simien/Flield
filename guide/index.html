@@ -277,7 +277,7 @@
     <ul>
       <li><strong>Flow scale</strong> is measured in canvas pixels, so a setting reads the same at any block size.</li>
       <li><strong>Field strength</strong> puts clear banding around the middle of its range. A link or saved slot from before that change loads with its strength halved, so it renders exactly as it did.</li>
-      <li><strong>Width</strong> and <strong>height</strong> stop at 8192 pixels a side, and a larger number is brought back to that. Past it a render takes tens of seconds, and the browser will not draw the canvas anyway.</li>
+      <li><strong>Width</strong> and <strong>height</strong> stop at 8192 pixels a side, and a larger number is brought back to that. Past it a render takes tens of seconds, and the browser will not draw the canvas anyway. The two together stop at the area of a 4096 by 4096 square, and a larger canvas is scaled down to fit with its shape kept, because past that a motion takes seconds to draw each frame.</li>
     </ul>
 
     <h3>Scrolling</h3>
@@ -368,7 +368,7 @@
 
     <div class="note">
       <p>Motion flashes the whole canvas. Pulse is the clearest case: it swings the covered area between roughly 39% and 81%, once a cycle, and on a high-contrast palette that is a large area changing brightness.</p>
-      <p>The Speed slider therefore starts at one second, which is one of those a second. <a href="https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html" target="_blank" rel="noopener">WCAG 2.3.1</a> puts the limit at three. If flashing affects you, leave Motion off. If your system asks for reduced motion, a shared link carrying a motion will not start it on its own.</p>
+      <p>The Speed slider therefore starts at one second, which is one of those a second. <a href="https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html" target="_blank" rel="noopener">WCAG 2.3.1</a> puts the limit at three. If flashing affects you, leave Motion off. If your system asks for reduced motion, a shared link carrying a motion will not start it on its own. Neither will a link whose first frame takes more than half a second to draw. It opens still, and setting Motion to None and back plays it anyway.</p>
     </div>
     <p><strong>Motion</strong>, in the General tab, holds every setting and both seeds, then animates the composition on screen. The last frame flows straight into the first, with no visible cut.</p>
     <p>There are six kinds beside <strong>None</strong>: <strong>Loop</strong>, <strong>Drift</strong>, <strong>Wind</strong>, <strong>Pulse</strong>, <strong>Ripple</strong> and <strong>Tide</strong>. Pick one and the canvas plays it straight away, which is also exactly what a GIF will record.</p>
