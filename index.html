@@ -1648,9 +1648,8 @@
         closeColorPicker();
       }
     });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeColorPicker();
-    });
+    // Escape is handled once, for every layer (see the end of the tour
+    // section below), so it closes only the one on top.
 
     // Background color, block size, and shape mask aren't per-layer fields,
     // so their lock buttons (in the General tab's own markup, not the layer
@@ -3585,9 +3584,6 @@
 
     sidebarToggle.addEventListener("click", () => showSheetPanel("settings"));
     sidebarBackdrop.addEventListener("click", () => setSidebarOpen(false));
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") setSidebarOpen(false);
-    });
 
     // Undo, Auto-randomize and Random are the three controls pressed
     // over and over, and inside the panel every one of them costs an
@@ -4184,9 +4180,19 @@
         else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
         return;
       }
-      if (e.key === "Escape") closeTutorial();
-      else if (e.key === "ArrowRight") advanceTutorial();
+      if (e.key === "ArrowRight") advanceTutorial();
       else if (e.key === "ArrowLeft" && !tutorialPrevBtn.disabled) goToTutorialStep(tutorialStep - 1);
+    });
+
+    // One Escape closes one layer, the topmost: the tour over everything,
+    // then the color picker, then the phone sheet. Each used to listen
+    // for itself, so a single press closed the picker and the sheet
+    // under it together, and the tour and the sheet the same way.
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (!tutorialModal.hidden) closeTutorial();
+      else if (!colorPopover.hidden) closeColorPicker();
+      else if (document.body.classList.contains("sidebar-open")) setSidebarOpen(false);
     });
 
     // Shortcuts for the exploration loop, the three things pressed over
