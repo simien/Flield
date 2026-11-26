@@ -214,8 +214,8 @@ input[type="range"]:focus-visible {
   /* The gap under the footer strip. It matches the sidebar's own bottom
      padding rather than the artboard's inset, so the name and links line
      up with the last row of buttons in the sidebar instead of floating
-     5px above it. The mobile block below hands it back to the artboard's
-     inset, where there is no sidebar to line up with. */
+     5px above it. The phone block at the end of the file hands it back to
+     the artboard's inset, where there is no sidebar to line up with. */
   --footer-inset: 20px;
   /* The footer's own footprint off the bottom edge: its 32px line plus
      the inset under it. The artboard stops here rather than running
@@ -286,35 +286,6 @@ input[type="range"]:focus-visible {
 
 .sheet-handle {
   display: none;
-}
-
-@media (max-width: 768px) {
-  .sheet-handle {
-    display: block;
-    position: relative;
-    flex-shrink: 0;
-    width: 100%;
-    height: 24px;
-    border: 0;
-    border-radius: 16px 16px 0 0;
-    background: var(--panel);
-    box-shadow: none;
-    /* The drag is handled in script; without this the browser claims
-       the gesture for a scroll before the first pointermove lands. */
-    touch-action: none;
-  }
-
-  .sheet-handle::before {
-    content: "";
-    position: absolute;
-    top: 9px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 36px;
-    height: 4px;
-    border-radius: 2px;
-    background: var(--border-strong);
-  }
 }
 
 /* Hidden wherever it happens to be sitting; .action-bar below shows it
@@ -572,14 +543,6 @@ input[type="range"]:focus-visible {
   padding-right: 4px;
 }
 
-@media (max-width: 768px) {
-  .tour-chip {
-    white-space: normal;
-    line-height: 1.4;
-    border-radius: 20px;
-  }
-}
-
 .tour-chip.play-offer > span {
   text-decoration: underline dotted;
   text-underline-offset: 3px;
@@ -618,98 +581,6 @@ input[type="range"]:focus-visible {
   .toast {
     transition: opacity 0.2s ease;
     transform: translateY(0);
-  }
-}
-
-/* Below this width there's no room for a permanent side-by-side layout,
-   so the sidebar becomes a sheet over the bottom of the screen, toggled
-   by .sidebar-toggle instead of always being on screen. */
-@media (max-width: 768px) {
-  /* The touch tier. One height, one caret, one inset and one gap, read
-     by the bar and by both sheet panels, so the whole bottom assembly
-     lines up: a download button's left edge sits directly over Undo's.
-     Gap stays under the inset, the usual toolbar ratio, so controls
-     never crowd the screen edge harder than they crowd each other. */
-  :root {
-    --touch-h: 44px;
-    --caret-w: 36px;
-    --edge-pad: 16px;
-    --touch-gap: 12px;
-    --action-bar-h: calc(var(--touch-h) + 17px + env(safe-area-inset-bottom, 0px));
-    /* Capped in px as well as dvh so the sheet stops growing on a tall
-       phone and leaves the artwork the rest. At this height the canvas
-       clears the sheet whole on every phone down to a 568px viewport. */
-    --sheet-h: min(58dvh, 460px);
-    /* The second stop, for when the settings matter more than the view:
-       the sheet takes what it can and still leaves a 96px band of
-       artboard, so the artwork thins to a strip rather than vanishing. */
-    --sheet-h-tall: min(88dvh, calc(100dvh - var(--action-bar-h) - 96px));
-  }
-
-  /* A sheet rising off the action bar, not a side drawer. A panel that
-     flew in from one edge covered the artwork it was editing, so every
-     slider was a guess; this leaves the canvas on screen above it and
-     .canvas-area shrinks to match, which is the whole point of the
-     shape. It also lands where the bar that opens it already is. */
-  .controls {
-    position: fixed;
-    top: auto;
-    left: 0;
-    right: 0;
-    bottom: var(--action-bar-h);
-    width: auto;
-    height: var(--sheet-h);
-    z-index: 25;
-    border-right: none;
-    border-top: 1px solid var(--border);
-    border-radius: 16px 16px 0 0;
-    /* Its own height, so it parks out of sight behind the bar. */
-    transform: translateY(100%);
-    transition: transform 0.2s ease;
-    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.35);
-  }
-
-  body.sidebar-open .controls {
-    transform: translateY(0);
-  }
-
-  body.sheet-tall .controls {
-    height: var(--sheet-h-tall);
-  }
-
-  /* Nothing is being sent to the background here: the canvas above the
-     sheet is the thing being watched, so the backdrop keeps only its
-     job of closing the sheet when the artwork is tapped. */
-  body.sidebar-open .sidebar-backdrop {
-    display: block;
-    background: transparent;
-  }
-
-  .main-area {
-    --artboard-pad: var(--edge-pad);
-    --footer-inset: var(--edge-pad);
-  }
-
-  /* With the sheet up, the artwork gets the shortened area to itself:
-     the name would otherwise sit across the top of it, and the footer
-     is behind the sheet anyway. */
-  body.sidebar-open .main-area {
-    --artboard-clear: 12px;
-  }
-}
-
-/* A 320px screen is 44px short of seating the cluster at full size, so
-   everything gives a little rather than the bar overflowing. 40px is
-   still a usable target, and only the smallest phones ever see it. */
-/* A 320px screen can't seat the touch tier at full size, so the tier
-   itself steps down and every rule above follows. 40px is still a
-   usable target, and only the smallest phones ever see it. */
-@media (max-width: 359px) {
-  :root {
-    --touch-h: 40px;
-    --caret-w: 32px;
-    --edge-pad: 12px;
-    --touch-gap: 8px;
   }
 }
 
@@ -1779,39 +1650,6 @@ button.secondary {
   overflow: hidden;
 }
 
-/* The artboard ends at the bottom edge, and below the breakpoint that
-   edge belongs to the action bar, then to the sheet on top of it. This
-   is what keeps the artwork on screen while it's being edited. Kept
-   next to the rule it overrides rather than up in the sheet's own media
-   query, which comes earlier in the file than the inset it has to beat. */
-@media (max-width: 768px) {
-  .canvas-area {
-    /* Matches the sheet's own slide, so the artwork resizes with it
-       rather than snapping once it lands. */
-    transition: bottom 0.2s ease;
-  }
-
-  /* --sheet-actual is the sheet's measured height, published by the
-     observer in index.html. One rule then covers all three of its
-     sizes, including the export panel's, which is only as tall as the
-     handful of buttons on it. The var's fallback is the first stop, for
-     the frame before the observer's first callback. */
-  body.sidebar-open .canvas-area {
-    bottom: calc(var(--action-bar-h) + var(--sheet-actual, var(--sheet-h)));
-  }
-
-  body.has-last-control .canvas-area {
-    bottom: calc(
-      var(--footer-strip) + var(--action-bar-h) + var(--last-control-h, 0px)
-    );
-  }
-
-  /* The handle already supplies the gap above the first row. */
-  .controls-header {
-    padding-top: 4px;
-  }
-}
-
 /* On desktop the wrapper leaves no box of its own, so the footer's link
    row lays its two buttons out exactly as it did before they were
    grouped. Below the breakpoint the group becomes a real row, at the
@@ -1825,107 +1663,6 @@ button.secondary {
 .export-title {
   display: none;
   margin-top: 0;
-}
-
-/* The sheet shows one panel at a time, chosen from the bar. Deleting
-   the footer from the settings view is the point of the split: it was
-   121px of permanently pinned chrome above a scroll area that had 82px
-   left on a small phone. */
-@media (max-width: 768px) {
-  body.sheet-export .controls-header,
-  body.sheet-export .controls-body {
-    display: none;
-  }
-
-  body:not(.sheet-export) .controls-footer {
-    display: none;
-  }
-
-  /* A handful of buttons doesn't need the settings panel's height, so
-     the sheet shrinks to them and hands the difference back to the
-     artwork. It still can't outgrow the first stop. */
-  body.sheet-export .controls {
-    height: auto;
-    max-height: var(--sheet-h);
-  }
-
-  /* As a panel it owns the sheet, so it scrolls if it ever has to, and
-     it drops the divider it wore as a footer. */
-  body.sheet-export .controls-footer {
-    flex: 0 1 auto;
-    overflow-y: auto;
-    border-top: none;
-    background: var(--well);
-  }
-
-  /* This is a thumb surface now, not a corner of the sidebar, and it
-     shares the bar's inset and gap so the two read as one stack. */
-  body.sheet-export .controls-footer button,
-  body.sheet-export .controls-footer .split-btn-select {
-    height: var(--touch-h);
-  }
-
-  body.sheet-export .controls-footer .button-row,
-  body.sheet-export .controls-footer .footer-link-row {
-    gap: var(--touch-gap);
-  }
-
-  /* Three equal labels. Sizing each unit outright, rather than leaving
-     it to grow from a flex basis, because the split's inner row makes
-     the shared-remainder maths come out lopsided: the caret has to be
-     an addition to the group, not a bite out of the label beside it.
-     The split gets one unit plus the caret; the other two get a unit
-     each; three units and the caret and two gaps fill the row. */
-  body.sheet-export .controls-footer .button-row {
-    --export-unit: calc((100% - 2 * var(--touch-gap) - var(--caret-w)) / 3);
-  }
-
-  body.sheet-export .controls-footer .button-row > button {
-    flex: 0 0 var(--export-unit);
-  }
-
-  body.sheet-export .controls-footer .button-row > .split-btn {
-    flex: 0 0 calc(var(--export-unit) + var(--caret-w));
-  }
-
-  body.sheet-export .controls-footer .button-row > .split-btn > .split-btn-main {
-    flex: 1;
-    min-width: 0;
-  }
-
-  /* Every panel takes the same side inset as the bar below it, so the
-     edges of the whole bottom assembly line up. */
-  .controls-header {
-    padding-left: var(--edge-pad);
-    padding-right: var(--edge-pad);
-  }
-
-  .controls-body {
-    padding: 16px var(--edge-pad) var(--edge-pad);
-  }
-
-  .controls-footer {
-    padding: var(--edge-pad);
-  }
-
-  .export-title {
-    display: block;
-  }
-
-  /* Tutorial and theme, once script has moved them to the end of the
-     settings scroll. They sit on their own line above the bottom fade,
-     off the pinned chrome they used to be part of. */
-  .app-chrome {
-    display: flex;
-    gap: 8px;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-  }
-
-  .app-chrome button {
-    width: auto;
-  }
 }
 
 /* A phone held sideways gets the sidebar layout, because it is wider
@@ -2071,21 +1808,6 @@ button.secondary {
    marked aria-hidden in the markup, so the dimming is decorative. */
 .site-footer-links span[aria-hidden] {
   opacity: 0.7;
-}
-
-/* Same as the artboard above: the strip clears the action bar instead
-   of sitting under it. Placed after .site-footer's own margin-bottom
-   for the same source-order reason. */
-@media (max-width: 768px) {
-  .site-footer {
-    margin-bottom: calc(var(--footer-inset) + var(--action-bar-h));
-  }
-
-  body.has-last-control .site-footer {
-    margin-bottom: calc(
-      var(--footer-inset) + var(--action-bar-h) + var(--last-control-h, 0px)
-    );
-  }
 }
 
 /* No keyboard to bind on a phone or a touch-only screen; the links go
@@ -3068,6 +2790,281 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
   }
 }
 
+/* The phone layout: every rule for 768px and below, in one block at the
+   end of the file. Being last is the point. A phone override and the
+   base rule it beats usually have the same specificity, so the later
+   one wins, and seven blocks spread through the file kept losing to base
+   rules declared after them (.canvas-area, .site-footer, .export-title,
+   .app-chrome). Here, each one comes after every base rule. Wider
+   tiers that only apply above the breakpoint stay beside their rules. */
+@media (max-width: 768px) {
+  .sheet-handle {
+    display: block;
+    position: relative;
+    flex-shrink: 0;
+    width: 100%;
+    height: 24px;
+    border: 0;
+    border-radius: 16px 16px 0 0;
+    background: var(--panel);
+    box-shadow: none;
+    /* The drag is handled in script; without this the browser claims
+       the gesture for a scroll before the first pointermove lands. */
+    touch-action: none;
+  }
+
+  .sheet-handle::before {
+    content: "";
+    position: absolute;
+    top: 9px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border-strong);
+  }
+
+  .tour-chip {
+    white-space: normal;
+    line-height: 1.4;
+    border-radius: 20px;
+  }
+
+  /* Below this width there's no room for a permanent side-by-side layout,
+     so the sidebar becomes a sheet over the bottom of the screen, toggled
+     by .sidebar-toggle instead of always being on screen. */
+  /* The touch tier. One height, one caret, one inset and one gap, read
+     by the bar and by both sheet panels, so the whole bottom assembly
+     lines up: a download button's left edge sits directly over Undo's.
+     Gap stays under the inset, the usual toolbar ratio, so controls
+     never crowd the screen edge harder than they crowd each other. */
+  :root {
+    --touch-h: 44px;
+    --caret-w: 36px;
+    --edge-pad: 16px;
+    --touch-gap: 12px;
+    --action-bar-h: calc(var(--touch-h) + 17px + env(safe-area-inset-bottom, 0px));
+    /* Capped in px as well as dvh so the sheet stops growing on a tall
+       phone and leaves the artwork the rest. At this height the canvas
+       clears the sheet whole on every phone down to a 568px viewport. */
+    --sheet-h: min(58dvh, 460px);
+    /* The second stop, for when the settings matter more than the view:
+       the sheet takes what it can and still leaves a 96px band of
+       artboard, so the artwork thins to a strip rather than vanishing. */
+    --sheet-h-tall: min(88dvh, calc(100dvh - var(--action-bar-h) - 96px));
+  }
+
+  /* A sheet rising off the action bar, not a side drawer. A panel that
+     flew in from one edge covered the artwork it was editing, so every
+     slider was a guess; this leaves the canvas on screen above it and
+     .canvas-area shrinks to match, which is the whole point of the
+     shape. It also lands where the bar that opens it already is. */
+  .controls {
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: var(--action-bar-h);
+    width: auto;
+    height: var(--sheet-h);
+    z-index: 25;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    /* Its own height, so it parks out of sight behind the bar. */
+    transform: translateY(100%);
+    transition: transform 0.2s ease;
+    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.35);
+  }
+
+  body.sidebar-open .controls {
+    transform: translateY(0);
+  }
+
+  body.sheet-tall .controls {
+    height: var(--sheet-h-tall);
+  }
+
+  /* Nothing is being sent to the background here: the canvas above the
+     sheet is the thing being watched, so the backdrop keeps only its
+     job of closing the sheet when the artwork is tapped. */
+  body.sidebar-open .sidebar-backdrop {
+    display: block;
+    background: transparent;
+  }
+
+  .main-area {
+    --artboard-pad: var(--edge-pad);
+    --footer-inset: var(--edge-pad);
+  }
+
+  /* With the sheet up, the artwork gets the shortened area to itself:
+     the name would otherwise sit across the top of it, and the footer
+     is behind the sheet anyway. */
+  body.sidebar-open .main-area {
+    --artboard-clear: 12px;
+  }
+
+  /* The artboard ends at the bottom edge, and below the breakpoint that
+     edge belongs to the action bar, then to the sheet on top of it. This
+     is what keeps the artwork on screen while it's being edited. */
+  .canvas-area {
+    /* Matches the sheet's own slide, so the artwork resizes with it
+       rather than snapping once it lands. */
+    transition: bottom 0.2s ease;
+  }
+
+  /* --sheet-actual is the sheet's measured height, published by the
+     observer in index.html. One rule then covers all three of its
+     sizes, including the export panel's, which is only as tall as the
+     handful of buttons on it. The var's fallback is the first stop, for
+     the frame before the observer's first callback. */
+  body.sidebar-open .canvas-area {
+    bottom: calc(var(--action-bar-h) + var(--sheet-actual, var(--sheet-h)));
+  }
+
+  body.has-last-control .canvas-area {
+    bottom: calc(
+      var(--footer-strip) + var(--action-bar-h) + var(--last-control-h, 0px)
+    );
+  }
+
+  /* The handle already supplies the gap above the first row. */
+  .controls-header {
+    padding-top: 4px;
+  }
+
+  /* The sheet shows one panel at a time, chosen from the bar. Deleting
+     the footer from the settings view is the point of the split: it was
+     121px of permanently pinned chrome above a scroll area that had 82px
+     left on a small phone. */
+  body.sheet-export .controls-header,
+  body.sheet-export .controls-body {
+    display: none;
+  }
+
+  body:not(.sheet-export) .controls-footer {
+    display: none;
+  }
+
+  /* A handful of buttons doesn't need the settings panel's height, so
+     the sheet shrinks to them and hands the difference back to the
+     artwork. It still can't outgrow the first stop. */
+  body.sheet-export .controls {
+    height: auto;
+    max-height: var(--sheet-h);
+  }
+
+  /* As a panel it owns the sheet, so it scrolls if it ever has to, and
+     it drops the divider it wore as a footer. */
+  body.sheet-export .controls-footer {
+    flex: 0 1 auto;
+    overflow-y: auto;
+    border-top: none;
+    background: var(--well);
+  }
+
+  /* This is a thumb surface now, not a corner of the sidebar, and it
+     shares the bar's inset and gap so the two read as one stack. */
+  body.sheet-export .controls-footer button,
+  body.sheet-export .controls-footer .split-btn-select {
+    height: var(--touch-h);
+  }
+
+  body.sheet-export .controls-footer .button-row,
+  body.sheet-export .controls-footer .footer-link-row {
+    gap: var(--touch-gap);
+  }
+
+  /* Three equal labels. Sizing each unit outright, rather than leaving
+     it to grow from a flex basis, because the split's inner row makes
+     the shared-remainder maths come out lopsided: the caret has to be
+     an addition to the group, not a bite out of the label beside it.
+     The split gets one unit plus the caret; the other two get a unit
+     each; three units and the caret and two gaps fill the row. */
+  body.sheet-export .controls-footer .button-row {
+    --export-unit: calc((100% - 2 * var(--touch-gap) - var(--caret-w)) / 3);
+  }
+
+  body.sheet-export .controls-footer .button-row > button {
+    flex: 0 0 var(--export-unit);
+  }
+
+  body.sheet-export .controls-footer .button-row > .split-btn {
+    flex: 0 0 calc(var(--export-unit) + var(--caret-w));
+  }
+
+  body.sheet-export .controls-footer .button-row > .split-btn > .split-btn-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Every panel takes the same side inset as the bar below it, so the
+     edges of the whole bottom assembly line up. */
+  .controls-header {
+    padding-left: var(--edge-pad);
+    padding-right: var(--edge-pad);
+  }
+
+  .controls-body {
+    padding: 16px var(--edge-pad) var(--edge-pad);
+  }
+
+  .controls-footer {
+    padding: var(--edge-pad);
+  }
+
+  .export-title {
+    display: block;
+  }
+
+  /* Tutorial and theme, once script has moved them to the end of the
+     settings scroll. They sit on their own line above the bottom fade,
+     off the pinned chrome they used to be part of. */
+  .app-chrome {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .app-chrome button {
+    width: auto;
+  }
+
+  /* Same as the artboard: the strip clears the action bar instead of
+     sitting under it. */
+  .site-footer {
+    margin-bottom: calc(var(--footer-inset) + var(--action-bar-h));
+  }
+
+  body.has-last-control .site-footer {
+    margin-bottom: calc(
+      var(--footer-inset) + var(--action-bar-h) + var(--last-control-h, 0px)
+    );
+  }
+
+  /* Touch targets in the phone sheet. Its controls were 26 to 32px tall
+     beside a 44px action bar. 40 is the floor here rather than 44, which
+     would add some 130px to every tab of a sheet already scrolled. As
+     min-height (and min-width for the square lock), so it wins over each
+     control's own height wherever that rule sits in the file. The handle
+     is left alone: it spans the sheet's whole width at 24px. */
+  .controls button:not(.sheet-handle),
+  .controls select,
+  .controls input[type="text"],
+  .controls input[type="number"] {
+    min-height: 40px;
+  }
+
+  .controls .lock-btn {
+    min-width: 40px;
+  }
+}
+
+/* The narrower tiers come after the phone block, so each refines it. */
 @media (max-width: 480px) {
   .tutorial-modal {
     width: 94vw;
@@ -3084,21 +3081,14 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
   }
 }
 
-/* Touch targets in the phone sheet. Its controls were 26 to 32px tall
-   beside a 44px action bar. 40 is the floor here rather than 44, which
-   would add some 130px to every tab of a sheet already scrolled. As
-   min-height (and min-width for the square lock), so it wins over each
-   control's own height wherever that rule sits in the file. The handle
-   is left alone: it spans the sheet's whole width at 24px. */
-@media (max-width: 768px) {
-  .controls button:not(.sheet-handle),
-  .controls select,
-  .controls input[type="text"],
-  .controls input[type="number"] {
-    min-height: 40px;
-  }
-
-  .controls .lock-btn {
-    min-width: 40px;
+/* A 320px screen can't seat the touch tier at full size, so the tier
+   itself steps down and every phone rule above follows. 40px is still a
+   usable target, and only the smallest phones ever see it. */
+@media (max-width: 359px) {
+  :root {
+    --touch-h: 40px;
+    --caret-w: 32px;
+    --edge-pad: 12px;
+    --touch-gap: 8px;
   }
 }

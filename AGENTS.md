@@ -60,15 +60,20 @@ copying a number out of a neighbouring paragraph.
 
 ## style.css: later wins at equal specificity
 
-The file is long and the mobile `@media (max-width: 768px)` block sits
-**earlier** than many of the base rules it needs to override. A rule like
-`.canvas-area { bottom: … }` placed in that block loses to the `.canvas-area`
-base declared 900 lines further down, silently.
+A phone override and the base rule it beats usually share a specificity,
+so whichever comes later in the file wins. The phone layout used to be
+seven `@media (max-width: 768px)` blocks spread through the file, and an
+override in an early one lost to a base rule declared further down,
+silently. That bit four separate rules (`.canvas-area`, `.site-footer`,
+`.export-title`, `.app-chrome`).
 
-This has bitten four separate rules (`.canvas-area`, `.site-footer`,
-`.export-title`, `.app-chrome`). If a CSS change appears to do nothing,
-check source order before anything else. The fix is to put the override
-*after* the rule it beats, or raise specificity deliberately.
+Since November 2026 every rule for 768px and below lives in one block at
+the end of the file, with the narrower tiers (480px, then 359px) after it
+so each refines the one before. Add a phone rule there, never in a new
+block beside its base rule. The trap can still come back from the other
+side: a base rule added *after* that block outranks it, so new base rules
+go above it. If a CSS change appears to do nothing, check source order
+before anything else.
 
 The same trap with a different shape: `#playBtn.playing` is an ID selector at
 (1,1,0) and outranks `button.secondary:hover` at (0,3,1). Filled states that
