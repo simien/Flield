@@ -658,7 +658,27 @@ def check_gif_writer():
     notes.append(f"gif writer: {proc.stdout.strip()}")
 
 
-# 11. Script hashes ------------------------------------------------------
+# 11. The generator ------------------------------------------------------
+# generator.js writes its noise three times over (the reference functions
+# the explainer calls, the loop inlined into getFlowField for speed, and
+# the warp's own sample), and every shared link and exported SVG rests on
+# the three agreeing to the bit. A slip in one still draws a plausible
+# picture, so nothing on screen says so. The test beside this script
+# checks the copies against each other cell for cell and holds a spread
+# of compositions to recorded checksums.
+def check_generator():
+    proc = subprocess.run(
+        ["node", str(Path(__file__).with_name("generator.test.js"))],
+        cwd=ROOT, text=True, capture_output=True,
+    )
+    if proc.returncode != 0:
+        for line in (proc.stderr.strip() or "the test did not run").splitlines()[:5]:
+            fail("generator", line.strip())
+        return
+    notes.append(f"generator: {proc.stdout.strip()}")
+
+
+# 12. Script hashes ------------------------------------------------------
 # The policy in _headers runs an inline script only if its sha256 is
 # listed there, so an injected one does not run. The cost is that every
 # edit to an inline script changes its hash, and a script whose hash is
@@ -694,7 +714,7 @@ def check_script_hashes():
         notes.append(f"script hashes: {len(want)} inline script(s), each listed in _headers")
 
 
-# 12. Analytics ----------------------------------------------------------
+# 13. Analytics ----------------------------------------------------------
 # Cloudflare's edge injects nothing into a Worker's static assets, so a
 # page is measured only if it carries the beacon itself. The app page had
 # it and the other five did not, for two months, and nothing said so. A
@@ -728,6 +748,7 @@ def main():
     check_sitemap_dates()
     check_json_ld_dates()
     check_gif_writer()
+    check_generator()
     check_script_hashes()
     check_analytics()
 

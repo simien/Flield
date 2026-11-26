@@ -246,6 +246,14 @@ marble is the streaks loop over a warped field rather than a fourth
 branch, and why new textures get their own loops instead of a condition
 inside that one.
 
+`checks.py` holds this with `.github/scripts/generator.test.js`. It
+checks the three copies of the noise arithmetic against each other (the
+reference functions the flow-fields explainer calls, the loop inlined
+into `getFlowField`, and the warp's own sample) cell for cell, and holds
+streaks and texture stills and a frame of every motion to recorded
+checksums. A motion meant to play differently updates its line from
+`--print`; a streaks still that moves is a break, not an update.
+
 Some controls mean something different per texture, and `TEXTURE_LABELS`
 renames them in the panel. Remap one without renaming it there and the
 control lies. Density means the fraction of the canvas covered in every
