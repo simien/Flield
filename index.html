@@ -1887,8 +1887,12 @@
       // Motion is part of what the piece is, not a playback preference,
       // so it travels with every link rather than only the ones marked
       // to play. Left off entirely when there is none, so links from
-      // still compositions are no longer than they were.
-      const kind = currentMotion();
+      // still compositions are no longer than they were. The General
+      // kind and nothing else: a layer's own kind already travels in
+      // its layer. Writing currentMotion() here turned General None with
+      // layer A on Drift into General Drift, and layer B, set to follow
+      // General, moved on the other end when it had been still.
+      const kind = generalMotion();
       if (kind) snapshot.motion = kind;
       return snapshot;
     }
