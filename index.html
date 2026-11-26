@@ -3025,6 +3025,21 @@
     // so slots survive a page reload.
     const PRESET_KEY_PREFIX = "featuregen-preset-";
 
+    // Every slot read and write goes through here. With site data
+    // blocked, or in a sandboxed frame, reading the localStorage
+    // property itself throws, and the read that fills in the slot rows
+    // runs at load: unguarded, it took the rest of the script with it,
+    // so the canvas stayed blank and a link was never read. A slot that
+    // cannot be read is an empty one, and a write says whether it took.
+    const slotStore = {
+      read(slot) {
+        try { return localStorage.getItem(PRESET_KEY_PREFIX + slot); } catch (err) { return null; }
+      },
+      write(slot, value) {
+        try { localStorage.setItem(PRESET_KEY_PREFIX + slot, value); return true; } catch (err) { return false; }
+      },
+    };
+
     function applyGeneral(values) {
       // Absent from every slot and link written while the beat was a
       // five-entry menu that only travelled with an autoplay flag; those
@@ -3077,7 +3092,7 @@
     }
 
     function refreshPresetUI(slot) {
-      const raw = localStorage.getItem(PRESET_KEY_PREFIX + slot);
+      const raw = slotStore.read(slot);
       const row = document.querySelector(`.preset-row[data-slot="${slot}"]`);
       const swatches = row.querySelector(".preset-swatches");
       let data = null;
@@ -3114,7 +3129,10 @@
     document.querySelectorAll(".preset-save-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const snapshot = Object.assign(snapshotForSharing(), { savedAt: Date.now() });
-        localStorage.setItem(PRESET_KEY_PREFIX + btn.dataset.slot, JSON.stringify(snapshot));
+        if (!slotStore.write(btn.dataset.slot, JSON.stringify(snapshot))) {
+          showToast("Couldn't save: storage is blocked or full");
+          return;
+        }
         refreshPresetUI(btn.dataset.slot);
         showToast(`Saved to Slot ${btn.dataset.slot}`);
       });
@@ -3122,7 +3140,7 @@
 
     document.querySelectorAll(".preset-load-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const raw = localStorage.getItem(PRESET_KEY_PREFIX + btn.dataset.slot);
+        const raw = slotStore.read(btn.dataset.slot);
         if (!raw) return;
         applySnapshot(upgradeState(JSON.parse(raw)));
         showToast(`Loaded Slot ${btn.dataset.slot}`);
