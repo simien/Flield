@@ -216,6 +216,16 @@ one scope:
   `SyntaxError` that killed every listener on the page while it still served
   200. CI parses `core.js`, `app.js` and each inline block to catch this.
 
+## A layer value is a row in LAYER_FIELDS
+
+`applyDefaults`, `readLayer` and `updateLayerLabels` walk `LAYER_FIELDS`
+in `app.js` rather than naming each field; until November 2026 a field
+was spelled out in each of them by hand. A new value is a row there, a
+control in the markup's layer template, and a default in each layer of
+`defaults`. If it is to travel in a link, it goes in `COMPACT_TAIL_FIELDS`
+in `core.js`, not `COMPACT_LAYER_NUMBERS`: that table sits ahead of the
+tail and may not grow (see "A shared link is a bit stream" below).
+
 ## The layout moves live elements, it does not copy them
 
 Across the 768px breakpoint, `syncActionBar()` reparents the real

@@ -690,31 +690,49 @@
       },
     };
 
-    function applyDefaults(prefix, values) {
-      document.getElementById(prefix + "-seed").value = values.seed;
-      document.getElementById(prefix + "-color").value = values.color;
-      document.getElementById(prefix + "-hueMin").value = values.hueMin;
-      document.getElementById(prefix + "-hueMax").value = values.hueMax;
-      document.getElementById(prefix + "-satMin").value = values.satMin;
-      document.getElementById(prefix + "-satMax").value = values.satMax;
-      document.getElementById(prefix + "-lightMin").value = values.lightMin;
-      document.getElementById(prefix + "-lightMax").value = values.lightMax;
-      document.getElementById(prefix + "-density").value = values.density;
-      document.getElementById(prefix + "-densityMin").value = values.densityMin;
-      document.getElementById(prefix + "-densityMax").value = values.densityMax;
-      document.getElementById(prefix + "-fieldStrength").value = values.fieldStrength;
-      document.getElementById(prefix + "-fieldScale").value = values.fieldScale;
-      document.getElementById(prefix + "-flowAngle").value = values.flowAngle;
-      document.getElementById(prefix + "-flowStretch").value = values.flowStretch;
-      document.getElementById(prefix + "-fieldOctaves").value = values.fieldOctaves;
+    // Every value a layer carries, once each: how its control reads back
+    // and how its value label shows it (the seed, the color and the menus
+    // show themselves). applyDefaults, readLayer and updateLayerLabels
+    // walk this rather than naming each field, so a new layer value is a
+    // row here, a control in the markup, and a default in each layer
+    // above. Field strength's label hangs on the texture and is written in
+    // updateLayerLabels. The shared link keeps its own table,
+    // COMPACT_LAYER_NUMBERS in core.js, whose order is the link format, so
+    // it is never derived from this one.
+    const asInt = (value) => parseInt(value, 10);
+    const LAYER_FIELDS = [
+      // An empty seed reads as the layer's own name.
+      { key: "seed", read: (value, prefix) => value || prefix },
+      { key: "color" },
+      { key: "hueMin", read: parseFloat, show: (v) => v + "°" },
+      { key: "hueMax", read: parseFloat, show: (v) => v + "°" },
+      { key: "satMin", read: parseFloat, show: (v) => v + "%" },
+      { key: "satMax", read: parseFloat, show: (v) => v + "%" },
+      { key: "lightMin", read: parseFloat, show: (v) => v + "%" },
+      { key: "lightMax", read: parseFloat, show: (v) => v + "%" },
+      { key: "density", read: parseFloat, show: (v) => v.toFixed(2) },
+      { key: "densityMin", read: parseFloat, show: (v) => v.toFixed(2) },
+      { key: "densityMax", read: parseFloat, show: (v) => v.toFixed(2) },
+      { key: "fieldStrength", read: parseFloat },
+      { key: "fieldScale", read: asInt, show: (v) => v + "px" },
+      { key: "flowAngle", read: asInt, show: (v) => v + "°" },
+      { key: "flowStretch", read: parseFloat, show: (v) => v.toFixed(1) },
+      { key: "fieldOctaves", read: asInt, show: (v) => v },
       // Absent from every slot and link written before the second
       // texture existed, which is exactly the one they were made with.
-      document.getElementById(prefix + "-texture").value = values.texture || "streaks";
+      { key: "texture", fallback: "streaks" },
       // Absent from every snapshot written before layers had their own
       // motion, and those followed General, which is what "same" is.
-      document.getElementById(prefix + "-motion").value = values.motion || "same";
-      document.getElementById(prefix + "-symmetry").value = values.symmetry;
-      document.getElementById(prefix + "-smoothPasses").value = values.smoothPasses;
+      { key: "motion", fallback: "same" },
+      { key: "symmetry" },
+      // The markup names its label smoothVal.
+      { key: "smoothPasses", read: asInt, show: (v) => v, label: "smoothVal" },
+    ];
+
+    function applyDefaults(prefix, values) {
+      LAYER_FIELDS.forEach(({ key, fallback }) => {
+        document.getElementById(prefix + "-" + key).value = fallback ? values[key] || fallback : values[key];
+      });
     }
     applyDefaults("layerA", defaults.layerA);
     applyDefaults("layerB", defaults.layerB);
@@ -739,28 +757,12 @@
     canvasSizeObserver.observe(canvasArea);
 
     function readLayer(prefix) {
-      return {
-        seed: document.getElementById(prefix + "-seed").value || prefix,
-        color: document.getElementById(prefix + "-color").value,
-        hueMin: parseFloat(document.getElementById(prefix + "-hueMin").value),
-        hueMax: parseFloat(document.getElementById(prefix + "-hueMax").value),
-        satMin: parseFloat(document.getElementById(prefix + "-satMin").value),
-        satMax: parseFloat(document.getElementById(prefix + "-satMax").value),
-        lightMin: parseFloat(document.getElementById(prefix + "-lightMin").value),
-        lightMax: parseFloat(document.getElementById(prefix + "-lightMax").value),
-        density: parseFloat(document.getElementById(prefix + "-density").value),
-        densityMin: parseFloat(document.getElementById(prefix + "-densityMin").value),
-        densityMax: parseFloat(document.getElementById(prefix + "-densityMax").value),
-        fieldStrength: parseFloat(document.getElementById(prefix + "-fieldStrength").value),
-        fieldScale: parseInt(document.getElementById(prefix + "-fieldScale").value, 10),
-        flowAngle: parseInt(document.getElementById(prefix + "-flowAngle").value, 10),
-        flowStretch: parseFloat(document.getElementById(prefix + "-flowStretch").value),
-        fieldOctaves: parseInt(document.getElementById(prefix + "-fieldOctaves").value, 10),
-        texture: document.getElementById(prefix + "-texture").value,
-        motion: document.getElementById(prefix + "-motion").value,
-        symmetry: document.getElementById(prefix + "-symmetry").value,
-        smoothPasses: parseInt(document.getElementById(prefix + "-smoothPasses").value, 10),
-      };
+      const layer = {};
+      LAYER_FIELDS.forEach(({ key, read }) => {
+        const value = document.getElementById(prefix + "-" + key).value;
+        layer[key] = read ? read(value, prefix) : value;
+      });
+      return layer;
     }
 
     // Every texture steers by the same five flow controls, but some of
@@ -829,15 +831,9 @@
       // By id rather than by panel: a field out on the phone strip has
       // left its panel and still needs its lock renamed.
       document.querySelectorAll(`.lock-btn[data-target-id^="${prefix}-"]`).forEach(nameLock);
-      document.getElementById(prefix + "-hueMinVal").textContent = layer.hueMin + "°";
-      document.getElementById(prefix + "-hueMaxVal").textContent = layer.hueMax + "°";
-      document.getElementById(prefix + "-satMinVal").textContent = layer.satMin + "%";
-      document.getElementById(prefix + "-satMaxVal").textContent = layer.satMax + "%";
-      document.getElementById(prefix + "-lightMinVal").textContent = layer.lightMin + "%";
-      document.getElementById(prefix + "-lightMaxVal").textContent = layer.lightMax + "%";
-      document.getElementById(prefix + "-densityVal").textContent = layer.density.toFixed(2);
-      document.getElementById(prefix + "-densityMinVal").textContent = layer.densityMin.toFixed(2);
-      document.getElementById(prefix + "-densityMaxVal").textContent = layer.densityMax.toFixed(2);
+      LAYER_FIELDS.forEach(({ key, show, label }) => {
+        if (show) document.getElementById(prefix + "-" + (label || key + "Val")).textContent = show(layer[key]);
+      });
       // Two decimals, three only when the value sits on a half step (a
       // state from before the field gain, halved on load), unless the
       // texture reads the slider as something with a unit of its own.
@@ -845,11 +841,6 @@
       document.getElementById(prefix + "-fieldStrengthVal").textContent = texture.fieldStrengthValue
         ? texture.fieldStrengthValue(strength)
         : Math.round(strength * 1000) % 10 ? strength.toFixed(3) : strength.toFixed(2);
-      document.getElementById(prefix + "-fieldScaleVal").textContent = layer.fieldScale + "px";
-      document.getElementById(prefix + "-flowAngleVal").textContent = layer.flowAngle + "°";
-      document.getElementById(prefix + "-flowStretchVal").textContent = layer.flowStretch.toFixed(1);
-      document.getElementById(prefix + "-fieldOctavesVal").textContent = layer.fieldOctaves;
-      document.getElementById(prefix + "-smoothVal").textContent = layer.smoothPasses;
     }
 
     // Only rebuilds the option list when the shape type actually changed
