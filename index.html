@@ -2110,14 +2110,47 @@
       return speedMs(parseInt(intervalInput.value, 10));
     }
 
-    // One beat's worth of frames: as smooth as the old fixed 80ms
-    // cadence until the budget can't afford it, then as many as it can.
+    // One beat's worth of frames: as many as the preview draws in that
+    // time, until the budget can't afford it, then as many as it can.
+    // The cadence is the preview's own (see the tick below), floored at
+    // what a GIF can hold. It was the fixed 80ms the preview had before
+    // PREVIEW_FRAMES_PER_CYCLE, which left a one second cycle at 13
+    // frames in the file against 25 on screen.
     function beatFrames(beats, beatMs) {
-      const smooth = Math.round(beatMs / CYCLE_FRAME_MS);
+      const cadence = Math.max(MIN_GIF_DELAY_MS, Math.min(CYCLE_FRAME_MS, beatMs / PREVIEW_FRAMES_PER_CYCLE));
+      const smooth = Math.round(beatMs / cadence);
       const budget = Math.min(GIF_FRAME_BUDGET, Math.floor(GIF_BYTES_BUDGET / (canvas.width * canvas.height * 4)));
       const affordable = Math.floor(budget / beats);
       const honored = Math.floor(beatMs / MIN_GIF_DELAY_MS);
       return Math.max(2, Math.min(Math.max(MIN_FRAMES_PER_BEAT, Math.min(smooth, affordable)), honored));
+    }
+
+    // How long frame `i` of a cycle is held, in milliseconds. A GIF
+    // stores a delay in whole hundredths of a second, so a cycle cut
+    // into equal frames almost never adds up to the cycle: 13454ms over
+    // 69 frames is 195ms each, written as 200, and the file ran 13.8s
+    // against 13.45s on screen. Each frame instead takes the hundredths
+    // between its own start and the next one's, both rounded, so the
+    // rounding is carried forward rather than repeated and a pass lands
+    // within 5ms of the cycle. Two frames never differ by more than one
+    // hundredth, and beatFrames' 20ms floor keeps every one at two or
+    // more.
+    //
+    // A frame held a hundredth longer than its neighbor has to show a
+    // moment a hundredth later too, or the motion would speed up and
+    // slow down with the rounding. So the phase is read off the same
+    // edges the delays are: where frame `i` starts, over where the
+    // cycle ends.
+    function frameEdge(n, frames, cycleMs) {
+      return Math.round((n * cycleMs) / frames / 10);
+    }
+
+    function frameDelay(i, frames, cycleMs) {
+      return (frameEdge(i + 1, frames, cycleMs) - frameEdge(i, frames, cycleMs)) * 10;
+    }
+
+    function framePhase(i, frames, cycleMs) {
+      return frameEdge(i, frames, cycleMs) / frameEdge(frames, frames, cycleMs);
     }
 
     // The General tab's kind, or null for None. What generate() gets as
@@ -2162,8 +2195,9 @@
       const beats = rerolls ? parseInt(gifStepsSelect.value, 10) : 1;
       if (!kind) return { kind: null, beats, rerolls, frames: 1, delay: currentIntervalMs() };
       const cycleMs = currentCycleMs();
-      const frames = beatFrames(beats, cycleMs);
-      return { kind, beats, rerolls, frames, delay: Math.round(cycleMs / frames) };
+      // No one delay for a motion: frameDelay spreads the cycle over
+      // its frames, so the plan carries the cycle and the frame count.
+      return { kind, beats, rerolls, frames: beatFrames(beats, cycleMs), cycleMs };
     }
 
     const SEAMLESS_NAMES = { circle: "Loop", drift: "Drift", wind: "Wind", pulse: "Pulse", ripple: "Ripple", tide: "Tide" };
@@ -2857,7 +2891,11 @@
       const plan = exportPlan();
       const kind = plan.kind;
       const frames = plan.frames;
+      // A still pass is held for the reroll interval; a moving one
+      // times each frame against the cycle (see frameDelay).
       const delay = plan.delay;
+      const delayAt = (i) => frameDelay(i, frames, plan.cycleMs);
+      const phaseAt = (i) => framePhase(i, frames, plan.cycleMs);
       const seedForFilename =
         lastOptions.layerA.seed +
         (kind ? "-" + kind : "") +
@@ -2906,8 +2944,8 @@
             if (pass) performRandomize(false);
             const options = readOptions();
             for (let i = 0; i < perPass; i++) {
-              drawComposition(Object.assign({}, options, { loopMode: generalMotion() || "none", loopPhase: i / perPass }));
-              gif.addFrame(canvas, { copy: true, delay });
+              drawComposition(Object.assign({}, options, { loopMode: generalMotion() || "none", loopPhase: phaseAt(i) }));
+              gif.addFrame(canvas, { copy: true, delay: delayAt(i) });
             }
           }
           render();
@@ -2919,8 +2957,8 @@
           // back to the still afterwards.
           const options = readOptions();
           for (let i = 0; i < frames; i++) {
-            drawComposition(Object.assign({}, options, { loopMode: generalMotion() || "none", loopPhase: i / frames }));
-            gif.addFrame(canvas, { copy: true, delay });
+            drawComposition(Object.assign({}, options, { loopMode: generalMotion() || "none", loopPhase: phaseAt(i) }));
+            gif.addFrame(canvas, { copy: true, delay: delayAt(i) });
           }
           render();
         } else {
