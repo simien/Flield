@@ -11,11 +11,13 @@ to merge.
   and that the maintainer may also use it under a separate commercial license
   offered to paying licensees.
 - **No build step, no dependencies**: the project is plain HTML, CSS, and
-  JavaScript, fully vendored, fully offline. Please don't introduce a build
+  JavaScript, nothing vendored, fully offline. Please don't introduce a build
   tool, package manager, framework, or CDN dependency. If a change seems to
   need one, open an issue first to discuss it.
 - **`generator.js` stands alone**: it has no dependency on the UI (`index.html`,
-  `style.css`), so it can be reused in other projects. Keep it that way.
+  `style.css`), so it can be reused in other projects. Keep it that way. The
+  same goes for `gif-writer.js`, the GIF encoder: it takes pixel arrays and
+  returns bytes, and `checks.py` reads its output back with a second decoder.
 - **The site is six pages**: the app (`index.html` + `style.css`), the guide
   (`guide/index.html`), three explainers (`flow-fields/`, `seamless-backgrounds/`,
   `animated-backgrounds/`), and `404.html`. Every page but the app shares
@@ -54,8 +56,9 @@ so a clear problem statement makes it much easier to judge fit.
 4. Run `python3 .github/scripts/checks.py origin/main` before you open the PR.
    It is the same script CI runs and needs nothing installed. It catches the
    failures that still serve a working-looking page: a syntax error in the
-   inline script, a duplicate id, a stale `?v=` cache buster, and a change to
-   the shared-link format that would stop existing links opening.
+   inline script, a duplicate id, a stale `?v=` cache buster, a change to
+   the shared-link format that would stop existing links opening, and a GIF
+   encoder whose file does not decode to the frames it was given.
 
    It also fails if a page changed without its paperwork:
 

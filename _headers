@@ -14,12 +14,13 @@
 # no script from any other host runs, no page can be re-based, nothing
 # embeds a plugin, and no form posts anywhere. img-src allows data: for
 # the favicon the app redraws on every load and blob: for the exported
-# frames; worker-src covers the vendored GIF encoder's worker.
+# frames. There is no worker-src: the GIF encoder that ran in a worker
+# was replaced by one that runs in the page.
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self' https://cloudflareinsights.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://cloudflareinsights.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'
 
 # The files index.html and the document pages request with a ?v= query.
 # Their cache is busted by the number, which CI makes sure moves whenever
@@ -27,12 +28,12 @@
 # a browser will keep it. Without this every asset carried Cloudflare's
 # default of max-age=0, and a returning visitor revalidated the stylesheet
 # and the generator on every load. Pages stay on the default: their names
-# never change, so they have to be checked each time. The vendored GIF
-# encoder is left out too; it carries no ?v=, so a swapped file under the
-# same name would sit stale for a year.
+# never change, so they have to be checked each time.
 /style.css
   Cache-Control: public, max-age=31536000, immutable
 /generator.js
+  Cache-Control: public, max-age=31536000, immutable
+/gif-writer.js
   Cache-Control: public, max-age=31536000, immutable
 /guide.css
   Cache-Control: public, max-age=31536000, immutable

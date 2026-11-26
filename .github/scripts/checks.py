@@ -110,11 +110,13 @@ def check_anchors():
 # Every page asks for the project's own evolving files with a ?v= query:
 # style.css and generator.js from the app, guide.css and generator.js from
 # the document pages, and the screenshot from all of them plus the README.
+# gif-writer.js is asked for by the app's script rather than its markup,
+# on the first GIF export, and is held to the same rule.
 # Forgetting to bump is invisible locally and serves a returning visitor a
 # stale copy; bumping one page and not another is how 404.html served an
 # older guide.css than the guide did; bumping without a change throws away
 # every visitor's cache for nothing. All three are caught here.
-ASSET_REF = re.compile(r"\b(style\.css|generator\.js|guide\.css|screenshot(?:-\d+)?\.(?:png|webp))\?v=(\d+)")
+ASSET_REF = re.compile(r"\b(style\.css|generator\.js|gif-writer\.js|guide\.css|screenshot(?:-\d+)?\.(?:png|webp))\?v=(\d+)")
 VERSIONED = PAGES + ["README.md"]
 # The files behind each versioned name. The screenshot's png and its webp
 # copies are cut from one capture and share one number, so they count as
@@ -122,6 +124,7 @@ VERSIONED = PAGES + ["README.md"]
 ASSET_FILES = {
     "style.css": {"style.css"},
     "generator.js": {"generator.js"},
+    "gif-writer.js": {"gif-writer.js"},
     "guide.css": {"guide.css"},
     "screenshot": {"screenshot.png", "screenshot.webp", "screenshot-800.webp"},
 }
@@ -555,6 +558,26 @@ def check_sitemap_dates():
         notes.append(f"sitemap dates: lastmod is current for all {len(SITEMAP_PAGES)} pages")
 
 
+# 10. The GIF encoder ----------------------------------------------------
+# gif-writer.js packs frames into a format with no slack in it: a code
+# written one bit too wide, or a table restarted a code late, and every
+# pixel after it is wrong. The page cannot tell. It hands over a file and
+# the damage is only visible to whoever opens it, which is the kind of
+# failure this script exists for. The test beside it writes frames, reads
+# them back with a decoder that shares no code with the encoder, and
+# compares every pixel.
+def check_gif_writer():
+    proc = subprocess.run(
+        ["node", str(Path(__file__).with_name("gif-writer.test.js"))],
+        cwd=ROOT, text=True, capture_output=True,
+    )
+    if proc.returncode != 0:
+        for line in (proc.stderr.strip() or "the test did not run").splitlines()[:5]:
+            fail("gif writer", line.strip())
+        return
+    notes.append(f"gif writer: {proc.stdout.strip()}")
+
+
 def main():
     base = sys.argv[1] if len(sys.argv) > 1 else None
     check_inline_js()
@@ -565,6 +588,7 @@ def main():
     check_link_compat(base, check_link_format())
     check_indexnow()
     check_sitemap_dates()
+    check_gif_writer()
 
     for n in notes:
         print(f"  ok  {n}")

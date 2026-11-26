@@ -128,7 +128,7 @@ walkthrough is built into the app, behind the **?** button.
 - Keyboard shortcuts for the exploration loop: `R`, `Space`, `Cmd/Ctrl+Z`
 - Dark by default, light on a toggle, remembered across visits
 - A favicon regenerated on each load in the same three colors as the canvas
-- Fully offline: every dependency vendored, no CDN, no network needed
+- No dependencies: no library, no CDN, no build step, and it keeps working offline
 
 ## Further reading
 
@@ -176,11 +176,9 @@ A full-resolution render stays well under a frame at typical sizes.
 
 ## Credits
 
-Flield is dependency-free apart from one vendored library:
+Flield has no dependencies. The GIF export is its own encoder, `gif-writer.js`, written for a canvas of three flat colors. Until November 2026 it was [gif.js](https://github.com/jnordberg/gif.js) by Johan Nordberg, which carried the export for the project's first year.
 
-- [gif.js](https://github.com/jnordberg/gif.js) by Johan Nordberg, used for the animated GIF export (`vendor/gif/`). MIT licensed, see [vendor/gif/LICENSE](vendor/gif/LICENSE).
-
-No other code is borrowed, but two public-domain algorithms in `generator.js` are built on published work rather than invented here:
+No code is borrowed, but two public-domain algorithms in `generator.js` are built on published work rather than invented here:
 
 - The flow field's noise (`makePerlin`) is [Ken Perlin](https://en.wikipedia.org/wiki/Ken_Perlin)'s gradient noise, using the fade curve from his 2002 SIGGRAPH paper, "Improved Noise reference implementation."
 - The seeded PRNG (`mulberry32`) is [Tommy Ettinger](https://github.com/tommyettinger)'s public-domain generator of the same name.

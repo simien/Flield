@@ -6,7 +6,7 @@ issues against are:
 
 - The shareable link / URL parameter parsing
 - Anything stored in the browser (save slots, theme preference)
-- The vendored, offline-bundled dependencies in `vendor/`
+- The files it exports (SVG and GIF) and the encoder that writes the GIF
 
 ## Reporting a vulnerability
 

@@ -22,9 +22,10 @@ after committing, not before.
 
 Every page requests the project's own evolving files with a `?v=N` query:
 `style.css` and `generator.js` from the app, `guide.css` from the guide, the
-explainers and `404.html`, `generator.js` again from the explainers, and
-`screenshot.png` (with its two `.webp` copies, on one number) from every page
-plus the README. Bump the
+explainers and `404.html`, `generator.js` again from the explainers,
+`gif-writer.js` from the app's script on the first GIF export (the number is
+in `loadGifWriter`, not in the markup), and `screenshot.png` (with its two
+`.webp` copies, on one number) from every page plus the README. Bump the
 number when you change that file, on **every page that requests it**, and
 **leave it alone when you haven't**. A missed bump serves a returning visitor
 a stale stylesheet; a bump on four pages and not the fifth is how `404.html`
@@ -375,6 +376,62 @@ itself. Both are tail fields whose zero is the default, so a link from
 before them opens as it did. A GIF export is capped at `GIF_FRAME_BUDGET` (240) frames; smoothness
 gives way before file size does, and at the default settings that cap is not
 what binds, the per-pass smoothness is.
+
+## The GIF encoder is the project's own
+
+`gif-writer.js` replaced the vendored gif.js on 25 November 2026. gif.js
+held every frame as raw RGBA until the encode finished, 3MB a frame on
+the default canvas, and the memory cap that forced left the default
+thirteen second cycle at 69 frames: 5fps in the file against 12.5 on the
+canvas, which is what "the GIF plays slower than it looks" turned out to
+be. It also trained a 256 color palette on a picture with three colors.
+The new one compresses each frame as it arrives and keeps only the
+bytes, reads the colors off the pixels and writes them as they are, and
+writes a pixel that did not change as transparent. Measured on one
+composition at the default speed, old encoder and new: 69 frames, 5.8MB
+and eighteen seconds became 168 frames, 6.2MB and twelve seconds. The
+file is no smaller; it holds two and a half times the frames. Three
+other compositions that day came to 0.6MB, 0.9MB and 1.8MB for the same
+168 frames: the less of the canvas a frame changes, the less it costs.
+
+Four things about it are invisible until they cost a cycle:
+
+- **It needs flat color.** A frame with more than 255 colors is refused
+  and the export ends in a toast. Nothing on the main canvas antialiases
+  today (`imageSmoothingEnabled` is off and Ripple's painter writes whole
+  pixels), so a refusal means something new started blending. Fix that
+  rather than teaching the encoder to quantize: quantizing is how a
+  brand color comes out one step off.
+- **A GIF delay is whole hundredths of a second.** Giving every frame
+  `cycle / frames` repeats the rounding on every frame, and the file ran
+  up to 4% long. `frameDelay` and `framePhase` cut the delays and the
+  phases from the same rounded edges, so a pass lands within 5ms of the
+  cycle and a frame held a hundredth longer also shows a moment a
+  hundredth later. Don't replace them with a single delay.
+- **The page is live while a moving export records.** Frames are drawn
+  one at a time with a timer between them, because 168 of them in one
+  task froze the tab. `gifExporting` holds still draws and the preview
+  off for the length of it, Auto-randomize is paused and resumed, PNG
+  and SVG are disabled because both read the canvas, and the size and
+  the motion are read once at the start. A draw that ignores the flag
+  cannot get into the file, since each frame is drawn and read back in
+  one task, but it will flash on the canvas. The timer is `setTimeout`
+  on purpose: a hidden tab stops delivering animation frames and the
+  export would wait there.
+- **The budget is pixels now, not bytes.** `GIF_PIXEL_BUDGET` gives the
+  default canvas the whole 240 frames and a larger one fewer in
+  proportion. It rations the wait and the download, not memory.
+
+An encoder that goes wrong still hands back a file, so `checks.py` runs
+`.github/scripts/gif-writer.test.js`, which reads the bytes back with a
+decoder that shares no code with the encoder and compares every pixel.
+Seven deliberate breaks (a code widened late, a table not restarted,
+the transparency flag dropped, the remap skipped, a crop a row short,
+the delay in the wrong unit, red and blue swapped) each fail it. That
+covers the format. It does not cover the page, so after touching the
+export handler, record a real one: drive the page in headless Chrome,
+checksum each frame as it is handed to the encoder, decode the saved
+file with ffmpeg, and compare. All 168 frames matched on the day.
 
 ## A shared link is a bit stream, and CI guards it
 

@@ -189,10 +189,11 @@
   }
   </script>
 
-  <!-- ?v= busts the browser cache for this project's own two evolving
-       files (not the vendored third-party ones, which are pinned and
-       don't change). Bump it whenever style.css or generator.js changes,
-       or a returning visitor's cached copy silently goes stale. -->
+  <!-- ?v= busts the browser cache for this project's own evolving
+       files. Bump it whenever style.css or generator.js changes, or a
+       returning visitor's cached copy silently goes stale. The third,
+       gif-writer.js, is asked for by the script on the first GIF export
+       (see loadGifWriter) and carries its number there. -->
   <link rel="stylesheet" href="style.css?v=110" />
   <!-- generator.js is requested at the end of the body, which is where
        it has to run, but the preload scanner only finds it once that
@@ -607,9 +608,10 @@
              is 13454ms, which the panel rounds to 13.5s.
 
              This is long enough to matter to a GIF. One pass is 168
-             frames at the 80ms the preview draws at, and the byte
-             budget below affords 69 on the default canvas, so an
-             export is slow motion at about 5fps. That reads fine at
+             frames at the 80ms the preview draws at, which the frame
+             budget below covers on the default canvas, so the file
+             plays at the canvas's own 12.5fps. Three passes share the
+             240 at 80 each and play at about 6fps, which reads fine at
              this cycle length and is what GIF_FRAME_BUDGET's comment
              anticipates; it is not a sign the budget is wrong. -->
         <input type="range" id="speed" min="16" max="48" value="46" />
@@ -2007,8 +2009,10 @@
       // While an animated kind is previewing, a still draw (a slider
       // drag, Random, Undo) would flash the still between animation
       // frames; the preview reads the new settings on its next frame
-      // instead. Exports stop the preview first so they always draw.
-      if (seamlessPreview.active && options.loopPhase === undefined) {
+      // instead. A GIF being recorded holds a still off the same way,
+      // because the canvas is where its frames are drawn. PNG and SVG
+      // stop the preview first so they always draw.
+      if ((seamlessPreview.active || gifExporting) && options.loopPhase === undefined) {
         lastOptions = options;
         return;
       }
@@ -2045,6 +2049,12 @@
     // back. Frames are picked by wall-clock time, so a
     // heavy composition drops frames rather than slowing the cycle.
     const seamlessPreview = { active: false, frame: 0 };
+    // True while a moving GIF is being recorded. The export draws its
+    // frames on this canvas one at a time, giving the page back in
+    // between, so for its length a still draw is held off the same way
+    // the preview holds one off (see drawComposition) and the preview
+    // itself does not start. What changed is drawn when it ends.
+    let gifExporting = false;
     // The slowest the preview is allowed to repaint, 12.5 fps. It is
     // also what counts as a smooth export before the budget below trims
     // it; the cycle's length comes from the Speed slider, not from here.
@@ -2071,25 +2081,29 @@
     // exports, which is the right thing to trade: a ten second cycle is
     // slow motion, where a low frame rate reads fine.
     const GIF_FRAME_BUDGET = 240;
-    // Counting frames cannot see the other half of the cost. gif.js
-    // holds every frame as raw RGBA until the encode finishes, so a
-    // frame is width x height x 4 bytes and an export retains all of
-    // them at once, before the encoder has allocated anything of its
-    // own. Measured on the default 1200x630 canvas that is 2.9MB a
-    // frame, so the 240 above is 700MB; on a hand-typed 1920x1080
-    // it is 7.9MB a frame and 1.9GB, which is past what a phone's tab
-    // survives and enough to hang a desktop one. Canvas size is a free
-    // text field, so there is no size this can assume. Whichever of the
-    // two budgets binds first wins, and MIN_FRAMES_PER_BEAT still
-    // overrides both rather than let a pass stop reading as motion.
-    const GIF_BYTES_BUDGET = 200 * 1024 * 1024;
+    // Counting frames cannot see the canvas. An export's wait and its
+    // file both grow with the pixels in it, frames x width x height,
+    // and canvas size is a free text field, so there is no size this
+    // can assume. The frame budget above is what the default 1200x630
+    // canvas gets, and a larger canvas gets fewer in proportion: 87 at
+    // 1920x1080, 21 at 4K. Whichever of the two binds first wins, and
+    // MIN_FRAMES_PER_BEAT still overrides both rather than let a pass
+    // stop reading as motion.
+    //
+    // This was a memory budget while the encoder was gif.js, which held
+    // every frame as raw RGBA until the encode finished: 3MB a frame on
+    // the default canvas, and the 200MB it was allowed left a thirteen
+    // second cycle at 69 frames, 5fps in the file against 12.5 on the
+    // canvas. gif-writer.js keeps only what it has compressed, so
+    // memory is no longer what runs out.
+    const GIF_PIXEL_BUDGET = GIF_FRAME_BUDGET * 1200 * 630;
     // Below this a beat stops reading as motion at all, so the budget is
     // allowed to be exceeded rather than go under it. The frame budget
     // alone only reached it past twenty beats, which the menu has never
-    // offered; the byte budget reaches it on a hand-typed canvas around
-    // 4K, where one frame is 33MB and twelve of them are 380MB. Still a
-    // floor rather than an operating point, and the one place an export
-    // can go over budget.
+    // offered; the pixel budget reaches it on a hand-typed canvas past
+    // fifteen million pixels, around 5200x2900. Still a floor rather
+    // than an operating point, and the one place an export can go over
+    // budget.
     const MIN_FRAMES_PER_BEAT = 12;
 
     // A GIF frame delay is written in hundredths of a second, and
@@ -2119,7 +2133,7 @@
     function beatFrames(beats, beatMs) {
       const cadence = Math.max(MIN_GIF_DELAY_MS, Math.min(CYCLE_FRAME_MS, beatMs / PREVIEW_FRAMES_PER_CYCLE));
       const smooth = Math.round(beatMs / cadence);
-      const budget = Math.min(GIF_FRAME_BUDGET, Math.floor(GIF_BYTES_BUDGET / (canvas.width * canvas.height * 4)));
+      const budget = Math.min(GIF_FRAME_BUDGET, Math.floor(GIF_PIXEL_BUDGET / (canvas.width * canvas.height)));
       const affordable = Math.floor(budget / beats);
       const honored = Math.floor(beatMs / MIN_GIF_DELAY_MS);
       return Math.max(2, Math.min(Math.max(MIN_FRAMES_PER_BEAT, Math.min(smooth, affordable)), honored));
@@ -2223,6 +2237,7 @@
       const kind = currentMotion();
       stopSeamlessPreview(!kind);
       if (!kind) return;
+      if (gifExporting) return;
       if (auto && prefersReducedMotion()) return;
       seamlessPreview.active = true;
       const start = performance.now();
@@ -2844,137 +2859,165 @@
       URL.revokeObjectURL(url);
     });
 
-    // gif.js (and its worker) are only needed by the export below, which
-    // most visits never touch; loading them here on first use instead of
-    // unconditionally in <head> keeps them off the initial render path.
-    let gifLibPromise = null;
-    function loadGifLib() {
-      if (window.GIF) return Promise.resolve();
-      if (!gifLibPromise) {
-        gifLibPromise = new Promise((resolve, reject) => {
+    // The GIF encoder is only needed by the export below, which most
+    // visits never touch; loading it here on first use instead of
+    // unconditionally in <head> keeps it off the initial render path.
+    // It is the project's own file, so it carries a ?v= like the
+    // generator does and CI holds the number to the file.
+    let gifWriterPromise = null;
+    function loadGifWriter() {
+      if (window.createGifWriter) return Promise.resolve();
+      if (!gifWriterPromise) {
+        gifWriterPromise = new Promise((resolve, reject) => {
           const script = document.createElement("script");
-          script.src = "vendor/gif/gif.js";
+          script.src = "gif-writer.js?v=1";
           script.onload = resolve;
           script.onerror = () => {
-            gifLibPromise = null;
-            reject(new Error("Failed to load gif.js"));
+            gifWriterPromise = null;
+            reject(new Error("Failed to load gif-writer.js"));
           };
           document.body.appendChild(script);
         });
       }
-      return gifLibPromise;
+      return gifWriterPromise;
     }
 
     // Builds an animated GIF from the composition on screen, then one
     // performRandomize() per pass after the first (so extra passes
-    // respect the same field locks as manual randomizing), capturing
-    // the canvas after each. Per-frame delay reuses the Speed slider
-    // above rather than a separate setting, so total GIF length =
-    // speed x passes.
+    // respect the same field locks as manual randomizing). A moving
+    // pass lasts one cycle of the Speed slider and a still one is held
+    // for the Reroll every interval, so total GIF length is that times
+    // the passes.
+    //
+    // A moving export is recorded a frame at a time with the page given
+    // back in between. One pass on the default canvas is 168 frames,
+    // and drawing them in one go froze the tab for as long as it took,
+    // with a spinner that could not turn. So the button counts up
+    // instead, and three things are held for the length of it: still
+    // draws and the preview (gifExporting), Auto-randomize, and the two
+    // exports that read the canvas, which would save whichever frame
+    // happened to be on it.
     const downloadGifBtn = document.getElementById("downloadGif");
+    const stillExportBtns = [document.getElementById("downloadPng"), document.getElementById("downloadSvg")];
+
+    function saveGif(writer, name) {
+      const url = URL.createObjectURL(new Blob(writer.finish(), { type: "image/gif" }));
+      const link = document.createElement("a");
+      link.download = `${name}.gif`;
+      link.href = url;
+      link.click();
+      // Not on the next line: the click only starts the download, and a
+      // browser that has not opened the blob yet finds it gone.
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
 
     downloadGifBtn.addEventListener("click", async () => {
-      // The export draws its own frames; the preview resumes once the
-      // encoder is done (see "finished" below).
-      stopSeamlessPreview();
-      downloadGifBtn.disabled = true;
-      downloadGifBtn.innerHTML = iconTag("spinner-gap") + " GIF";
-      try {
-        await loadGifLib();
-      } catch (err) {
-        downloadGifBtn.disabled = false;
-        downloadGifBtn.innerHTML = iconTag("download-simple") + " GIF";
-        showToast("Couldn't load the GIF encoder");
-        syncSeamlessPreview();
-        return;
-      }
+      // Read before anything is stopped: the plan asks whether
+      // Auto-randomize is running, and the first frame is the
+      // composition on screen now, not the one a reroll would bring
+      // while the encoder loads.
       const plan = exportPlan();
       const kind = plan.kind;
       const frames = plan.frames;
-      // A still pass is held for the reroll interval; a moving one
-      // times each frame against the cycle (see frameDelay).
-      const delay = plan.delay;
-      const delayAt = (i) => frameDelay(i, frames, plan.cycleMs);
-      const phaseAt = (i) => framePhase(i, frames, plan.cycleMs);
+      const wasPreviewing = seamlessPreview.active;
+      const wasAutoplaying = !!autoplayTimer;
       const seedForFilename =
         lastOptions.layerA.seed +
         (kind ? "-" + kind : "") +
         (plan.rerolls && plan.beats > 1 ? "-x" + plan.beats : "");
 
-      const gif = new GIF({
-        workers: 2,
-        quality: 10,
-        width: canvas.width,
-        height: canvas.height,
-        workerScript: "vendor/gif/gif.worker.js",
-      });
+      stopSeamlessPreview();
+      if (wasAutoplaying) stopAutoplay();
+      downloadGifBtn.disabled = true;
+      downloadGifBtn.setAttribute("aria-busy", "true");
+      downloadGifBtn.innerHTML = iconTag("spinner-gap") + " GIF";
+      // The label is the text after the icon. Writing to it leaves the
+      // icon element alone, so the spinner keeps turning between counts.
+      const label = downloadGifBtn.lastChild;
 
-      gif.on("finished", (blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.download = `${seedForFilename}.gif`;
-        link.href = url;
-        link.click();
-        URL.revokeObjectURL(url);
-        downloadGifBtn.disabled = false;
-        downloadGifBtn.innerHTML = iconTag("download-simple") + " GIF";
-        syncSeamlessPreview();
-      });
+      try {
+        try {
+          await loadGifWriter();
+        } catch (err) {
+          showToast("Couldn't load the GIF encoder");
+          return;
+        }
+        const ctx = canvas.getContext("2d");
+        const pixelsOf = (width, height) => new Uint32Array(ctx.getImageData(0, 0, width, height).data.buffer);
 
-      // Frame generation runs synchronously and can take a moment at a
-      // fine block size or large canvas; deferring it one frame lets the
-      // browser actually paint the "Rendering..." state above first,
-      // instead of setting it and immediately blocking the main thread
-      // before that paint ever happens.
-      requestAnimationFrame(() => {
-        if (kind && plan.rerolls) {
-          // One Auto-randomize pass per segment, each held for the beat
-          // menu's interval and animated through exactly one cycle of the
-          // kind in that time, then a cut to the next pass, the way the
-          // live preview looks with Auto-randomize running. The first
-          // pass is the composition on screen, since that is what
-          // Auto-randomize is showing at the moment the button is
-          // pressed and it rerolls at the end of an interval, not the
-          // start. The rerolls are a single entry on the undo stack,
-          // not one per pass, and a lone pass makes no entry at all
-          // because it changes nothing.
-          const perPass = plan.frames;
-          if (plan.beats > 1) recordUndoState();
-          for (let pass = 0; pass < plan.beats; pass++) {
-            if (pass) performRandomize(false);
-            const options = readOptions();
-            for (let i = 0; i < perPass; i++) {
-              drawComposition(Object.assign({}, options, { loopMode: generalMotion() || "none", loopPhase: phaseAt(i) }));
-              gif.addFrame(canvas, { copy: true, delay: delayAt(i) });
-            }
-          }
-          render();
-        } else if (kind) {
-          // Every setting and both seeds hold; only the loop's phase
-          // advances through one full cycle, so frame 0 is the still on
-          // screen and the frame after the last would be frame 0 again. Nothing
-          // touches the DOM or the undo stack, and the canvas is put
-          // back to the still afterwards.
-          const options = readOptions();
-          for (let i = 0; i < frames; i++) {
-            drawComposition(Object.assign({}, options, { loopMode: generalMotion() || "none", loopPhase: phaseAt(i) }));
-            gif.addFrame(canvas, { copy: true, delay: delayAt(i) });
-          }
-          render();
-        } else {
-          // Same again: the still on screen is the first frame and the
+        if (!kind) {
+          // Stills: the composition on screen is the first frame and the
           // rerolls after it share one undo entry, so undoing after an
           // export lands on the composition you exported from. A lone
           // pass is that composition and nothing else, so it makes no
-          // entry at all.
+          // entry at all. A handful of frames at most, so nothing is
+          // held and nothing counts up.
+          const writer = createGifWriter(canvas.width, canvas.height);
           if (plan.beats > 1) recordUndoState();
           for (let i = 0; i < plan.beats; i++) {
             if (i) performRandomize(false);
-            gif.addFrame(canvas, { copy: true, delay });
+            writer.addFrame(pixelsOf(canvas.width, canvas.height), plan.delay);
+          }
+          saveGif(writer, seedForFilename);
+          return;
+        }
+
+        // One Auto-randomize pass per segment, each animated through
+        // exactly one cycle of the kind, then a cut to the next pass,
+        // the way the canvas looks with Auto-randomize running. Motion
+        // alone is one pass: every setting and both seeds hold and only
+        // the phase advances, so frame 0 is the still on screen and the
+        // frame after the last would be frame 0 again.
+        //
+        // The first pass is the composition on screen, since that is
+        // what Auto-randomize is showing when the button is pressed and
+        // it rerolls at the end of an interval, not the start. The
+        // rerolls are a single entry on the undo stack, not one per
+        // pass, and a lone pass makes no entry at all because it
+        // changes nothing.
+        //
+        // The size and the motion are read once. A reroll does not
+        // change either, but the page is live between frames, and a
+        // width typed halfway through would otherwise arrive in the
+        // next pass as a frame the file has no room for.
+        gifExporting = true;
+        stillExportBtns.forEach((btn) => { btn.disabled = true; });
+        const first = readOptions();
+        const loopMode = generalMotion() || "none";
+        const writer = createGifWriter(first.width, first.height);
+        const total = plan.beats * frames;
+        if (plan.beats > 1) recordUndoState();
+        for (let pass = 0; pass < plan.beats; pass++) {
+          if (pass) performRandomize(false);
+          const options = pass ? Object.assign(readOptions(), { width: first.width, height: first.height }) : first;
+          for (let i = 0; i < frames; i++) {
+            drawComposition(Object.assign({}, options, { loopMode, loopPhase: framePhase(i, frames, plan.cycleMs) }));
+            writer.addFrame(pixelsOf(first.width, first.height), frameDelay(i, frames, plan.cycleMs));
+            label.textContent = " " + Math.floor((100 * (pass * frames + i + 1)) / total) + "%";
+            // A timer rather than an animation frame, which a hidden
+            // tab stops delivering: the export would wait there until
+            // someone came back to look at it.
+            await new Promise((resolve) => setTimeout(resolve, 0));
           }
         }
-        gif.render();
-      });
+        saveGif(writer, seedForFilename);
+      } catch (err) {
+        // Whatever it was (a canvas too large to read back, a frame the
+        // encoder refused), the button must not be left spinning.
+        console.error(err);
+        showToast("Couldn't make the GIF");
+      } finally {
+        gifExporting = false;
+        stillExportBtns.forEach((btn) => { btn.disabled = false; });
+        downloadGifBtn.disabled = false;
+        downloadGifBtn.removeAttribute("aria-busy");
+        downloadGifBtn.innerHTML = iconTag("download-simple") + " GIF";
+        // The canvas is on the last frame recorded. Put the still back,
+        // then whatever was running when the button was pressed.
+        render();
+        if (wasPreviewing) syncSeamlessPreview();
+        if (wasAutoplaying) startAutoplay(false);
+      }
     });
 
     // Save-state slots: each stores the full readOptions() snapshot
