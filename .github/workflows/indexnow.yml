@@ -18,6 +18,7 @@ on:
       - tutorial.js
       - guide/index.html
       - guide.css
+      - theme.js
       - flow-fields/index.html
       - seamless-backgrounds/index.html
       - animated-backgrounds/index.html

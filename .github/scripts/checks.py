@@ -52,6 +52,9 @@ def read(rel):
 # The app's own scripts, in the order index.html loads them. Every list
 # below that needs them reads this one.
 SCRIPTS = ["core.js", "hold.js", "app.js", "picker.js", "tutorial.js"]
+# The document pages' own shared script: the theme toggle that the guide and
+# the three explainers each carried a copy of until November 2026.
+DOC_SCRIPTS = ["theme.js"]
 
 
 def check_inline_js():
@@ -71,7 +74,7 @@ def check_inline_js():
                 ).strip()
                 fail("inline js", f"{page} block {i + 1}: {err}")
         notes.append(f"inline js: {page}, {len(blocks)} block(s) parsed")
-    for rel in SCRIPTS:
+    for rel in SCRIPTS + DOC_SCRIPTS:
         proc = subprocess.run(["node", "--check", str(ROOT / rel)], text=True, capture_output=True)
         if proc.returncode != 0:
             err = next((l for l in proc.stderr.splitlines() if "Error:" in l), "syntax error").strip()
@@ -125,9 +128,9 @@ def check_anchors():
 
 # 5. Cache busting -------------------------------------------------------
 # Every page asks for the project's own evolving files with a ?v= query:
-# style.css, generator.js and the SCRIPTS from the app, guide.css and
-# generator.js from the document pages, and the screenshot from all of them
-# plus the README. gif-writer.js is asked for by app.js rather than by
+# style.css, generator.js and the SCRIPTS from the app, guide.css,
+# generator.js and the DOC_SCRIPTS from the document pages, and the
+# screenshot from all of them plus the README. gif-writer.js is asked for by app.js rather than by
 # markup, on the first GIF export, and is held to the same rule, so the
 # SCRIPTS are read for numbers as the pages are.
 # Forgetting to bump is invisible locally and serves a returning visitor a
@@ -136,7 +139,7 @@ def check_anchors():
 # every visitor's cache for nothing. All three are caught here.
 ASSET_REF = re.compile(
     r"\b(style\.css|generator\.js|"
-    + "|".join(re.escape(rel) for rel in SCRIPTS)
+    + "|".join(re.escape(rel) for rel in SCRIPTS + DOC_SCRIPTS)
     + r"|gif-writer\.js|guide\.css|screenshot(?:-\d+)?\.(?:png|webp))\?v=(\d+)"
 )
 VERSIONED = PAGES + SCRIPTS + ["README.md"]
@@ -146,7 +149,7 @@ VERSIONED = PAGES + SCRIPTS + ["README.md"]
 ASSET_FILES = {
     "style.css": {"style.css"},
     "generator.js": {"generator.js"},
-    **{rel: {rel} for rel in SCRIPTS},
+    **{rel: {rel} for rel in SCRIPTS + DOC_SCRIPTS},
     "gif-writer.js": {"gif-writer.js"},
     "guide.css": {"guide.css"},
     "screenshot": {"screenshot.png", "screenshot.webp", "screenshot-800.webp"},

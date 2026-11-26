@@ -47,7 +47,7 @@ USER_AGENT = f"flield-indexnow/1 (+https://{HOST}/)"
 # search, rather than fanning out to all five.
 PAGES = {
     "/": {"index.html", "style.css", "generator.js", "core.js", "hold.js", "app.js", "picker.js", "tutorial.js"},
-    "/guide/": {"guide/index.html", "guide.css"},
+    "/guide/": {"guide/index.html", "guide.css", "theme.js"},
     "/flow-fields/": {"flow-fields/index.html"},
     "/seamless-backgrounds/": {"seamless-backgrounds/index.html"},
     "/animated-backgrounds/": {"animated-backgrounds/index.html"},

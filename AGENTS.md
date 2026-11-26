@@ -23,7 +23,7 @@ after committing, not before.
 Every page requests the project's own evolving files with a `?v=N` query:
 `style.css`, `generator.js` and the app's own scripts (`SCRIPTS` in
 `checks.py`) from the app, `guide.css` from the guide, the explainers and `404.html`, `generator.js`
-again from the explainers, `gif-writer.js` from `app.js` on the first GIF
+again from the explainers, `theme.js` (the theme toggle) from the guide and the explainers, `gif-writer.js` from `app.js` on the first GIF
 export (the number is in `loadGifWriter`, not in the markup), and `screenshot.png` (with its two
 `.webp` copies, on one number) from every page plus the README. Bump the
 number when you change that file, on **every page that requests it**, and
