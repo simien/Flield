@@ -258,6 +258,14 @@ Across the 768px breakpoint, `syncActionBar()` reparents the real
 moves a whole `.field` into the strip above the bar and back. Nothing is
 duplicated, so every listener stays bound and no id is ever on the page twice.
 
+The footer strip is a size container (`container-type: inline-size`), so
+nothing in it can widen the artboard. Until November 2026 its one-line
+minimum pushed `.main-area` past the window from 769px to 873px and the
+canvas lost up to 104px on the right. Its legend now hides by container
+query, at a content width that is the measured sum of what the strip
+holds plus a few pixels. Anything added to the strip changes that sum:
+re-measure, and move the threshold in `style.css`.
+
 When adding to this pattern: record the element itself along with where it
 came from, so the right one goes back. `lastFieldHome` carries both, and has
 to, because a control reached for while a field is out on the strip moves

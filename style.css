@@ -1880,6 +1880,23 @@ button.secondary {
   }
 }
 
+/* The strip is a size container so its contents can never widen the
+   artboard. Before this, its one-line minimum forced .main-area past
+   the window from 769px to about 873px, and body's overflow cut the
+   canvas and the links off at the right. Instead the legend goes when
+   the strip has no room for it: brand, legend and links take 563px of
+   content with "Ctrl+Z", the wider of the two undo labels, and the
+   threshold is that sum plus a few pixels for a wider fallback face. */
+.site-footer {
+  container-type: inline-size;
+}
+
+@container (max-width: 568px) {
+  .site-footer-keys {
+    display: none;
+  }
+}
+
 /* Anchored at the artboard's top-left corner; centerCanvas() in the
    script translates it to the middle. A translate doesn't move an
    element's layout position, and a resize that keeps its corner in
