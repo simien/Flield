@@ -398,6 +398,28 @@ dd {
   background: var(--well);
 }
 
+/* A motion clip opens on a still with its Play over the corner (see
+   .clip-play in guide/index.html). The button takes the panel rather
+   than .btn's --input, which is translucent and would let the artwork
+   show through the label. */
+.clip-frame {
+  position: relative;
+}
+
+.clip-play {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  background: var(--panel);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+@media (hover: hover) {
+  .clip-play:hover {
+    background: var(--muted);
+  }
+}
+
 .shot figcaption {
   margin-top: 10px;
   font-size: 14px;

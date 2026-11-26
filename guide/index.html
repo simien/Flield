@@ -90,7 +90,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="../guide.css?v=8" />
+  <link rel="stylesheet" href="../guide.css?v=9" />
 </head>
 <body>
   <header class="site-header">
@@ -377,13 +377,18 @@
     <!-- Each kind gets its own heading and its own example beside it,
          rather than four long bullets above a row of three clips: the point
          of the clip is to show what that kind's prose describes, so they
-         belong together. Lazy, and a long way down the page, so the 2.6MB
-         of GIF is only fetched by a reader who scrolls this far. -->
+         belong together. Each opens on a still of its first frame and
+         plays only when asked: six GIFs looping on their own were 7.1MB,
+         had no way to stop, and ignored reduced motion. The stills come
+         to 153KB, and a clip's GIF is fetched when its Play is pressed. -->
     <h3>Loop</h3>
     <p>Breathes the flow field around a small closed path, one full turn across the frames. Each cell's dither is fixed by the seed, so shapes grow, shrink, and slide rather than flicker.</p>
     <figure class="shot">
-      <img src="../examples/loop.gif" width="1200" height="630" loading="lazy" decoding="async"
-           alt="Loop: the composition's shapes grow, shrink, and slide in place as the flow field turns through one closed cycle." />
+      <div class="clip-frame">
+        <img src="../examples/loop-poster.webp" data-clip="../examples/loop.gif" width="1200" height="630" loading="lazy" decoding="async"
+             alt="Loop: the composition's shapes grow, shrink, and slide in place as the flow field turns through one closed cycle." />
+        <button type="button" class="btn clip-play" data-name="Loop" aria-label="Play the Loop clip"><svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z"/></svg><span class="clip-play-label">Play</span></button>
+      </div>
           <figcaption>The two layers sway against each other and land back where they started.</figcaption>
     </figure>
 
@@ -391,8 +396,11 @@
     <p>Flows the field one way along its flow direction, travelling exactly one period. So the pattern's density envelope repeats along that axis, at flow scale times stretch pixels.</p>
     <p>Picking Drift repaints the composition once. The field it travels on repeats along the flow direction and the still does not, so its first frame is its own. Wind repaints only its fine detail, for the same reason. Ripple's first frame already has rings in flight, so it repaints too. Loop, Pulse, and Tide open on the still itself.</p>
     <figure class="shot">
-      <img src="../examples/drift.gif" width="1200" height="630" loading="lazy" decoding="async"
-           alt="Drift: the pattern travels steadily across the canvas along its flow direction, repeating exactly at the end of one period." />
+      <div class="clip-frame">
+        <img src="../examples/drift-poster.webp" data-clip="../examples/drift.gif" width="1200" height="630" loading="lazy" decoding="async"
+             alt="Drift: the pattern travels steadily across the canvas along its flow direction, repeating exactly at the end of one period." />
+        <button type="button" class="btn clip-play" data-name="Drift" aria-label="Play the Drift clip"><svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z"/></svg><span class="clip-play-label">Play</span></button>
+      </div>
           <figcaption>Orange bands slide one way and a cream nebula behind them slides the other, each along its own flow direction, and both wrap into themselves so they never jump.</figcaption>
     </figure>
 
@@ -400,16 +408,22 @@
     <p>Weather passing over a standing field. The broad shapes hold their ground while a second, much broader noise field bends where they are sampled. That gust rises and settles once per cycle, and the fine detail streams through along the flow direction.</p>
     <p>Wind used to slide the whole field the way Drift does, with the gust on top, and at a glance the two were the same thing. Now Drift is the field moving and Wind is the weather moving over it. The gust starts and ends at nothing, so the cycle opens and closes on the same frame.</p>
     <figure class="shot">
-      <img src="../examples/wind.gif" width="1200" height="630" loading="lazy" decoding="async"
-           alt="Wind: the broad streaks hold still while a gust bends them once across the cycle and fine wisps stream through them along the flow direction." />
+      <div class="clip-frame">
+        <img src="../examples/wind-poster.webp" data-clip="../examples/wind.gif" width="1200" height="630" loading="lazy" decoding="async"
+             alt="Wind: the broad streaks hold still while a gust bends them once across the cycle and fine wisps stream through them along the flow direction." />
+        <button type="button" class="btn clip-play" data-name="Wind" aria-label="Play the Wind clip"><svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z"/></svg><span class="clip-play-label">Play</span></button>
+      </div>
           <figcaption>The streaks hold their ground as the gust bends them and their fine detail streams through.</figcaption>
     </figure>
 
     <h3>Pulse</h3>
     <p>Swings density with one sine wave, 40% of each layer's density either way, so the composition inflates and thins. Cells appear and vanish in a stable order, so it breathes rather than sparkles. It moves without any field strength, as Ripple does.</p>
     <figure class="shot">
-      <img src="../examples/pulse.gif" width="1200" height="630" loading="lazy" decoding="async"
-           alt="Pulse: the composition inflates and thins as density swings up and down, with cells appearing and vanishing in a stable order." />
+      <div class="clip-frame">
+        <img src="../examples/pulse-poster.webp" data-clip="../examples/pulse.gif" width="1200" height="630" loading="lazy" decoding="async"
+             alt="Pulse: the composition inflates and thins as density swings up and down, with cells appearing and vanishing in a stable order." />
+        <button type="button" class="btn clip-play" data-name="Pulse" aria-label="Play the Pulse clip"><svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z"/></svg><span class="clip-play-label">Play</span></button>
+      </div>
           <figcaption>The mint contour lines swell and thin in weight while the gray streaks behind them breathe more gently, and nothing moves.</figcaption>
     </figure>
 
@@ -424,8 +438,11 @@
     <p>Both layers ripple under the same drops. Layer B is pulled less than Layer A, as a deeper layer would be, so the two slide against each other where they overlap. The rain falls on the canvas as a whole, so a mirrored layer's rings are not mirrored. Rain does not respect a mirror.</p>
     <p>On the canvas, each drop lands somewhere new every time it falls. An export has to come back round, so in a GIF the same drops fall in the same places every cycle, and a link reopens to the same rain.</p>
     <figure class="shot">
-      <img src="../examples/ripple.gif" width="1200" height="630" loading="lazy" decoding="async"
-           alt="Ripple: rings of denser cells spread from several points across the composition, thinning as they grow and crossing where they meet." />
+      <div class="clip-frame">
+        <img src="../examples/ripple-poster.webp" data-clip="../examples/ripple.gif" width="1200" height="630" loading="lazy" decoding="async"
+             alt="Ripple: rings of denser cells spread from several points across the composition, thinning as they grow and crossing where they meet." />
+        <button type="button" class="btn clip-play" data-name="Ripple" aria-label="Play the Ripple clip"><svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z"/></svg><span class="clip-play-label">Play</span></button>
+      </div>
           <figcaption>Rings from seven drops cross a lilac marble and the coral streaks under it, bending and swelling both as they pass, and the field beneath never moves.</figcaption>
     </figure>
 
@@ -433,8 +450,11 @@
     <p>The one kind in which the layers act on each other. Each layer's field is pushed along the ridges of the other's. Layer A's bands bend around Layer B's, and Layer B's around Layer A's, into crossings that were not in the still. The push rises and settles once per cycle, so both ends of the cycle are the still.</p>
     <p>The push is away from the other layer's ridges rather than toward them, which opens the gaps between the two rather than gathering both onto the same lines. Each layer is pushed by up to a little under half its own <strong>Flow scale</strong>. A layer with no field strength has nothing to push with, so the other layer holds still.</p>
     <figure class="shot">
-      <img src="../examples/tide.gif" width="1200" height="630" loading="lazy" decoding="async"
-           alt="Tide: the two layers' bands bend around each other's ridges, press into crossings, and relax back to the still once per cycle." />
+      <div class="clip-frame">
+        <img src="../examples/tide-poster.webp" data-clip="../examples/tide.gif" width="1200" height="630" loading="lazy" decoding="async"
+             alt="Tide: the two layers' bands bend around each other's ridges, press into crossings, and relax back to the still once per cycle." />
+        <button type="button" class="btn clip-play" data-name="Tide" aria-label="Play the Tide clip"><svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z"/></svg><span class="clip-play-label">Play</span></button>
+      </div>
           <figcaption>Lime strands are swept along the ridges of the sky-blue nebula behind them, and the nebula bends around the strands, then both let go.</figcaption>
     </figure>
 
@@ -558,6 +578,26 @@
         // localStorage can be unavailable (private browsing, blocked); the
         // toggle still works for this page load, just won't persist.
       }
+    });
+
+    // Play swaps a clip's still for its GIF, and Pause swaps it back,
+    // which also starts it over next time; every clip is one closed
+    // loop, so there is no point partway through worth holding on to.
+    const CLIP_ICONS = {
+      play: "M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z",
+      pause: "M200,28H160a20,20,0,0,0-20,20V208a20,20,0,0,0,20,20h40a20,20,0,0,0,20-20V48A20,20,0,0,0,200,28Zm-4,176H164V52h32ZM96,28H56A20,20,0,0,0,36,48V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V48A20,20,0,0,0,96,28ZM92,204H60V52H92Z",
+    };
+    document.querySelectorAll(".clip-play").forEach((btn) => {
+      const img = btn.parentElement.querySelector("img");
+      const still = img.getAttribute("src");
+      btn.addEventListener("click", () => {
+        const playing = img.getAttribute("src") === still;
+        img.setAttribute("src", playing ? img.dataset.clip : still);
+        const verb = playing ? "Pause" : "Play";
+        btn.querySelector(".clip-play-label").textContent = verb;
+        btn.setAttribute("aria-label", `${verb} the ${btn.dataset.name} clip`);
+        btn.querySelector("path").setAttribute("d", CLIP_ICONS[playing ? "pause" : "play"]);
+      });
     });
 
     const tocBtn = document.getElementById("tocBtn");
