@@ -129,6 +129,30 @@ const FIELD_GAIN = 2;
 const FIELD_CACHE_LIMIT = 6;
 const fieldCache = new Map();
 
+// Every cache here is capped by bytes as well as by entries, because an
+// entry's size follows the canvas: six fields, four pushes and six masks
+// at 8192 by 8192 held 1.1 GB. Each budget holds both layers' entries
+// at the app's largest canvas (a 4096 square at block size 2) with room
+// for the small demos; an entry bigger than its whole budget is not
+// kept, which only a caller drawing past the app's caps would meet.
+// Eviction is oldest first, as before, so at the default canvas, where
+// the entry count binds first, nothing changes.
+const CACHE_MB = 1024 * 1024;
+const FIELD_CACHE_BYTES = 80 * CACHE_MB;
+function cacheStore(cache, key, value, sizeOf, limit, budget) {
+  const bytes = sizeOf(value);
+  if (bytes > budget) return;
+  let total = bytes;
+  for (const held of cache.values()) total += sizeOf(held);
+  while (cache.size > 0 && (cache.size >= limit || total > budget)) {
+    const oldest = cache.keys().next().value;
+    total -= sizeOf(cache.get(oldest));
+    cache.delete(oldest);
+  }
+  cache.set(key, value);
+}
+const byteLengthOf = (array) => array.byteLength;
+
 // Loops: a phase from 0 to 1 slides the field's sampling origin
 // around a circle of this radius (in noise units) that passes through
 // the origin, so phase 0 is exactly the still render and phase 1 lands
@@ -381,10 +405,7 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
   // recomputed both layers for nothing. Drift's and Wind's phase 0 is
   // their first frame and is kept, like every other still.
   if ((looping && phase > 0) || deform) return values;
-  if (fieldCache.size >= FIELD_CACHE_LIMIT) {
-    fieldCache.delete(fieldCache.keys().next().value);
-  }
-  fieldCache.set(key, values);
+  cacheStore(fieldCache, key, values, byteLengthOf, FIELD_CACHE_LIMIT, FIELD_CACHE_BYTES);
   return values;
 }
 
@@ -858,6 +879,7 @@ const TIDE_PULL = 0.45;
 const TIDE_CLAMP = 1.5;
 const TIDE_STEP = 2;
 const TIDE_CACHE_LIMIT = 4;
+const TIDE_CACHE_BYTES = 40 * CACHE_MB;
 const tideCache = new Map();
 
 // A layer's field as the canvas shows it at a phase of a motion:
@@ -943,8 +965,7 @@ function tidePush(layer, canvasCols, canvasRows, blockSize, phase, mode, phaseOf
   }
   const push = { key, cols, step, pull };
   if (moving) return push;
-  if (tideCache.size >= TIDE_CACHE_LIMIT) tideCache.delete(tideCache.keys().next().value);
-  tideCache.set(key, push);
+  cacheStore(tideCache, key, push, (held) => held.pull.byteLength, TIDE_CACHE_LIMIT, TIDE_CACHE_BYTES);
   return push;
 }
 
@@ -1606,6 +1627,7 @@ function maskKeepProbability(shape, direction, x, y, cols, rows) {
 // what the per-frame version drew. Same shape of cache as the field's: a
 // few entries cover both layers, the tutorial demos and the favicon.
 const SHAPE_MASK_CACHE_LIMIT = 6;
+const SHAPE_MASK_CACHE_BYTES = 12 * CACHE_MB;
 const shapeMaskCache = new Map();
 
 function buildShapeMask(cols, rows, shape, seed, direction) {
@@ -1644,10 +1666,7 @@ function shapeMaskFor(cols, rows, shape, seed, direction) {
   const cached = shapeMaskCache.get(key);
   if (cached) return cached;
   const keep = buildShapeMask(cols, rows, shape, seed, direction);
-  if (shapeMaskCache.size >= SHAPE_MASK_CACHE_LIMIT) {
-    shapeMaskCache.delete(shapeMaskCache.keys().next().value);
-  }
-  shapeMaskCache.set(key, keep);
+  cacheStore(shapeMaskCache, key, keep, byteLengthOf, SHAPE_MASK_CACHE_LIMIT, SHAPE_MASK_CACHE_BYTES);
   return keep;
 }
 
