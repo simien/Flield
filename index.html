@@ -3094,9 +3094,19 @@
     // runs at load: unguarded, it took the rest of the script with it,
     // so the canvas stayed blank and a link was never read. A slot that
     // cannot be read is an empty one, and a write says whether it took.
+    //
+    // A read hands back the snapshot, parsed, or null. What is stored
+    // under the key is only a string, and anything can be in it: text
+    // that is not JSON, or JSON of the wrong shape (a number, an object
+    // with no layers). The row used to parse it one way and Load
+    // another, so a slot holding `5` showed as saved, enabled Load, and
+    // Load threw. Both layers present is what makes it a composition.
     const slotStore = {
       read(slot) {
-        try { return localStorage.getItem(PRESET_KEY_PREFIX + slot); } catch (err) { return null; }
+        let data = null;
+        try { data = JSON.parse(localStorage.getItem(PRESET_KEY_PREFIX + slot)); } catch (err) { return null; }
+        const isObject = (value) => !!value && typeof value === "object" && !Array.isArray(value);
+        return isObject(data) && isObject(data.layerA) && isObject(data.layerB) ? data : null;
       },
       write(slot, value) {
         try { localStorage.setItem(PRESET_KEY_PREFIX + slot, value); return true; } catch (err) { return false; }
@@ -3154,13 +3164,9 @@
     }
 
     function refreshPresetUI(slot) {
-      const raw = slotStore.read(slot);
+      const data = slotStore.read(slot);
       const row = document.querySelector(`.preset-row[data-slot="${slot}"]`);
       const swatches = row.querySelector(".preset-swatches");
-      let data = null;
-      if (raw) {
-        try { data = JSON.parse(raw); } catch (err) { data = null; }
-      }
       // The three colors are what make one slot recognizable next to
       // another; nothing else in the snapshot is glanceable.
       swatches.replaceChildren();
@@ -3202,9 +3208,9 @@
 
     document.querySelectorAll(".preset-load-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const raw = slotStore.read(btn.dataset.slot);
-        if (!raw) return;
-        applySnapshot(upgradeState(JSON.parse(raw)));
+        const data = slotStore.read(btn.dataset.slot);
+        if (!data) return;
+        applySnapshot(upgradeState(data));
         showToast(`Loaded Slot ${btn.dataset.slot}`);
       });
     });
