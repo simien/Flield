@@ -14,11 +14,16 @@ on:
   push:
     branches: [main]
 
+# Read the repo and nothing else, whatever the repository's default token
+# permission is set to. Nothing here writes back to GitHub.
+permissions:
+  contents: read
+
 jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # The cache-bust check compares this branch against its base, so it
           # needs the base commit present rather than a single-commit clone.
@@ -42,12 +47,19 @@ jobs:
         # that check was added, naming today's date for files nobody had
         # touched. fetch-depth: 0 above already pays for the history, so
         # there is nothing to save here.
+        #
+        # Event data reaches the shell through env, never pasted into the
+        # script: an expression is substituted before the shell parses
+        # anything, so a value that held shell syntax would run as code.
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE: ${{ github.event.before }}
         run: |
           BASE=""
-          if [ -n "${{ github.base_ref }}" ]; then
-            git fetch --no-tags origin "${{ github.base_ref }}"
-            BASE="origin/${{ github.base_ref }}"
-          elif git cat-file -e "${{ github.event.before }}^{commit}" 2>/dev/null; then
-            BASE="${{ github.event.before }}"
+          if [ -n "$BASE_REF" ]; then
+            git fetch --no-tags origin "$BASE_REF"
+            BASE="origin/$BASE_REF"
+          elif git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            BASE="$BEFORE"
           fi
           python3 .github/scripts/checks.py $BASE

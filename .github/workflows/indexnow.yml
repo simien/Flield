@@ -17,11 +17,16 @@ on:
       - seamless-backgrounds/index.html
       - animated-backgrounds/index.html
 
+# Read the repo and nothing else, whatever the repository's default token
+# permission is set to. Nothing here writes back to GitHub.
+permissions:
+  contents: read
+
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
 
@@ -30,9 +35,13 @@ jobs:
         # so the diff covers every commit the push carried. It is all
         # zeros on a first push and may be missing after a force push;
         # with no file list the script submits every page.
+        # Event data reaches the shell through env, as in checks.yml.
+        env:
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
         run: |
           CHANGED=""
-          if git cat-file -e "${{ github.event.before }}^{commit}" 2>/dev/null; then
-            CHANGED=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}")
+          if git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            CHANGED=$(git diff --name-only "$BEFORE" "$SHA")
           fi
           python3 .github/scripts/indexnow.py $CHANGED
