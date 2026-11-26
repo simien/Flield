@@ -1680,7 +1680,7 @@ button,
 .sheet-handle,
 .color-swatch,
 .color-sl-square,
-.color-hue-slider,
+.color-hue-strip,
 input[type="range"] {
   user-select: none;
   -webkit-user-select: none;

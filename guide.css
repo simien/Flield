@@ -444,13 +444,6 @@ dd {
   color: var(--text-muted);
 }
 
-/* Stacked rather than side by side: at this column width a three-up row
-   would leave each clip near 190px across, too small to read the motion
-   these are here to show. */
-.shot-row {
-  margin: 0 0 12px;
-}
-
 /* Tables carry a lot of this guide's comparisons, so they get the panel
    surface and a header that holds while the row list runs long. */
 .table-scroll {
