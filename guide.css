@@ -142,9 +142,12 @@ main.wrap {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  font-size: 18px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  /* One 16px line, the lockup's own height, so the row centers on whole
+     pixels: in the page's 1.65 line height it landed at y 22.19 and the
+     page name's Silkscreen blurred across the fraction. */
+  height: 16px;
+  line-height: 16px;
+  font-size: 16px;
   color: var(--text);
   text-decoration: none;
 }
@@ -155,6 +158,13 @@ main.wrap {
 }
 
 .wordmark-page {
+  /* Silkscreen's ascent puts its capitals 1px below the logotype's in a
+     16px line; raised to share the logotype's top and baseline. */
+  position: relative;
+  top: -1px;
+  display: block;
+  height: 16px;
+  line-height: 16px;
   color: var(--text-subtle);
   font-family: "Silkscreen", ui-monospace, monospace;
   font-size: 16px;
@@ -357,6 +367,10 @@ dd {
    menu hangs off the button without any measuring in script. */
 .nav-toc {
   position: relative;
+  /* Flex, so its height is its button's 32px. As a block it held the
+     button in a text line box 32.39px tall, which made the header
+     60.39px and set the lockup and the page name on a fractional y. */
+  display: flex;
 }
 
 .btn-icon {

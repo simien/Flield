@@ -271,6 +271,44 @@ input[type="range"]:focus-visible {
   display: block;
 }
 
+/* The strip's mark rests in the brand's grayscale fallback, quiet under
+   the artwork, and takes its Citrus colors while the strip is hovered.
+   The SVG's own fill attributes are Citrus, so a page without this sheet
+   still shows the brand. The logotype's lift is the hover rule below. */
+.brand .lockup .mark-ground {
+  fill: #0e0e0e;
+}
+
+.brand .lockup .mark-a {
+  fill: #e2e2e2;
+}
+
+.brand .lockup .mark-b {
+  fill: #888888;
+}
+
+.brand .lockup path {
+  transition: fill 0.2s ease;
+}
+
+@media (hover: hover) {
+  .site-footer:hover .brand .lockup .mark-ground {
+    fill: #0a0f0d;
+  }
+  .site-footer:hover .brand .lockup .mark-a {
+    fill: #d9f25a;
+  }
+  .site-footer:hover .brand .lockup .mark-b {
+    fill: #1fa97a;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand .lockup path {
+    transition: none;
+  }
+}
+
 @media (hover: hover) {
   .brand a:hover {
     color: var(--text);
