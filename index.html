@@ -2019,12 +2019,22 @@
     // event (cheap, and the value tooltip reads it right away) while the
     // generate-and-draw half runs at most once per animation frame,
     // however many input events land in between.
-    function render() {
-      drawComposition(prepareRender());
-    }
-
     let pendingOptions = null;
     let renderFrame = 0;
+
+    // A draw asked for here is the newest there is, so a frame a slider
+    // still has waiting is dropped: it holds the settings as they were
+    // when the slider moved, and landing after a Random it painted the
+    // old picture over the new one. A PNG or SVG saved then was the
+    // stale picture carrying the new one's link.
+    function render() {
+      if (renderFrame) {
+        cancelAnimationFrame(renderFrame);
+        renderFrame = 0;
+        pendingOptions = null;
+      }
+      drawComposition(prepareRender());
+    }
 
     function scheduleRender() {
       pendingOptions = prepareRender();
