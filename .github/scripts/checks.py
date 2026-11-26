@@ -536,6 +536,17 @@ SITEMAP_PAGES = {
 
 
 def check_sitemap_dates():
+    # A shallow clone grafts history at its oldest commit, so git log names
+    # that commit for every file and every page looks changed on its date.
+    # The deploy build may clone shallow; CI clones at full depth and keeps
+    # this check honest.
+    shallow = subprocess.run(
+        ["git", "rev-parse", "--is-shallow-repository"],
+        cwd=ROOT, text=True, capture_output=True,
+    ).stdout.strip()
+    if shallow == "true":
+        notes.append("sitemap dates: skipped, shallow clone")
+        return
     sitemap = read("sitemap.xml")
     entries = dict(re.findall(
         r"<loc>https://flield\.com(/[^<]*)</loc>\s*<lastmod>(\d{4}-\d{2}-\d{2})</lastmod>",

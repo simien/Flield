@@ -12,6 +12,16 @@
   // changes no runtime behavior.
   "compatibility_date": "2026-09-11",
 
+  // The deploy runs the same checks CI does, and a failing one stops it.
+  // CI runs beside Workers Builds, not before it, so on its own it only
+  // reports a bad commit after that commit is live: 8a0bd18 failed five
+  // checks on 7 November and deployed twelve seconds later. Wrangler runs
+  // this command before every `wrangler deploy` and `wrangler dev`, on
+  // Workers Builds and by hand alike, and aborts on a non-zero exit.
+  // There is no base ref here, so the cache-bust and link-compat
+  // comparisons are left to CI; everything else runs.
+  "build": { "command": "python3 .github/scripts/checks.py" },
+
   "assets": {
     // The repo root, where index.html lives. .assetsignore, alongside this
     // file, decides what inside it is left out.
