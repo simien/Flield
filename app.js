@@ -17,6 +17,7 @@
     // field lock's "locked" state uses "fill" instead, so a solid glyph
     // reinforces the locked state over the open outline of "lock-open".
     const ICONS = {
+      "sidebar-simple": "M216,36H40A20,20,0,0,0,20,56V200a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A20,20,0,0,0,216,36ZM44,60H76V196H44ZM212,196H100V60H212Z",
       "list": "M228,128a12,12,0,0,1-12,12H40a12,12,0,0,1,0-24H216A12,12,0,0,1,228,128ZM40,76H216a12,12,0,0,0,0-24H40a12,12,0,0,0,0,24ZM216,180H40a12,12,0,0,0,0,24H216a12,12,0,0,0,0-24Z",
       "x": "M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z",
       "sun": "M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z",
@@ -423,6 +424,15 @@
     const canvasSizeObserver = new ResizeObserver(centerCanvas);
     canvasSizeObserver.observe(canvas);
     canvasSizeObserver.observe(canvasArea);
+
+    // Wide's fit (see :root[data-sidebar] #preview in style.css) needs the
+    // picture's aspect, which a calc() cannot read off the canvas itself.
+    // It only changes when a render gives the canvas a new size.
+    function publishCanvasAspect() {
+      if (canvas.width && canvas.height) canvas.style.setProperty("--canvas-ar", String(canvas.width / canvas.height));
+    }
+    new MutationObserver(publishCanvasAspect).observe(canvas, { attributes: true, attributeFilter: ["width", "height"] });
+    publishCanvasAspect();
 
     function readLayer(prefix) {
       const layer = {};
@@ -2069,7 +2079,8 @@
     // it closes, so a breakpoint crossed under the tour still settles.
     function syncSheetInert() {
       const closedSheet = narrowLayout.matches && !document.body.classList.contains("sidebar-open");
-      controls.inert = closedSheet || !document.getElementById("tutorialModal").hidden;
+      // Wide slides the sidebar off screen the same way, so it goes inert too.
+      controls.inert = closedSheet || wideOn() || !document.getElementById("tutorialModal").hidden;
     }
 
     function setSidebarOpen(open) {
@@ -2241,11 +2252,68 @@
       );
     }).observe(lastControl);
 
+    // Wide: the desktop sidebar collapsed, so the artboard takes the
+    // window's whole width and the canvas scales up to fill it (see
+    // :root[data-sidebar] in style.css). The state is that attribute,
+    // which the script in <head> restores from SIDEBAR_KEY before first
+    // paint; this only ever changes it on a press. Below the breakpoint
+    // the attribute stays but means nothing, so a phone held upright
+    // gets the sheet and turning it back gives Wide back.
+    const SIDEBAR_KEY = "flield-sidebar";
+    const sidebarCollapseBtn = document.getElementById("sidebarCollapseBtn");
+    const siteFooter = document.querySelector(".site-footer");
+
+    function wideOn() {
+      return document.documentElement.dataset.sidebar === "collapsed" && !narrowLayout.matches;
+    }
+
+    // Undo, Auto-randomize and Random ride into the footer strip, the
+    // same move syncActionBar() makes into the phone bar, so the loop
+    // stays one click away with the sidebar gone. The toggle is the
+    // row's first button and goes with it. Below the breakpoint the bar
+    // owns the row and this leaves it alone.
+    function syncWide() {
+      const on = wideOn();
+      if (!narrowLayout.matches) {
+        const home = on ? siteFooter : controlsHeader;
+        if (exploreRow.parentElement !== home) {
+          // Moving an element drops its focus, and the toggle is usually
+          // the focused thing when this runs.
+          const focused = exploreRow.contains(document.activeElement) ? document.activeElement : null;
+          home.prepend(exploreRow);
+          if (focused) focused.focus({ preventScroll: true });
+        }
+      }
+      sidebarCollapseBtn.setAttribute("aria-expanded", String(!on));
+      sidebarCollapseBtn.title = on ? "Show settings (S)" : "Hide settings (S)";
+      syncSheetInert();
+    }
+
+    function setWide(on) {
+      // A control inside the sidebar is about to go inert; the toggle
+      // takes focus rather than leaving it nowhere.
+      const focusInside = on && controls.contains(document.activeElement) && !exploreRow.contains(document.activeElement);
+      // The picker is anchored to a swatch in the sidebar.
+      if (on && !colorPopover.hidden) closeColorPicker();
+      if (on) document.documentElement.dataset.sidebar = "collapsed";
+      else delete document.documentElement.dataset.sidebar;
+      try {
+        if (on) localStorage.setItem(SIDEBAR_KEY, "collapsed");
+        else localStorage.removeItem(SIDEBAR_KEY);
+      } catch (err) {
+        // Storage unavailable: Wide holds for this visit only.
+      }
+      syncWide();
+      if (focusInside) sidebarCollapseBtn.focus({ preventScroll: true });
+    }
+
+    sidebarCollapseBtn.addEventListener("click", () => setWide(!wideOn()));
+
     syncActionBar();
-    syncSheetInert();
+    syncWide();
     narrowLayout.addEventListener("change", () => {
       syncActionBar();
-      syncSheetInert();
+      syncWide();
     });
 
     // Drag the handle, the gesture the shape already promises. The sheet
@@ -2324,9 +2392,10 @@
 
     // Shortcuts for the exploration loop, the three things pressed over
     // and over while hunting for a composition: R rerolls, Space toggles
-    // Auto-randomize, Cmd/Ctrl+Z steps back. All three stay out of the
+    // Auto-randomize, Cmd/Ctrl+Z steps back. S, beside them, collapses the
+    // sidebar into Wide on desktop. All four stay out of the
     // way of typing: a focused text/number field or select keeps its
-    // own keys (R types a letter there, Cmd+Z is the field's own undo,
+    // own keys (R and S type letters there, Cmd+Z is the field's own undo,
     // Space opens the select), and a focused button keeps Space as its
     // native click. Range sliders don't use any of these, so they still
     // work with a slider focused after a drag. Held-down repeat is
@@ -2347,6 +2416,10 @@
         if (inField) return;
         e.preventDefault();
         performRandomize();
+      } else if (e.key.toLowerCase() === "s") {
+        if (inField || narrowLayout.matches) return;
+        e.preventDefault();
+        setWide(!wideOn());
       } else if (e.key === " ") {
         // A button focused by keyboard keeps Space as its native click.
         // One that merely kept focus from a mouse click (most commonly

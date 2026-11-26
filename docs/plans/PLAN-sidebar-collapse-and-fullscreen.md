@@ -26,26 +26,34 @@ lives in a class on `body`, and nothing is copied.
 
 ### Wide (desktop, above 768px)
 
-- A toggle collapses `.controls` to nothing. The sidebar slides out left (`transform` plus `width`,
-  0.2s, the sheet's own duration, off under `prefers-reduced-motion`) and `.main-area` takes the width.
+- A toggle collapses the sidebar. It slides out left by its own width (`margin-left: -300px`, 0.2s,
+  the sheet's own duration, off under `prefers-reduced-motion`), so nothing in it reflows on the way,
+  and `.main-area` takes the window.
 - The canvas fits the artboard both ways: it scales up as well as down, keeping its aspect, with
-  `image-rendering: pixelated` so the blocks stay hard. Expected at 1440x900 and 1200x630: about
-  1390x730, against about 1090x572 today.
+  `image-rendering: pixelated` so the blocks stay hard. Measured at 1440x900 and 1200x630: a
+  1388x729 picture, against 1088x571 expanded. The fit is CSS (`100cqw` and `100cqh` of
+  `.canvas-area`); `app.js` publishes only the picture's aspect as `--canvas-ar`, from a
+  `MutationObserver` on the canvas's `width` and `height`.
 - The exploration loop stays one click away. `.explore-row` (Undo, Play, Random) moves into the footer
-  strip, left of the brand, the same way `syncActionBar()` moves it into the phone bar. The footer
-  strip is 32px tall and so are those buttons, so it fits without a new row.
-- The toggle itself: a sidebar icon button. Expanded, it sits at the start of `.explore-row` in the
-  sidebar header. Collapsed, it travels with the row into the footer strip, so it is always in the
-  same place relative to the controls it hides.
-- Key `S` toggles it, with the same guards as `R` (not in a text field, no modifier, no repeat, not
-  while the tour or the picker is up).
-- The state is remembered per viewer in `localStorage` as `flield-sidebar`, beside `flield-theme`,
-  inside the same try/catch. It never travels in a shared link.
-- Closing the sidebar closes the color picker first. Opening the tour expands the sidebar, since every
-  tour step points into it, and puts it back as it was when the tour closes.
-- The collapsed sidebar is `inert`, as the closed phone sheet already is, so Tab never walks into it.
-- Below 768px Wide does not exist: the sheet already gives the artwork the screen. Crossing the
-  breakpoint while collapsed restores the normal desktop layout on the way back up, from storage.
+  strip, left of the brand, the same way `syncActionBar()` moves it into the phone bar.
+- The toggle is a sidebar icon button at the start of `.explore-row`, so it travels with the row and
+  stays beside the controls it hides. Hidden below 768px.
+- Key `S` toggles it, with the same guards as `R`. It is in the guide, `USAGE.md`, `README.md` and the
+  toggle's tooltip, not in the footer legend, which would otherwise grow by 70px.
+- The state is `data-sidebar="collapsed"` on `<html>`, stored as `flield-sidebar`. An inline script in
+  `<head>` restores it before first paint, because the first paint comes before `app.js` runs. It never
+  travels in a shared link. Below 768px the stylesheet ignores it, so the sheet works as before and
+  widening back gives Wide back.
+- Collapsing closes the color picker. The collapsed sidebar is `inert`, as the closed phone sheet
+  already is, so Tab never walks into it.
+- The tour is a modal of its own with its own mock-ups, so it does not touch Wide. The first draft of
+  this plan had it expand the sidebar "since every tour step points into it"; none does.
+- In Wide the theme and tutorial buttons are out of reach with the sidebar, and the keys are not.
+- The footer strip is now a size container, and its legend hides by container query when the strip
+  is too narrow. Building Wide found that on `cd5c8d7` the strip's one-line minimum already pushed
+  `.main-area` past the window from 769px to 873px, cutting up to 104px off the canvas; the same rule
+  fixes that. The cost: the expanded legend now hides below a 920px window, where it used to show
+  from about 886px on a Mac.
 
 ### Full screen (every layout where the API exists)
 
@@ -86,33 +94,32 @@ lives in a class on `body`, and nothing is copied.
 
 ### Phase 1: Wide
 
-- [ ] Add the toggle button to `.explore-row` in `index.html` and the `body.sidebar-collapsed` rules
-      to `style.css` above the phone block: the column's collapse, its transition, and the canvas fit.
-      The fit: `#preview` takes `width` and `height` from a scale `app.js` publishes as a custom
-      property. Container query units on `.canvas-area` could do it in CSS alone; try that first and
-      keep it if `view-modes.js` passes, since it removes a script dependency from the layout.
-- [ ] In `app.js`, add `setSidebarCollapsed()` beside `setSidebarOpen()`: the class, `inert`, storage,
-      moving `.explore-row` and the toggle into the footer strip and back (recording each element's
-      home, as `lastFieldHome` does), closing the picker, and a no-op below 768px. Extend
-      `centerCanvas()` to publish the fit scale in Wide and full screen only. Declare every `const`
-      it reads above `syncActionBar()`'s first call.
-- [ ] Add `S` to the shortcut handler and to `.site-footer-keys`, and make the tour expand the
-      sidebar and restore it.
-- [ ] Verify Phase 1. Write `local/Harness/view-modes.js` on the pattern of `ux-u1-u7.js`, at 1440x900
-      and 1024x768, that measures the canvas's rendered box and fails unless: expanded equals the
-      baseline measured before the change (expected about 1090 wide at 1440); Wide is at least the
-      artboard width minus 1px, still centered within 1px; the footer strip does not overflow at 769px
-      wide; Tab from the toggle never lands inside `.controls` while collapsed; and a reload restores
-      the state. Then the standing gates: `style-dump.js` and `pseudo-dump.js` against a `git archive`
-      of the commit before show zero computed-style differences in the expanded layout, both themes;
-      `bugs-b4-b16.js` and `a11y-a1-a15.js` print no `BUG`; `gif-button-width.js` ends in `ok`;
-      `ux-u1-u7.js` ends in `all ok`; `checks.py` passes.
-- [ ] Commit Phase 1: bump `style.css` (127 to 128) and `app.js` (2 to 3) on every page that requests
-      them, move `sitemap.xml`'s `lastmod` for the app page, update the three shortcut lists.
+- [x] Add the toggle to `.explore-row`, the head script, and the Wide rules in a
+      `@media (min-width: 769px)` block after `#preview` in `style.css`: the slide, the CSS fit, and the
+      row's margin in the strip. Hide the toggle in the phone block.
+- [x] In `app.js`, add `wideOn()`, `syncWide()` and `setWide()` before the first `syncActionBar()`
+      call, run `syncWide()` after it at load and at the breakpoint, make `syncSheetInert()` ask
+      `wideOn()`, publish `--canvas-ar`, and add `S` to the shortcut handler.
+- [x] Fix the footer overflow found on the way: `.site-footer` as a size container, and the legend's
+      two container-query thresholds. Add the new hash to `_headers`.
+- [x] Verify Phase 1. Run on 26 November 2026 against a `git archive` of `7bb9ef6`:
+      `view-modes.js` 24 of 24 `ok` (on the base, E2 reads 104px over at 769px and every W check
+      fails). `style-dump.js` with `SKIP='#sidebarCollapseBtn'` differs in all 16 states, dark and
+      light alike once color lines are set aside, and only where expected: the row's boxes (Random
+      179px to 139px), `--canvas-ar`, the footer's `container-type`, the legend hidden at 900px and
+      the overflow fix at 769px. `pseudo-dump.js`, re-keyed by button name so an added button no
+      longer shifts every key (its exit status was always 0 before), differs only in Random's width
+      in its four forced states. `bugs-b4-b16.js` 29 `ok`; `a11y-a1-a15.js` all `ok` except the
+      known A4 flake, which passes alone; `gif-button-width.js` `ok`; `ux-u1-u7.js` `all ok`;
+      `checks.py` passes. Screens with reduced motion at 1440, 1024 (light), 800 and 769px.
+- [ ] Commit Phase 1 as two commits, the overflow fix first, then Wide with the docs: the guide's shortcut table, `USAGE.md`, `README.md`, and the two
+      new traps in `AGENTS.md`. `style.css` is at 128 and `app.js` at 3; `sitemap.xml` and the guide's
+      `dateModified` already read the commit date if it lands on 26 November.
 
 ### Phase 2: Full screen
 
-- [ ] Add the full-screen button to `#appChrome`, its third home in the footer strip for Wide, and the
+- [ ] Add the full-screen button to `#appChrome`, its third home in the footer strip for Wide (which
+      grows the strip's sum: re-measure and move both container-query thresholds), and the
       `.main-area:fullscreen` rules (footer hidden, no padding, bare canvas, `--bg` letterbox, idle
       cursor class).
 - [ ] In `app.js`, add `toggleFullscreen()`, the `fullscreenchange` listener that owns the button's
