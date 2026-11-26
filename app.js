@@ -1269,7 +1269,7 @@
     // want back afterwards is the composition you had before the export,
     // not its thirteenth intermediate step.
     //
-    // At the 2s default a twenty-deep stack was forty seconds of
+    // At the 4s default a twenty-deep stack was eighty seconds of
     // autoplay, which is nothing. A hundred entries of a small options
     // object costs little and covers a few minutes.
     const MAX_UNDO_HISTORY = 100;
@@ -1490,9 +1490,9 @@
       clearTimeout(autoplayTimer);
       autoplayTimer = setTimeout(() => {
         performRandomize();
-        // A pass can stop playback itself (a GIF export does), and the
-        // id is still the fired timeout's until it is reassigned, so
-        // this asks whether anything cleared it rather than assuming.
+        // Nothing in a pass stops playback today, but the id is still
+        // the fired timeout's until it is reassigned, so this asks
+        // whether anything cleared it rather than assuming.
         if (autoplayTimer) scheduleReroll(true);
       }, remaining);
     }
@@ -1764,9 +1764,9 @@
       }
     });
 
-    // Save-state slots: each stores the full readOptions() snapshot
-    // (canvas settings + both layers, not lock states) in localStorage
-    // so slots survive a page reload.
+    // Save-state slots: each stores snapshotForSharing(), the same
+    // snapshot a link carries (canvas settings, both layers, the lock set
+    // and the motion), in localStorage so slots survive a page reload.
     const PRESET_KEY_PREFIX = "featuregen-preset-";
 
     // Every slot read and write goes through here. With site data

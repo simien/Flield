@@ -203,7 +203,7 @@
        end of a 200KB document has arrived. This starts the fetch
        alongside the stylesheet instead. Same ?v= as the tag below, and
        CI holds the two together. -->
-  <link rel="preload" href="generator.js?v=15" as="script" />
+  <link rel="preload" href="generator.js?v=16" as="script" />
 </head>
 <body>
   <button id="sidebarToggle" class="secondary sidebar-toggle" title="Show settings" aria-pressed="false"><i class="ph ph-list"></i></button>
@@ -472,11 +472,11 @@
     <div class="controls-header">
       <!-- The exploration loop, the three controls pressed over and
            over: Undo, Auto-randomize, Random. Auto-randomize's interval
-           lives in the General tab as the Speed slider, since it is the
-           same beat a motion cycle runs on. Lock and Unlock, which
-           constrain that loop rather than drive it, get their own row
-           below. The brand lives over the artboard (see .brand in
-           .main-area) so this row has the full width. -->
+           lives in the General tab as Reroll every, a slider of its own
+           beside Speed, which times a motion cycle instead. The two
+           bulk lock buttons, which constrain that loop rather than drive
+           it, get their own row below. The brand lives over the artboard (see
+           .brand in .main-area) so this row has the full width. -->
       <div class="explore-row">
           <button id="undoBtn" class="secondary icon-btn" title="Undo last randomize" data-hold="Hold to undo" disabled><i class="ph ph-arrow-counter-clockwise"></i></button>
           <button id="playBtn" class="secondary icon-btn" title="Auto-randomize (Space)"><i class="ph ph-play"></i></button>
@@ -564,7 +564,7 @@
       <!-- Its own section rather than the last field under Settings,
            headed Animation so it does not repeat the field's own label:
            motion is what the site leads with, so it should be findable
-           as a heading, and it is one of the four controls that drive
+           as a heading, and it is one of the six controls that drive
            animation (see AGENTS.md) rather than a canvas setting. Second
            in the tab, not first: size, colors and mask come before how
            it moves, a still is the default, and the flash warning here
@@ -1032,7 +1032,7 @@
     </script>
   </main>
 
-  <script src="generator.js?v=15"></script>
+  <script src="generator.js?v=16"></script>
   <script src="core.js?v=1"></script>
   <script src="hold.js?v=1"></script>
   <script src="app.js?v=1"></script>

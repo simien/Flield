@@ -248,7 +248,7 @@ const FlieldCore = (() => {
   // hold is a color, a menu choice, or a number on a known step and
   // range, so each takes exactly the bits its range needs (hue 9,
   // symmetry 3, octaves 2), written end to end with nothing in
-  // between, then base64url'd. That is 78 characters where base64'd
+  // between, then base64url'd. That is 84 characters where base64'd
   // JSON ran past a thousand, most of which went on spelling out
   // "fieldStrength" and its neighbours twice.
   //
@@ -299,8 +299,9 @@ const FlieldCore = (() => {
   // before that can ship, and each choice here carries roughly double
   // the room it needs today.
   //
-  // size is width and height, the one pair with no maximum in the
-  // markup, so they are clamped to what their bits hold. A canvas a
+  // size is width and height. The markup stops both at 8192, but a link
+  // or a slot can carry any number, so they are clamped to what their
+  // bits hold. A canvas a
   // million pixels down one side runs out of memory long before it
   // runs out of link.
   const COMPACT_BITS = {
@@ -507,7 +508,7 @@ const FlieldCore = (() => {
     out.add(snapshot.blockSize, COMPACT_BITS.blockSize);
     out.add(optionIndex(page.options.shapeMask, snapshot.shapeMask), COMPACT_BITS.shapeMask);
     // Written even for the shapes that have no direction to point in:
-    // two bits cost nothing next to a decoder that has to know which
+    // three bits cost nothing next to a decoder that has to know which
     // shapes those are.
     out.add(Math.max(0, directions.findIndex((d) => d.value === snapshot.shapeMaskDirection)), COMPACT_BITS.shapeMaskDirection);
     out.add(optionIndex(page.options.motion, snapshot.motion || "none"), COMPACT_BITS.motion);

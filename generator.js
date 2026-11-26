@@ -236,7 +236,7 @@ const GRAD_Y = new Float64Array([0, 0, 1, -1, 1, 1, -1, -1]);
 // it is null for every other motion and every still, which keeps those
 // bit-identical.
 // `depth` scales how far Loop's circle and Wind's gust go (see
-// MOTION_DEPTH); 1 is exactly the arithmetic without it.
+// MOTION_DEPTH_DEFAULT); 1 is exactly the arithmetic without it.
 // `spin` is the direction Loop's circle and Wind's gust circle turn:
 // 1, or LAYER_B_SPIN for layer B.
 function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octaves, phase, mode, phaseOffset, warp, deform, depth, spin) {
@@ -537,11 +537,12 @@ function dilatePass(src, dst, cols, fillCols, fillRows) {
 // uses the value to bias how likely a cell is to fill.
 //
 // Both share everything around them. The heading here is read off the
-// very field getFlowField already builds, so all four motions drive a
-// streamlines layer without knowing it exists, and the trails land in
-// the same Uint8Array, so symmetry, the shape mask, layer stacking, and
-// every exporter treat them like any other cells. Eight-way symmetric
-// streamlines and an exactly looping GIF of them both fall out of that.
+// very field getFlowField already builds, so every motion that moves
+// the field drives a streamlines layer without knowing it exists, and
+// the trails land in the same Uint8Array, so symmetry, the shape mask,
+// layer stacking, and every exporter treat them like any other cells.
+// Eight-way symmetric streamlines and an exactly looping GIF of them
+// both fall out of that.
 
 // Integration step, in cells. Under one cell so a strand comes out
 // continuous rather than dotted; halving it again only doubles the work
@@ -709,7 +710,8 @@ const RIPPLE_TRAVEL = [0.5, 1.2];
 // in `gWave`, and the slope's pull in cells in `gShiftX` and `gShiftY`.
 // `waveRow(y, out)` reads one row of the wave off the lattice at cell
 // resolution; the painter reads the pull at pixel resolution itself.
-// Null when no drop is falling.
+// Never null: generate() passes null in its place for every motion but
+// Ripple.
 function makeRipple(seed, cols, rows, spacing, phase, cycle) {
   const half = Math.hypot(cols, rows) / 2;
   const lambda = Math.max(1, spacing);
@@ -1170,8 +1172,9 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
     }
   } else if (texture === "contours" && hasField) {
     // Contours and nebula read the same field streaks does, and differ
-    // only in what they make of the value; see CONTOUR_LEVELS and
-    // NEBULA_PIVOT for the two profiles.
+    // only in what they make of the value; see CONTOUR_LEVELS, and
+    // NEBULA_GAIN with the pivot nebula computes below, for the two
+    // profiles.
     const values = getFlowField(
       seed, fillCols, fillRows, field.scale / blockSize, (field.angle * Math.PI) / 180,
       field.stretch, field.octaves, fieldPhase, fieldMode, phaseOffset, 0, deform, depth, spin
@@ -1731,7 +1734,8 @@ function layerOptionsToField(layer) {
 // (WIND_WARP), "pulse" (PULSE_DEPTH), "ripple" (RIPPLE_DEPTH), or
 // "tide" (TIDE_PULL). Circle, drift, and wind move the field, so a
 // streaks layer with no field strength stays still through them; pulse
-// and ripple swing density instead, so they move any layer; tide bends
+// swings density and ripple swells and refracts the finished cells
+// instead, so both move any layer; tide bends
 // each layer's field with the other's; and a streamlines layer runs its
 // particles under drift and wind, so that one moves whether it has a
 // field to bend it or not.

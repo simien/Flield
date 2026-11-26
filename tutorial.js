@@ -112,7 +112,8 @@
 
     // One fixed composition (seeded, so it reads as one thing moving
     // rather than a reroll) run through a full cycle of each kind in
-    // turn, at the export's own frame count and rate. Enough field
+    // turn, CYCLE_FRAMES frames to a cycle at CYCLE_FRAME_MS each, on a
+    // fixed beat rather than the Speed slider's. Enough field
     // strength for the three kinds that move the field to show, and
     // no mirror axes, since Drift and Wind read best as one-way travel.
     const TUTORIAL_ANIMATE_KINDS = ["drift", "wind", "circle", "pulse", "ripple", "tide"];

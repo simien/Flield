@@ -6,7 +6,8 @@
 // same SyntaxError it was in one.
 
     // Custom color picker: a 2D saturation/lightness square plus a hue
-    // strip, in a Floating UI-positioned popover shared by every swatch.
+    // strip, in a popover shared by every swatch and placed by its own
+    // reposition() below.
     // The value below the square can be read or typed as hex, RGB, or
     // HSL; all three stay in sync with the same underlying color. Each
     // swatch's hidden .color-input-native stays the real value store
