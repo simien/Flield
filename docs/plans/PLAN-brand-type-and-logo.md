@@ -41,7 +41,7 @@ Decided by the owner on 26 November 2026 (#2140).
       and 390.
 - [ ] Fonts: Silkscreen Regular and Geist Mono at weight 500 as Latin-subset WOFF2 in `fonts/`,
       with their OFL files, `@font-face` with `font-display: swap`, and a year-long cache in
-      `_headers` under versioned names. Needs `py314-fonttools` (MacPorts).
+      `_headers` under versioned names. Needs `sudo port install py314-fonttools py314-brotli`, run as `/opt/local/bin/python3.14 -m fontTools`.
 - [ ] Type: Silkscreen at multiples of 8px for titles and labels, Geist Mono 500 for document body.
       Verify: every hint in the app still measures one line (method in `AGENTS.md`).
 - [ ] Bump `?v=` for every changed versioned file on every page that requests it, with
