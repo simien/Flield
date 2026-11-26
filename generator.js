@@ -1481,13 +1481,18 @@ function escapeXmlText(value) {
 // caller rather than built here: this file knows nothing about the app or
 // where it is hosted, and that stays true. Left out entirely when the
 // caller doesn't pass one, so the markup is unchanged without it.
+// crispEdges on the root: every rect is a whole block on whole
+// coordinates, but at any non-integer scale a renderer antialiases each
+// rect's edges separately, and two neighbours' half-covered pixels
+// leave a hairline of the ground between them. Measured at 1.37x, 206
+// colors without it and 2, the picture's own, with it.
 function gridToSVG({ width, height, blockSize, bgColor, colorA, colorB, gridA, gridB, cols, rows, source }) {
   const provenance = source
     ? `<!-- Open this URL to load this composition back into the editor. -->` +
       `<metadata>${escapeXmlText(source)}</metadata>`
     : "";
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" shape-rendering="crispEdges">` +
     provenance +
     `<rect width="${width}" height="${height}" fill="${bgColor}"/>` +
     `<g fill="${colorA}">${rectsForGrid(gridA, cols, rows, blockSize)}</g>` +
