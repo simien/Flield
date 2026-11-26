@@ -2477,6 +2477,12 @@
       seamlessPreview.active = true;
       const start = performance.now();
       let lastStep = -1;
+      // How many cycles have played, added up a tick at a time at the
+      // beat in force then. The phase used to be the time since start
+      // over the current beat, so moving Speed rescaled all of that time
+      // at once and the picture jumped as far as a whole cycle.
+      let cycles = 0;
+      let last = start;
       const tick = (now) => {
         if (!seamlessPreview.active) return;
         const elapsed = now - start;
@@ -2487,17 +2493,19 @@
         // effect without a restart. A composition too heavy to keep up
         // drops frames rather than slowing the cycle down.
         const beat = currentCycleMs();
+        cycles += Math.max(0, now - last) / beat;
+        last = now;
         const cadence = Math.max(PREVIEW_MIN_FRAME_MS, Math.min(CYCLE_FRAME_MS, beat / PREVIEW_FRAMES_PER_CYCLE));
         const step = Math.floor(elapsed / cadence);
         if (step !== lastStep) {
           const first = lastStep === -1;
           lastStep = step;
-          const phase = (elapsed % beat) / beat;
+          const phase = cycles % 1;
           const drawStart = performance.now();
           // The cycle count is for Ripple, whose drops land somewhere
           // new each time they are reborn on the canvas; exports leave
           // it out so their rain repeats and the loop closes.
-          drawComposition(Object.assign(readOptions(), { loopMode: generalMotion() || "none", loopPhase: phase, loopCycle: Math.floor(elapsed / beat) }));
+          drawComposition(Object.assign(readOptions(), { loopMode: generalMotion() || "none", loopPhase: phase, loopCycle: Math.floor(cycles) }));
           // A link can carry a canvas this machine cannot animate. The
           // first frame says so, and the still goes back in place of a
           // tab that only draws. The Motion menu keeps what the link
