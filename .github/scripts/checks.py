@@ -135,7 +135,8 @@ def asset_versions(text_for):
     found = {}
     for page in VERSIONED:
         for asset, v in ASSET_REF.findall(text_for(page)):
-            key = "screenshot" if asset.startswith("screenshot.") else asset
+            # screenshot-800.webp included: one capture, one number.
+            key = "screenshot" if asset.startswith("screenshot") else asset
             found.setdefault(key, {}).setdefault(page, set()).add(int(v))
     return found
 
@@ -354,6 +355,40 @@ def check_link_format():
         if not width:
             fail("link format", f"tail field {key} has no width; check its COMPACT_BITS key")
 
+    # Four tail fields take a plain number of bits rather than a
+    # COMPACT_BITS entry, so nothing above ties them to their controls.
+    # Direction and each layer's Motion travel as a menu index; Collide
+    # as its slider's value, zero for off; Depth as its slider's value
+    # plus one, keeping zero for the default.
+    tail_bits = dict(fmt["tail"])
+
+    def menu_fits(field, pattern):
+        block = re.search(pattern + r"(.*?)</select>", html, re.S)
+        if not block:
+            fail("link format", f"no menu found for tail field {field}")
+            return
+        options = re.findall(r'<option value="([^"]*)"', block.group(1))
+        room = 2 ** tail_bits.get(field, 0)
+        if len(options) > room:
+            fail("link format", f"{field} has {len(options)} options, {tail_bits.get(field, 0)} tail bits hold {room}")
+
+    def slider_fits(field, plus):
+        tag = re.search(r'<input[^>]*\bid="%s"[^>]*>' % field, html)
+        attrs = dict(re.findall(r'(\w+)="([^"]*)"', tag.group(0))) if tag else {}
+        if "max" not in attrs:
+            fail("link format", f"no {field} slider with a max to check against its tail bits")
+            return
+        top = int(attrs["max"]) + plus
+        room = 2 ** tail_bits.get(field, 0) - 1
+        if top > room or int(attrs.get("min", 0)) < 0:
+            fail("link format", f"{field} slider writes up to {top}, {tail_bits.get(field, 0)} tail bits hold {room}")
+
+    menu_fits("direction", r'<select id="direction"')
+    for prefix in ("layerA", "layerB"):
+        menu_fits(f"{prefix}-motion", r'<select class="l-motion"')
+    slider_fits("collide", 0)
+    slider_fits("depth", 1)
+
     # Speed and the reroll interval are the tail fields that carry a
     # range rather than a menu index, so their top step gets the same
     # treatment the layer sliders get above. Both run on one scale and
@@ -390,7 +425,10 @@ def check_link_format():
 # The widths above say a link can be *written*. This says an old one can
 # still be *read*: a menu choice travels as its index and a layer field as
 # its position in the stream, so reordering either silently repaints every
-# link ever shared. Appending is always safe and passes quietly.
+# link ever shared. A menu or the tail may grow at its end. The lock ids
+# and the layer fields may not grow at all: both sit ahead of the tail, so
+# one more of either shifts every field behind it, and an old link's tail
+# would be read from the wrong bits. A new one of those goes in the tail.
 #
 # Bumping COMPACT_VERSION is the way to say a break is deliberate; the
 # decoder refuses a version it doesn't know, so old links stop rather than
@@ -439,10 +477,18 @@ def check_link_compat(base, current):
 
     for name, options in old["choices"].items():
         appended_only(f"{name} options", options, current["choices"].get(name, []))
-    appended_only("lock ids", old["locks"], current["locks"])
-    appended_only(
-        "layer fields", [f[0] for f in old["layers"]], [f[0] for f in current["layers"]]
-    )
+    for what, was, now in (
+        ("lock ids", old["locks"], current["locks"]),
+        ("layer fields", [f[0] for f in old["layers"]], [f[0] for f in current["layers"]]),
+    ):
+        appended_only(what, was, now)
+        if now[: len(was)] == was and len(now) > len(was):
+            fail(
+                "link compat",
+                f"{what}: {now[len(was)]!r} was added. These sit ahead of the "
+                "tail, so every field after them shifts; add it as a tail field "
+                "instead, or bump COMPACT_VERSION",
+            )
     # The tail is the one part of the stream that may grow, and only at
     # its end: a link written before a tail field existed reads it out of
     # the padding, so anything inserted ahead of it shifts what that
