@@ -2276,6 +2276,13 @@ button:disabled {
   display: flex;
 }
 
+/* The tour takes focus itself when it opens (see openTutorial), so a
+   screen reader lands on the dialog and its name. Tab never stops here,
+   so a ring around the whole card would only ever mean that. */
+.tutorial-modal:focus {
+  outline: none;
+}
+
 .tutorial-modal-header {
   display: flex;
   align-items: center;
