@@ -2906,21 +2906,29 @@
       playBtn.title = "Stop auto-randomize (Space)";
     }
 
+    // Every way of starting playback by hand comes through here: the
+    // Play button, Space (which clicks it), and the prompt on a link
+    // that offers to play. While that prompt is up the link's motion is
+    // being held for the answer, and starting playback is the answer
+    // whichever control gives it. Play and Space used to dismiss the
+    // prompt and start the rerolls without the motion the link carried.
+    function startPlayback() {
+      if (!playOffer.hidden) syncSeamlessPreview();
+      startAutoplay();
+    }
+
     playBtn.addEventListener("click", () => {
       if (autoplayTimer) stopAutoplay();
-      else startAutoplay();
+      else startPlayback();
     });
 
     // The prompt a recipient sees on a link marked "Offers to play"
     // (see loadStateFromURL). Playing from it rerolls at once, like the
     // Play button, since that is the author's variations they came for.
     const playOffer = document.getElementById("playOffer");
-    document.getElementById("playOfferStartBtn").addEventListener("click", () => {
-      // Both halves of what the link offered: the motion it was made
-      // with, and the rerolls on top of it.
-      syncSeamlessPreview();
-      startAutoplay();
-    });
+    // Both halves of what the link offered: the motion it was made
+    // with, and the rerolls on top of it.
+    document.getElementById("playOfferStartBtn").addEventListener("click", startPlayback);
     document.getElementById("playOfferDismissBtn").addEventListener("click", () => {
       playOffer.hidden = true;
     });
