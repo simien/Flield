@@ -2976,9 +2976,14 @@
       // General is the master: choosing a kind here puts both layers
       // back to following it. A layer set to its own kind would
       // otherwise keep it, and General would look dead for that layer.
-      ["layerA", "layerB"].forEach((prefix) => {
-        document.getElementById(prefix + "-motion").value = "same";
-      });
+      // None takes nothing back: it stops what General was playing,
+      // and a layer that runs its own kind goes on running it.
+      const general = motionSelect.value;
+      if (general !== "none") {
+        ["layerA", "layerB"].forEach((prefix) => {
+          document.getElementById(prefix + "-motion").value = "same";
+        });
+      }
       // Also called from prepareRender, but that is a frame away behind
       // scheduleRender, and the select's own change is the moment the
       // Speed slider should be there or gone.
@@ -2986,7 +2991,12 @@
       const wasPreviewing = seamlessPreview.active;
       syncSeamlessPreview();
       const kind = currentMotion();
-      if (kind) showToast(`Playing ${SEAMLESS_NAMES[kind]}`);
+      const ownKinds = ["layerA", "layerB"]
+        .map((prefix) => [prefix === "layerA" ? "Layer A" : "Layer B", document.getElementById(prefix + "-motion").value])
+        .filter(([, own]) => own !== "same" && own !== "none");
+      if (general === "none" && ownKinds.length) {
+        showToast(`General off, ${ownKinds.map(([name, own]) => `${name} plays ${SEAMLESS_NAMES[own]}`).join(", ")}`);
+      } else if (kind) showToast(`Playing ${SEAMLESS_NAMES[kind]}`);
       else if (wasPreviewing) showToast("Motion off");
     });
 
