@@ -700,7 +700,11 @@
       <div class="field">
         <label>Seed</label>
         <div class="field-row">
-          <input type="text" class="l-seed" />
+          <!-- 85 is what a link is sure to carry whole. Its seed field
+               holds 255 bytes, a character is up to three of them for
+               each unit this limit counts, and a longer seed was cut
+               without a word, so the link opened a different picture. -->
+          <input type="text" class="l-seed" maxlength="85" />
           <button type="button" class="lock-btn" data-for="seed" title="Lock from randomization"><i class="ph ph-lock-open"></i></button>
         </div>
       </div>
