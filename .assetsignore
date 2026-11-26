@@ -13,3 +13,20 @@ wrangler.jsonc
 
 .git
 .wrangler
+
+# What .gitignore keeps out of the repo is still on disk in a working
+# folder, and Wrangler does not read .gitignore. The site deploys from a
+# clean clone, where none of this exists, so these lines change nothing
+# there. They are for a `wrangler deploy` run by hand from a folder
+# someone works in, which would otherwise publish local/ (analytics
+# exports, plans, drafts) and an editor's settings as static assets.
+# Keep this list in step with .gitignore.
+local
+.claude
+__pycache__
+.DS_Store
+Thumbs.db
+
+# Tells GitHub Pages not to run Jekyll. It means nothing to Cloudflare,
+# which was serving the empty file at /.nojekyll.
+.nojekyll
