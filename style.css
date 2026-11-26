@@ -183,19 +183,22 @@ body {
 /* One keyboard focus treatment for everything, shadcn's: the border
    takes the ring color and a 3px half-opacity ring sits outside it.
    :focus-visible only, so a mouse click never leaves a ring behind.
-   Range inputs put the ring on their thumb instead (see below). */
+   Range inputs put the ring on their thumb instead (see below).
+   The outline is transparent rather than none: forced colors drops the
+   box-shadow, and paints a transparent outline in the system's own
+   color, so that is the ring left in high contrast mode. */
 button:focus-visible,
 .field input[type="text"]:focus-visible,
 .field input[type="number"]:focus-visible,
 .field select:focus-visible,
 .split-btn-select:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
   border-color: var(--ring);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
 }
 
 input[type="range"]:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
 }
 
 .main-area {
@@ -883,7 +886,6 @@ input[type="range"]:focus-visible {
    than sitting on permanently and mismatching its other half. */
 .split-btn-select:focus {
   background-color: var(--input-hover);
-  outline: none;
 }
 
 @media (hover: hover) {
@@ -1493,7 +1495,7 @@ input[type="range"]:focus-visible {
    the same ring as every other control. */
 .color-sl-square:focus-visible,
 .color-hue-strip:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
   border-color: var(--ring);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
 }
@@ -1623,6 +1625,8 @@ input[type="range"]:focus-visible {
    itself rather than on a box the field doesn't have. */
 .color-value-row:has(input:focus-visible) {
   box-shadow: inset 0 0 0 2px var(--ring);
+  outline: 2px solid transparent;
+  outline-offset: -2px;
 }
 
 .color-channel {
