@@ -146,6 +146,7 @@ const LOOP_RADIUS = 0.2;
 // all octaves close together). On screen the period is flow scale times
 // stretch pixels, which is how far the pattern moves per loop; the
 // per-cell dither does not repeat, so only the density envelope does.
+// It must stay a power of two: getFlowField wraps the lattice with a mask.
 const DRIFT_PERIOD = 1;
 
 // Pulse loops swing density with one sine wave per cycle (so phase 0
@@ -343,11 +344,14 @@ function getFlowField(seed, fillCols, fillRows, scale, angleRad, stretch, octave
         // Drift wraps the lattice along the flow axis so the field is
         // periodic there (see DRIFT_PERIOD), and Wind wraps the octaves
         // that travel; a still octave, circle mode, and stills use the
-        // plain 256-entry wrap.
+        // plain 256-entry wrap. The period is a power of two (DRIFT_PERIOD
+        // is 1 and freq doubles), so a mask wraps it, negatives included,
+        // to exactly what the double modulo gave, for an eighth less of a
+        // Drift frame.
         const wrapThis = drift || (wind && o > 0);
-        const period = DRIFT_PERIOD * freq;
-        const xi = wrapThis ? (((flx % period) + period) % period) & 255 : flx & 255;
-        const xi1 = wrapThis ? (((flx + 1) % period + period) % period) & 255 : xi + 1;
+        const wrapMask = DRIFT_PERIOD * freq - 1;
+        const xi = wrapThis ? flx & wrapMask & 255 : flx & 255;
+        const xi1 = wrapThis ? (flx + 1) & wrapMask & 255 : xi + 1;
         const yi = fly & 255;
         const xf = sx - flx;
         const yf = sy - fly;
