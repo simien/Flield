@@ -565,9 +565,14 @@ const STREAM_TRAVEL = 2;
 
 // Coverage is capped here before the particle count is solved for it,
 // because the count goes to infinity as coverage approaches 1 (see
-// below) and strands laid thickly enough to cover 85% of a canvas have
-// already merged into a solid field with no strand left to see.
-const STREAM_MAX_COVERAGE = 0.85;
+// below). The cap is on the layer's coverage, before Weave splits it
+// between its two passes. It was 0.85 on each pass, which left the top
+// fifteen steps of Density drawing one picture under Streamlines (80%
+// covered from 0.85 to 1) while Weave's two passes went on to 96%. At
+// 0.98 on the layer, Streamlines climbs to the top of the slider, and a
+// Weave pass gets 0.859, so Weave draws what it did. Below 0.85 neither
+// changes by a cell, so links there open as they did.
+const STREAM_MAX_COVERAGE = 0.98;
 
 // A step's heading is otherwise two trigonometric calls, and a busy
 // frame takes a million steps, so the headings are precomputed once per
@@ -1138,7 +1143,8 @@ function buildGrid({ seed, cols, rows, density, symmetry, smoothPasses, field, b
     const woven = texture === "weave";
     // See WEAVE_CROSS: each of the two passes covers less, so that what
     // they leave between them is the density the slider asked for.
-    const passDensity = woven ? 1 - Math.sqrt(Math.max(0, 1 - density)) : density;
+    const covered = Math.min(STREAM_MAX_COVERAGE, density);
+    const passDensity = woven ? 1 - Math.sqrt(Math.max(0, 1 - covered)) : covered;
     const pass = {
       fillCols,
       fillRows,
