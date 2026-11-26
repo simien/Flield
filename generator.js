@@ -1481,12 +1481,34 @@ function escapeXmlText(value) {
 // caller rather than built here: this file knows nothing about the app or
 // where it is hosted, and that stays true. Left out entirely when the
 // caller doesn't pass one, so the markup is unchanged without it.
+//
+// Every other value lands in an attribute, so each is checked rather
+// than trusted: a color must be #rrggbb and a size a finite number,
+// which is all the app's color inputs and fields ever give. Anything
+// else throws instead of writing markup the caller did not mean.
+//
 // crispEdges on the root: every rect is a whole block on whole
 // coordinates, but at any non-integer scale a renderer antialiases each
 // rect's edges separately, and two neighbours' half-covered pixels
 // leave a hairline of the ground between them. Measured at 1.37x, 206
 // colors without it and 2, the picture's own, with it.
+const SVG_COLOR = /^#[0-9a-f]{6}$/i;
+function svgColor(value) {
+  if (typeof value !== "string" || !SVG_COLOR.test(value)) throw new TypeError(`gridToSVG: ${JSON.stringify(value)} is not a #rrggbb color`);
+  return value;
+}
+function svgSize(value) {
+  if (typeof value !== "number" || !Number.isFinite(value)) throw new TypeError(`gridToSVG: ${String(value)} is not a finite size`);
+  return value;
+}
+
 function gridToSVG({ width, height, blockSize, bgColor, colorA, colorB, gridA, gridB, cols, rows, source }) {
+  svgSize(width);
+  svgSize(height);
+  svgSize(blockSize);
+  svgColor(bgColor);
+  svgColor(colorA);
+  svgColor(colorB);
   const provenance = source
     ? `<!-- Open this URL to load this composition back into the editor. -->` +
       `<metadata>${escapeXmlText(source)}</metadata>`
