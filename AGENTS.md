@@ -462,9 +462,10 @@ every exported SVG, and neither shows up in the browser:
 Both are checked by `checks.py`, against the widths in `COMPACT_BITS` and
 `COMPACT_LAYER_NUMBERS`, so the build fails rather than the links. It also
 compares option order and field positions against the base branch and
-fails on anything but an append, which includes adding a lock: the lock
-ids expand to one bit each in a fixed order, and a new one lands in the
-middle of that order rather than the end.
+fails on anything but an append to a menu or the tail. The lock ids and
+the layer fields may not grow at all, not even at their ends: both sit
+ahead of the tail, so one more of either shifts every tail field an old
+link carries. A new lock or layer value belongs in the tail.
 
 There is one place the format may grow: `COMPACT_TAIL_FIELDS`, written
 after both layers and read back with a fallback rather than throwing, so
