@@ -85,7 +85,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="../guide.css?v=10" />
+  <link rel="stylesheet" href="../guide.css?v=11" />
 </head>
 <body>
   <header class="site-header">
@@ -127,11 +127,11 @@
       <div class="demo-canvases">
         <div class="demo-pane">
           <p class="demo-label">No field</p>
-          <canvas id="staticCanvas" width="320" height="240"></canvas>
+          <canvas id="staticCanvas" role="img" aria-label="No field: cells filled at random, evenly scattered." width="320" height="240"></canvas>
         </div>
         <div class="demo-pane">
           <p class="demo-label">With a field</p>
-          <canvas id="fieldCanvas" width="320" height="240"></canvas>
+          <canvas id="fieldCanvas" role="img" aria-label="With a field: the same random cells gathered into bands and thinned into valleys." width="320" height="240"></canvas>
         </div>
       </div>
       <div class="demo-controls">
@@ -176,11 +176,11 @@
       <div class="demo-canvases">
         <div class="demo-pane">
           <p class="demo-label">The vectors</p>
-          <canvas id="arrowCanvas" width="320" height="240"></canvas>
+          <canvas id="arrowCanvas" role="img" aria-label="The vectors: one arrow per patch of the grid, each pointing where the field flows there." width="320" height="240"></canvas>
         </div>
         <div class="demo-pane">
           <p class="demo-label">Particles tracing them</p>
-          <canvas id="streamCanvas" width="320" height="240"></canvas>
+          <canvas id="streamCanvas" role="img" aria-label="Particles tracing them: strands drawn by particles following those arrows." width="320" height="240"></canvas>
         </div>
       </div>
       <div class="demo-controls">
@@ -240,11 +240,11 @@
       <div class="demo-canvases">
         <div class="demo-pane">
           <p class="demo-label">The field</p>
-          <canvas id="heatCanvas" width="320" height="240"></canvas>
+          <canvas id="heatCanvas" role="img" aria-label="The field: its value at every point, dark for low and light for high." width="320" height="240"></canvas>
         </div>
         <div class="demo-pane">
           <p class="demo-label">What it produces</p>
-          <canvas id="artCanvas" width="320" height="240"></canvas>
+          <canvas id="artCanvas" role="img" aria-label="What it produces: the composition those field values make." width="320" height="240"></canvas>
         </div>
       </div>
       <div class="demo-controls">
@@ -315,7 +315,10 @@ grid[y][x] = rand() &lt; p;</code></pre>
 
     <p class="meta">Flield is free for noncommercial use under the <a href="https://github.com/simien/Flield/blob/main/LICENSE.md" target="_blank" rel="noopener">PolyForm Noncommercial License</a>.</p>
 
-    <footer class="site-footer">
+  </main>
+
+  <footer class="wrap">
+    <div class="site-footer">
       <div class="site-footer-row">
         <a href="../guide/">Guide</a>
         <a href="../animated-backgrounds/">Animated Backgrounds</a>
@@ -326,8 +329,8 @@ grid[y][x] = rand() &lt; p;</code></pre>
         <a href="https://github.com/simien/Flield" target="_blank" rel="noopener">GitHub</a>
         <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP</a>
       </div>
-    </footer>
-  </main>
+    </div>
+  </footer>
 
   <script src="../generator.js?v=14"></script>
   <script>

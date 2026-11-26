@@ -85,7 +85,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="../guide.css?v=10" />
+  <link rel="stylesheet" href="../guide.css?v=11" />
   <style>
     /* The six motions sit in a two-column grid rather than the shared
        .demo-canvases pair, since they are peers being compared rather
@@ -173,27 +173,27 @@
       <div class="motion-grid">
         <div class="demo-pane">
           <p class="demo-label">Loop</p>
-          <canvas id="motion-circle" width="260" height="170"></canvas>
+          <canvas id="motion-circle" role="img" aria-label="Loop: one composition playing a full Loop cycle on repeat." width="260" height="170"></canvas>
         </div>
         <div class="demo-pane">
           <p class="demo-label">Drift</p>
-          <canvas id="motion-drift" width="260" height="170"></canvas>
+          <canvas id="motion-drift" role="img" aria-label="Drift: one composition playing a full Drift cycle on repeat." width="260" height="170"></canvas>
         </div>
         <div class="demo-pane">
           <p class="demo-label">Wind</p>
-          <canvas id="motion-wind" width="260" height="170"></canvas>
+          <canvas id="motion-wind" role="img" aria-label="Wind: one composition playing a full Wind cycle on repeat." width="260" height="170"></canvas>
         </div>
         <div class="demo-pane">
           <p class="demo-label">Pulse</p>
-          <canvas id="motion-pulse" width="260" height="170"></canvas>
+          <canvas id="motion-pulse" role="img" aria-label="Pulse: one composition playing a full Pulse cycle on repeat." width="260" height="170"></canvas>
         </div>
         <div class="demo-pane">
           <p class="demo-label">Ripple</p>
-          <canvas id="motion-ripple" width="260" height="170"></canvas>
+          <canvas id="motion-ripple" role="img" aria-label="Ripple: one composition playing a full Ripple cycle on repeat." width="260" height="170"></canvas>
         </div>
         <div class="demo-pane">
           <p class="demo-label">Tide</p>
-          <canvas id="motion-tide" width="260" height="170"></canvas>
+          <canvas id="motion-tide" role="img" aria-label="Tide: one composition playing a full Tide cycle on repeat." width="260" height="170"></canvas>
         </div>
       </div>
       <div class="demo-controls">
@@ -347,7 +347,10 @@
 
     <p class="meta">Flield is free for noncommercial use under the <a href="https://github.com/simien/Flield/blob/main/LICENSE.md" target="_blank" rel="noopener">PolyForm Noncommercial License</a>.</p>
 
-    <footer class="site-footer">
+  </main>
+
+  <footer class="wrap">
+    <div class="site-footer">
       <div class="site-footer-row">
         <a href="../guide/">Guide</a>
         <a href="../flow-fields/">Flow Fields</a>
@@ -358,8 +361,8 @@
         <a href="https://github.com/simien/Flield" target="_blank" rel="noopener">GitHub</a>
         <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP</a>
       </div>
-    </footer>
-  </main>
+    </div>
+  </footer>
 
   <script src="../generator.js?v=14"></script>
   <script>

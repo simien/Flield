@@ -85,7 +85,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="../guide.css?v=10" />
+  <link rel="stylesheet" href="../guide.css?v=11" />
 </head>
 <body>
   <header class="site-header">
@@ -129,11 +129,11 @@
       <div class="demo-canvases">
         <div class="demo-pane">
           <p class="demo-label">One tile</p>
-          <canvas id="tileCanvas" width="256" height="256"></canvas>
+          <canvas id="tileCanvas" role="img" aria-label="One tile: a single generated composition." width="256" height="256"></canvas>
         </div>
         <div class="demo-pane">
           <p class="demo-label">Repeated 3 &times; 3</p>
-          <canvas id="repeatCanvas" width="256" height="256"></canvas>
+          <canvas id="repeatCanvas" role="img" aria-label="The same tile repeated three by three, showing whether its edges meet." width="256" height="256"></canvas>
         </div>
       </div>
       <div class="demo-controls">
@@ -248,7 +248,10 @@
 
     <p class="meta">Flield is free for noncommercial use under the <a href="https://github.com/simien/Flield/blob/main/LICENSE.md" target="_blank" rel="noopener">PolyForm Noncommercial License</a>.</p>
 
-    <footer class="site-footer">
+  </main>
+
+  <footer class="wrap">
+    <div class="site-footer">
       <div class="site-footer-row">
         <a href="../guide/">Guide</a>
         <a href="../flow-fields/">Flow Fields</a>
@@ -259,8 +262,8 @@
         <a href="https://github.com/simien/Flield" target="_blank" rel="noopener">GitHub</a>
         <a href="https://simienap.com" target="_blank" rel="noopener">SimienAP</a>
       </div>
-    </footer>
-  </main>
+    </div>
+  </footer>
 
   <script src="../generator.js?v=14"></script>
   <script>

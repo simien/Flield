@@ -81,6 +81,13 @@ body {
   padding: 0 24px 96px;
 }
 
+/* The footer follows <main> rather than sitting inside it, so the page
+   has a footer landmark. It takes the column's bottom padding with it,
+   which keeps the spacing what it was. */
+main.wrap {
+  padding-bottom: 0;
+}
+
 /* Site header: the wordmark returns to the app, which is the only
    navigation a document page needs. */
 .site-header {
@@ -457,7 +464,6 @@ table {
   border-collapse: collapse;
   width: 100%;
   font-size: 14px;
-  min-width: 420px;
 }
 
 th, td {
@@ -466,6 +472,16 @@ th, td {
   border-bottom: 1px solid var(--border);
   color: var(--text-muted);
   vertical-align: top;
+}
+
+/* Tables used to hold a 420px minimum and scroll sideways in their box
+   below it. Every one fits a phone column without it, so a phone reads
+   them whole; the cells give up some padding there to leave the text
+   more room. */
+@media (max-width: 480px) {
+  th, td {
+    padding: 10px 10px;
+  }
 }
 
 th {
