@@ -2583,26 +2583,46 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
   }
 }
 
+/* Each dot's target is 24px tall and takes the gap either side of it,
+   while the dot drawn on it stays 6px, as a ::before. Thirteen 24px
+   squares would not fit the phone's footer, and Previous and Next do
+   the same job at full size. */
 .tutorial-dots {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 0;
 }
 
 .tutorial-dot {
-  width: 6px;
-  height: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 24px;
   padding: 0;
   margin: 0;
   border: none;
+  background: transparent;
+  box-shadow: none;
+  transition: width 0.2s ease;
+}
+
+.tutorial-dot::before {
+  content: "";
+  width: 6px;
+  height: 6px;
   border-radius: 3px;
   background: var(--border-strong);
   transition: width 0.2s ease, background-color 0.2s ease;
 }
 
 .tutorial-dot.active {
+  width: 24px;
+}
+
+.tutorial-dot.active::before {
   width: 18px;
   background: var(--accent);
 }
@@ -3096,5 +3116,24 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
   .tutorial-demo {
     height: 92px;
     padding: 0 14px;
+  }
+}
+
+/* Touch targets in the phone sheet. Its controls were 26 to 32px tall
+   beside a 44px action bar. 40 is the floor here rather than 44, which
+   would add some 130px to every tab of a sheet already scrolled. As
+   min-height (and min-width for the square lock), so it wins over each
+   control's own height wherever that rule sits in the file. The handle
+   is left alone: it spans the sheet's whole width at 24px. */
+@media (max-width: 768px) {
+  .controls button:not(.sheet-handle),
+  .controls select,
+  .controls input[type="text"],
+  .controls input[type="number"] {
+    min-height: 40px;
+  }
+
+  .controls .lock-btn {
+    min-width: 40px;
   }
 }
