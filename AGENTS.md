@@ -37,7 +37,8 @@ that bumps the number alone. CI allows it because the file changed after
 its current number was set (`stale_on_base` in `checks.py`). Don't amend
 and force-push to main to fix one. The same follow-up must move
 `sitemap.xml`'s `lastmod` for every page it touches, including pages
-whose only change is the new `?v=`.
+whose only change is the new `?v=`, and a document page's JSON-LD
+`dateModified` with it: `checks.py` holds the two equal.
 
 ## A new motion or texture leaves counts behind in the prose
 

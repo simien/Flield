@@ -583,6 +583,27 @@ SITEMAP_PAGES = {
 }
 
 
+def check_json_ld_dates():
+    # A page's JSON-LD dateModified tells a search engine the same thing
+    # the sitemap's lastmod does, and the two had drifted three weeks
+    # apart. The sitemap is the one the check below keeps true, so the
+    # JSON-LD follows it. Pages with no dateModified are left alone.
+    entries = dict(re.findall(
+        r"<loc>https://flield\.com(/[^<]*)</loc>\s*<lastmod>(\d{4}-\d{2}-\d{2})</lastmod>",
+        read("sitemap.xml"),
+    ))
+    checked = 0
+    for path, rel in SITEMAP_PAGES.items():
+        found = re.search(r'"dateModified":\s*"([^"]*)"', read(rel))
+        if not found:
+            continue
+        checked += 1
+        if found.group(1) != entries.get(path):
+            fail("json-ld dates", f"{rel} dateModified {found.group(1)}, sitemap lastmod {entries.get(path)}")
+    if not any(f.startswith("json-ld dates") for f in failures):
+        notes.append(f"json-ld dates: dateModified matches lastmod on {checked} pages")
+
+
 def check_sitemap_dates():
     # A shallow clone grafts history at its oldest commit, so git log names
     # that commit for every file and every page looks changed on its date.
@@ -683,6 +704,7 @@ def main():
     check_link_compat(base, check_link_format())
     check_indexnow()
     check_sitemap_dates()
+    check_json_ld_dates()
     check_gif_writer()
     check_script_hashes()
 
