@@ -26,7 +26,7 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-Ds/ScUsrPnUBdg26DXSAWYNIABHvigRnykYrMBE0Oto=' 'sha256-0l9ZtnxUWr2ypAnk7hAzG42Prmc6V1O7dMfLKkl4rnU=' 'sha256-74mdc7Sa2zx27/iW9E7+8DbEqwB0/BaPIQBwqd6Kn7Q=' 'sha256-KoGlDju2KTLRCUPxGD1pAYM4mTggRbgf8xrxxeyywAU=' 'sha256-KrhJJ6Z9XI/81G3LPX88QtYqklAEC3TCbLOYX83LABY=' 'sha256-gVFisLFekc1PCu42fsgaZTsoQp/avJqC3WxDf9oEMaA=' 'sha256-nmGncG2FQWZq059I5HFWzZI1awe7VyWFLkahS43Kpp4=' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-X9/6/SaB1uaEaKfa4oAuwvquAuxHHT8sG5I+I0QW/8M=' 'sha256-0l9ZtnxUWr2ypAnk7hAzG42Prmc6V1O7dMfLKkl4rnU=' 'sha256-74mdc7Sa2zx27/iW9E7+8DbEqwB0/BaPIQBwqd6Kn7Q=' 'sha256-KoGlDju2KTLRCUPxGD1pAYM4mTggRbgf8xrxxeyywAU=' 'sha256-KrhJJ6Z9XI/81G3LPX88QtYqklAEC3TCbLOYX83LABY=' 'sha256-gVFisLFekc1PCu42fsgaZTsoQp/avJqC3WxDf9oEMaA=' 'sha256-nmGncG2FQWZq059I5HFWzZI1awe7VyWFLkahS43Kpp4=' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
   Strict-Transport-Security: max-age=31536000
 
 # The files index.html and the document pages request with a ?v= query.

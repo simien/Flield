@@ -2882,20 +2882,31 @@
     undoBtn.addEventListener("click", () => {
       const previous = undoHistory.pop();
       if (!previous) return;
-      const hadMotion = !!currentMotion();
-      applyGeneral(previous);
-      applyDefaults("layerA", previous.layerA);
-      applyDefaults("layerB", previous.layerB);
+      // Undo takes back a reroll, so it puts back what a pass rerolls
+      // (the background, the block size, the shape mask and each
+      // layer's randomizable fields) and leaves everything else as it
+      // is now. Restoring the whole snapshot also threw away a width
+      // typed, a Speed dragged or a palette range narrowed since then.
+      const now = readOptions();
+      const restored = Object.assign(now, {
+        bgColor: previous.bgColor,
+        blockSize: previous.blockSize,
+        shapeMask: previous.shapeMask,
+        shapeMaskDirection: previous.shapeMaskDirection,
+      });
+      ["layerA", "layerB"].forEach((prefix) => {
+        RANDOMIZABLE_FIELDS.forEach((field) => { restored[prefix][field] = previous[prefix][field]; });
+      });
+      // Auto-randomize would replace the restored picture at its next
+      // tick, so stepping back stops it.
+      const wasAutoplaying = !!autoplayTimer;
+      if (wasAutoplaying) stopAutoplay();
+      applyGeneral(restored);
+      applyDefaults("layerA", restored.layerA);
+      applyDefaults("layerB", restored.layerB);
       render();
-      // A layer's own Motion is part of what comes back, so a step can
-      // take the last motion away or bring one in, and the preview has
-      // to follow: left alone it went on redrawing a still twelve times
-      // a second, or sat frozen under a Speed slider. Only when that
-      // changed, though. A step that leaves the motion as it was must
-      // not restart the cycle, or start one that is being held still.
-      if (!!currentMotion() !== hadMotion) syncSeamlessPreview();
       updateUndoButton();
-      showToast("Stepped back");
+      showToast(wasAutoplaying ? "Stepped back, Auto-randomize stopped" : "Stepped back");
     });
 
     // A brief confirmation for actions whose effect might not be visible
