@@ -46,6 +46,11 @@ def read(rel):
 # A SyntaxError anywhere in the inline script kills the whole file, and the
 # page still serves 200 with a dead UI. This has happened: a second `const
 # controlsBody` took the entire app down with nothing but a console line.
+# The app's script moved out to app.js, where the same SyntaxError does the
+# same damage, so it is parsed alongside the inline blocks.
+SCRIPTS = ["app.js"]
+
+
 def check_inline_js():
     for page in PAGES:
         html = read(page)
@@ -63,6 +68,13 @@ def check_inline_js():
                 ).strip()
                 fail("inline js", f"{page} block {i + 1}: {err}")
         notes.append(f"inline js: {page}, {len(blocks)} block(s) parsed")
+    for rel in SCRIPTS:
+        proc = subprocess.run(["node", "--check", str(ROOT / rel)], text=True, capture_output=True)
+        if proc.returncode != 0:
+            err = next((l for l in proc.stderr.splitlines() if "Error:" in l), "syntax error").strip()
+            fail("inline js", f"{rel}: {err}")
+        else:
+            notes.append(f"inline js: {rel} parsed")
 
 
 # 2. Duplicate ids -------------------------------------------------------
@@ -110,22 +122,24 @@ def check_anchors():
 
 # 5. Cache busting -------------------------------------------------------
 # Every page asks for the project's own evolving files with a ?v= query:
-# style.css and generator.js from the app, guide.css and generator.js from
+# style.css, generator.js and app.js from the app, guide.css and generator.js from
 # the document pages, and the screenshot from all of them plus the README.
-# gif-writer.js is asked for by the app's script rather than its markup,
-# on the first GIF export, and is held to the same rule.
+# gif-writer.js is asked for by app.js rather than by markup, on the first
+# GIF export, and is held to the same rule, so app.js is read for numbers
+# as the pages are.
 # Forgetting to bump is invisible locally and serves a returning visitor a
 # stale copy; bumping one page and not another is how 404.html served an
 # older guide.css than the guide did; bumping without a change throws away
 # every visitor's cache for nothing. All three are caught here.
-ASSET_REF = re.compile(r"\b(style\.css|generator\.js|gif-writer\.js|guide\.css|screenshot(?:-\d+)?\.(?:png|webp))\?v=(\d+)")
-VERSIONED = PAGES + ["README.md"]
+ASSET_REF = re.compile(r"\b(style\.css|generator\.js|app\.js|gif-writer\.js|guide\.css|screenshot(?:-\d+)?\.(?:png|webp))\?v=(\d+)")
+VERSIONED = PAGES + ["app.js", "README.md"]
 # The files behind each versioned name. The screenshot's png and its webp
 # copies are cut from one capture and share one number, so they count as
 # one asset.
 ASSET_FILES = {
     "style.css": {"style.css"},
     "generator.js": {"generator.js"},
+    "app.js": {"app.js"},
     "gif-writer.js": {"gif-writer.js"},
     "guide.css": {"guide.css"},
     "screenshot": {"screenshot.png", "screenshot.webp", "screenshot-800.webp"},
@@ -242,7 +256,9 @@ def check_cache_bust(base):
 # decodes as option 0), and a slider widened past its width pushes every
 # later value out of place. Both are caught here.
 #
-# The widths live in COMPACT_BITS and COMPACT_LAYER_NUMBERS in index.html.
+# The widths live in COMPACT_BITS and COMPACT_LAYER_NUMBERS in app.js, and
+# the menus and sliders they must hold in index.html, so the two are read as
+# one text. A revision from before app.js existed had both in index.html.
 LAYER_CONTROL = r'<(?:input|select)[^>]*\bclass="l-{}"[^>]*>'
 
 
@@ -316,8 +332,13 @@ def parse_link_format(html):
     }
 
 
+def app_source(show):
+    """index.html and app.js as one text, read through show(rel)."""
+    return show("index.html") + "\n" + show("app.js")
+
+
 def check_link_format():
-    html = read("index.html")
+    html = app_source(read)
     fmt = parse_link_format(html)
 
     # Every menu must fit its field. autoSpeed stores index + 1, keeping 0
@@ -439,14 +460,17 @@ def check_link_compat(base, current):
     if not base:
         notes.append("link compat: skipped, no base ref to compare against")
         return
-    before = subprocess.run(
-        ["git", "show", f"{base}:index.html"], cwd=ROOT, text=True, capture_output=True
-    )
+    def show(rel):
+        return subprocess.run(
+            ["git", "show", f"{base}:{rel}"], cwd=ROOT, text=True, capture_output=True
+        )
+
+    before = show("index.html")
     if before.returncode != 0:
         notes.append("link compat: skipped, base ref unavailable")
         return
     try:
-        old = parse_link_format(before.stdout)
+        old = parse_link_format(app_source(lambda rel: show(rel).stdout))
     except AttributeError:
         notes.append("link compat: skipped, base predates the ?c= format")
         return

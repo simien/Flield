@@ -21,10 +21,10 @@ after committing, not before.
 ## Cache busting is load-bearing
 
 Every page requests the project's own evolving files with a `?v=N` query:
-`style.css` and `generator.js` from the app, `guide.css` from the guide, the
-explainers and `404.html`, `generator.js` again from the explainers,
-`gif-writer.js` from the app's script on the first GIF export (the number is
-in `loadGifWriter`, not in the markup), and `screenshot.png` (with its two
+`style.css`, `generator.js` and `app.js` from the app, `guide.css` from the
+guide, the explainers and `404.html`, `generator.js` again from the
+explainers, `gif-writer.js` from `app.js` on the first GIF export (the number
+is in `loadGifWriter`, not in the markup), and `screenshot.png` (with its two
 `.webp` copies, on one number) from every page plus the README. Bump the
 number when you change that file, on **every page that requests it**, and
 **leave it alone when you haven't**. A missed bump serves a returning visitor
@@ -195,9 +195,11 @@ The browser pane cannot verify the clipboard half of this.
 pane's document is never focused, so the copy path can be read but not
 run. Press the button in a real browser before believing it.
 
-## The inline script has one scope
+## The app's script has one scope
 
-`index.html` holds a single long inline script. Two consequences:
+`app.js` holds the app's script, one long file that `index.html` loads after
+`generator.js`. It was inline in `index.html` until November 2026 and moved
+out verbatim, still indented as it was. Two consequences:
 
 - **Declare a `const` above its first *caller*, not just its first use.**
   `syncActionBar()` runs during init and reaches into the sheet and the bar,
@@ -205,7 +207,7 @@ run. Press the button in a real browser before believing it.
   `ReferenceError` at load and takes the whole app down.
 - **A duplicate declaration is fatal.** A second `const controlsBody` threw a
   `SyntaxError` that killed every listener on the page while it still served
-  200. CI parses each inline block to catch this.
+  200. CI parses `app.js` and each inline block to catch this.
 
 ## The layout moves live elements, it does not copy them
 
@@ -526,9 +528,9 @@ the workflow's `paths`.
 ## Editing an inline script changes the policy
 
 `_headers` allows each inline script by its sha256, not by
-`'unsafe-inline'`, so a change of one character to the app's script, a
-document page's script or the theme script every page shares changes
-its hash, and the browser refuses the old one: the page serves 200 with
+`'unsafe-inline'`, so a change of one character to the app's undo-label
+script, a document page's script or the theme script every page shares
+changes its hash, and the browser refuses the old one: the page serves 200 with
 nothing running. `checks.py` names the hash to add and the stale one to
 drop, and the deploy runs `checks.py`, so a missed update stops the
 deploy rather than the site. Copy the hash it prints into `script-src`.
