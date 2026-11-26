@@ -3,10 +3,11 @@
 # form, and talks to nothing but its own origin, so the policy can say
 # exactly that.
 #
-# The one exception is Cloudflare Web Analytics, which the dashboard
-# injects at the edge as a script from static.cloudflareinsights.com that
-# then posts to cloudflareinsights.com. Both hosts are allowed below; drop
-# them if analytics is ever turned off.
+# The one exception is Cloudflare Web Analytics. Every page carries its
+# snippet by hand, since the edge injects nothing into a Worker's static
+# assets: a script from static.cloudflareinsights.com that then posts to
+# cloudflareinsights.com. Both hosts are allowed below; drop them if
+# analytics is ever turned off.
 #
 # script-src names each inline script by its sha256 rather than allowing
 # 'unsafe-inline', so a script injected into a page does not run. A nonce

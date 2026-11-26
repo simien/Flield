@@ -694,6 +694,28 @@ def check_script_hashes():
         notes.append(f"script hashes: {len(want)} inline script(s), each listed in _headers")
 
 
+# 12. Analytics ----------------------------------------------------------
+# Cloudflare's edge injects nothing into a Worker's static assets, so a
+# page is measured only if it carries the beacon itself. The app page had
+# it and the other five did not, for two months, and nothing said so. A
+# new page must carry it too, with the same token.
+BEACON = re.compile(r"<script[^>]*src='https://static\.cloudflareinsights\.com/beacon\.min\.js'[^>]*data-cf-beacon='([^']*)'")
+
+
+def check_analytics():
+    tokens = {}
+    for page in PAGES:
+        found = BEACON.findall(read(page))
+        if len(found) != 1:
+            fail("analytics", f"{page} carries the beacon {len(found)} times, not once")
+        else:
+            tokens.setdefault(found[0], []).append(page)
+    if len(tokens) > 1:
+        fail("analytics", "pages disagree on the beacon's token: " + "; ".join(f"{v} {k}" for k, v in tokens.items()))
+    if not any(f.startswith("analytics") for f in failures):
+        notes.append(f"analytics: the beacon is on all {len(PAGES)} pages, one token")
+
+
 def main():
     base = sys.argv[1] if len(sys.argv) > 1 else None
     check_inline_js()
@@ -707,6 +729,7 @@ def main():
     check_json_ld_dates()
     check_gif_writer()
     check_script_hashes()
+    check_analytics()
 
     for n in notes:
         print(f"  ok  {n}")
