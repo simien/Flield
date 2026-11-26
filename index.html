@@ -194,7 +194,7 @@
        returning visitor's cached copy silently goes stale. The third,
        gif-writer.js, is asked for by the script on the first GIF export
        (see loadGifWriter) and carries its number there. -->
-  <link rel="stylesheet" href="style.css?v=110" />
+  <link rel="stylesheet" href="style.css?v=111" />
   <!-- generator.js is requested at the end of the body, which is where
        it has to run, but the preload scanner only finds it once that
        end of a 200KB document has arrived. This starts the fetch
@@ -3060,10 +3060,10 @@
       if (wasAutoplaying) stopAutoplay();
       downloadGifBtn.disabled = true;
       downloadGifBtn.setAttribute("aria-busy", "true");
+      // A spinner while the wait has no length: the encoder loading,
+      // or a handful of stills. It is the same size as the icon it
+      // replaces, so nothing in the row moves.
       downloadGifBtn.innerHTML = iconTag("spinner-gap") + " GIF";
-      // The label is the text after the icon. Writing to it leaves the
-      // icon element alone, so the spinner keeps turning between counts.
-      const label = downloadGifBtn.lastChild;
 
       try {
         try {
@@ -3112,6 +3112,16 @@
         // next pass as a frame the file has no room for.
         gifExporting = true;
         stillExportBtns.forEach((btn) => { btn.disabled = true; });
+        // From here the wait has a length, so the spinner gives way to
+        // a count, and the count is the only thing in the button. It
+        // used to sit beside the spinner, where "100%" is wider than
+        // "GIF": the button grew and shrank with every digit, and PNG
+        // and SVG, which share what the GIF button leaves, moved with
+        // it. Alone, the widest count is narrower than the icon and
+        // "GIF" together, so the button is held at the width it has
+        // now and the row stays as it is at rest.
+        downloadGifBtn.style.minWidth = `${downloadGifBtn.getBoundingClientRect().width}px`;
+        downloadGifBtn.textContent = "0%";
         const first = readOptions();
         const loopMode = generalMotion() || "none";
         const writer = createGifWriter(first.width, first.height);
@@ -3123,7 +3133,7 @@
           for (let i = 0; i < frames; i++) {
             drawComposition(Object.assign({}, options, { loopMode, loopPhase: framePhase(i, frames, plan.cycleMs) }));
             writer.addFrame(pixelsOf(first.width, first.height), frameDelay(i, frames, plan.cycleMs));
-            label.textContent = " " + Math.floor((100 * (pass * frames + i + 1)) / total) + "%";
+            downloadGifBtn.textContent = Math.floor((100 * (pass * frames + i + 1)) / total) + "%";
             // A timer rather than an animation frame, which a hidden
             // tab stops delivering: the export would wait there until
             // someone came back to look at it.
@@ -3141,6 +3151,7 @@
         stillExportBtns.forEach((btn) => { btn.disabled = false; });
         downloadGifBtn.disabled = false;
         downloadGifBtn.removeAttribute("aria-busy");
+        downloadGifBtn.style.minWidth = "";
         downloadGifBtn.innerHTML = iconTag("download-simple") + " GIF";
         // The canvas is on the last frame recorded. Put the still back,
         // then whatever was running when the button was pressed.

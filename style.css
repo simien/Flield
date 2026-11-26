@@ -812,6 +812,13 @@ input[type="range"]:focus-visible {
   border-bottom-right-radius: 0;
 }
 
+/* While a GIF records, this button shows a count and is held at its
+   resting width (see the export handler). Every digit the same width
+   keeps the centered count from shifting as it climbs. */
+#downloadGif[aria-busy="true"] {
+  font-variant-numeric: tabular-nums;
+}
+
 .split-btn-select {
   width: var(--caret-w);
   height: 32px;
