@@ -437,10 +437,10 @@
       <div class="color-hue-thumb"></div>
     </div>
 
-    <div class="color-format-tabs" role="tablist">
-      <button type="button" class="color-format-btn active" data-format="hex">Hex</button>
-      <button type="button" class="color-format-btn" data-format="rgb">RGB</button>
-      <button type="button" class="color-format-btn" data-format="hsl">HSL</button>
+    <div class="color-format-tabs" role="tablist" aria-label="Color format">
+      <button type="button" class="color-format-btn active" data-format="hex" role="tab">Hex</button>
+      <button type="button" class="color-format-btn" data-format="rgb" role="tab">RGB</button>
+      <button type="button" class="color-format-btn" data-format="hsl" role="tab">HSL</button>
     </div>
 
     <div class="color-value-row" data-format-panel="hex">
@@ -485,16 +485,16 @@
         <button id="unlockAllBtn" class="secondary" title="Unlock all fields" data-hold="Hold to unlock all"><i class="ph ph-lock-simple-open"></i> Unlock</button>
       </div>
 
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="general">General <span class="tab-count" aria-hidden="true"></span></button>
-        <button class="tab-btn" data-tab="layerA">Layer A <span class="tab-count" aria-hidden="true"></span></button>
-        <button class="tab-btn" data-tab="layerB">Layer B <span class="tab-count" aria-hidden="true"></span></button>
+      <div class="tabs" role="tablist" aria-label="Settings">
+        <button class="tab-btn active" id="tabBtn-general" data-tab="general" role="tab" aria-controls="tab-general">General <span class="tab-count" aria-hidden="true"></span></button>
+        <button class="tab-btn" id="tabBtn-layerA" data-tab="layerA" role="tab" aria-controls="tab-layerA">Layer A <span class="tab-count" aria-hidden="true"></span></button>
+        <button class="tab-btn" id="tabBtn-layerB" data-tab="layerB" role="tab" aria-controls="tab-layerB">Layer B <span class="tab-count" aria-hidden="true"></span></button>
       </div>
     </div>
 
     <div class="controls-body">
     <div class="scroll-fade scroll-fade-top" aria-hidden="true"></div>
-    <div class="tab-panel" id="tab-general">
+    <div class="tab-panel" id="tab-general" role="tabpanel" aria-labelledby="tabBtn-general">
       <h2 class="section-title">Settings</h2>
       <div class="color-row">
         <div class="field">
@@ -893,8 +893,8 @@
       </div>
     </template>
 
-    <div class="tab-panel" id="tab-layerA" hidden></div>
-    <div class="tab-panel" id="tab-layerB" hidden>
+    <div class="tab-panel" id="tab-layerA" role="tabpanel" aria-labelledby="tabBtn-layerA" hidden></div>
+    <div class="tab-panel" id="tab-layerB" role="tabpanel" aria-labelledby="tabBtn-layerB" hidden>
       <p class="hint">Layer B fills the gaps Layer A leaves.</p>
     </div>
     <div class="scroll-fade scroll-fade-bottom" aria-hidden="true"></div>
@@ -1062,7 +1062,10 @@
     };
 
     function iconSvg(name) {
-      return `<svg viewBox="0 0 256 256" fill="currentColor"><path d="${ICONS[name]}"/></svg>`;
+      // Hidden from assistive tech: every icon sits on a control that is
+      // named by its title or label, and an SVG left exposed reads as an
+      // unnamed image beside it.
+      return `<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="${ICONS[name]}"/></svg>`;
     }
 
     function setIcon(el, name) {
@@ -1130,16 +1133,44 @@
     controlsBody.addEventListener("scroll", updateScrollFade);
     window.addEventListener("resize", updateScrollFade);
 
+    // Both tab sets, the panel's three and the picker's three formats,
+    // behave as ARIA tabs: the selected one is the set's only Tab stop
+    // and says so, and the arrows (and Home and End) move between them,
+    // selecting as they go, so Tab from a tab goes into what it shows.
+    function markTabs(buttons, active) {
+      buttons.forEach((b) => {
+        b.setAttribute("aria-selected", String(b === active));
+        b.tabIndex = b === active ? 0 : -1;
+      });
+    }
+
+    function arrowTabs(buttons) {
+      buttons.forEach((btn, i) => {
+        btn.addEventListener("keydown", (e) => {
+          const last = buttons.length - 1;
+          const to = { ArrowLeft: i === 0 ? last : i - 1, ArrowRight: i === last ? 0 : i + 1, Home: 0, End: last }[e.key];
+          if (to === undefined) return;
+          e.preventDefault();
+          buttons[to].focus();
+          buttons[to].click();
+        });
+      });
+    }
+
     // Wire up tab switching.
-    document.querySelectorAll(".tab-btn").forEach((btn) => {
+    const tabButtons = [...document.querySelectorAll(".tab-btn")];
+    tabButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
         document.querySelectorAll(".tab-panel").forEach((p) => (p.hidden = true));
         btn.classList.add("active");
+        markTabs(tabButtons, btn);
         document.getElementById("tab-" + btn.dataset.tab).hidden = false;
         updateScrollFade();
       });
     });
+    markTabs(tabButtons, tabButtons.find((b) => b.classList.contains("active")));
+    arrowTabs(tabButtons);
 
     // Fields a lock button can be attached to; randomize() skips any of
     // these whose lock is engaged.
@@ -1155,6 +1186,7 @@
     // click and the Lock All / Unlock All bulk actions.
     function setLock(btn, locked) {
       const targetId = btn.dataset.targetId;
+      btn.setAttribute("aria-pressed", String(locked));
       if (locked) {
         lockedFields.add(targetId);
         btn.classList.add("locked");
@@ -1167,6 +1199,21 @@
         btn.title = "Lock from randomization";
       }
       updateLockCounts();
+    }
+
+    // Each lock is named for its field ("Lock Seed") and carries its state
+    // in aria-pressed, where all 25 used to read "Lock from randomization"
+    // and none said whether it was on. The name is the field's own label
+    // less its readout, so a label a texture renames (see
+    // updateLayerLabels) renames its lock with it.
+    function nameLock(btn) {
+      const label = btn.closest(".field").querySelector("label");
+      const name = [...label.childNodes]
+        .filter((n) => !(n.nodeType === Node.ELEMENT_NODE && n.classList.contains("field-value")))
+        .map((n) => n.textContent)
+        .join("")
+        .trim();
+      btn.setAttribute("aria-label", "Lock " + name);
     }
 
     // Each tab shows how many of its own fields are locked, so the state
@@ -1232,6 +1279,8 @@
       });
       frag.querySelectorAll(".lock-btn").forEach((btn) => {
         btn.dataset.targetId = prefix + "-" + btn.dataset.for;
+        btn.setAttribute("aria-pressed", "false");
+        nameLock(btn);
         btn.addEventListener("click", () => setLock(btn, !lockedFields.has(btn.dataset.targetId)));
       });
       frag.querySelectorAll(".palette-preset-btn").forEach((btn) => {
@@ -1299,15 +1348,19 @@
       return Math.min(Math.max(n, min), max);
     }
 
-    document.querySelectorAll(".color-format-btn").forEach((btn) => {
+    const colorFormatButtons = [...document.querySelectorAll(".color-format-btn")];
+    colorFormatButtons.forEach((btn) => {
       btn.addEventListener("click", () => setColorFormat(btn.dataset.format));
     });
+    markTabs(colorFormatButtons, colorFormatButtons.find((b) => b.classList.contains("active")));
+    arrowTabs(colorFormatButtons);
 
     function setColorFormat(format) {
       colorFormat = format;
-      document.querySelectorAll(".color-format-btn").forEach((btn) => {
+      colorFormatButtons.forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.format === format);
       });
+      markTabs(colorFormatButtons, colorFormatButtons.find((b) => b.dataset.format === format));
       document.querySelectorAll(".color-value-row").forEach((row) => {
         row.hidden = row.dataset.formatPanel !== format;
       });
@@ -1608,6 +1661,7 @@
     // passes.
     document.querySelectorAll("#tab-general .lock-btn").forEach((btn) => {
       btn.dataset.targetId = btn.dataset.for;
+      nameLock(btn);
       btn.addEventListener("click", () => setLock(btn, !lockedFields.has(btn.dataset.targetId)));
       setLock(btn, true);
     });
@@ -1797,6 +1851,9 @@
       TEXTURE_NAMES.forEach((key) => {
         document.getElementById(prefix + "-" + key + "Name").textContent = texture[key];
       });
+      // By id rather than by panel: a field out on the phone strip has
+      // left its panel and still needs its lock renamed.
+      document.querySelectorAll(`.lock-btn[data-target-id^="${prefix}-"]`).forEach(nameLock);
       document.getElementById(prefix + "-hueMinVal").textContent = layer.hueMin + "°";
       document.getElementById(prefix + "-hueMaxVal").textContent = layer.hueMax + "°";
       document.getElementById(prefix + "-satMinVal").textContent = layer.satMin + "%";
