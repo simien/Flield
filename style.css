@@ -92,6 +92,15 @@
      tab shows nine tracks at once, and nine bright lines competed with
      Random and the locks for attention. */
   --slider-fill: var(--text-muted);
+  /* The empty part of a track is --muted, close to the panel by design,
+     so a slider at its minimum showed no track at all (1.29:1 here,
+     1.05:1 in light). Its edge carries the 3:1 a control's boundary
+     needs instead, and the fill stays quiet: filled reads as solid,
+     empty as outlined. 3.22:1 on the dark panel. */
+  --track-edge: #63636b;
+  /* The padlock on a lock that is off. 4.83:1 on the dark input; light
+     sets its own below. */
+  --lock-idle: var(--text-subtle);
   --ring: #71717a;
   /* shadcn's scale: 10px base, controls two steps down, cards and the
      modal one step up. */
@@ -126,6 +135,10 @@
      on the white panel it is 4.83. This is the guide's quiet gray, the
      same fix for the same ground: 5.03:1. */
   --text-on-bg: #68686f;
+  /* 3.51:1 on the #fafafa panel. */
+  --track-edge: #85858d;
+  /* Subtle on the white input was 2.56:1; muted is 4.83. */
+  --lock-idle: var(--text-muted);
   --primary: #18181b;
   --primary-fg: #fafafa;
   --ring: #a1a1aa;
@@ -1219,6 +1232,7 @@ input[type="range"]:focus-visible {
     var(--muted) calc(var(--pct, 0) * 1%),
     var(--muted) 100%
   );
+  box-shadow: inset 0 0 0 1px var(--track-edge);
 }
 
 .field input[type="range"]::-webkit-slider-thumb {
@@ -1243,6 +1257,7 @@ input[type="range"]:focus-visible {
   height: 6px;
   border-radius: 3px;
   background: var(--muted);
+  box-shadow: inset 0 0 0 1px var(--track-edge);
 }
 
 .field input[type="range"]::-moz-range-progress {
@@ -1334,7 +1349,7 @@ input[type="range"]:focus-visible {
   padding: 0;
   margin-top: 0;
   background: var(--input);
-  color: var(--text-subtle);
+  color: var(--lock-idle);
   border: 1px solid var(--input-border);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-xs);
