@@ -1,3 +1,16 @@
+/* The brand's two faces (local/Brand reference, 26 November 2026), served
+   from fonts/ as Latin subsets. Silkscreen is a pixel face: it is set
+   only at multiples of 8px, where every stroke lands on whole pixels, at
+   weight 400 with synthesis off, since a faux bold smears it. A change to
+   a font file bumps its ?v= here and in the other stylesheet. */
+@font-face {
+  font-family: "Silkscreen";
+  src: url("fonts/silkscreen-400.woff2?v=1") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Dark is the default regardless of the system's own light/dark
    setting (a deliberate choice, not an oversight); light only applies
    when the theme toggle has set data-theme="light" on the root, read
@@ -855,10 +868,11 @@ input[type="range"]:focus-visible {
   gap: 10px;
   overflow: hidden;
   white-space: nowrap;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-family: "Silkscreen", ui-monospace, monospace;
+  font-size: 16px;
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0;
   /* The brightest text in its group, above the setting titles it
      introduces: 12.9:1 on the dark panel against their 9.9:1, and
      19.9:1 against 10.4:1 on the light one. It sat below them for a
@@ -987,6 +1001,9 @@ input[type="range"]:focus-visible {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  /* Stays in the system sans. Silkscreen was tried here on 26 November
+     2026: at 16px (its smallest readable whole-pixel size) the longer
+     names wrapped and every label matched the section title above it. */
   font-size: 12px;
   font-weight: 500;
   margin-bottom: var(--space-2);

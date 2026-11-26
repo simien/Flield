@@ -1,3 +1,24 @@
+/* The brand's two faces (local/Brand reference, 26 November 2026), served
+   from fonts/ as Latin subsets. Silkscreen is a pixel face: it is set
+   only at multiples of 8px, where every stroke lands on whole pixels, at
+   weight 400 with synthesis off, since a faux bold smears it. A change to
+   a font file bumps its ?v= here and in the other stylesheet. */
+@font-face {
+  font-family: "Silkscreen";
+  src: url("fonts/silkscreen-400.woff2?v=1") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("fonts/geist-mono-500.woff2?v=1") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* The guide is a scrolling document, so it can't share style.css: that
    file puts display:flex, height:100vh, and overflow:hidden on body for
    the app's fixed, non-scrolling viewport. What it borrows instead is the
@@ -62,12 +83,16 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  /* Sentences are Geist Mono at 500, the brand's face for them. A
+     monospace runs wider than the sans it replaced, so 16px keeps the
+     640px column near 60 characters. */
+  font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg);
   color: var(--text);
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.65;
 }
 
@@ -131,7 +156,11 @@ main.wrap {
 
 .wordmark-page {
   color: var(--text-subtle);
-  font-weight: 500;
+  font-family: "Silkscreen", ui-monospace, monospace;
+  font-size: 16px;
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0;
 }
 
 .sr-only {
@@ -208,6 +237,10 @@ main.wrap {
 h1, h2, h3 {
   /* Short blocks, so even line lengths matter more than orphan avoidance. */
   text-wrap: balance;
+  font-family: "Silkscreen", ui-monospace, monospace;
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0;
 }
 
 /* The header is sticky, so an anchor jump would otherwise park the heading
@@ -230,9 +263,8 @@ html {
 }
 
 h1 {
-  font-size: clamp(30px, 5vw, 40px);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  font-size: 40px;
+  line-height: 1.2;
   margin: 56px 0 14px;
 }
 
@@ -244,16 +276,16 @@ h1 {
 }
 
 h2 {
-  font-size: 25px;
-  letter-spacing: -0.015em;
+  font-size: 24px;
+  line-height: 1.33;
   margin: 56px 0 14px;
   padding-top: 20px;
   border-top: 1px solid var(--border);
 }
 
 h3 {
-  font-size: 18px;
-  letter-spacing: -0.01em;
+  font-size: 16px;
+  line-height: 1.5;
   margin: 34px 0 10px;
 }
 
@@ -499,13 +531,32 @@ th, td {
   th, td {
     padding: 10px 10px;
   }
+  /* Silkscreen runs about 30px a letter at 40px, so a long word in a
+     title fills a phone's column. One step down the 8px scale. */
+  h1 {
+    font-size: 32px;
+  }
 }
 
 th {
   background: var(--well);
   color: var(--text);
-  font-weight: 600;
+  /* Geist Mono is served at 500 only, so a heavier weight here was a
+     synthesized bold, wider and smeared. The fill and the text color
+     mark the header row. */
+  font-weight: 500;
   white-space: nowrap;
+}
+
+/* Below the base rule, not in the phone block above: that block comes
+   first in the file, so its override lost to this nowrap. Geist Mono
+   runs wider than the sans these tables were fitted to: "What it does
+   with the field" on one line needs 247px of a 342px column, and the
+   table overflowed by 17px. */
+@media (max-width: 480px) {
+  th {
+    white-space: normal;
+  }
 }
 
 tr:last-child td {

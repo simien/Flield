@@ -32,6 +32,11 @@ a stale stylesheet; a bump on four pages and not the fifth is how `404.html`
 served an older `guide.css` than the guide did; a needless bump throws away
 every visitor's cache for nothing. CI checks all three.
 
+The two brand fonts in `fonts/` are the exception CI cannot see: their
+`?v=` sits in the `@font-face` rules inside `style.css` and `guide.css`,
+not in a page. A changed font file bumps its number in both stylesheets
+by hand, which in turn bumps theirs.
+
 A missed bump that already reached main is fixed by a follow-up commit
 that bumps the number alone. CI allows it because the file changed after
 its current number was set (`stale_on_base` in `checks.py`). Don't amend

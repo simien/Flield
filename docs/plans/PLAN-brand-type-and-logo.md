@@ -39,14 +39,19 @@ Decided by the owner on 26 November 2026 (#2140).
       two pixels per font pixel 3 down (10px caps, whole pixels at 1x), and a 6px gap. The
       logotype is `currentColor`; the mark keeps its dark tile. Looked at in both themes at 1280
       and 390.
-- [ ] Fonts: Silkscreen Regular and Geist Mono at weight 500 as Latin-subset WOFF2 in `fonts/`,
-      with their OFL files, `@font-face` with `font-display: swap`, and a year-long cache in
-      `_headers` under versioned names. Needs `sudo port install py314-fonttools py314-brotli`, run as `/opt/local/bin/python3.14 -m fontTools`.
-- [ ] Type: Silkscreen at multiples of 8px for titles and labels, Geist Mono 500 for document body.
-      Verify: every hint in the app still measures one line (method in `AGENTS.md`).
-- [ ] Bump `?v=` for every changed versioned file on every page that requests it, with
-      `sitemap.xml` and JSON-LD dates; `rehash.py` if an inline script changed.
-- [ ] Verify: `checks.py` passes; `bugs-b4-b16.js`, `a11y-a1-a15.js` (A4 alone if flagged),
-      `gif-button-width.js` and `ux-u1-u7.js` pass; `csp-probe.js` reports no refused font or image;
-      shots of the app strip and each document header in both themes, looked at.
+- [x] Fonts: `fonts/silkscreen-400.woff2` (7.8KB) and `fonts/geist-mono-500.woff2` (15.7KB, the
+      variable font fixed at 500), Latin-1 plus common punctuation, with both OFL files. Every
+      character the six pages use is covered. Neither license reserves a font name. `@font-face`
+      with `font-display: swap` and `?v=1`; `/fonts/*` cached for a year in `_headers`.
+- [x] Type: Silkscreen 40/24/16px for the document headings (32px h1 under 480px), 16px for the
+      header's page name and the app's section titles; Geist Mono 500 at 16px for document body.
+      Silkscreen on the app's field labels was tried and dropped: at 16px, its smallest readable
+      whole-pixel size, the long names wrapped and the labels matched the section titles.
+      Verified: `style-dump.js` against the commit before shows only the section titles changed in
+      the app, plus the 7px each adds below it; no hint or label changed size in any state.
+- [x] Bumps: `style.css` 126, `guide.css` 14. No inline script changed.
+- [x] Verify: `checks.py` passes; `bugs-b4-b16.js`, `a11y-a1-a15.js`, `gif-button-width.js` and
+      `ux-u1-u7.js` pass; `csp-probe.js` finds no violation and both fonts report `loaded` under
+      the policy. A14 caught two tables overflowing at 390px in the wider face; header cells now
+      wrap on phones, in a rule placed after the base one (source order). Looked at in both themes.
 - [ ] Commit per part; push after asking; confirm flield.com serves the new files.

@@ -36,6 +36,9 @@
 # default of max-age=0, and a returning visitor revalidated the stylesheet
 # and the generator on every load. Pages stay on the default: their names
 # never change, so they have to be checked each time.
+# The brand's two fonts, requested from both stylesheets with a ?v=.
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
 /style.css
   Cache-Control: public, max-age=31536000, immutable
 /generator.js
