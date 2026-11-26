@@ -2878,17 +2878,22 @@
     });
 
     // PNG and SVG capture the still: a running preview is stopped (which
-    // redraws the still) and picked up again afterwards.
+    // redraws the still) and picked up again afterwards. Picked up, not
+    // started: a motion held still (for reduced motion, behind the play
+    // offer, on a canvas too slow to play) was being set going by the
+    // export, which nobody asked of a download button.
     document.getElementById("downloadPng").addEventListener("click", () => {
+      const wasPreviewing = seamlessPreview.active;
       stopSeamlessPreview();
       const link = document.createElement("a");
       link.download = `${lastOptions.layerA.seed}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
-      syncSeamlessPreview();
+      if (wasPreviewing) syncSeamlessPreview();
     });
 
     document.getElementById("downloadSvg").addEventListener("click", () => {
+      const wasPreviewing = seamlessPreview.active;
       stopSeamlessPreview();
       const svg = gridToSVG({
         width: lastOptions.width,
@@ -2913,7 +2918,7 @@
       link.download = `${lastOptions.layerA.seed}.svg`;
       link.href = url;
       link.click();
-      syncSeamlessPreview();
+      if (wasPreviewing) syncSeamlessPreview();
       URL.revokeObjectURL(url);
     });
 
