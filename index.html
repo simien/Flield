@@ -3529,6 +3529,10 @@
 
     function showLastField() {
       if (!narrowLayout.matches || !lastTouchedField || lastFieldHome) return;
+      // A field can be hidden after it was touched (Speed, once the
+      // last motion is gone), and pinning it put a strip on screen with
+      // a close button and nothing in it.
+      if (lastTouchedField.hidden) return;
       lastFieldHome = {
         field: lastTouchedField,
         parent: lastTouchedField.parentElement,
