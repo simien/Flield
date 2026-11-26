@@ -46,7 +46,7 @@ USER_AGENT = f"flield-indexnow/1 (+https://{HOST}/)"
 # are attributed to the home page, which is the one that matters for
 # search, rather than fanning out to all five.
 PAGES = {
-    "/": {"index.html", "style.css", "generator.js", "app.js"},
+    "/": {"index.html", "style.css", "generator.js", "core.js", "app.js"},
     "/guide/": {"guide/index.html", "guide.css"},
     "/flow-fields/": {"flow-fields/index.html"},
     "/seamless-backgrounds/": {"seamless-backgrounds/index.html"},

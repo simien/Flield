@@ -21,10 +21,10 @@ after committing, not before.
 ## Cache busting is load-bearing
 
 Every page requests the project's own evolving files with a `?v=N` query:
-`style.css`, `generator.js` and `app.js` from the app, `guide.css` from the
-guide, the explainers and `404.html`, `generator.js` again from the
-explainers, `gif-writer.js` from `app.js` on the first GIF export (the number
-is in `loadGifWriter`, not in the markup), and `screenshot.png` (with its two
+`style.css`, `generator.js`, `core.js` and `app.js` from the app,
+`guide.css` from the guide, the explainers and `404.html`, `generator.js`
+again from the explainers, `gif-writer.js` from `app.js` on the first GIF
+export (the number is in `loadGifWriter`, not in the markup), and `screenshot.png` (with its two
 `.webp` copies, on one number) from every page plus the README. Bump the
 number when you change that file, on **every page that requests it**, and
 **leave it alone when you haven't**. A missed bump serves a returning visitor
@@ -198,8 +198,15 @@ run. Press the button in a real browser before believing it.
 ## The app's script has one scope
 
 `app.js` holds the app's script, one long file that `index.html` loads after
-`generator.js`. It was inline in `index.html` until November 2026 and moved
-out verbatim, still indented as it was. Two consequences:
+`generator.js` and `core.js`. It was inline in `index.html` until November
+2026 and moved out verbatim, still indented as it was. `core.js` took what
+needs no page: the link codec, the speed and depth scales, the GIF frame
+cuts and the color conversions, as one `FlieldCore` object that `app.js`
+destructures at its top. Like `generator.js` it stands alone, so node runs
+it: `.github/scripts/core.test.js` does, from `checks.py`. Where a piece
+needs the page (a menu's option order, a slider's bounds, the canvas size),
+`app.js` reads it and passes it in; see `linkPage`. Two consequences of the
+one scope:
 
 - **Declare a `const` above its first *caller*, not just its first use.**
   `syncActionBar()` runs during init and reaches into the sheet and the bar,
@@ -207,7 +214,7 @@ out verbatim, still indented as it was. Two consequences:
   `ReferenceError` at load and takes the whole app down.
 - **A duplicate declaration is fatal.** A second `const controlsBody` threw a
   `SyntaxError` that killed every listener on the page while it still served
-  200. CI parses `app.js` and each inline block to catch this.
+  200. CI parses `core.js`, `app.js` and each inline block to catch this.
 
 ## The layout moves live elements, it does not copy them
 
@@ -470,9 +477,13 @@ every exported SVG, and neither shows up in the browser:
   after it in the stream shifts.
 
 Both are checked by `checks.py`, against the widths in `COMPACT_BITS` and
-`COMPACT_LAYER_NUMBERS`, so the build fails rather than the links. It also
-compares option order and field positions against the base branch and
-fails on anything but an append to a menu or the tail. The lock ids and
+`COMPACT_LAYER_NUMBERS` in `core.js`, so the build fails rather than the
+links. `core.test.js` also holds the codec to ten links the app wrote
+before it moved to `core.js`, each against a checksum of what it decoded
+to. One that stops matching is a broken format, never a line to
+re-record. `checks.py` also compares option order and field positions
+against the base branch and fails on anything but an append to a menu or
+the tail. The lock ids and
 the layer fields may not grow at all, not even at their ends: both sit
 ahead of the tail, so one more of either shifts every tail field an old
 link carries. A new lock or layer value belongs in the tail.

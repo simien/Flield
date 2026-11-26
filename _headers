@@ -40,6 +40,8 @@
   Cache-Control: public, max-age=31536000, immutable
 /generator.js
   Cache-Control: public, max-age=31536000, immutable
+/core.js
+  Cache-Control: public, max-age=31536000, immutable
 /app.js
   Cache-Control: public, max-age=31536000, immutable
 /gif-writer.js

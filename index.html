@@ -193,9 +193,9 @@
   </script>
 
   <!-- ?v= busts the browser cache for this project's own evolving
-       files. Bump it whenever style.css, generator.js or app.js changes,
-       or a returning visitor's cached copy silently goes stale. The
-       fourth, gif-writer.js, is asked for by app.js on the first GIF
+       files. Bump it whenever style.css, generator.js, core.js or app.js
+       changes, or a returning visitor's cached copy silently goes stale.
+       The fifth, gif-writer.js, is asked for by app.js on the first GIF
        export (see loadGifWriter) and carries its number there. -->
   <link rel="stylesheet" href="style.css?v=121" />
   <!-- generator.js is requested at the end of the body, which is where
@@ -1033,6 +1033,7 @@
   </main>
 
   <script src="generator.js?v=15"></script>
+  <script src="core.js?v=1"></script>
   <script src="app.js?v=1"></script>
   <!-- Cloudflare Web Analytics: manual snippet, since flield.com is served
        by a Worker's own static-assets pipeline, which the Automatic

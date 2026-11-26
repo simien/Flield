@@ -11,6 +11,7 @@ on:
       - index.html
       - style.css
       - generator.js
+      - core.js
       - app.js
       - guide/index.html
       - guide.css

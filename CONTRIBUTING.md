@@ -15,12 +15,16 @@ to merge.
   tool, package manager, framework, or CDN dependency. If a change seems to
   need one, open an issue first to discuss it.
 - **`generator.js` stands alone**: it has no dependency on the UI (`index.html`,
-  `app.js`, `style.css`), so it can be reused in other projects. Keep it that way. The
-  same goes for `gif-writer.js`, the GIF encoder: it takes pixel arrays and
+  `app.js`, `style.css`), so it can be reused in other projects. Keep it that way.
+  So does `core.js`, the app's logic that needs no page (the shared-link codec,
+  the speed scale, the GIF frame cuts, the color math): `checks.py` runs it in
+  node, which it can only do while nothing in it touches the DOM. The same
+  goes for `gif-writer.js`, the GIF encoder: it takes pixel arrays and
   returns bytes, and `checks.py` reads its output back with a second decoder.
-- **The site is six pages**: the app (`index.html` + `app.js` + `style.css`), the guide
-  (`guide/index.html`), three explainers (`flow-fields/`, `seamless-backgrounds/`,
-  `animated-backgrounds/`), and `404.html`. Every page but the app shares
+- **The site is six pages**: the app (`index.html`, `core.js`, `app.js` and
+  `style.css`), the guide (`guide/index.html`), three explainers
+  (`flow-fields/`, `seamless-backgrounds/`, `animated-backgrounds/`), and
+  `404.html`. Every page but the app shares
   `guide.css`. The app does not, because `style.css` gives `body` a fixed,
   non-scrolling viewport that a document page can't use. `guide.css` copies the
   handful of design tokens it needs from `style.css`, so a token changed in one

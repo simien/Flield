@@ -46,9 +46,10 @@ def read(rel):
 # A SyntaxError anywhere in the inline script kills the whole file, and the
 # page still serves 200 with a dead UI. This has happened: a second `const
 # controlsBody` took the entire app down with nothing but a console line.
-# The app's script moved out to app.js, where the same SyntaxError does the
-# same damage, so it is parsed alongside the inline blocks.
-SCRIPTS = ["app.js"]
+# The app's script moved out to core.js and app.js, where the same
+# SyntaxError does the same damage, so both are parsed alongside the inline
+# blocks.
+SCRIPTS = ["core.js", "app.js"]
 
 
 def check_inline_js():
@@ -122,7 +123,7 @@ def check_anchors():
 
 # 5. Cache busting -------------------------------------------------------
 # Every page asks for the project's own evolving files with a ?v= query:
-# style.css, generator.js and app.js from the app, guide.css and generator.js from
+# style.css, generator.js, core.js and app.js from the app, guide.css and generator.js from
 # the document pages, and the screenshot from all of them plus the README.
 # gif-writer.js is asked for by app.js rather than by markup, on the first
 # GIF export, and is held to the same rule, so app.js is read for numbers
@@ -131,7 +132,7 @@ def check_anchors():
 # stale copy; bumping one page and not another is how 404.html served an
 # older guide.css than the guide did; bumping without a change throws away
 # every visitor's cache for nothing. All three are caught here.
-ASSET_REF = re.compile(r"\b(style\.css|generator\.js|app\.js|gif-writer\.js|guide\.css|screenshot(?:-\d+)?\.(?:png|webp))\?v=(\d+)")
+ASSET_REF = re.compile(r"\b(style\.css|generator\.js|core\.js|app\.js|gif-writer\.js|guide\.css|screenshot(?:-\d+)?\.(?:png|webp))\?v=(\d+)")
 VERSIONED = PAGES + ["app.js", "README.md"]
 # The files behind each versioned name. The screenshot's png and its webp
 # copies are cut from one capture and share one number, so they count as
@@ -139,6 +140,7 @@ VERSIONED = PAGES + ["app.js", "README.md"]
 ASSET_FILES = {
     "style.css": {"style.css"},
     "generator.js": {"generator.js"},
+    "core.js": {"core.js"},
     "app.js": {"app.js"},
     "gif-writer.js": {"gif-writer.js"},
     "guide.css": {"guide.css"},
@@ -256,9 +258,11 @@ def check_cache_bust(base):
 # decodes as option 0), and a slider widened past its width pushes every
 # later value out of place. Both are caught here.
 #
-# The widths live in COMPACT_BITS and COMPACT_LAYER_NUMBERS in app.js, and
-# the menus and sliders they must hold in index.html, so the two are read as
-# one text. A revision from before app.js existed had both in index.html.
+# The widths live in COMPACT_BITS and COMPACT_LAYER_NUMBERS in core.js, and
+# the menus and sliders they must hold in index.html, so the three files
+# are read as one text. A revision from before core.js and app.js existed
+# had all of it in index.html, at a deeper indent, which the patterns
+# below allow for.
 LAYER_CONTROL = r'<(?:input|select)[^>]*\bclass="l-{}"[^>]*>'
 
 
@@ -267,8 +271,8 @@ def parse_link_format(html):
     bits = dict(
         (m.group(1), int(m.group(2)))
         for m in re.finditer(
-            r"^\s{6}(\w+): (\d+),$",
-            re.search(r"const COMPACT_BITS = \{(.*?)\n    \};", html, re.S).group(1),
+            r"^\s+(\w+): (\d+),$",
+            re.search(r"const COMPACT_BITS = \{(.*?)\n\s*\};", html, re.S).group(1),
             re.M,
         )
     )
@@ -276,7 +280,7 @@ def parse_link_format(html):
         (k, int(b), int(o), int(sc))
         for k, b, o, sc in re.findall(
             r'\["(\w+)", (\d+), (-?\d+), (\d+)\]',
-            re.search(r"const COMPACT_LAYER_NUMBERS = \[(.*?)\n    \];", html, re.S).group(1),
+            re.search(r"const COMPACT_LAYER_NUMBERS = \[(.*?)\n\s*\];", html, re.S).group(1),
         )
     ]
     choices = {}
@@ -299,14 +303,14 @@ def parse_link_format(html):
         choices["autoSpeed"] = re.findall(r'<option value="([^"]*)"', block.group(1)) if block else []
     # Directions are built in JS, not markup, and the widest list is the one
     # the shared 2-or-more-bit field has to hold.
-    dirs = re.search(r"const SHAPE_MASK_DIRECTIONS = \{(.*?)\n    \};", html, re.S).group(1)
+    dirs = re.search(r"const SHAPE_MASK_DIRECTIONS = \{(.*?)\n\s*\};", html, re.S).group(1)
     choices["shapeMaskDirection"] = max(
         (re.findall(r'value: "([^"]*)"', shape.group(2)) for shape in
          re.finditer(r"(\w+): \[(.*?)\],\n", dirs, re.S)),
         key=len, default=[],
     )
     lock_src = re.search(
-        r"const COMPACT_LOCK_IDS = \[(.*?)\n    \);", html, re.S
+        r"const COMPACT_LOCK_IDS = \[(.*?)\n\s*\);", html, re.S
     ).group(1)
     general, prefixes, suffixes = (
         re.findall(r'"([\w-]+)"', group) for group in
@@ -317,7 +321,7 @@ def parse_link_format(html):
     # numbers, so resolve both to the number of bits each field takes.
     # A revision from before the tail existed has none, which is the
     # empty list every tail field was appended to.
-    tail_src = re.search(r"const COMPACT_TAIL_FIELDS = \[(.*?)\n    \];", html, re.S)
+    tail_src = re.search(r"const COMPACT_TAIL_FIELDS = \[(.*?)\n\s*\];", html, re.S)
     tail = [
         (key, bits.get(width[len("COMPACT_BITS."):]) if width.startswith("COMPACT_BITS.") else int(width))
         for key, width in re.findall(r'\["([\w:-]+)", ([\w.]+)\]', tail_src.group(1) if tail_src else "")
@@ -333,8 +337,8 @@ def parse_link_format(html):
 
 
 def app_source(show):
-    """index.html and app.js as one text, read through show(rel)."""
-    return show("index.html") + "\n" + show("app.js")
+    """index.html, core.js and app.js as one text, read through show(rel)."""
+    return "\n".join(show(rel) for rel in ("index.html", "core.js", "app.js"))
 
 
 def check_link_format():
@@ -702,6 +706,25 @@ def check_generator():
     notes.append(f"generator: {proc.stdout.strip()}")
 
 
+# 11b. The link codec and the app's arithmetic ----------------------------
+# core.js holds what the app computes without the page: the shared link's
+# bit stream, the speed and depth scales, the GIF frame cuts, the color
+# conversions. The test beside this script holds the codec to links the
+# app recorded, round-trips random compositions, reads links written
+# before each tail field and links cut short, and checks the rest. A codec
+# that goes wrong still writes a link that opens, to the wrong picture.
+def check_core():
+    proc = subprocess.run(
+        ["node", str(Path(__file__).with_name("core.test.js"))],
+        cwd=ROOT, text=True, capture_output=True,
+    )
+    if proc.returncode != 0:
+        for line in (proc.stderr.strip() or "the test did not run").splitlines()[:5]:
+            fail("core", line.strip())
+        return
+    notes.append(f"core: {proc.stdout.strip()}")
+
+
 # 12. Script hashes ------------------------------------------------------
 # The policy in _headers runs an inline script only if its sha256 is
 # listed there, so an injected one does not run. The cost is that every
@@ -773,6 +796,7 @@ def main():
     check_json_ld_dates()
     check_gif_writer()
     check_generator()
+    check_core()
     check_script_hashes()
     check_analytics()
 
