@@ -3209,6 +3209,9 @@
             writer.addFrame(pixelsOf(canvas.width, canvas.height), plan.delay);
           }
           saveGif(writer, seedForFilename);
+          // Motion opens at None, so a first GIF is one still frame,
+          // and a file that does not move reads as a broken export.
+          if (plan.beats === 1) showToast("Still GIF. Pick a Motion to animate it.");
           return;
         }
 
