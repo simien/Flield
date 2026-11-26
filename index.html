@@ -3723,6 +3723,13 @@
 
     sheetHandle.addEventListener("pointerup", endSheetDrag);
     sheetHandle.addEventListener("pointercancel", endSheetDrag);
+    // Enter and Space. A pointer press has already been read as a tap or
+    // a drag by the time its click arrives, and a click after a drag up
+    // must not close the sheet the drag just raised, so only a click
+    // with no pointer behind it (detail 0) is taken here.
+    sheetHandle.addEventListener("click", (e) => {
+      if (e.detail === 0) setSidebarOpen(false);
+    });
 
     // Lock All, Unlock All and Undo each throw away something that took
     // a while to arrive at, and none of them can be walked back: undo
