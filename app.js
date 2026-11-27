@@ -17,6 +17,8 @@
     // field lock's "locked" state uses "fill" instead, so a solid glyph
     // reinforces the locked state over the open outline of "lock-open".
     const ICONS = {
+      "corners-out": "M220,48V88a12,12,0,0,1-24,0V60H168a12,12,0,0,1,0-24h40A12,12,0,0,1,220,48ZM88,196H60V168a12,12,0,0,0-24,0v40a12,12,0,0,0,12,12H88a12,12,0,0,0,0-24Zm120-40a12,12,0,0,0-12,12v28H168a12,12,0,0,0,0,24h40a12,12,0,0,0,12-12V168A12,12,0,0,0,208,156ZM88,36H48A12,12,0,0,0,36,48V88a12,12,0,0,0,24,0V60H88a12,12,0,0,0,0-24Z",
+      "corners-in": "M148,96V48a12,12,0,0,1,24,0V84h36a12,12,0,0,1,0,24H160A12,12,0,0,1,148,96ZM96,148H48a12,12,0,0,0,0,24H84v36a12,12,0,0,0,24,0V160A12,12,0,0,0,96,148Zm112,0H160a12,12,0,0,0-12,12v48a12,12,0,0,0,24,0V172h36a12,12,0,0,0,0-24ZM96,36A12,12,0,0,0,84,48V84H48a12,12,0,0,0,0,24H96a12,12,0,0,0,12-12V48A12,12,0,0,0,96,36Z",
       "sidebar-simple": "M216,36H40A20,20,0,0,0,20,56V200a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A20,20,0,0,0,216,36ZM44,60H76V196H44ZM212,196H100V60H212Z",
       "list": "M228,128a12,12,0,0,1-12,12H40a12,12,0,0,1,0-24H216A12,12,0,0,1,228,128ZM40,76H216a12,12,0,0,0,0-24H40a12,12,0,0,0,0,24ZM216,180H40a12,12,0,0,0,0,24H216a12,12,0,0,0,0-24Z",
       "x": "M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z",
@@ -2309,6 +2311,55 @@
 
     sidebarCollapseBtn.addEventListener("click", () => setWide(!wideOn()));
 
+    // Full screen: .main-area alone on the display (see
+    // .main-area:fullscreen in style.css). The button's label, icon and
+    // pressed state follow fullscreenchange rather than the press, so
+    // leaving with Escape or the browser's own gesture keeps them true.
+    // Where the browser cannot put an element full screen (iPhone Safari
+    // refuses anything but video) the button goes and F does nothing.
+    const mainArea = document.querySelector(".main-area");
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    let pointerIdleTimer = 0;
+
+    function isFullscreen() {
+      return document.fullscreenElement === mainArea;
+    }
+
+    function toggleFullscreen() {
+      if (isFullscreen()) {
+        document.exitFullscreen().catch(() => {});
+        return;
+      }
+      if (!document.fullscreenEnabled) return;
+      // Both sit outside .main-area, so neither would be seen; the sheet
+      // would also hand its held field back on the way out.
+      setSidebarOpen(false);
+      if (!colorPopover.hidden) closeColorPicker();
+      mainArea.requestFullscreen({ navigationUI: "hide" }).catch(() => showToast("Full screen isn't available here"));
+    }
+
+    // The pointer hides after two seconds still, so it never sits over
+    // the artwork, and comes back on the next move.
+    function wakePointer() {
+      mainArea.classList.remove("pointer-idle");
+      clearTimeout(pointerIdleTimer);
+      if (isFullscreen()) pointerIdleTimer = setTimeout(() => mainArea.classList.add("pointer-idle"), 2000);
+    }
+
+    document.addEventListener("fullscreenchange", () => {
+      const on = isFullscreen();
+      fullscreenBtn.setAttribute("aria-pressed", String(on));
+      fullscreenBtn.title = on ? "Exit full screen (F)" : "Full screen (F)";
+      setIcon(fullscreenBtn.querySelector("i"), on ? "corners-in" : "corners-out");
+      wakePointer();
+      // The strip and its button are gone, so say how to leave. Only
+      // with a keyboard to hand; a phone leaves by its own gesture.
+      if (on && matchMedia("(hover: hover)").matches) showToast("Press F or Esc to exit full screen");
+    });
+    mainArea.addEventListener("pointermove", wakePointer);
+    fullscreenBtn.hidden = !document.fullscreenEnabled;
+    fullscreenBtn.addEventListener("click", toggleFullscreen);
+
     syncActionBar();
     syncWide();
     narrowLayout.addEventListener("change", () => {
@@ -2393,9 +2444,10 @@
     // Shortcuts for the exploration loop, the three things pressed over
     // and over while hunting for a composition: R rerolls, Space toggles
     // Auto-randomize, Cmd/Ctrl+Z steps back. S, beside them, collapses the
-    // sidebar into Wide on desktop. All four stay out of the
+    // sidebar into Wide on desktop, and F puts the artboard full screen.
+    // All five stay out of the
     // way of typing: a focused text/number field or select keeps its
-    // own keys (R and S type letters there, Cmd+Z is the field's own undo,
+    // own keys (R, S and F type letters there, Cmd+Z is the field's own undo,
     // Space opens the select), and a focused button keeps Space as its
     // native click. Range sliders don't use any of these, so they still
     // work with a slider focused after a drag. Held-down repeat is
@@ -2416,6 +2468,10 @@
         if (inField) return;
         e.preventDefault();
         performRandomize();
+      } else if (e.key.toLowerCase() === "f") {
+        if (inField || !document.fullscreenEnabled) return;
+        e.preventDefault();
+        toggleFullscreen();
       } else if (e.key.toLowerCase() === "s") {
         if (inField || narrowLayout.matches) return;
         e.preventDefault();

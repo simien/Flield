@@ -208,7 +208,7 @@
        scripts below changes, or a returning visitor's cached copy silently
        goes stale. One more, gif-writer.js, is asked for by app.js on the first GIF
        export (see loadGifWriter) and carries its number there. -->
-  <link rel="stylesheet" href="style.css?v=129" />
+  <link rel="stylesheet" href="style.css?v=130" />
   <!-- generator.js is requested at the end of the body, which is where
        it has to run, but the preload scanner only finds it once that
        end of a 200KB document has arrived. This starts the fetch
@@ -1036,6 +1036,12 @@
         <span aria-hidden="true">&middot;</span>
         <span>&copy; <span id="footerYear"></span></span>
       </div>
+      <!-- Full screen (see toggleFullscreen in app.js), at the strip's
+           right end on every layout, where a video player keeps it. The
+           strip is on screen expanded, in Wide and on a phone, so the
+           button never has to move. The script hides it where the
+           browser cannot put an element full screen (iPhone Safari). -->
+      <button id="fullscreenBtn" class="secondary icon-btn" title="Full screen (F)" aria-pressed="false"><i class="ph ph-corners-out"></i></button>
     </footer>
     <!-- Filled in as the markup parses rather than by app.js
          below: both labels change the legend's width, and setting them
@@ -1051,7 +1057,7 @@
   <script src="generator.js?v=16"></script>
   <script src="core.js?v=2"></script>
   <script src="hold.js?v=1"></script>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
   <script src="picker.js?v=1"></script>
   <script src="tutorial.js?v=1"></script>
   <!-- Cloudflare Web Analytics: manual snippet, since flield.com is served

@@ -57,10 +57,11 @@ lives in a class on `body`, and nothing is copied.
 
 ### Full screen (every layout where the API exists)
 
-- A full-screen icon button joins `#appChrome` (tutorial, theme). That row already lives in the sidebar
-  footer on desktop and at the end of the settings scroll on a phone, so one button covers both
-  layouts. In Wide, a second home is needed because the sidebar is hidden: it travels into the footer
-  strip's right end, after the links, where a video player keeps its full-screen control.
+- A full-screen icon button sits at the right end of the footer strip, where a video player keeps
+  it. The strip is on screen expanded, in Wide and on a phone, so the button has one home and never
+  moves. (The first draft put it in `#appChrome` with a third home in Wide; the strip needs neither.)
+  Adding it moved the strip's legend thresholds (611px expanded, 845px in Wide), and on a phone strip
+  under 348px of content the year goes rather than the button.
 - Key `F` toggles it, guarded like `S`. `Escape` exits through the browser's own handling, so the
   existing Escape ladder (`app.js:2318`) is untouched.
 - What goes full screen is `.main-area`, not the document, so the sidebar, the sheet and the action bar
@@ -112,26 +113,32 @@ lives in a class on `body`, and nothing is copied.
       in its four forced states. `bugs-b4-b16.js` 29 `ok`; `a11y-a1-a15.js` all `ok` except the
       known A4 flake, which passes alone; `gif-button-width.js` `ok`; `ux-u1-u7.js` `all ok`;
       `checks.py` passes. Screens with reduced motion at 1440, 1024 (light), 800 and 769px.
-- [ ] Commit Phase 1 as two commits, the overflow fix first, then Wide with the docs: the guide's shortcut table, `USAGE.md`, `README.md`, and the two
+- [x] Commit Phase 1 as two commits, the overflow fix first, then Wide with the docs: the guide's shortcut table, `USAGE.md`, `README.md`, and the two
       new traps in `AGENTS.md`. `style.css` is at 128 and `app.js` at 3; `sitemap.xml` and the guide's
-      `dateModified` already read the commit date if it lands on 26 November.
+      `dateModified` already read the commit date if it lands on 26 November. Done as `b17770b` and
+      `f3d5d23`, pushed and verified with `git ls-remote`, PR #16.
 
 ### Phase 2: Full screen
 
-- [ ] Add the full-screen button to `#appChrome`, its third home in the footer strip for Wide (which
-      grows the strip's sum: re-measure and move both container-query thresholds), and the
-      `.main-area:fullscreen` rules (footer hidden, no padding, bare canvas, `--bg` letterbox, idle
-      cursor class).
-- [ ] In `app.js`, add `toggleFullscreen()`, the `fullscreenchange` listener that owns the button's
-      label and `aria-pressed`, the idle-pointer timer, the entry toast, `F` in the shortcut handler,
-      and the `fullscreenEnabled` gate that hides the button.
-- [ ] Verify Phase 2. Extend `view-modes.js`: in headless Chrome, `requestFullscreen` on `.main-area`
-      gives a canvas within 1px of contain-fit to the screen size, the footer is not rendered,
-      `R` still rerolls (the canvas checksum changes), and after `exitFullscreen` the expanded
-      baseline from Phase 1 measures again exactly. Then press `F` and Escape by hand in Chrome,
-      Safari and Firefox on this Mac, since headless full screen is not the real one, and on an
-      Android phone through the live site. Rerun the Phase 1 gates.
-- [ ] Commit Phase 2 with the same cache-bust and `lastmod` rules, and the `F` key in the three lists.
+- [x] Add the button to the footer strip, the `.main-area:fullscreen` rules after Wide's block (strip
+      hidden, no margins, bare canvas fitted on container units, `--bg` letterbox, idle cursor), and
+      the strip's new thresholds.
+- [x] In `app.js`, add `toggleFullscreen()`, the `fullscreenchange` listener that owns the button's
+      label, icon and `aria-pressed`, the idle-pointer timer, the entry toast (only with a pointer
+      that hovers), `F` in the shortcut handler, and the `fullscreenEnabled` gate. Entering closes
+      the sheet and the picker.
+- [x] Verify Phase 2, headless, against a `git archive` of `f3d5d23` on 26 November 2026:
+      `view-modes.js` 49 of 49 `ok`, F1 to F5 beside the Phase 1 checks (a 1200x630 picture at
+      1440x756 on a 1440x900 screen, unframed and centered; the same pixels after leaving; `R`
+      rerolls in full screen; the pointer idles at two seconds; a phone closes its sheet first; the
+      strip fits from 340 to 1280px). On the base, F1, F3 and F4 fail. `style-dump.js` with
+      `SKIP='#fullscreenBtn'`, dark and light identical: only the footer links moving over for the
+      button, and the year gone at 340px. `pseudo-dump.js` 0 differences in 384 forced states.
+      `bugs-b4-b16.js` 29 `ok`, `a11y-a1-a15.js` 65 `ok`, `gif-button-width.js` `ok`,
+      `ux-u1-u7.js` `all ok`, `checks.py` passes.
+- [ ] Press `F` and Esc by hand in Chrome, Safari and Firefox on a Mac and on an Android phone,
+      since headless full screen is not the real one. Not done by the session that built it.
+- [x] Commit Phase 2 with `style.css` at 130 and `app.js` at 4, and `F` in the three lists.
 
 ## Open questions
 
