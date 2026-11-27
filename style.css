@@ -1884,22 +1884,46 @@ button.secondary {
    artboard. Before this, its one-line minimum forced .main-area past
    the window from 769px to about 873px, and body's overflow cut the
    canvas and the links off at the right. Instead the legend goes when
-   the strip has no room for it, which differs by layout: brand, legend
-   and links take 563px of content with "Ctrl+Z", the wider of the two
-   undo labels, and Wide's exploration row adds 234px. Each threshold
-   is that sum plus a few pixels for a wider fallback face. */
+   the strip has no room for it, in two steps: the view keys (S and F,
+   marked data-key) go first, then the loop's three. With "Ctrl+Z", the
+   wider of the two undo labels, brand, the whole legend, links and the
+   full-screen button take 787px of content, and 611px with the loop's
+   keys alone; Wide's exploration row adds 234px to each. Each threshold
+   is its sum plus a few pixels for a wider fallback face. On a phone,
+   where the legend is already gone, brand, links and button take 344px,
+   and a narrower strip drops the year rather than the button; only
+   while the button shows, since iPhone Safari hides it and has the
+   room. */
 .site-footer {
   container-type: inline-size;
 }
 
-@container (max-width: 568px) {
+@container (max-width: 792px) {
+  .site-footer-keys [data-key] {
+    display: none;
+  }
+}
+
+@container (max-width: 616px) {
   .site-footer-keys {
     display: none;
   }
 }
 
-@container (max-width: 802px) {
+@container (max-width: 1026px) {
+  :root[data-sidebar="collapsed"] .site-footer-keys [data-key] {
+    display: none;
+  }
+}
+
+@container (max-width: 850px) {
   :root[data-sidebar="collapsed"] .site-footer-keys {
+    display: none;
+  }
+}
+
+@container (max-width: 348px) {
+  .site-footer:has(> #fullscreenBtn:not([hidden])) .site-footer-links > span:nth-last-child(-n + 2) {
     display: none;
   }
 }
@@ -1982,6 +2006,63 @@ button.secondary {
   .controls {
     transition: none;
   }
+}
+
+/* Full screen: .main-area alone on the display, under the Fullscreen
+   API (toggleFullscreen in app.js), so the sidebar, the sheet and the
+   action bar are simply not rendered. The strip goes, the artboard
+   loses its margins, and the canvas loses its frame and fits the
+   display by the same rule as Wide, less the border. Letterbox bars
+   are the page ground. After Wide's block, because :root[data-sidebar]
+   #preview has the same specificity as #preview here and must lose.
+   The canvas-area rule outranks the phone sheet's bottom offsets by
+   class count, so a sheet left open cannot shorten the picture. */
+.main-area:fullscreen {
+  --footer-strip: 0px;
+  background: var(--bg);
+}
+
+.main-area:fullscreen .site-footer,
+.main-area:fullscreen #tourChip {
+  display: none;
+}
+
+.main-area:fullscreen .canvas-area {
+  inset: 0;
+  padding: 0;
+  container-type: size;
+}
+
+.main-area:fullscreen #preview {
+  top: 0;
+  left: 0;
+  width: min(100cqw, 100cqh * var(--canvas-ar, 1));
+  height: auto;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  image-rendering: pixelated;
+}
+
+/* Two seconds without the pointer moving hides it (wakePointer). */
+.main-area:fullscreen.pointer-idle,
+.main-area:fullscreen.pointer-idle * {
+  cursor: none;
+}
+
+/* At its icon's width, as the row's buttons are, rather than the bare
+   button's full width; and display is set, which would beat the hidden
+   attribute without the second rule. */
+#fullscreenBtn {
+  width: auto;
+  flex-shrink: 0;
+}
+
+#fullscreenBtn[hidden],
+#fullscreenKey[hidden] {
+  display: none;
 }
 
 .hint {
