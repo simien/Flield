@@ -2358,6 +2358,7 @@
     });
     mainArea.addEventListener("pointermove", wakePointer);
     fullscreenBtn.hidden = !document.fullscreenEnabled;
+    document.getElementById("fullscreenKey").hidden = !document.fullscreenEnabled;
     fullscreenBtn.addEventListener("click", toggleFullscreen);
 
     syncActionBar();

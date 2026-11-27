@@ -1884,20 +1884,34 @@ button.secondary {
    artboard. Before this, its one-line minimum forced .main-area past
    the window from 769px to about 873px, and body's overflow cut the
    canvas and the links off at the right. Instead the legend goes when
-   the strip has no room for it, which differs by layout: brand, legend,
-   links and the full-screen button take 611px of content with "Ctrl+Z",
-   the wider of the two undo labels, and Wide's exploration row adds
-   234px. Each threshold is that sum plus a few pixels for a wider
-   fallback face. On a phone, where the legend is already gone, brand,
-   links and button take 344px, and a narrower strip drops the year
-   rather than the button; only while the button shows, since iPhone
-   Safari hides it and has the room. */
+   the strip has no room for it, in two steps: the view keys (S and F,
+   marked data-key) go first, then the loop's three. With "Ctrl+Z", the
+   wider of the two undo labels, brand, the whole legend, links and the
+   full-screen button take 787px of content, and 611px with the loop's
+   keys alone; Wide's exploration row adds 234px to each. Each threshold
+   is its sum plus a few pixels for a wider fallback face. On a phone,
+   where the legend is already gone, brand, links and button take 344px,
+   and a narrower strip drops the year rather than the button; only
+   while the button shows, since iPhone Safari hides it and has the
+   room. */
 .site-footer {
   container-type: inline-size;
 }
 
+@container (max-width: 792px) {
+  .site-footer-keys [data-key] {
+    display: none;
+  }
+}
+
 @container (max-width: 616px) {
   .site-footer-keys {
+    display: none;
+  }
+}
+
+@container (max-width: 1026px) {
+  :root[data-sidebar="collapsed"] .site-footer-keys [data-key] {
     display: none;
   }
 }
@@ -2046,7 +2060,8 @@ button.secondary {
   flex-shrink: 0;
 }
 
-#fullscreenBtn[hidden] {
+#fullscreenBtn[hidden],
+#fullscreenKey[hidden] {
   display: none;
 }
 

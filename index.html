@@ -208,7 +208,7 @@
        scripts below changes, or a returning visitor's cached copy silently
        goes stale. One more, gif-writer.js, is asked for by app.js on the first GIF
        export (see loadGifWriter) and carries its number there. -->
-  <link rel="stylesheet" href="style.css?v=130" />
+  <link rel="stylesheet" href="style.css?v=131" />
   <!-- generator.js is requested at the end of the body, which is where
        it has to run, but the preload scanner only finds it once that
        end of a 200KB document has arrived. This starts the fetch
@@ -1018,11 +1018,15 @@
       <!-- Shortcut legend for the exploration loop (see the keydown
            handler near the end of the script). Hidden on narrow and
            touch-only layouts, where there's no keyboard to bind. The
-           undo key label is filled in per platform by UNDO_SHORTCUT. -->
+           undo key label is filled in per platform by UNDO_SHORTCUT.
+           S and F are the view keys (Wide and full screen); F hides
+           with its button where the browser has no full screen. -->
       <div class="site-footer-keys" aria-label="Keyboard shortcuts">
         <span><kbd>R</kbd> Random</span>
         <span><kbd>Space</kbd> Play</span>
         <span><kbd id="undoKeyLabel">Ctrl+Z</kbd> Undo</span>
+        <span data-key="s"><kbd>S</kbd> Settings</span>
+        <span data-key="f" id="fullscreenKey"><kbd>F</kbd> Full screen</span>
       </div>
       <div class="site-footer-links">
         <!-- Internal, and first: the guide is the way a reader reaches
@@ -1057,7 +1061,7 @@
   <script src="generator.js?v=16"></script>
   <script src="core.js?v=2"></script>
   <script src="hold.js?v=1"></script>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
   <script src="picker.js?v=1"></script>
   <script src="tutorial.js?v=1"></script>
   <!-- Cloudflare Web Analytics: manual snippet, since flield.com is served

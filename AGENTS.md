@@ -273,10 +273,11 @@ nothing in it can widen the artboard. Until November 2026 its one-line
 minimum pushed `.main-area` past the window from 769px to 873px and the
 canvas lost up to 104px on the right. Its legend now hides by container
 query, at a content width that is the measured sum of what the strip
-holds plus a few pixels: one threshold for the expanded layout, one for
-Wide, and a third on phones, where the year goes before the full-screen
-button does. Anything added to the strip changes those sums: re-measure,
-and move all three in `style.css`. A button in the strip needs
+holds plus a few pixels. It steps down: the view keys (`S`, `F`, marked
+`data-key`) go first, then the loop's three, each with one threshold for
+the expanded layout and one for Wide, and on phones the year goes before
+the full-screen button does. Anything added to the strip changes those
+sums: re-measure, and move all five thresholds in `style.css`. A button in the strip needs
 `width: auto`, or the bare button's full width takes the strip.
 
 Full screen puts `.main-area` under the Fullscreen API, not the document,
