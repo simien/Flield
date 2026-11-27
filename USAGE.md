@@ -15,7 +15,7 @@ The guide covers:
 - **Locks.** Holding a field's value through a randomize pass, and which three start locked.
 - **Tiling without a seam.** What the Tile preset changes, and why it locks what it locks.
 - **Saving and sharing.** Browser slots against shareable links, including the link that offers Auto-randomize on open.
-- **Keyboard shortcuts.** R, Space, and Undo.
+- **Keyboard shortcuts.** R, Space, Undo, and S, which hides the settings so the canvas fills the window.
 - **Exploring with Auto-randomize.** Locking down an art direction, then letting the rest drift.
 - **Motion.** Loop, Drift, Wind, Pulse, Ripple, and Tide, each with an example clip, and the Speed slider that sets a cycle, kept apart from the Auto-randomize interval.
 - **Palette Range and Density Range.** Constraining how far a randomized value can wander.

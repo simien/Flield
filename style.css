@@ -1880,6 +1880,30 @@ button.secondary {
   }
 }
 
+/* The strip is a size container so its contents can never widen the
+   artboard. Before this, its one-line minimum forced .main-area past
+   the window from 769px to about 873px, and body's overflow cut the
+   canvas and the links off at the right. Instead the legend goes when
+   the strip has no room for it, which differs by layout: brand, legend
+   and links take 563px of content with "Ctrl+Z", the wider of the two
+   undo labels, and Wide's exploration row adds 234px. Each threshold
+   is that sum plus a few pixels for a wider fallback face. */
+.site-footer {
+  container-type: inline-size;
+}
+
+@container (max-width: 568px) {
+  .site-footer-keys {
+    display: none;
+  }
+}
+
+@container (max-width: 802px) {
+  :root[data-sidebar="collapsed"] .site-footer-keys {
+    display: none;
+  }
+}
+
 /* Anchored at the artboard's top-left corner; centerCanvas() in the
    script translates it to the middle. A translate doesn't move an
    element's layout position, and a resize that keeps its corner in
@@ -1905,6 +1929,59 @@ button.secondary {
    artboard, then the artwork, rather than a blank frame that jumps. */
 #preview:not([width]) {
   visibility: hidden;
+}
+
+/* Wide: the desktop sidebar collapsed, by the S key or the toggle at
+   the start of .explore-row. The state is :root's data-sidebar, set
+   before first paint by the script in <head>. The column slides out by
+   its own width rather than shrinking, so nothing in it reflows on the
+   way, and .main-area takes the window.
+
+   The canvas then fits the artboard both ways. The caps on #preview
+   above only ever shrink it, which would leave a 1200px canvas at
+   1200px in a 1390px artboard. 100cqw and 100cqh are .canvas-area's
+   content box, the space inside its padding; the 2px are the canvas's
+   own border, outside the picture. --canvas-ar is the picture's aspect,
+   published by app.js because a calc() cannot read a canvas's ratio.
+   Pixelated keeps the blocks hard at any scale.
+
+   Below the breakpoint the sheet already gives the artwork the screen,
+   so none of this applies there and the attribute is ignored. */
+@media (min-width: 769px) {
+  .controls {
+    transition: margin-left 0.2s ease;
+  }
+
+  :root[data-sidebar="collapsed"] .controls {
+    margin-left: -300px;
+  }
+
+  :root[data-sidebar="collapsed"] .canvas-area {
+    container-type: size;
+  }
+
+  :root[data-sidebar="collapsed"] #preview {
+    width: min(100cqw, (100cqh - 2px) * var(--canvas-ar, 1) + 2px);
+    height: auto;
+    max-width: none;
+    max-height: none;
+    image-rendering: pixelated;
+  }
+
+  /* The row's 16px under it is spacing for the sidebar header's stack;
+     in the one-line strip it would push the buttons off center. */
+  :root[data-sidebar="collapsed"] .site-footer .explore-row {
+    margin-bottom: 0;
+  }
+}
+
+/* After the block above on purpose: at equal specificity the later
+   rule wins, and the earlier reduced-motion rule for .controls would
+   lose to the slide. */
+@media (prefers-reduced-motion: reduce) {
+  .controls {
+    transition: none;
+  }
 }
 
 .hint {
@@ -2891,6 +2968,13 @@ button.secondary.tutorial-nav-arrow-wide:not([hidden]) {
     white-space: normal;
     line-height: 1.4;
     border-radius: 20px;
+  }
+
+  /* Wide has no meaning under the sheet, which already gives the
+     artwork the screen; the row carries its toggle into the action bar,
+     where it would only take a thumb's width from Random. */
+  #sidebarCollapseBtn {
+    display: none;
   }
 
   /* Below this width there's no room for a permanent side-by-side layout,

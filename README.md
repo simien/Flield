@@ -125,7 +125,7 @@ walkthrough is built into the app, behind the **?** button.
 
 - On a phone, a bar within thumb reach and a sheet that stops short of the artwork, so a value can be judged against the result
 - A thirteen-step tutorial with a live example at every step
-- Keyboard shortcuts for the exploration loop: `R`, `Space`, `Cmd/Ctrl+Z`
+- Keyboard shortcuts for the exploration loop: `R`, `Space`, `Cmd/Ctrl+Z`, and `S` to hide the settings so the canvas fills the window
 - Dark by default, light on a toggle, remembered across visits
 - A favicon regenerated on each load in the same three colors as the canvas
 - No dependencies: no library, no build step, and it keeps working offline. The one outside request is Cloudflare's analytics beacon, which nothing in the app waits on

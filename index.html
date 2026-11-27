@@ -20,6 +20,17 @@
       // localStorage can be unavailable (private browsing, blocked); dark stays the default.
     }
   </script>
+  <!-- Wide, the collapsed desktop sidebar (see setWide in app.js), is
+       restored here for the same reason as the theme: the first paint
+       comes before app.js runs, so a collapse applied from there would
+       show the sidebar for a frame and then slide it away. -->
+  <script>
+    try {
+      if (localStorage.getItem("flield-sidebar") === "collapsed") document.documentElement.setAttribute("data-sidebar", "collapsed");
+    } catch (err) {
+      // Storage unavailable: the sidebar stays open.
+    }
+  </script>
   <title>Flield: Seamless Animated Background Generator</title>
   <meta name="description" content="Generate seamless animated backgrounds in your brand colors. Seeded three-color pixel art from flow fields and symmetry, looping with no cut. GIF, SVG, PNG." />
   <link rel="canonical" href="https://flield.com/" />
@@ -197,7 +208,7 @@
        scripts below changes, or a returning visitor's cached copy silently
        goes stale. One more, gif-writer.js, is asked for by app.js on the first GIF
        export (see loadGifWriter) and carries its number there. -->
-  <link rel="stylesheet" href="style.css?v=127" />
+  <link rel="stylesheet" href="style.css?v=129" />
   <!-- generator.js is requested at the end of the body, which is where
        it has to run, but the preload scanner only finds it once that
        end of a 200KB document has arrived. This starts the fetch
@@ -478,6 +489,11 @@
            it, get their own row below. The brand lives over the artboard (see
            .brand in .main-area) so this row has the full width. -->
       <div class="explore-row">
+          <!-- Collapses the sidebar into Wide (see setWide in app.js).
+               First in the row so it travels with it into the footer
+               strip and stays beside the controls it hides. Hidden
+               below the breakpoint, where the sheet does this job. -->
+          <button id="sidebarCollapseBtn" class="secondary icon-btn" title="Hide settings (S)" aria-expanded="true"><i class="ph ph-sidebar-simple"></i></button>
           <button id="undoBtn" class="secondary icon-btn" title="Undo last randomize" data-hold="Hold to undo" disabled><i class="ph ph-arrow-counter-clockwise"></i></button>
           <button id="playBtn" class="secondary icon-btn" title="Auto-randomize (Space)"><i class="ph ph-play"></i></button>
           <button id="randomizeBtn" title="Randomize every unlocked field (R)"><i class="ph ph-shuffle"></i> <span class="btn-label">Random</span></button>
@@ -1035,7 +1051,7 @@
   <script src="generator.js?v=16"></script>
   <script src="core.js?v=2"></script>
   <script src="hold.js?v=1"></script>
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
   <script src="picker.js?v=1"></script>
   <script src="tutorial.js?v=1"></script>
   <!-- Cloudflare Web Analytics: manual snippet, since flield.com is served
