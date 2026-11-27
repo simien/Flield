@@ -1,12 +1,12 @@
 # Collapse the sidebar, then go full screen
 
-Status: in flight (spec written 26 November 2026, nothing built)
+Status: done 26 November 2026 (#16 as `9ddf1ce`, #17 as `38898df`, live on flield.com the same day)
 
 Two new view modes on top of the normal one, built in this order. **Wide** collapses the 300px settings
 column on desktop so the artboard takes the whole viewport width. **Full screen** uses the Fullscreen API
 to give the artwork the whole display, with no chrome at all. Both reuse the pattern the layout already
 trusts: live elements move between homes (see "The layout moves live elements" in `AGENTS.md`), state
-lives in a class on `body`, and nothing is copied.
+lives in an attribute on `<html>`, and nothing is copied.
 
 ## What exists today
 
@@ -136,12 +136,38 @@ lives in a class on `body`, and nothing is copied.
       button, and the year gone at 340px. `pseudo-dump.js` 0 differences in 384 forced states.
       `bugs-b4-b16.js` 29 `ok`, `a11y-a1-a15.js` 65 `ok`, `gif-button-width.js` `ok`,
       `ux-u1-u7.js` `all ok`, `checks.py` passes.
-- [ ] Press `F` and Esc by hand in Chrome, Safari and Firefox on a Mac and on an Android phone,
-      since headless full screen is not the real one. Not done by the session that built it.
+- [x] Press `F` and Esc by hand, since headless full screen is not the real one. The owner tried it
+      in a real browser on 26 November and reported it works; which browsers was not recorded, and
+      an Android phone was not named.
 - [x] Commit Phase 2 with `style.css` at 130 and `app.js` at 4, and `F` in the three lists.
 
 ## Open questions
 
-- None blocking. The work is Memex #2149. Two calls this spec makes are open there as low decisions,
-  each with the built option marked: #2150 (letterbox or tile in full screen) and #2151 (any fit, or
+- None. The two calls the plan made on the owner's behalf stay open in Memex as low decisions, each
+  with the built option marked: #2150 (letterbox or tile in full screen) and #2151 (any fit, or
   whole multiples only, when scaling the pixel art up).
+
+## Where the plan was wrong
+
+- It said a collapsed sidebar alone was most of the win. Measured, it was 10 percent: the canvas only
+  ever shrank, so the real change was letting it scale up, and that became the spec's center.
+- It put Wide's state in a class on `body`, set from `app.js`. The first paint comes before `app.js`
+  runs, so a stored collapse would have flashed the sidebar on every load; the state moved to an
+  attribute on `<html>`, set by an inline script in `<head>`, which also cost a new hash in
+  `_headers`.
+- It had the tour expand the sidebar "since every tour step points into it". None does: the tour is
+  a modal with its own mock-ups.
+- It expected the footer strip to take the exploration row without trouble, and checked only for
+  overflow inside the strip. The strip's minimum was already pushing the artboard past the window
+  on main from 769px to 873px; only a check against the window found it, and the fix (a size
+  container with a legend that steps down) became its own commit.
+- It put the full-screen button in `#appChrome` with a third home in Wide. The footer strip is on
+  screen in every layout, so the button got one home and never moves.
+- It planned to add `S` to the legend in Phase 1, took it out to save width, and the owner asked for
+  it back with `F` after Phase 2. The two-step legend is what made room for both.
+- It assumed the harness could be trusted as it stood. `pseudo-dump.js` keyed buttons by index, so an
+  added button shifted every key, and it exited 0 whatever it found; both were fixed before its
+  result counted.
+- It assumed a stacked pair of PRs would merge as they were. Squashing #16 left #17's branch holding
+  the original commits; a rebase and force-push was refused, and merging main into the branch with
+  the `ours` strategy, safe because main's tree equalled the branch's base, took its place.
