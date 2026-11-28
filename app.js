@@ -548,6 +548,7 @@
     // If it is the field currently pinned above the bar on a phone (see
     // showLastField), it goes home first: hiding it there would leave an
     // empty strip with a close button and nothing in it.
+    const LINK_MENU_TITLE = "What the link offers when opened";
     function updateMotionUI() {
       const show = !!currentMotion();
       ["speedField", "depthField", "directionField", "collideField"].forEach((id) => {
@@ -555,6 +556,23 @@
         if (!show && field.closest("#lastControl")) returnLastField();
         field.hidden = !show;
       });
+      syncLinkMenu(show);
+    }
+
+    // The menu beside Copy Link says what the recipient will see, so it
+    // follows the motion. A moving composition opens moving, and its
+    // first entry said "Opens as a still" while it did. "Waits for Play"
+    // has nothing to hold without a motion, so it is disabled then, and
+    // a choice of it falls back to the first entry rather than sitting
+    // selected on an option that cannot be chosen. Looked up by id, not
+    // through linkModeSelect, which is declared further down than the
+    // first call to this.
+    function syncLinkMenu(moving) {
+      const menu = document.getElementById("linkMode");
+      menu.options[0].textContent = moving ? "Opens playing" : "Opens as a still";
+      menu.options[1].disabled = !moving;
+      if (!moving && menu.value === "hold") menu.value = "open";
+      syncSelectTitle(menu, LINK_MENU_TITLE);
     }
 
     // Bumped whenever a saved field's meaning changes; upgradeState()
@@ -1425,8 +1443,8 @@
     // selects render as a bare caret.
     const GIF_MENU_TITLE = "How many passes the GIF records";
     syncSelectTitle(gifStepsSelect, GIF_MENU_TITLE);
-    syncSelectTitle(linkModeSelect, "What the link offers when opened");
-    linkModeSelect.addEventListener("change", () => syncSelectTitle(linkModeSelect, "What the link offers when opened"));
+    syncSelectTitle(linkModeSelect, LINK_MENU_TITLE);
+    linkModeSelect.addEventListener("change", () => syncSelectTitle(linkModeSelect, LINK_MENU_TITLE));
     gifStepsSelect.addEventListener("change", () => syncSelectTitle(gifStepsSelect, GIF_MENU_TITLE));
 
     // Motion is the only one of the three that changes what's on screen
@@ -1524,12 +1542,13 @@
       playBtn.title = "Stop auto-randomize (Space)";
     }
 
-    // Every way of starting playback by hand comes through here: the
-    // Play button, Space (which clicks it), and the prompt on a link
-    // that offers to play. While that prompt is up the link's motion is
-    // being held for the answer, and starting playback is the answer
-    // whichever control gives it. Play and Space used to dismiss the
+    // Auto-randomize started by hand: the Play button and Space, which
+    // clicks it. While a link's prompt is up its motion is being held
+    // for the answer, and pressing Play is an answer, so the motion
+    // starts with the rerolls. Play and Space used to dismiss the
     // prompt and start the rerolls without the motion the link carried.
+    // The prompt's own button has its own handler below, because on a
+    // link that waits for Play it plays the motion and rerolls nothing.
     function startPlayback() {
       if (!playOffer.hidden) syncSeamlessPreview();
       startAutoplay();
@@ -1540,13 +1559,28 @@
       else startPlayback();
     });
 
-    // The prompt a recipient sees on a link marked "Offers to play"
-    // (see loadStateFromURL). Playing from it rerolls at once, like the
-    // Play button, since that is the author's variations they came for.
+    // The prompt a recipient sees on a link marked "Waits for Play" or
+    // "Offers Auto-randomize" (see loadStateFromURL), which sets
+    // playOfferKind to "hold" or "reroll".
+    //
+    // Waits for Play plays the motion the link carries and nothing else.
+    // Until 28 November 2026 that was the only offer, it was labelled
+    // "Offers to play", and pressing it rerolled the composition at once
+    // and every interval after, so the recipient lost the picture they
+    // were sent the moment they pressed Play.
+    //
+    // Auto-randomize is still offered, under its own name. From the
+    // prompt the first reroll waits one interval when there is a motion,
+    // so the picture that was shared plays before it changes; with no
+    // motion it rerolls at once, or the press would show nothing at all
+    // for the length of the interval.
     const playOffer = document.getElementById("playOffer");
-    // Both halves of what the link offered: the motion it was made
-    // with, and the rerolls on top of it.
-    document.getElementById("playOfferStartBtn").addEventListener("click", startPlayback);
+    let playOfferKind = null;
+    document.getElementById("playOfferStartBtn").addEventListener("click", () => {
+      syncSeamlessPreview();
+      if (playOfferKind === "reroll") startAutoplay(!currentMotion());
+      playOffer.hidden = true;
+    });
     document.getElementById("playOfferDismissBtn").addEventListener("click", () => {
       playOffer.hidden = true;
     });
@@ -2525,17 +2559,28 @@
       try {
         const data = upgradeState(compact ? decodeCompact(compact) : JSON.parse(atob(legacy)));
         applySnapshot(data);
-        // A link copied with "Offers to play" chosen sets the recorded
-        // speed and shows the prompt. Nothing moves until the recipient
-        // says so, which has to include the motion: applySnapshot has
-        // already started it by this point, and a canvas animating
-        // behind a button offering to start it reads as a broken button.
-        if (data.autoplay) {
+        // A link copied with "Waits for Play" or "Offers Auto-randomize"
+        // shows the prompt, and nothing moves until the recipient says
+        // so: applySnapshot has already started the motion by this point,
+        // and a canvas animating behind a button offering to start it
+        // reads as a broken button. A link that offered to play before
+        // 28 November 2026 carries autoplay, so it still offers rerolls.
+        // A hold with no motion to hold opens as the still it is.
+        const kind = currentMotion();
+        playOfferKind = data.autoplay ? "reroll" : data.hold && kind ? "hold" : null;
+        if (playOfferKind) {
           stopSeamlessPreview();
-          const speedText = formatSpeed(currentIntervalMs());
-          document.getElementById("playOfferSpeed").textContent = speedText;
-          document.getElementById("playOfferText").title =
-            `Locked fields hold, the rest reroll every ${speedText}`;
+          const text = document.getElementById("playOfferText");
+          if (playOfferKind === "hold") {
+            text.textContent = `Set to play ${SEAMLESS_NAMES[kind]}`;
+            text.title = "Plays the motion it was made with, and nothing else changes";
+            document.getElementById("playOfferLabel").textContent = "Play it";
+          } else {
+            const speedText = formatSpeed(currentIntervalMs());
+            text.textContent = `Rerolls every ${speedText}`;
+            text.title = `Auto-randomize: locked fields hold, the rest reroll every ${speedText}`;
+            document.getElementById("playOfferLabel").textContent = "Start";
+          }
           playOffer.hidden = false;
         }
         addressCarriesLink = true;
@@ -2553,16 +2598,18 @@
       return `${location.origin}${location.pathname}?c=${encodeCompact(snapshot)}`;
     }
 
-    // Encodes the current composition (and, per the menu, an autoplay
-    // flag) into the URL the button below hands off, whether that's a
-    // clipboard copy or the OS share sheet.
+    // Encodes the current composition (and, per the menu, a hold or an
+    // autoplay flag) into the URL the button below hands off, whether
+    // that's a clipboard copy or the OS share sheet. Returns the toast
+    // that says which, so the copy confirms what the recipient gets.
     function buildShareLink() {
       const snapshot = snapshotForSharing();
-      // The menu beside the button decides: a link that offers to play
-      // (at the current Auto-randomize speed) is a live instance to drop
-      // into a post, once the recipient accepts; a still is the default.
-      if (linkModeSelect.value === "play") snapshot.autoplay = currentIntervalMs();
-      return { url: stateUrl(snapshot), autoplay: snapshot.autoplay };
+      const mode = linkModeSelect.value;
+      const moving = !!currentMotion();
+      if (mode === "reroll") snapshot.autoplay = currentIntervalMs();
+      if (mode === "hold" && moving) snapshot.hold = true;
+      const note = mode === "reroll" ? "offers Auto-randomize" : snapshot.hold ? "waits for Play" : moving ? "opens playing" : "";
+      return { url: stateUrl(snapshot), note };
     }
 
     const copyLinkBtn = document.getElementById("copyLinkBtn");
@@ -2583,10 +2630,10 @@
       copyLinkBtn.title = "Share this exact composition, locks included";
     }
 
-    async function copyShareLink(url, autoplay) {
+    async function copyShareLink(url, note) {
       try {
         await navigator.clipboard.writeText(url);
-        showToast(autoplay ? "Link copied, plays on open" : "Link copied");
+        showToast(note ? `Link copied, ${note}` : "Link copied");
       } catch (err) {
         try {
           window.prompt("Copy this link:", url);
@@ -2597,7 +2644,7 @@
     }
 
     copyLinkBtn.addEventListener("click", async () => {
-      const { url, autoplay } = buildShareLink();
+      const { url, note } = buildShareLink();
       if (canShare) {
         try {
           await navigator.share({ title: "Flield", text: "A composition I made with Flield:", url });
@@ -2610,7 +2657,7 @@
           if (err && err.name === "AbortError") return;
         }
       }
-      copyShareLink(url, autoplay);
+      copyShareLink(url, note);
     });
 
     if (!loadStateFromURL()) {

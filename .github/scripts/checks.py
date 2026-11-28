@@ -394,7 +394,8 @@ def check_link_format():
     # COMPACT_BITS entry, so nothing above ties them to their controls.
     # Direction and each layer's Motion travel as a menu index; Collide
     # as its slider's value, zero for off; Depth as its slider's value
-    # plus one, keeping zero for the default.
+    # plus one, keeping zero for the default. Hold is a flag with no
+    # control behind it, so it has nothing to fit.
     tail_bits = dict(fmt["tail"])
 
     def menu_fits(field, pattern):

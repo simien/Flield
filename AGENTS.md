@@ -207,6 +207,16 @@ rejects for any reason other than a cancelled sheet leaves the button
 doing nothing at all. Only `AbortError` returns early; everything else
 falls through to the clipboard.
 
+The menu beside the button says how the link opens, and "play" means two
+things in this app. The Play button is Auto-randomize, which rerolls; a
+recipient pressing Play on a link means the motion. Until 28 November 2026
+the one offer was "Offers to play", and its button rerolled the picture
+the recipient had been sent. Now **Waits for Play** (the `hold` tail bit)
+plays the motion and nothing else, **Offers Auto-randomize** (`autoSpeed`,
+as before, so old links keep their meaning) offers the rerolls, and the
+first entry reads "Opens playing" or "Opens as a still" from
+`syncLinkMenu`, since a link to a moving composition never opened still.
+
 The browser pane cannot verify the clipboard half of this.
 `navigator.clipboard.writeText` throws `NotAllowedError` there because the
 pane's document is never focused, so the copy path can be read but not

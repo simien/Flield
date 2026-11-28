@@ -965,13 +965,19 @@
                take that branch). The id, the menu beside it, and the
                link it hands off all stay the same either way. -->
           <button id="copyLinkBtn" class="secondary split-btn-main" title="Copy a link to this exact composition, locks included"><i class="ph ph-link"></i> Copy Link</button>
-          <!-- Whether the copied link opens as a plain still or also
-               offers the recipient Auto-randomize at the current speed
-               (see #playOffer). The author chooses; nothing is inferred
-               from playback state. -->
+          <!-- How the copied link opens (see #playOffer). The first
+               option's label is written from the script, because a
+               composition with a motion opens playing and one without
+               opens still. "Waits for Play" holds the motion behind a
+               prompt that plays it and changes nothing else, so it is
+               disabled while there is no motion to hold. "Offers
+               Auto-randomize" prompts for rerolls at the current
+               interval, which is what "Offers to play" used to do. The
+               author chooses; nothing is inferred from playback state. -->
           <select id="linkMode" class="split-btn-select" title="What the link offers when opened">
-            <option value="still" selected>Opens as a still</option>
-            <option value="play">Offers to play</option>
+            <option value="open" selected>Opens as a still</option>
+            <option value="hold">Waits for Play</option>
+            <option value="reroll">Offers Auto-randomize</option>
           </select>
         </div>
       </div>
@@ -997,12 +1003,13 @@
       <button type="button" id="tourChipOpenBtn">Take the tour</button>
       <button type="button" id="tourChipDismissBtn" class="tour-chip-dismiss" title="Dismiss"><i class="ph ph-x"></i></button>
     </div>
-    <!-- Shown to whoever opens a link the author marked "Offers to
-         play": the composition stays still until they choose, and the
-         prompt doubles as an introduction to the Play button. -->
+    <!-- Shown to whoever opens a link the author marked "Waits for
+         Play" or "Offers Auto-randomize": the composition stays still
+         until they choose. The script writes the text, the tooltip and
+         the button's label for whichever of the two the link carries. -->
     <div class="tour-chip play-offer" id="playOffer" hidden>
-      <span id="playOfferText" title="Locked fields hold, the rest reroll on a timer">Set to play every <span id="playOfferSpeed"></span></span>
-      <button type="button" id="playOfferStartBtn"><i class="ph ph-play"></i> Play it</button>
+      <span id="playOfferText"></span>
+      <button type="button" id="playOfferStartBtn"><i class="ph ph-play"></i> <span id="playOfferLabel">Play it</span></button>
       <button type="button" id="playOfferDismissBtn" class="tour-chip-dismiss" title="Keep the still"><i class="ph ph-x"></i></button>
     </div>
     <div class="canvas-area">
@@ -1059,9 +1066,9 @@
   </main>
 
   <script src="generator.js?v=16"></script>
-  <script src="core.js?v=2"></script>
+  <script src="core.js?v=3"></script>
   <script src="hold.js?v=1"></script>
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
   <script src="picker.js?v=1"></script>
   <script src="tutorial.js?v=1"></script>
   <!-- Cloudflare Web Analytics: manual snippet, since flield.com is served
