@@ -145,6 +145,7 @@ function composition(random) {
     interval: C.speedMs(int(C.SPEED_MAX_STEP + 1)),
   };
   if (random() < 0.3) snapshot.autoplay = Number(one(C.LEGACY_AUTO_SPEEDS));
+  if (random() < 0.3) snapshot.hold = true;
   return snapshot;
 }
 
@@ -153,7 +154,7 @@ function composition(random) {
 // a set; depth's default comes back as 0, "this link says nothing".
 function sameAsWritten(snapshot, decoded) {
   const differs = [];
-  for (const key of ["bgColor", "width", "height", "blockSize", "shapeMask", "shapeMaskDirection", "motion", "direction", "collide", "speed", "interval", "autoplay"]) {
+  for (const key of ["bgColor", "width", "height", "blockSize", "shapeMask", "shapeMaskDirection", "motion", "direction", "collide", "speed", "interval", "autoplay", "hold"]) {
     if (decoded[key] !== snapshot[key]) differs.push(key);
   }
   const wantDepth = C.depthIndex(snapshot.depth, page.depth.min, page.depth.max) === page.depth.defaultIndex ? 0 : snapshot.depth;
@@ -194,6 +195,7 @@ function zeroMeaning(key, decoded, snapshot) {
   if (key === "depth") return decoded.depth === 0;
   if (key === "direction") return decoded.direction === "forward";
   if (key === "collide") return decoded.collide === 0;
+  if (key === "hold") return !decoded.hold;
   if (key.startsWith("lock:")) return !decoded.locks.includes(key.slice(5));
   const layer = decoded[key.split("-")[0]];
   if (key.endsWith("-motion")) return layer.motion === page.options.layerMotion[0];

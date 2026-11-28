@@ -358,7 +358,7 @@ const FlieldCore = (() => {
   // carries its speed as an index into them, so the list outlives the
   // menu and its order is still part of the format. New links carry
   // the exact beat in the tail; this field keeps its other job, which
-  // is saying whether the link offers to play at all.
+  // is saying whether the link offers Auto-randomize at all.
   const LEGACY_AUTO_SPEEDS = ["1000", "2000", "3000", "5000", "10000"];
 
   const COMPACT_TAIL_FIELDS = [
@@ -377,6 +377,11 @@ const FlieldCore = (() => {
     // Index into the layer's Motion menu, whose first entry is "same".
     ["layerA-motion", 4],
     ["layerB-motion", 4],
+    // One for a link that opens with its motion held behind a Play
+    // prompt, which plays the motion and nothing else. Zero is how a
+    // link opened before this: playing, or behind the Auto-randomize
+    // prompt when autoSpeed is set.
+    ["hold", 1],
   ];
 
   // Bits go in and out with arithmetic rather than << and >>, which
@@ -516,7 +521,7 @@ const FlieldCore = (() => {
     // Zero means a still link. Otherwise the speed's place in the
     // menu, one higher, so the first entry can't read as "still".
     // The nearest of the five, since the beat is no longer restricted
-    // to them. Only a link that offers to play writes anything here;
+    // to them. Only a link that offers Auto-randomize writes anything here;
     // the tail below carries the beat itself either way.
     out.add(snapshot.autoplay ? nearestLegacySpeed(snapshot.autoplay) + 1 : 0, COMPACT_BITS.autoSpeed);
     addCompactLayer(out, snapshot.layerA, page);
@@ -537,6 +542,8 @@ const FlieldCore = (() => {
               ? (snapshot.collide > 0 ? Math.min(10, Math.round(snapshot.collide * 10)) : 0)
               : key.endsWith("-motion")
                 ? optionIndex(page.options.layerMotion, snapshot[key.split("-")[0]].motion || "same")
+            : key === "hold"
+              ? (snapshot.hold ? 1 : 0)
             : key.startsWith("lock:")
               ? (snapshot.locks || []).includes(key.slice(5)) ? 1 : 0
               : optionIndex(textures, snapshot[key.split("-")[0]].texture)
@@ -574,9 +581,11 @@ const FlieldCore = (() => {
     let depth = 0;
     let motionDirection = "forward";
     let collide = 0;
+    let hold = false;
     COMPACT_TAIL_FIELDS.forEach(([key, bits]) => {
       const value = input.tail(bits);
-      if (key === "speed" || key === "interval") beats[key] = value ? speedMs(value - 1) : 0;
+      if (key === "hold") hold = !!value;
+      else if (key === "speed" || key === "interval") beats[key] = value ? speedMs(value - 1) : 0;
       else if (key === "depth") depth = value ? depthValue(value - 1) : 0;
       else if (key === "direction") motionDirection = value ? "reverse" : "forward";
       else if (key === "collide") collide = value / 10;
@@ -607,6 +616,9 @@ const FlieldCore = (() => {
       layerA,
       layerB,
     };
+    // Only when set, so every link written before it decodes to exactly
+    // the object it did (core.test.js holds ten of them to checksums).
+    if (hold) data.hold = true;
     if (speed && LEGACY_AUTO_SPEEDS[speed - 1]) data.autoplay = parseInt(LEGACY_AUTO_SPEEDS[speed - 1], 10);
     // A link from before the tail says nothing about either duration
     // unless it offered to play, in which case the one speed it
